@@ -332,8 +332,8 @@ void CHW::CreateDevice(HWND m_hWnd, bool move_window)
 #ifdef USE_DX11
     D3D_FEATURE_LEVEL pFeatureLevels[] = {
         D3D_FEATURE_LEVEL_11_0,
-        //D3D_FEATURE_LEVEL_10_1,
-        //D3D_FEATURE_LEVEL_10_0,
+        // D3D_FEATURE_LEVEL_10_1,
+        // D3D_FEATURE_LEVEL_10_0,
     };
 
     R = D3D11CreateDeviceAndSwapChain(
@@ -369,7 +369,8 @@ void CHW::CreateDevice(HWND m_hWnd, bool move_window)
         // Fatal error! Cannot create rendering device AT STARTUP !!!
         Msg("Failed to initialize graphics hardware.\n"
             "Please try to restart the game.\n"
-            "CreateDevice returned 0x%08x", R);
+            "CreateDevice returned 0x%08x",
+            R);
         FlushLog();
         MessageBox(NULL, "Failed to initialize graphics hardware.\nPlease try to restart the game.", "Error!",
             MB_OK | MB_ICONERROR);
@@ -713,9 +714,10 @@ void CHW::updateWindowProps(HWND m_hWnd)
     {
         if (m_move_window)
         {
-            dwWindowStyle = WS_BORDER | WS_VISIBLE;
-            if (!strstr(Core.Params, "-no_dialog_header"))
-                dwWindowStyle |= WS_DLGFRAME | WS_SYSMENU | WS_MINIMIZEBOX;
+            bool bBordersMode = strstr(Core.Params, "-draw_borders");
+            dwWindowStyle = WS_VISIBLE;
+            if (bBordersMode)
+                dwWindowStyle |= WS_BORDER | WS_DLGFRAME | WS_SYSMENU | WS_MINIMIZEBOX;
             SetWindowLong(m_hWnd, GWL_STYLE, dwWindowStyle);
             // When moving from fullscreen to windowed mode, it is important to
             // adjust the window size after recreating the device rather than
@@ -727,18 +729,32 @@ void CHW::updateWindowProps(HWND m_hWnd)
             // desktop.
 
             RECT m_rcWindowBounds;
-            RECT DesktopRect;
+            float fYOffset = 0.f;
+            bool bCenter = false;
+            if (strstr(Core.Params, "-center_screen"))
+                bCenter = true;
 
-            GetClientRect(GetDesktopWindow(), &DesktopRect);
+            if (bCenter)
+            {
+                RECT DesktopRect;
 
-            SetRect(&m_rcWindowBounds, (DesktopRect.right - m_ChainDesc.BufferDesc.Width) / 2,
-                (DesktopRect.bottom - m_ChainDesc.BufferDesc.Height) / 2,
-                (DesktopRect.right + m_ChainDesc.BufferDesc.Width) / 2,
-                (DesktopRect.bottom + m_ChainDesc.BufferDesc.Height) / 2);
+                GetClientRect(GetDesktopWindow(), &DesktopRect);
+
+                SetRect(&m_rcWindowBounds, (DesktopRect.right - m_ChainDesc.BufferDesc.Width) / 2,
+                    (DesktopRect.bottom - m_ChainDesc.BufferDesc.Height) / 2,
+                    (DesktopRect.right + m_ChainDesc.BufferDesc.Width) / 2,
+                    (DesktopRect.bottom + m_ChainDesc.BufferDesc.Height) / 2);
+            }
+            else
+            {
+                if (bBordersMode)
+                    fYOffset = GetSystemMetrics(SM_CYCAPTION); // size of the window title bar
+                SetRect(&m_rcWindowBounds, 0, 0, m_ChainDesc.BufferDesc.Width, m_ChainDesc.BufferDesc.Height);
+            };
 
             AdjustWindowRect(&m_rcWindowBounds, dwWindowStyle, FALSE);
 
-            SetWindowPos(m_hWnd, HWND_NOTOPMOST, m_rcWindowBounds.left, m_rcWindowBounds.top,
+            SetWindowPos(m_hWnd, HWND_NOTOPMOST, m_rcWindowBounds.left, m_rcWindowBounds.top + fYOffset,
                 (m_rcWindowBounds.right - m_rcWindowBounds.left), (m_rcWindowBounds.bottom - m_rcWindowBounds.top),
                 SWP_SHOWWINDOW | SWP_NOCOPYBITS | SWP_DRAWFRAME);
         }
