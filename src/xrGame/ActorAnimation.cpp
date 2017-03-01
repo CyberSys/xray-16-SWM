@@ -404,6 +404,10 @@ void CActor::g_SetAnimation(u32 mstate_rl)
         {
             g_player_hud->OnMovementChanged(mcSprint);
         }
+        else if ((mstate_rl & mcAccel) != (mstate_old & mcAccel)) //--#SM+#-- + HudItem.cpp
+        {
+            g_player_hud->OnMovementChanged(mcAccel);
+        }
         else if ((mstate_rl & mcAnyMove) != (mstate_old & mcAnyMove))
         {
             g_player_hud->OnMovementChanged(mcAnyMove);

@@ -14,9 +14,9 @@
 #include "xrEngine/xr_input.h"
 #include "ui_base.h"
 
-#ifdef DEBUG
+//#ifdef DEBUG	//--#SM+#--
 CAttachableItem* CAttachableItem::m_dbgItem = NULL;
-#endif
+//#endif
 
 CPhysicsShellHolder& CAttachableItem::object() const { return (item().object()); }
 IFactoryObject* CAttachableItem::_construct()
@@ -123,7 +123,7 @@ void CAttachableItem::afterDetach()
     object().processing_deactivate();
 }
 
-#ifdef DEBUG
+//#ifdef DEBUG	--#SM+#--
 float ATT_ITEM_MOVE_CURR = 0.01f;
 float ATT_ITEM_ROT_CURR = 0.1f;
 
@@ -216,4 +216,4 @@ void attach_draw_adjust_mode()
     xr_sprintf(_text, "attach_angle_offset IS [%3.3f][%3.3f][%3.3f]", _ang.x, _ang.y, _ang.z);
     F->OutNext(_text);
 }
-#endif // #ifdef DEBUG
+//#endif // #ifdef DEBUG

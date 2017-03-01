@@ -58,6 +58,13 @@ public:
 
     // Lain: added
     void SetRenderable(bool renderable) { psHUD_Flags.set(HUD_DRAW_RT2, renderable); }
+
+    /*--#SM+ Begin --*/
+    xr_vector<IGameObject*> m_renderHUD_list;
+
+    void RenderHUD_Add(IGameObject* O); // Добавить объект в список объектов, для которых вызывается OnRenderHUD
+    void RenderHUD_Remove(IGameObject* O); // Убрать объект из списка объектов, для которых вызывается OnRenderHUD
+    /*--#SM+ End --*/
 };
 
 IC CHUDManager& HUD() { return *((CHUDManager*)g_hud); }

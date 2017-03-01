@@ -37,12 +37,13 @@ class CExplosive;
 class CHolderCustom;
 class CAttachmentOwner;
 class CBaseMonster;
+class CShellLauncher; //--#SM+#--
 class CSpaceRestrictor;
 class CAttachableItem;
 class animation_movement_controller;
 class CBlend;
 class ai_obstacle;
-
+class attachable_visual; //--#SM+#--
 class IKinematics;
 
 template <typename _return_type>
@@ -56,6 +57,32 @@ class CGameObject : public IGameObject,
                     public RenderableBase,
                     public CollidableBase
 {
+    //--#SM+# Begin--
+public:
+    struct common_values
+    {
+        // IRNV Values
+        float m_fIRNV_value; // Текущее значение теплоты
+        float m_fIRNV_value_max; // Максимальная теплота
+        float m_fIRNV_value_min; // Минимальная  теплота
+        float m_fIRNV_cooling_speed; // Скорость изменеия теплоты от max к min
+        bool m_fIRNV_max_or_min; // true если двигать к максимуму, false если к минимуму
+    };
+    common_values m_common_values; // Хранит игровые параметры, используемые всеми объектами
+
+    xr_vector<attachable_visual*> m_attached_visuals; // Дополнительные прикреплённые визуалы
+
+    bool AttachAdditionalVisual(const shared_str& sect_name); // Прикрепить доп визуал
+    bool DetachAdditionalVisual(const shared_str& sect_name); // Открепить доп визуал
+    attachable_visual* FindAdditionalVisual(
+        const shared_str& sect_name, xr_vector<attachable_visual*>::iterator* it_child = NULL); // Найти доп визуал
+    void GetAllInheritedVisuals(
+        xr_vector<IRenderVisual*>& tOutVisList); // Получить список всех визуалов, связанных с нашим объектом
+
+    virtual void OnAdditionalVisualModelChange(
+        attachable_visual* pChangedVisual); // Каллбэк на смену модели в данном доп визуале
+    //--#SM+# End --
+
 private:
     BENCH_SEC_SCRAMBLEMEMBER1
     BENCH_SEC_SCRAMBLEVTBL2
@@ -211,6 +238,7 @@ public:
     virtual CAttachableItem* cast_attachable_item() override { return NULL; }
     virtual CHolderCustom* cast_holder_custom() override { return NULL; }
     virtual CBaseMonster* cast_base_monster() override { return NULL; }
+    virtual CShellLauncher* cast_shell_launcher() override { return NULL; } //--#SM+#--
     virtual bool feel_touch_on_contact(IGameObject*) override { return TRUE; }
     // Utilities
     // XXX: move out
@@ -218,7 +246,9 @@ public:
     static void u_EventSend(NET_Packet& P, u32 dwFlags = DPNSEND_GUARANTEED);
     // Methods
     virtual void Load(LPCSTR section) override;
+    virtual void PostLoad(LPCSTR section) override; //--#SM+#--
     virtual void UpdateCL() override; // Called each frame, so no need for dt
+    virtual void PostUpdateCL(bool bUpdateCL_disabled) override; //--#SM+#--
     virtual void OnChangeVisual() override;
     // object serialization
     virtual void net_Save(NET_Packet& packet) override;
@@ -240,6 +270,8 @@ public:
     virtual GameObjectSavedPosition ps_Element(u32 ID) const override;
     virtual void ForceTransform(const Fmatrix& m) override {}
     virtual void OnHUDDraw(CCustomHUD* hud) override {}
+    virtual void OnRenderHUD(IGameObject* pCurViewEntity) override{}; //--#SM+#--
+    virtual void OnOwnedCameraMove(CCameraBase* pCam, float fOldYaw, float fOldPitch) override{}; //--#SM+#--
     virtual BOOL Ready() override { return getReady(); } // update only if active and fully initialized by/for network
     virtual void renderable_Render() override;
     virtual void OnEvent(NET_Packet& P, u16 type) override;
@@ -356,6 +388,7 @@ public:
     virtual void set_nonscript_usable(bool usable) override;
     virtual CScriptBinderObject* GetScriptBinderObject() override { return scriptBinder.object(); }
     virtual void SetScriptBinderObject(CScriptBinderObject* object) override { scriptBinder.set_object(object); }
+
 protected:
     virtual void spawn_supplies();
 

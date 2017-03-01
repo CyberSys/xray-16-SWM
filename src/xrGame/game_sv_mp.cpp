@@ -794,10 +794,14 @@ void game_sv_mp::ChargeGrenades(
     CSE_ALifeItemWeapon* weapon, LPCSTR grenade_string, game_PlayerState::PLAYER_ITEMS_LIST& playerItems)
 {
     int grenades_count = _GetItemCount(grenade_string);
+
+    /* --#SM+#--
     R_ASSERT2(grenades_count <= 4,
         make_string("weapon [%s] has greater than 4 types of grenade [%s]", weapon->s_name.c_str(), grenade_string)
             .c_str());
     weapon->a_elapsed_grenades.unpack_from_byte(0);
+    */
+    weapon->a_elapsed_2 = 0; //--#SM+#--
     string512 temp_ammo_class;
     for (int i = 0; i < grenades_count; ++i)
     {
@@ -809,8 +813,8 @@ void game_sv_mp::ChargeGrenades(
         if (temp_iter != playerItems.end())
         {
             playerItems.erase(temp_iter);
-            weapon->a_elapsed_grenades.grenades_count = 1;
-            weapon->a_elapsed_grenades.grenades_type = i;
+            weapon->a_elapsed_2 = 1; //--#SM+#--
+            weapon->ammo_type_2 = u8(i); //--#SM+#--
             break;
         }
     }
@@ -849,7 +853,7 @@ void game_sv_mp::SetAmmoForWeapon(
 #ifdef DEBUG
             Msg("! WARNING: not found grenade_class for [%s]", weapon->s_name.c_str());
 #endif
-            weapon->a_elapsed_grenades.unpack_from_byte(0);
+            weapon->a_elapsed_2 = 0; //--#SM+#--
             return;
         }
         else
@@ -886,7 +890,7 @@ void game_sv_mp::SpawnWeapon4Actor(u16 actorId, LPCSTR N, u8 Addons, game_Player
     CSE_ALifeItemWeapon* pWeapon = smart_cast<CSE_ALifeItemWeapon*>(E);
     if (pWeapon)
     {
-        pWeapon->m_addon_flags.assign(Addons);
+        pWeapon->SetAddonsState(Addons); //--#SM+#--
         SetAmmoForWeapon(pWeapon, Addons, playerItems, ammo_diff);
     };
     /////////////////////////////////////////////////////////////////////////////////
@@ -1887,9 +1891,10 @@ void game_sv_mp::RejectGameItem(CSE_Abstract* entity)
 
     //	R_ASSERT2( e_parent, make_string( "RejectGameItem: parent not found. entity_id = [%d], parent_id = [%d]",
     // entity->ID, entity->ID_Parent ).c_str() );
-    VERIFY2(e_parent, make_string("RejectGameItem: parent not found. entity_id = [%d], parent_id = [%d]", entity->ID,
-                          entity->ID_Parent)
-                          .c_str());
+    VERIFY2(e_parent,
+        make_string(
+            "RejectGameItem: parent not found. entity_id = [%d], parent_id = [%d]", entity->ID, entity->ID_Parent)
+            .c_str());
     if (!e_parent)
     {
         Msg("! ERROR (RejectGameItem): parent not found. entity_id = [%d], parent_id = [%d]", entity->ID,

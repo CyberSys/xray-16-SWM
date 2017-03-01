@@ -52,6 +52,12 @@ void CCameraLook::UpdateDistance(Fvector& point)
 
 void CCameraLook::Move(int cmd, float val, float factor)
 {
+    if (m_bInputDisabled)
+        return; //--#SM+#--
+
+    float fOldYaw = yaw; //--#SM+#--
+    float fOldPitch = pitch; //--#SM+#--
+
     switch (cmd)
     {
     case kCAM_ZOOM_IN: dist -= val ? val : (rot_speed.z * Device.fTimeDelta); break;
@@ -61,6 +67,9 @@ void CCameraLook::Move(int cmd, float val, float factor)
     case kLEFT: yaw -= val ? val : (rot_speed.y * Device.fTimeDelta / factor); break;
     case kRIGHT: yaw += val ? val : (rot_speed.y * Device.fTimeDelta / factor); break;
     }
+
+    parent->OnOwnedCameraMove(this, fOldYaw, fOldPitch); //--#SM+#--
+
     if (bClampYaw)
         clamp(yaw, lim_yaw[0], lim_yaw[1]);
     if (bClampPitch)

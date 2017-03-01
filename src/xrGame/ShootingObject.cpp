@@ -37,6 +37,11 @@ CShootingObject::CShootingObject(void)
     m_bUseAimBullet = false;
     m_fTimeToAim = 0.0f;
 
+    //overheat	//--#SM+#--
+    m_overheat = 0.0f;
+    m_overheat_per_shot = 0.0f;
+    m_overheat_cooling = 1.0f;
+
     // particles
     m_sFlameParticlesCurrent = m_sFlameParticles = NULL;
     m_sSmokeParticlesCurrent = m_sSmokeParticles = NULL;
@@ -70,6 +75,14 @@ void CShootingObject::Load(LPCSTR section)
     LoadFlameParticles(section, "");
 
     m_air_resistance_factor = READ_IF_EXISTS(pSettings, r_float, section, "air_resistance_factor", 1.f);
+
+    //overheat	//--#SM+#--
+    m_overheat_per_shot = READ_IF_EXISTS(pSettings, r_float, section, "overheat_per_shot", 0.f);
+    m_overheat_cooling = READ_IF_EXISTS(pSettings, r_float, section, "overheat_cooling", 100.f) / 100.f;
+
+    clamp(m_overheat_per_shot, 0.f, 1.f);
+    if (m_overheat_cooling < 0.0f)
+        m_overheat_cooling = 0.f;
 }
 
 void CShootingObject::Light_Create()
@@ -95,8 +108,7 @@ void CShootingObject::LoadFireParams(LPCSTR section)
     //сила выстрела и его мощьность
     s_sHitPower = pSettings->r_string_wb(section, "hit_power"); //читаем строку силы хита пули оружия
     s_sHitPowerCritical = pSettings->r_string_wb(section, "hit_power_critical");
-    fvHitPower[egdMaster] =
-        (float)atof(_GetItem(*s_sHitPower, 0, buffer)); //первый параметр - это хит для уровня игры мастер
+    fvHitPower[egdMaster] = (float)atof(_GetItem(*s_sHitPower, 0, buffer)); //первый параметр - это хит для уровня игры мастер
     fvHitPowerCritical[egdMaster] =
         (float)atof(_GetItem(*s_sHitPowerCritical, 0, buffer)); //первый параметр - это хит для уровня игры мастер
 
@@ -122,18 +134,15 @@ void CShootingObject::LoadFireParams(LPCSTR section)
     num_game_diff_param = _GetItemCount(*s_sHitPowerCritical); //узнаём колличество параметров
     if (num_game_diff_param > 1) //если задан второй параметр хита
     {
-        fvHitPowerCritical[egdVeteran] =
-            (float)atof(_GetItem(*s_sHitPowerCritical, 1, buffer)); //то вычитываем его для уровня ветерана
+        fvHitPowerCritical[egdVeteran] = (float)atof(_GetItem(*s_sHitPowerCritical, 1, buffer)); //то вычитываем его для уровня ветерана
     }
     if (num_game_diff_param > 2) //если задан третий параметр хита
     {
-        fvHitPowerCritical[egdStalker] =
-            (float)atof(_GetItem(*s_sHitPowerCritical, 2, buffer)); //то вычитываем его для уровня сталкера
+        fvHitPowerCritical[egdStalker] = (float)atof(_GetItem(*s_sHitPowerCritical, 2, buffer)); //то вычитываем его для уровня сталкера
     }
     if (num_game_diff_param > 3) //если задан четвёртый параметр хита
     {
-        fvHitPowerCritical[egdNovice] =
-            (float)atof(_GetItem(*s_sHitPowerCritical, 3, buffer)); //то вычитываем его для уровня новичка
+        fvHitPowerCritical[egdNovice] = (float)atof(_GetItem(*s_sHitPowerCritical, 3, buffer)); //то вычитываем его для уровня новичка
     }
 
     fHitImpulse = pSettings->r_float(section, "hit_impulse");
@@ -157,10 +166,8 @@ void CShootingObject::LoadLights(LPCSTR section, LPCSTR prefix)
         Fvector clr = pSettings->r_fvector3(section, strconcat(sizeof(full_name), full_name, prefix, "light_color"));
         light_base_color.set(clr.x, clr.y, clr.z, 1);
         light_base_range = pSettings->r_float(section, strconcat(sizeof(full_name), full_name, prefix, "light_range"));
-        light_var_color =
-            pSettings->r_float(section, strconcat(sizeof(full_name), full_name, prefix, "light_var_color"));
-        light_var_range =
-            pSettings->r_float(section, strconcat(sizeof(full_name), full_name, prefix, "light_var_range"));
+        light_var_color = pSettings->r_float(section, strconcat(sizeof(full_name), full_name, prefix, "light_var_color"));
+        light_var_range = pSettings->r_float(section, strconcat(sizeof(full_name), full_name, prefix, "light_var_range"));
         light_lifetime = pSettings->r_float(section, strconcat(sizeof(full_name), full_name, prefix, "light_time"));
         light_time = -1.f;
     }
@@ -177,7 +184,9 @@ void CShootingObject::Light_Start()
         light_time = light_lifetime;
 
         light_build_color.set(Random.randFs(light_var_color, light_base_color.r),
-            Random.randFs(light_var_color, light_base_color.g), Random.randFs(light_var_color, light_base_color.b), 1);
+            Random.randFs(light_var_color, light_base_color.g),
+            Random.randFs(light_var_color, light_base_color.b),
+            1);
         light_build_range = Random.randFs(light_var_range, light_base_range);
     }
 }
@@ -188,8 +197,7 @@ void CShootingObject::Light_Render(const Fvector& P)
     R_ASSERT(light_render);
 
     light_render->set_position(P);
-    light_render->set_color(
-        light_build_color.r * light_scale, light_build_color.g * light_scale, light_build_color.b * light_scale);
+    light_render->set_color(light_build_color.r * light_scale, light_build_color.g * light_scale, light_build_color.b * light_scale);
     light_render->set_range(light_build_range * light_scale);
 
     if (!light_render->get_active())
@@ -260,8 +268,7 @@ void CShootingObject::LoadShellParticles(LPCSTR section, LPCSTR prefix)
     if (pSettings->line_exist(section, full_name))
     {
         m_sShellParticles = pSettings->r_string(section, full_name);
-        vLoadedShellPoint =
-            pSettings->r_fvector3(section, strconcat(sizeof(full_name), full_name, prefix, "shell_point"));
+        vLoadedShellPoint = pSettings->r_fvector3(section, strconcat(sizeof(full_name), full_name, prefix, "shell_point"));
     }
 }
 
@@ -433,9 +440,12 @@ bool CShootingObject::SendHitAllowed(IGameObject* pUser)
 
 extern void random_dir(Fvector& tgt_dir, const Fvector& src_dir, float dispersion);
 
-void CShootingObject::FireBullet(const Fvector& pos, const Fvector& shot_dir, float fire_disp,
-    const CCartridge& cartridge, u16 parent_id, u16 weapon_id, bool send_hit)
+void CShootingObject::FireBullet(
+    const Fvector& pos, const Fvector& shot_dir, float fire_disp, const CCartridge& cartridge, u16 parent_id, u16 weapon_id, bool send_hit)
 {
+    m_overheat += m_overheat_per_shot; //--#SM+#--
+    clamp(m_overheat, 0.f, 1.f); //--#SM+#--
+
     Fvector dir;
     random_dir(dir, shot_dir, fire_disp);
 
@@ -492,9 +502,19 @@ void CShootingObject::FireBullet(const Fvector& pos, const Fvector& shot_dir, fl
         l_fHitPower = fvHitPower[egdMaster];
     }
 
-    Level().BulletManager().AddBullet(pos, dir, m_fStartBulletSpeed * cur_silencer_koef.bullet_speed,
-        l_fHitPower * cur_silencer_koef.hit_power, fHitImpulse * cur_silencer_koef.hit_impulse, parent_id, weapon_id,
-        ALife::eHitTypeFireWound, fireDistance, cartridge, m_air_resistance_factor, send_hit, aim_bullet);
+    Level().BulletManager().AddBullet(pos,
+        dir,
+        m_fStartBulletSpeed * cur_silencer_koef.bullet_speed,
+        l_fHitPower * cur_silencer_koef.hit_power,
+        fHitImpulse * cur_silencer_koef.hit_impulse,
+        parent_id,
+        weapon_id,
+        ALife::eHitTypeFireWound,
+        fireDistance,
+        cartridge,
+        m_air_resistance_factor,
+        send_hit,
+        aim_bullet);
 }
 void CShootingObject::FireStart() { bWorking = true; }
 void CShootingObject::FireEnd() { bWorking = false; }
@@ -502,4 +522,16 @@ void CShootingObject::StartShotParticles()
 {
     CParticlesObject* pSmokeParticles = NULL;
     StartParticles(pSmokeParticles, *m_sShotParticles, m_vCurrentShootPos, m_vCurrentShootDir, true);
+}
+
+//--#SM_TODO+#--М.б лучше на UpdateCL ?
+// Обновление перегрева ствола --#SM+#--
+void CShootingObject::UpdateOverheat(u32 dT)
+{
+    // При неактивности ствол остывает
+    if (m_overheat > 0.0f && !IsWorking())
+    {
+        m_overheat -= (dT * m_overheat_cooling);
+        clamp(m_overheat, 0.0f, 1.0f);
+    }
 }

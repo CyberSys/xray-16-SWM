@@ -207,7 +207,28 @@ void CHUDManager::Render_Last()
     GlobalEnv.Render->set_HUD(TRUE);
     GlobalEnv.Render->set_Object(O->H_Root());
     O->OnHUDDraw(this);
+
+    // Вызываем рендеринг для дополнительных объектов --#SM+#--
+    for (xr_vector<IGameObject*>::iterator I = m_renderHUD_list.begin(); I != m_renderHUD_list.end(); I++)
+        (*I)->OnRenderHUD(O);
+
     GlobalEnv.Render->set_HUD(FALSE);
+}
+
+// Добавить объект в список объектов, для которых вызывается OnRenderHUD --#SM+#--
+void CHUDManager::RenderHUD_Add(IGameObject* O)
+{
+    xr_vector<IGameObject*>::iterator _i = std::find(m_renderHUD_list.begin(), m_renderHUD_list.end(), O);
+    R_ASSERT(_i == m_renderHUD_list.end());
+    m_renderHUD_list.push_back(O);
+}
+
+// Убрать объект из списка объектов, для которых вызывается OnRenderHUD --#SM+#--
+void CHUDManager::RenderHUD_Remove(IGameObject* O)
+{
+    xr_vector<IGameObject*>::iterator _i = std::find(m_renderHUD_list.begin(), m_renderHUD_list.end(), O);
+    R_ASSERT(_i != m_renderHUD_list.end());
+    m_renderHUD_list.erase(_i);
 }
 
 #include "player_hud.h"

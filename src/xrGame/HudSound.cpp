@@ -96,6 +96,31 @@ void HUD_SOUND_ITEM::PlaySound(
     hud_snd.m_activeSnd->snd.set_volume(hud_snd.m_activeSnd->volume * (b_hud_mode ? psHUDSoundVolume : 1.0f));
 }
 
+// Проиграть новый звук, без остановки старого (накладывающийся поверх старого) --#SM+#--
+void HUD_SOUND_ITEM::PlaySoundAdd(
+    HUD_SOUND_ITEM& hud_snd, const Fvector& position, const IGameObject* parent, bool b_hud_mode, bool looped, u8 index)
+{
+    if (hud_snd.sounds.empty())
+        return;
+
+    hud_snd.m_activeSnd = NULL;
+
+    u32 flags = b_hud_mode ? sm_2D : 0;
+    if (looped)
+        flags |= sm_Looped;
+
+    if (index == u8(-1))
+        index = (u8)Random.randI(hud_snd.sounds.size());
+
+    hud_snd.m_activeSnd = &hud_snd.sounds[index];
+
+    Fvector pos = flags & sm_2D ? Fvector().set(0, 0, 0) : position;
+    float vol = hud_snd.m_activeSnd->volume * b_hud_mode ? psHUDSoundVolume : 1.0f;
+
+    hud_snd.m_activeSnd->snd.play_no_feedback(
+        const_cast<IGameObject*>(parent), flags, hud_snd.m_activeSnd->delay, &pos, &vol);
+}
+
 void HUD_SOUND_ITEM::StopSound(HUD_SOUND_ITEM& hud_snd)
 {
     xr_vector<SSnd>::iterator it = hud_snd.sounds.begin();
@@ -144,7 +169,10 @@ void HUD_SOUND_COLLECTION::PlaySound(
     }
 
     HUD_SOUND_ITEM* snd_item = FindSoundItem(alias, true);
-    HUD_SOUND_ITEM::PlaySound(*snd_item, position, parent, hud_mode, looped, index);
+    if (snd_item->m_b_exclusive) //--#SM+#--
+        HUD_SOUND_ITEM::PlaySound(*snd_item, position, parent, hud_mode, looped, index);
+    else
+        HUD_SOUND_ITEM::PlaySoundAdd(*snd_item, position, parent, hud_mode, looped, index);
 }
 
 void HUD_SOUND_COLLECTION::StopSound(LPCSTR alias)
@@ -153,11 +181,35 @@ void HUD_SOUND_COLLECTION::StopSound(LPCSTR alias)
     HUD_SOUND_ITEM::StopSound(*snd_item);
 }
 
+// Остановить все звуки, в названии которых содержится указанный alias --#SM+#--
+void HUD_SOUND_COLLECTION::StopAllSoundsWhichContain(LPCSTR alias)
+{
+    xr_vector<HUD_SOUND_ITEM>::iterator it = m_sound_items.begin();
+    xr_vector<HUD_SOUND_ITEM>::iterator it_e = m_sound_items.end();
+    for (; it != it_e; ++it)
+    {
+        if (strstr(it->m_alias.c_str(), alias) != NULL)
+            HUD_SOUND_ITEM::StopSound(*it);
+    }
+}
+
 void HUD_SOUND_COLLECTION::SetPosition(LPCSTR alias, const Fvector& pos)
 {
     HUD_SOUND_ITEM* snd_item = FindSoundItem(alias, true);
     if (snd_item->playing())
         snd_item->set_position(pos);
+}
+
+void HUD_SOUND_COLLECTION::SetCurentTime(LPCSTR alias, float fTime) //--#SM+#--
+{
+    HUD_SOUND_ITEM* snd_item = FindSoundItem(alias, true);
+    if (snd_item->playing())
+    {
+        if (snd_item->m_activeSnd->snd.get_length_sec() > fTime)
+            snd_item->set_cur_time(fTime);
+        else
+            HUD_SOUND_ITEM::StopSound(*snd_item);
+    }
 }
 
 void HUD_SOUND_COLLECTION::StopAllSounds()
@@ -173,10 +225,43 @@ void HUD_SOUND_COLLECTION::StopAllSounds()
 
 void HUD_SOUND_COLLECTION::LoadSound(LPCSTR section, LPCSTR line, LPCSTR alias, bool exclusive, int type)
 {
-    R_ASSERT(NULL == FindSoundItem(alias, false));
+    R_ASSERT4(NULL == FindSoundItem(alias, false), section, line, alias); //--#SM+#--
     m_sound_items.resize(m_sound_items.size() + 1);
     HUD_SOUND_ITEM& snd_item = m_sound_items.back();
     HUD_SOUND_ITEM::LoadSound(section, line, snd_item, type);
     snd_item.m_alias = alias;
     snd_item.m_b_exclusive = exclusive;
+}
+
+// Загрузить или перезагрузить (если уже есть) звук //--#SM+#--
+void HUD_SOUND_COLLECTION::ReLoadSound(LPCSTR section, LPCSTR line, LPCSTR alias, bool exclusive, int type)
+{
+    // Проверяем, существует-ли уже звук с таким alies в коллекции
+    HUD_SOUND_ITEM* sndItem = FindSoundItem(alias, false);
+
+    // Обновляем звук
+    if (sndItem != NULL)
+    {
+        // Такой звук уже есть - перезагружаем
+        HUD_SOUND_ITEM::LoadSound(section, line, *sndItem, type);
+        sndItem->m_alias = alias;
+        sndItem->m_b_exclusive = exclusive;
+    }
+    else
+    {
+        // Такого звука нету - грузим с нуля
+        this->LoadSound(section, line, alias, exclusive, type);
+    }
+}
+
+// Обновить позицию всех звуков //--#SM+#--
+void HUD_SOUND_COLLECTION::UpdateAllSounds(const Fvector& vPos)
+{
+    xr_vector<HUD_SOUND_ITEM>::iterator it = m_sound_items.begin();
+    xr_vector<HUD_SOUND_ITEM>::iterator it_e = m_sound_items.end();
+
+    for (; it != it_e; ++it)
+    {
+        it->set_position(vPos);
+    }
 }

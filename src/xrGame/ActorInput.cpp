@@ -38,7 +38,13 @@ extern u32 hud_adj_mode;
 void CActor::IR_OnKeyboardPress(int cmd)
 {
     if (hud_adj_mode && pInput->iGetAsyncKeyState(DIK_LSHIFT))
+    {
+        if (pInput->iGetAsyncKeyState(DIK_RETURN) || pInput->iGetAsyncKeyState(DIK_BACKSPACE) ||
+            pInput->iGetAsyncKeyState(DIK_DELETE)) //--#SM+#--
+            g_player_hud->tune(Ivector().set(0, 0, 0));
+
         return;
+    }
 
     if (Remote())
         return;
@@ -251,8 +257,18 @@ void CActor::IR_OnKeyboardRelease(int cmd)
 
 void CActor::IR_OnKeyboardHold(int cmd)
 {
-    if (hud_adj_mode && pInput->iGetAsyncKeyState(DIK_LSHIFT))
+    if (hud_adj_mode && pInput->iGetAsyncKeyState(DIK_LSHIFT)) //--#SM+#--
+    {
+        if (pInput->iGetAsyncKeyState(DIK_UP))
+            g_player_hud->tune(Ivector().set(0, -1, 0));
+        if (pInput->iGetAsyncKeyState(DIK_DOWN))
+            g_player_hud->tune(Ivector().set(0, 1, 0));
+        if (pInput->iGetAsyncKeyState(DIK_LEFT))
+            g_player_hud->tune(Ivector().set(-1, 0, 0));
+        if (pInput->iGetAsyncKeyState(DIK_RIGHT))
+            g_player_hud->tune(Ivector().set(1, 0, 0));
         return;
+    }
 
     if (Remote() || !g_Alive())
         return;
@@ -492,6 +508,16 @@ BOOL CActor::HUDview() const
 {
     return IsFocused() && (cam_active == eacFirstEye) &&
         ((!m_holder) || (m_holder && m_holder->allowWeapon() && m_holder->HUDView()));
+}
+
+void CActor::OnOwnedCameraMove(CCameraBase* pCam, float fOldYaw, float fOldPitch) //--#SM+#--
+{
+    if (Level().CurrentControlEntity() == this)
+    {
+        CHudItem* pHUDItem = smart_cast<CHudItem*>(inventory().ActiveItem());
+        if (pHUDItem)
+            pHUDItem->OnOwnedCameraMove(pCam, fOldYaw, fOldPitch);
+    }
 }
 
 static u16 SlotsToCheck[] = {

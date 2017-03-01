@@ -13,6 +13,7 @@
 class CCartridge;
 class CParticlesObject;
 class IRender_Sector;
+class CWeaponKnifeHit; //--#SM+#--
 
 extern const Fvector zero_vel;
 
@@ -20,6 +21,9 @@ extern const Fvector zero_vel;
 
 class CShootingObject : public IAnticheatDumpable
 {
+public:
+    friend CWeaponKnifeHit; //--#SM+#--
+
 protected:
     CShootingObject();
     virtual ~CShootingObject();
@@ -44,8 +48,8 @@ protected:
 protected:
     virtual void LoadFireParams(LPCSTR section); //сила выстрела
     virtual bool SendHitAllowed(IGameObject* pUser);
-    virtual void FireBullet(const Fvector& pos, const Fvector& dir, float fire_disp, const CCartridge& cartridge,
-        u16 parent_id, u16 weapon_id, bool send_hit);
+    virtual void FireBullet(
+        const Fvector& pos, const Fvector& dir, float fire_disp, const CCartridge& cartridge, u16 parent_id, u16 weapon_id, bool send_hit);
     void SetBulletSpeed(float new_speed) { m_fStartBulletSpeed = new_speed; }
     float GetBulletSpeed() { return m_fStartBulletSpeed; }
     virtual void FireStart();
@@ -55,6 +59,7 @@ public:
     IC BOOL IsWorking() const { return bWorking; }
     virtual BOOL ParentMayHaveAimBullet() { return FALSE; }
     virtual BOOL ParentIsActor() { return FALSE; }
+
 protected:
     // Weapon fires now
     bool bWorking;
@@ -100,7 +105,15 @@ protected:
 public:
     SilencerKoeffs cur_silencer_koef;
 
+    // Коэфиценты перегрева ствола --#SM+#--
+    float m_overheat; // Степень перегрева ствола (0.0-1.0)
+    float m_overheat_per_shot; // Нагревание ствола при каждом выстреле
+    float m_overheat_cooling; // Остывание ствола после стрельбы
+
 protected:
+    // Обновление перегрева ствола --#SM+#--
+    void UpdateOverheat(u32 dT);
+
     //для сталкеров, чтоб они знали эффективные границы использования
     //оружия
     float m_fMinRadius;
@@ -143,8 +156,11 @@ protected:
 
     ////////////////////////////////////////////////
     //общие функции для работы с партиклами оружия
-    void StartParticles(CParticlesObject*& pParticles, LPCSTR particles_name, const Fvector& pos,
-        const Fvector& vel = zero_vel, bool auto_remove_flag = false);
+    void StartParticles(CParticlesObject*& pParticles,
+        LPCSTR particles_name,
+        const Fvector& pos,
+        const Fvector& vel = zero_vel,
+        bool auto_remove_flag = false);
     void StopParticles(CParticlesObject*& pParticles);
     void UpdateParticles(CParticlesObject*& pParticles, const Fvector& pos, const Fvector& vel = zero_vel);
 

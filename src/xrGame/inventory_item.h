@@ -57,7 +57,7 @@ struct net_updateInvData
 class CInventoryItem : public CAttachableItem,
                        public CHitImmunity
 #ifdef DEBUG
-                       ,
+    ,
                        public pureRender
 #endif
 {
@@ -110,6 +110,8 @@ public:
     virtual bool Detach(const char* item_section_name, bool b_spawn_item);
     virtual bool CanAttach(PIItem pIItem) { return false; }
     virtual bool CanDetach(LPCSTR item_section_name) { return false; }
+    virtual void OnDetacAddonSpawn(const char* item_section_name, CSE_ALifeDynamicObject* E) { ; } //--#SM+#--
+
     virtual EHandDependence HandDependence() const { return hd1Hand; };
     virtual bool IsSingleHanded() const { return true; };
     virtual bool ActivateItem(); // !!! Переопределить. (см. в Inventory.cpp)
@@ -140,6 +142,7 @@ public:
     virtual u32 Cost() const { return m_cost; }
     //			u32					Cost				()	const	{ return m_cost; }
     virtual float Weight() const { return m_weight; }
+
 public:
     CInventory* m_pInventory;
     shared_str m_section_id;
@@ -177,6 +180,8 @@ public:
     void DenyTrade() { m_flags.set(FCanTrade, FALSE); };
     virtual bool IsNecessaryItem(CInventoryItem* item);
     virtual bool IsNecessaryItem(const shared_str& item_sect) { return false; };
+    virtual bool DrawConditionBar() { return false; }; //--#SM+#--
+
 protected:
     u32 m_cost;
     float m_weight;
@@ -242,6 +247,7 @@ public:
     u16 object_id() const;
     u16 parent_id() const;
     virtual void on_activate_physic_shell() { R_ASSERT2(0, "failed call of virtual function!"); }
+
 protected:
     float m_holder_range_modifier;
     float m_holder_fov_modifier;

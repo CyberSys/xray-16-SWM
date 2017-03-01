@@ -76,6 +76,8 @@ public:
     virtual void OnEvent(NET_Packet& P, u16 type);
     bool m_bLaunched;
 
+    IC bool IsEnginePresent() { return m_bEnginePresent; } //--#SM+#--
+
 protected:
     //указатель на владельца RocketLauncher - который стреляет ракету
     CGameObject* m_pOwner;

@@ -3,9 +3,12 @@
 #include "customdetector.h"
 #include "weapon.h"
 #include "artefact.h"
-#include "scope.h"
-#include "silencer.h"
-#include "grenadelauncher.h"
+//--#SM+# Begin--
+//#include "scope.h"
+//#include "silencer.h"
+//#include "grenadelauncher.h"
+#include "WeaponAddon.h"
+//--#SM+# End--
 #include "inventory.h"
 #include "Level.h"
 #include "xr_level_controller.h"
@@ -117,9 +120,10 @@ void CActor::OnEvent(NET_Packet& P, u16 type)
             break;
         }
 
-        VERIFY2(GO->H_Parent()->ID() == ID(), make_string("actor [%d][%s] tries to drop not own object [%d][%s]", ID(),
-                                                  Name(), GO->ID(), GO->cNameSect().c_str())
-                                                  .c_str());
+        VERIFY2(GO->H_Parent()->ID() == ID(),
+            make_string(
+                "actor [%d][%s] tries to drop not own object [%d][%s]", ID(), Name(), GO->ID(), GO->cNameSect().c_str())
+                .c_str());
 
         if (GO->H_Parent()->ID() != ID())
         {

@@ -65,7 +65,7 @@ class CActor : public CEntityAlive,
                public CStepManager,
                public Feel::Sound
 #ifdef DEBUG
-               ,
+    ,
                public pureRender
 #endif
 {
@@ -89,6 +89,7 @@ public:
     virtual CCharacterPhysicsSupport* character_physics_support() const { return m_pPhysics_support; }
     virtual CPHDestroyable* ph_destroyable();
     CHolderCustom* Holder() { return m_holder; }
+
 public:
     virtual void Load(LPCSTR section);
 
@@ -144,6 +145,7 @@ public:
     CCharacterPhysicsSupport* m_pPhysics_support;
 
     virtual LPCSTR Name() const { return CInventoryOwner::Name(); }
+
 public:
     // PhraseDialogManager
     virtual void ReceivePhrase(DIALOG_SHARED_PTR& phrase_dialog);
@@ -239,6 +241,7 @@ public:
     s32 GetZoomRndSeed() { return m_ZoomRndSeed; };
     void SetShotRndSeed(s32 Seed = 0);
     s32 GetShotRndSeed() { return m_ShotRndSeed; };
+
 public:
     void detach_Vehicle();
     void steer_Vehicle(float angle);
@@ -298,9 +301,12 @@ public:
     virtual void OnHUDDraw(CCustomHUD* hud);
     BOOL HUDview() const;
 
+    virtual void OnOwnedCameraMove(CCameraBase* pCam, float fOldYaw, float fOldPitch); //--#SM+#--
+
     // visiblity
     virtual float ffGetFov() const { return 90.f; }
     virtual float ffGetRange() const { return 500.f; }
+
 public:
     CActorCameraManager& Cameras()
     {
@@ -309,6 +315,7 @@ public:
     }
     IC CCameraBase* cam_Active() { return cameras[cam_active]; }
     IC CCameraBase* cam_FirstEye() { return cameras[eacFirstEye]; }
+
 protected:
     virtual void cam_Set(EActorCameras style);
     void cam_Update(float dt, float fFOV);
@@ -340,6 +347,7 @@ public:
     CGameObject* ObjectWeLookingAt() { return m_pObjectWeLookingAt; }
     CInventoryOwner* PersonWeLookingAt() { return m_pPersonWeLookingAt; }
     LPCSTR GetDefaultActionForObject() { return *m_sDefaultObjAction; }
+
 protected:
     CGameObject* m_pUsableObject;
     // Person we're looking at
@@ -395,6 +403,7 @@ public:
     bool AnyMove() { return (mstate_real & mcAnyMove) != 0; };
     bool is_jump();
     u32 MovingState() const { return mstate_real; }
+
 protected:
     u32 mstate_wishful;
     u32 mstate_old;
@@ -592,6 +601,7 @@ public:
     void set_input_external_handler(CActorInputHandler* handler);
     bool input_external_handler_installed() const { return (m_input_external_handler != 0); }
     IC void lock_accel_for(u32 time) { m_time_lock_accel = Device.dwTimeGlobal + time; }
+
 private:
     CActorInputHandler* m_input_external_handler;
     u32 m_time_lock_accel;
@@ -621,6 +631,7 @@ public:
 
 private: // IPhysicsShellHolder
     virtual void HideAllWeapons(bool v) { SetWeaponHideState(INV_STATE_BLOCK_ALL, v); }
+
 public:
     void SetCantRunState(bool bSet);
 
@@ -730,6 +741,7 @@ public:
     bool DisableHitMarks() { return m_disabled_hitmarks; };
     void set_inventory_disabled(bool is_disabled) { m_inventory_disabled = is_disabled; }
     bool inventory_disabled() const { return m_inventory_disabled; }
+
 private:
     void set_state_box(u32 mstate);
 

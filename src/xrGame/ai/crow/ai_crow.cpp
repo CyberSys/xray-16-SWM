@@ -126,6 +126,10 @@ void CAI_Crow::Load(LPCSTR section)
     fIdleSoundDelta = pSettings->r_float(section, "idle_sound_delta");
     fIdleSoundTime = fIdleSoundDelta + fIdleSoundDelta * Random.randF(-.5f, .5f);
     VERIFY2(valid_pos(Position()), dbg_valide_pos_string(Position(), this, "CAI_Crow::Load( LPCSTR section )"));
+
+    // SM_TODO- В конфиги ? Тогда из Entity тоже
+    m_common_values.m_fIRNV_value = m_common_values.m_fIRNV_value_max;  //--#SM+#--
+    m_common_values.m_fIRNV_max_or_min = true;                          //--#SM+#--
 }
 
 BOOL CAI_Crow::net_Spawn(CSE_Abstract* DC)
@@ -143,9 +147,12 @@ BOOL CAI_Crow::net_Spawn(CSE_Abstract* DC)
     m_Anims.m_fly.Load(M, "fly_fwd");
     m_Anims.m_idle.Load(M, "fly_idle");
 
+    // Crow fixes by Sin! (Gunslinger mod)  --#SM+#--
+    // [bug] баг - кто-то забыл проинициализировать, из-за чего при неудачном стечении обстоятельств вороны вне сектора обзора не летают... Исправим.
     o_workload_frame = 0;
     o_workload_rframe = 0;
 
+    // без этого уже сбитые вороны "воскресают" при перезагрузке игры и начинают вести себя некорректно (начинают летать, при попадании не падают на землю) --#SM+#--
     if (GetfHealth() > 0) {
         st_current = ECrowStates::eFlyIdle;
         st_target = ECrowStates::eFlyIdle;
@@ -309,6 +316,8 @@ void CAI_Crow::UpdateCL()
 }
 void CAI_Crow::renderable_Render()
 {
+    //CAI_Crow::renderable_Render вызывается только для ВИДИМЫХ В ЭТОМ КАДРЕ объектов --#SM+#--
+    //из-за этого вороны, видимые в мире, но не видимые в зуме, замедляются - fDeltaTime для каждров линзы не учитывается
     UpdateWorkload(Device.fTimeDelta * (Device.dwFrame - o_workload_frame));
     inherited::renderable_Render();
     o_workload_rframe = Device.dwFrame;
@@ -369,7 +378,7 @@ void CAI_Crow::shedule_Update(u32 DT)
     m_Sounds.m_idle.SetPosition(Position());
 
     // work
-    if (o_workload_rframe >= (Device.dwFrame - 2))
+    if (o_workload_rframe >= (Device.dwFrame - 2))  //--#SM+#--
         ;
     else
         UpdateWorkload(fDT);

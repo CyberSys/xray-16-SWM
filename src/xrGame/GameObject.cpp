@@ -37,6 +37,7 @@
 #include "game_object_space.h"
 #include "doors_door.h"
 #include "doors.h"
+#include "attachable_visual.h" //--#SM+#--
 
 #pragma warning(push)
 #pragma warning(disable : 4995)
@@ -245,7 +246,27 @@ void CGameObject::Load(LPCSTR section)
         // self->spatial.type	|=	STYPE_VISIBLEFORAI;
         self->GetSpatialData().type &= ~STYPE_REACTTOSOUND;
     }
+
+    // Загружаем начальное значение "тепло-излучаемости" объекта --#SM+#--
+    m_common_values.m_fIRNV_value_max = READ_IF_EXISTS(pSettings, r_float, section, "shader_irnv_value_max", 0.0f);
+    clamp(m_common_values.m_fIRNV_value_max, 0.0f, 1.0f);
+
+    m_common_values.m_fIRNV_value_min =
+        READ_IF_EXISTS(pSettings, r_float, section, "shader_irnv_value_min", m_common_values.m_fIRNV_value_max);
+    clamp(m_common_values.m_fIRNV_value_min, 0.0f, 1.0f);
+    if (m_common_values.m_fIRNV_value_min > m_common_values.m_fIRNV_value_max)
+        m_common_values.m_fIRNV_value_min = m_common_values.m_fIRNV_value_max;
+
+    m_common_values.m_fIRNV_cooling_speed =
+        READ_IF_EXISTS(pSettings, r_float, section, "shader_irnv_cooling_speed", 0.0f) / 100.f;
+
+    m_common_values.m_fIRNV_value = m_common_values.m_fIRNV_value_min;
+    m_common_values.m_fIRNV_max_or_min =
+        false; //--> По умолчанию для объектов юзаем их минимиальное тепло, если объект живой, то максимальное (Entity_alive.cpp) SM_TODO
 }
+
+// Вызывается после Load //--#SM+#--
+void CGameObject::PostLoad(LPCSTR section) {}
 
 void CGameObject::init()
 {
@@ -275,6 +296,9 @@ void CGameObject::net_Destroy()
 #endif
 
     VERIFY(m_spawned);
+
+    delete_data(m_attached_visuals); // --#SM+#-- Удаляем присоединённые визуалы
+
     if (m_anim_mov_ctrl)
         destroy_anim_mov_ctrl();
 
@@ -699,6 +723,11 @@ void CGameObject::spawn_supplies()
     bool bScope = false;
     bool bSilencer = false;
     bool bLauncher = false;
+    bool bMagaz = false; //--#SM+#--
+    bool bSpec_1 = false; //--#SM+#--
+    bool bSpec_2 = false; //--#SM+#--
+    bool bSpec_3 = false; //--#SM+#--
+    bool bSpec_4 = false; //--#SM+#--
 
     for (u32 k = 0, j; spawn_ini()->r_line("spawn", k, &N, &V); k++)
     {
@@ -725,6 +754,11 @@ void CGameObject::spawn_supplies()
             bScope = (NULL != strstr(V, "scope"));
             bSilencer = (NULL != strstr(V, "silencer"));
             bLauncher = (NULL != strstr(V, "launcher"));
+            bMagaz = (NULL != strstr(V, "magaz")); //--#SM+#--
+            bSpec_1 = (NULL != strstr(V, "special_1")); //--#SM+#--
+            bSpec_2 = (NULL != strstr(V, "special_2")); //--#SM+#--
+            bSpec_3 = (NULL != strstr(V, "special_3")); //--#SM+#--
+            bSpec_4 = (NULL != strstr(V, "special_4")); //--#SM+#--
         }
         for (u32 i = 0; i < j; ++i)
             if (::Random.randF(1.f) < p)
@@ -736,14 +770,27 @@ void CGameObject::spawn_supplies()
                     pSE_InventoryItem->m_fCondition = f_cond;
 
                 CSE_ALifeItemWeapon* W = smart_cast<CSE_ALifeItemWeapon*>(A);
-                if (W)
+                if (W) //--#SM+#--
                 {
-                    if (W->m_scope_status == ALife::eAddonAttachable)
-                        W->m_addon_flags.set(CSE_ALifeItemWeapon::eWeaponAddonScope, bScope);
-                    if (W->m_silencer_status == ALife::eAddonAttachable)
-                        W->m_addon_flags.set(CSE_ALifeItemWeapon::eWeaponAddonSilencer, bSilencer);
-                    if (W->m_grenade_launcher_status == ALife::eAddonAttachable)
-                        W->m_addon_flags.set(CSE_ALifeItemWeapon::eWeaponAddonGrenadeLauncher, bLauncher);
+                    // TODO: Возможность указывать конкретную секцию аддона в xml-е //SM_TODO - дубль код?
+                    if (W->m_scope_status == ALife::eAddonAttachable && bScope)
+                        W->m_scope_idx = 0;
+                    if (W->m_silencer_status == ALife::eAddonAttachable && bSilencer)
+                        W->m_muzzle_idx = 0;
+                    if (W->m_grenade_launcher_status == ALife::eAddonAttachable && bLauncher)
+                        W->m_launcher_idx = 0;
+                    if (W->m_magazine_status == ALife::eAddonAttachable && bMagaz)
+                        W->m_magaz_idx = 0;
+                    if (W->m_spec_1_status == ALife::eAddonAttachable && bSpec_1)
+                        W->m_spec_1_idx = 0;
+                    if (W->m_spec_2_status == ALife::eAddonAttachable && bSpec_2)
+                        W->m_spec_2_idx = 0;
+                    if (W->m_spec_3_status == ALife::eAddonAttachable && bSpec_3)
+                        W->m_spec_3_idx = 0;
+                    if (W->m_spec_4_status == ALife::eAddonAttachable && bSpec_4)
+                        W->m_spec_4_idx = 0;
+
+                    W->AddonsUpdate();
                 }
 
                 NET_Packet P;
@@ -1061,6 +1108,10 @@ void CGameObject::renderable_Render()
     GlobalEnv.Render->set_Transform(&XFORM());
     GlobalEnv.Render->add_Visual(Visual());
     Visual()->getVisData().hom_frame = Device.dwFrame;
+
+    // Рендерим приатаченные визуалы --#SM+#--
+    for (u32 i = 0; i < this->m_attached_visuals.size(); i++)
+        this->m_attached_visuals[i]->Render();
 }
 
 /*
@@ -1096,7 +1147,9 @@ void CGameObject::add_visual_callback(visual_callback callback)
 {
     VERIFY(smart_cast<IKinematics*>(Visual()));
     CALLBACK_VECTOR_IT I = std::find(visual_callbacks().begin(), visual_callbacks().end(), callback);
-    VERIFY(I == visual_callbacks().end());
+    if (I != visual_callbacks().end())
+        return; //--#SM+#-- Код ниже не подразумевает наличие нескольких каллбэков у объекта
+    // SM_TODO разберись вообще с этими колбеками, зачем тут вектор, если у скелета может быть лишь один каллбэк???
 
     if (m_visual_callback.empty())
         SetKinematicsCallback(true);
@@ -1107,7 +1160,8 @@ void CGameObject::add_visual_callback(visual_callback callback)
 void CGameObject::remove_visual_callback(visual_callback callback)
 {
     CALLBACK_VECTOR_IT I = std::find(m_visual_callback.begin(), m_visual_callback.end(), callback);
-    VERIFY(I != m_visual_callback.end());
+    if (I == m_visual_callback.end())
+        return; //--#SM+#-- SM_TODO
     m_visual_callback.erase(I);
     if (m_visual_callback.empty())
         SetKinematicsCallback(false);
@@ -1185,6 +1239,20 @@ void CGameObject::shedule_Update(u32 dt)
     if (AlwaysTheCrow()) MakeMeCrow ();
     else if (Device.vCameraPosition.distance_to_sqr(Position()) < CROW_RADIUS*CROW_RADIUS) MakeMeCrow ();
     */
+
+    //--#SM+ Begin#--
+    // IRNV увеличиваем\уменьшаем теплоту
+    if (m_common_values.m_fIRNV_value_max != m_common_values.m_fIRNV_value_min)
+    {
+        if (m_common_values.m_fIRNV_max_or_min)
+            m_common_values.m_fIRNV_value += (dt * m_common_values.m_fIRNV_cooling_speed);
+        else
+            m_common_values.m_fIRNV_value -= (dt * m_common_values.m_fIRNV_cooling_speed);
+
+        clamp(m_common_values.m_fIRNV_value, m_common_values.m_fIRNV_value_min, m_common_values.m_fIRNV_value_max);
+    }
+    //--#SM+ End#--
+
     // ~
     if (!g_dedicated_server)
         scriptBinder.shedule_Update(dt);
@@ -1287,6 +1355,9 @@ void CGameObject::OnChangeVisual()
         destroy_anim_mov_ctrl();
 }
 
+// Каллбэк на смену визуала в одном из присоединённых доп. визуалов  --#SM+#--
+void CGameObject::OnAdditionalVisualModelChange(attachable_visual* pChangedVisual) {}
+
 bool CGameObject::shedule_Needed() { return (!getDestroy()); }
 void CGameObject::create_anim_mov_ctrl(CBlend* b, Fmatrix* start_pose, bool local_animation)
 {
@@ -1300,9 +1371,10 @@ void CGameObject::create_anim_mov_ctrl(CBlend* b, Fmatrix* start_pose, bool loca
         if (m_anim_mov_ctrl)
             destroy_anim_mov_ctrl();
 
-        VERIFY2(start_pose, make_string("start pose hasn't been specified for animation [%s][%s]",
-                                smart_cast<IKinematicsAnimated&>(*Visual()).LL_MotionDefName_dbg(b->motionID).first,
-                                smart_cast<IKinematicsAnimated&>(*Visual()).LL_MotionDefName_dbg(b->motionID).second));
+        VERIFY2(start_pose,
+            make_string("start pose hasn't been specified for animation [%s][%s]",
+                smart_cast<IKinematicsAnimated&>(*Visual()).LL_MotionDefName_dbg(b->motionID).first,
+                smart_cast<IKinematicsAnimated&>(*Visual()).LL_MotionDefName_dbg(b->motionID).second));
 
         VERIFY2(!animation_movement(),
             make_string("start pose hasn't been specified for animation [%s][%s]",
@@ -1367,6 +1439,9 @@ void CGameObject::UpdateCL()
     //	if (!is_ai_obstacle())
     //		return;
 
+    for (u32 i = 0; i < m_attached_visuals.size(); i++) //--#SM+#--
+        m_attached_visuals[i]->Update();
+
     if (H_Parent())
         return;
 
@@ -1375,6 +1450,41 @@ void CGameObject::UpdateCL()
 
     on_matrix_change(m_previous_matrix);
     m_previous_matrix = XFORM();
+}
+
+// Вызывается на каждом кадре после\вместо UpdateCL --#SM+#--
+void CGameObject::PostUpdateCL(bool bUpdateCL_disabled)
+{
+    if (!g_dedicated_server)
+    {
+        // Обновляем присоединённые визуалы
+        for (u32 i = 0; i < this->m_attached_visuals.size(); i++)
+            this->m_attached_visuals[i]->Update();
+
+        // Обновляем шейдерные данные
+        IRenderVisual* _visual = this->Visual();
+        if (_visual != NULL)
+        {
+            //Обновляем параметры объекта для шейдеров
+            CEntity* entity_item = this->cast_entity();
+            if (entity_item)
+                _visual->getVisData().obj_data->sh_entity_data.x =
+                    entity_item->GetfHealth(); // Обновляем инфу о здоровье объекта
+
+            CEntityAlive* ealive_item = this->cast_entity_alive();
+            if (ealive_item)
+                _visual->getVisData().obj_data->sh_entity_data.y =
+                    ealive_item->conditions().radiation(); // Обновляем инфу о радиации объекта
+
+            CInventoryItem* inv_item = this->cast_inventory_item();
+            if (inv_item)
+                _visual->getVisData().obj_data->sh_entity_data.z =
+                    inv_item->GetCondition(); // Обновляем инфу о износе объекта
+
+            _visual->getVisData().obj_data->sh_entity_data.w =
+                m_common_values.m_fIRNV_value; // Обновляем инфу о тепло-излучении объекта
+        }
+    }
 }
 
 void CGameObject::on_matrix_change(const Fmatrix& previous) { obstacle().on_move(); }
@@ -1509,3 +1619,85 @@ void CGameObject::set_tip_text(LPCSTR new_text) { m_sTipText = new_text; }
 void CGameObject::set_tip_text_default() { m_sTipText = NULL; }
 bool CGameObject::nonscript_usable() { return m_bNonscriptUsable; }
 void CGameObject::set_nonscript_usable(bool usable) { m_bNonscriptUsable = usable; }
+
+// Присоединить дополнительный визуал к главному --#SM+#--
+bool CGameObject::AttachAdditionalVisual(const shared_str& sect_name)
+{
+    if (FindAdditionalVisual(sect_name) != NULL)
+        return false;
+
+    attachable_visual* vis = new attachable_visual(this, sect_name);
+    m_attached_visuals.push_back(vis);
+
+    return true;
+}
+
+// Отсоединить дополнительный визуал от главного --#SM+#--
+bool CGameObject::DetachAdditionalVisual(const shared_str& sect_name)
+{
+    xr_vector<attachable_visual*>::iterator it_child;
+    attachable_visual* vis = FindAdditionalVisual(sect_name, &it_child);
+    if (vis == NULL)
+        return false;
+
+    m_attached_visuals.erase(it_child);
+    xr_delete(vis);
+
+    return true;
+}
+
+// Найти присоединённый визуал по его секции (не ищет внутри самих визуалов <!>) --#SM+#--
+attachable_visual* CGameObject::FindAdditionalVisual(
+    const shared_str& sect_name, xr_vector<attachable_visual*>::iterator* it_child)
+{
+    xr_vector<attachable_visual*>::iterator it = m_attached_visuals.begin();
+    while (it != m_attached_visuals.end())
+    {
+        attachable_visual* vis = (*it);
+        if (vis->m_sect_name.equal(sect_name))
+        {
+            if (it_child != NULL)
+                *it_child = it;
+            return vis;
+        }
+        else
+            ++it;
+    }
+    return NULL;
+}
+
+// Получить список всех визуалов, связанных с нашим объектом --#SM+#--
+void CGameObject::GetAllInheritedVisuals(xr_vector<IRenderVisual*>& tOutVisList)
+{
+    // Заносим свой основной визуал
+    if (renderable.visual != NULL)
+        tOutVisList.push_back(renderable.visual);
+
+    // Заносим все визуалы из m_attached_visuals
+    if (m_attached_visuals.size() > 0)
+    {
+        xr_vector<attachable_visual*> tAVisList;
+
+        // Получаем список всех attachable_visual связанных с нами
+        for (u32 i = 0; i < m_attached_visuals.size(); i++)
+        {
+            attachable_visual* pAVis = m_attached_visuals[i];
+            if (pAVis != NULL)
+            {
+                // Заносим его в общий лист
+                tAVisList.push_back(pAVis);
+
+                // А также заносим всех его детей
+                pAVis->GetAllInheritedAVisuals(tAVisList);
+            }
+        }
+
+        // Теперь считываем модель из каждого attachable_visual
+        for (u32 i = 0; i < tAVisList.size(); i++)
+        {
+            IRenderVisual* pVis = (tAVisList[i]->m_model != NULL ? tAVisList[i]->m_model->dcast_RenderVisual() : NULL);
+            if (pVis != NULL)
+                tOutVisList.push_back(pVis);
+        }
+    }
+}

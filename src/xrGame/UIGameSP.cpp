@@ -50,12 +50,12 @@ void CUIGameSP::SetClGame(game_cl_GameState* g)
     m_game = smart_cast<game_cl_Single*>(g);
     R_ASSERT(m_game);
 }
-#ifdef DEBUG
+//#ifdef DEBUG	//--#SM+#--
 void attach_adjust_mode_keyb(int dik);
 void attach_draw_adjust_mode();
 void hud_adjust_mode_keyb(int dik);
 void hud_draw_adjust_mode();
-#endif
+//#endif
 
 void CUIGameSP::OnFrame()
 {
@@ -91,10 +91,10 @@ bool CUIGameSP::IR_UIOnKeyboardPress(int dik)
     if (Device.Paused())
         return false;
 
-#ifdef DEBUG
+    //#ifdef DEBUG	//--#SM+#--
     hud_adjust_mode_keyb(dik);
     attach_adjust_mode_keyb(dik);
-#endif
+    //#endif
 
     CInventoryOwner* pInvOwner = smart_cast<CInventoryOwner*>(Level().CurrentEntity());
     if (!pInvOwner)
@@ -145,14 +145,14 @@ bool CUIGameSP::IR_UIOnKeyboardPress(int dik)
 
     return false;
 }
-#ifdef DEBUG
+//#ifdef DEBUG --#SM+#--
 void CUIGameSP::Render()
 {
     inherited::Render();
     hud_draw_adjust_mode();
     attach_draw_adjust_mode();
 }
-#endif
+//#endif
 
 void CUIGameSP::StartTrade(CInventoryOwner* pActorInv, CInventoryOwner* pOtherOwner)
 {
@@ -211,8 +211,15 @@ void CUIGameSP::StartCarBody(CInventoryOwner* pActorInv, CInventoryBox* pBox) //
 }
 
 extern ENGINE_API BOOL bShowPauseString;
-void CUIGameSP::ChangeLevel(GameGraph::_GRAPH_ID game_vert_id, u32 level_vert_id, Fvector pos, Fvector ang,
-    Fvector pos2, Fvector ang2, bool b_use_position_cancel, const shared_str& message_str, bool b_allow_change_level)
+void CUIGameSP::ChangeLevel(GameGraph::_GRAPH_ID game_vert_id,
+    u32 level_vert_id,
+    Fvector pos,
+    Fvector ang,
+    Fvector pos2,
+    Fvector ang2,
+    bool b_use_position_cancel,
+    const shared_str& message_str,
+    bool b_allow_change_level)
 {
     if (TopInputReceiver() != UIChangeLevelWnd)
     {
@@ -288,8 +295,7 @@ bool CChangeLevelWnd::OnKeyboardAction(int dik, EUIMessages keyboard_action)
 bool g_block_pause = false;
 void CChangeLevelWnd::Show()
 {
-    m_messageBox->InitMessageBox(
-        m_b_allow_change_level ? "message_box_change_level" : "message_box_change_level_disabled");
+    m_messageBox->InitMessageBox(m_b_allow_change_level ? "message_box_change_level" : "message_box_change_level_disabled");
     SetWndPos(m_messageBox->GetWndPos());
     m_messageBox->SetWndPos(Fvector2().set(0.0f, 0.0f));
     SetWndSize(m_messageBox->GetWndSize());

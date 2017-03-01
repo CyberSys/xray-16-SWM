@@ -13,6 +13,9 @@ struct HUD_SOUND_ITEM
     static void PlaySound(HUD_SOUND_ITEM& snd, const Fvector& position, const IGameObject* parent, bool hud_mode,
         bool looped = false, u8 index = u8(-1));
 
+    static void PlaySoundAdd(HUD_SOUND_ITEM& snd, //--#SM+#--
+        const Fvector& position, const IGameObject* parent, bool hud_mode, bool looped = false, u8 index = u8(-1));
+
     static void StopSound(HUD_SOUND_ITEM& snd);
 
     ICF BOOL playing()
@@ -29,6 +32,17 @@ struct HUD_SOUND_ITEM
         {
             if (m_activeSnd->snd._feedback() && !m_activeSnd->snd._feedback()->is_2D())
                 m_activeSnd->snd.set_position(pos);
+            else
+                m_activeSnd = NULL;
+        }
+    }
+
+    ICF void set_cur_time(float fTime) //--#SM+#--
+    {
+        if (m_activeSnd)
+        {
+            if (m_activeSnd->snd._feedback())
+                m_activeSnd->snd.set_time(fTime);
             else
                 m_activeSnd = NULL;
         }
@@ -51,17 +65,26 @@ struct HUD_SOUND_ITEM
 class HUD_SOUND_COLLECTION
 {
     xr_vector<HUD_SOUND_ITEM> m_sound_items;
-    HUD_SOUND_ITEM* FindSoundItem(LPCSTR alias, bool b_assert);
 
 public:
     ~HUD_SOUND_COLLECTION();
+
+    HUD_SOUND_ITEM* FindSoundItem(LPCSTR alias, bool b_assert); //--#SM+#--
+
     void PlaySound(LPCSTR alias, const Fvector& position, const IGameObject* parent, bool hud_mode, bool looped = false,
         u8 index = u8(-1));
 
     void StopSound(LPCSTR alias);
+    void StopAllSoundsWhichContain(LPCSTR alias); //--#SM+#--
 
     void LoadSound(LPCSTR section, LPCSTR line, LPCSTR alias, bool exclusive = false, int type = sg_SourceType);
 
+    void ReLoadSound(LPCSTR section, //--#SM+#--
+        LPCSTR line, LPCSTR alias, bool exclusive = false, int type = sg_SourceType);
+
     void SetPosition(LPCSTR alias, const Fvector& pos);
+    void SetCurentTime(LPCSTR alias, float fTime); //--#SM+#--
+
     void StopAllSounds();
+    void UpdateAllSounds(const Fvector& vPos); //--#SM+#--
 };

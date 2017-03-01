@@ -19,6 +19,8 @@
 #include "CustomOutfit.h"
 #include "ActorHelmet.h"
 
+#include "Weapon.h" //--#SM+#--
+
 static const float TORCH_INERTION_CLAMP = PI_DIV_6;
 static const float TORCH_INERTION_SPEED_MAX = 7.5f;
 static const float TORCH_INERTION_SPEED_MIN = 0.5f;
@@ -293,8 +295,7 @@ void CTorch::UpdateCL()
         if (actor)
             smart_cast<IKinematics*>(H_Parent()->Visual())->CalculateBones_Invalidate();
 
-        if (H_Parent()->XFORM().c.distance_to_sqr(Device.vCameraPosition) < _sqr(OPTIMIZATION_DISTANCE) ||
-            GameID() != eGameIDSingle)
+        if (H_Parent()->XFORM().c.distance_to_sqr(Device.vCameraPosition) < _sqr(OPTIMIZATION_DISTANCE) || GameID() != eGameIDSingle)
         {
             // near camera
             smart_cast<IKinematics*>(H_Parent()->Visual())->CalculateBones();
@@ -310,14 +311,29 @@ void CTorch::UpdateCL()
 
         if (actor)
         {
-            m_prev_hp.x = angle_inertion_var(m_prev_hp.x, -actor->cam_FirstEye()->yaw, TORCH_INERTION_SPEED_MIN,
-                TORCH_INERTION_SPEED_MAX, TORCH_INERTION_CLAMP, Device.fTimeDelta);
-            m_prev_hp.y = angle_inertion_var(m_prev_hp.y, -actor->cam_FirstEye()->pitch, TORCH_INERTION_SPEED_MIN,
-                TORCH_INERTION_SPEED_MAX, TORCH_INERTION_CLAMP, Device.fTimeDelta);
+            m_prev_hp.x = angle_inertion_var(m_prev_hp.x,
+                -actor->cam_FirstEye()->yaw,
+                TORCH_INERTION_SPEED_MIN,
+                TORCH_INERTION_SPEED_MAX,
+                TORCH_INERTION_CLAMP,
+                Device.fTimeDelta);
+            m_prev_hp.y = angle_inertion_var(m_prev_hp.y,
+                -actor->cam_FirstEye()->pitch,
+                TORCH_INERTION_SPEED_MIN,
+                TORCH_INERTION_SPEED_MAX,
+                TORCH_INERTION_CLAMP,
+                Device.fTimeDelta);
 
             Fvector dir, right, up;
             dir.setHP(m_prev_hp.x + m_delta_h, m_prev_hp.y);
             Fvector::generate_orthonormal_basis_normalized(dir, up, right);
+
+            if (actor == Level().CurrentViewEntity()) //--#SM+#--
+            {
+                CHudItem* pHUDItem = smart_cast<CHudItem*>(actor->inventory().ActiveItem());
+                if (pHUDItem != NULL)
+                    pHUDItem->UpdateActorTorchLightPosFromHUD(&M.c);
+            }
 
             if (true)
             {
@@ -474,8 +490,7 @@ CNightVisionEffector::CNightVisionEffector(const shared_str& section) : m_pActor
     m_sounds.LoadSound(section.c_str(), "snd_night_vision_on", "NightVisionOnSnd", false, SOUND_TYPE_ITEM_USING);
     m_sounds.LoadSound(section.c_str(), "snd_night_vision_off", "NightVisionOffSnd", false, SOUND_TYPE_ITEM_USING);
     m_sounds.LoadSound(section.c_str(), "snd_night_vision_idle", "NightVisionIdleSnd", false, SOUND_TYPE_ITEM_USING);
-    m_sounds.LoadSound(
-        section.c_str(), "snd_night_vision_broken", "NightVisionBrokenSnd", false, SOUND_TYPE_ITEM_USING);
+    m_sounds.LoadSound(section.c_str(), "snd_night_vision_broken", "NightVisionBrokenSnd", false, SOUND_TYPE_ITEM_USING);
 }
 
 void CNightVisionEffector::Start(const shared_str& sect, CActor* pA, bool play_sound)
@@ -533,9 +548,7 @@ void CNightVisionEffector::PlaySounds(EPlaySounds which)
     case eStopSound: { m_sounds.PlaySound("NightVisionOffSnd", m_pActor->Position(), NULL, bPlaySoundFirstPerson);
     }
     break;
-    case eIdleSound:
-    {
-        m_sounds.PlaySound("NightVisionIdleSnd", m_pActor->Position(), NULL, bPlaySoundFirstPerson, true);
+    case eIdleSound: { m_sounds.PlaySound("NightVisionIdleSnd", m_pActor->Position(), NULL, bPlaySoundFirstPerson, true);
     }
     break;
     case eBrokeSound: { m_sounds.PlaySound("NightVisionBrokenSnd", m_pActor->Position(), NULL, bPlaySoundFirstPerson);

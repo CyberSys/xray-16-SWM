@@ -47,8 +47,9 @@ public:
 
 protected:
     virtual bool use_parent_ai_locations() const = 0 { return !enabled(); }
+
 public:
-#ifdef DEBUG
+    //#ifdef DEBUG	--#SM+#--
     static CAttachableItem* m_dbgItem;
     static Fvector get_angle_offset()
     {
@@ -118,7 +119,7 @@ public:
         c.z += val;
         m_dbgItem->m_offset.c = c;
     }
-#endif
+    //#endif --#SM+#--
 };
 
 #include "attachable_item_inline.h"

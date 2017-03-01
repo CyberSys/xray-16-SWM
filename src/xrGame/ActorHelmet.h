@@ -20,6 +20,7 @@ public:
     shared_str m_BonesProtectionSect;
     shared_str m_NightVisionSect;
 
+    virtual bool DrawConditionBar() { return true; } //--#SM+#--
     virtual void OnMoveToSlot(const SInvItemPlace& previous_place);
     virtual void OnMoveToRuck(const SInvItemPlace& previous_place);
     virtual BOOL net_Spawn(CSE_Abstract* DC);

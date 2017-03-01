@@ -1,5 +1,6 @@
 #pragma once
 
+class CShellLauncher; //--#SM+#--
 class CSE_Abstract;
 class CPhysicItem;
 class NET_Packet;
@@ -38,8 +39,9 @@ public:
     CHUDState() { SetState(eHidden); }
     IC u32 GetNextState() const { return m_nextState; }
     IC u32 GetState() const { return m_hud_item_state; }
-    IC void SetState(u32 v)
+    IC void SetState(u32 v) //--#SM+#--
     {
+        OnBeforeStateSwitch(GetState(), v);
         m_hud_item_state = v;
         m_dw_curr_state_time = Device.dwTimeGlobal;
         ResetSubStateTime();
@@ -49,6 +51,12 @@ public:
     IC void ResetSubStateTime() { m_dw_curr_substate_time = Device.dwTimeGlobal; }
     virtual void SwitchState(u32 S) = 0;
     virtual void OnStateSwitch(u32 S) = 0;
+    virtual bool OnBeforeStateSwitch(u32 oldS, u32 newS) //--#SM+#--
+    {
+        if (oldS == newS)
+            return false;
+        return true;
+    };
 };
 
 class CHudItem : public CHUDState
@@ -129,9 +137,13 @@ public:
 
     virtual void UpdateXForm() = 0;
 
+    virtual bool UpdateCameraFromHUD(IGameObject* pCameraOwner, Fvector noise_dangle) { return false; } //--#SM+#--
+    virtual void UpdateActorTorchLightPosFromHUD(Fvector* pTorchPos) { ; } //--#SM+#--
+
     u32 PlayHUDMotion(const shared_str& M, BOOL bMixIn, CHudItem* W, u32 state);
     u32 PlayHUDMotion_noCB(const shared_str& M, BOOL bMixIn);
     void StopCurrentAnimWithoutCallback();
+    virtual bool OnBeforeMotionPlayed(const shared_str& sMotionName); //--#SM+#--
 
     IC void RenderHud(BOOL B) { m_huditem_flags.set(fl_renderhud, B); }
     IC BOOL RenderHud() { return m_huditem_flags.test(fl_renderhud); }
@@ -140,11 +152,17 @@ public:
     virtual void on_b_hud_detach();
     IC BOOL HudInertionEnabled() const { return m_huditem_flags.test(fl_inertion_enable); }
     IC BOOL HudInertionAllowed() const { return m_huditem_flags.test(fl_inertion_allow); }
+    virtual float GetInertionFactor() { return 1.f; }; //--#SM+#--
+    virtual float GetInertionPowerFactor() { return 1.f; }; //--#SM+#--
     virtual void render_hud_mode(){};
     virtual bool need_renderable() { return true; };
     virtual void render_item_3d_ui() {}
     virtual bool render_item_3d_ui_query() { return false; }
     virtual bool CheckCompatibility(CHudItem*) { return true; }
+
+    virtual void OnOwnedCameraMove(CCameraBase* pCam, float fOldYaw, float fOldPitch) { ; } //--#SM+#--
+    virtual bool IsMovementEffectorAllowed() { return true; } //--#SM+#--
+
 protected:
     IC void SetPending(BOOL H) { m_huditem_flags.set(fl_pending, H); }
     shared_str hud_sect;
@@ -156,6 +174,12 @@ protected:
     IC void EnableHudInertion(BOOL B) { m_huditem_flags.set(fl_inertion_enable, B); }
     IC void AllowHudInertion(BOOL B) { m_huditem_flags.set(fl_inertion_allow, B); }
     u32 m_animation_slot;
+
+    float m_fLastAnimStartTime; //--#SM+#--
+    bool m_bEnableMovAnimAtCrouch; //--#SM+#--
+
+    float m_fIdleSpeedCrouchFactor; //--#SM+#--
+    float m_fIdleSpeedNoAccelFactor; //--#SM+#--
 
     HUD_SOUND_COLLECTION m_sounds;
 
@@ -180,4 +204,6 @@ public:
     virtual void debug_draw_firedeps(){};
 
     virtual CHudItem* cast_hud_item() { return this; }
+
+    inline HUD_SOUND_COLLECTION* get_sound_collection() { return &m_sounds; }; //--#SM+#--
 };

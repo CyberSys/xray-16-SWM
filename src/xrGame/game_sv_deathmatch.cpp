@@ -501,11 +501,12 @@ bool game_sv_Deathmatch::checkForRoundStart()
         return false;
 
     if (m_bFastRestart ||
-        (AllPlayers_Ready() || (
+        (AllPlayers_Ready() ||
+            (
 #ifdef DEBUG
-                                   !g_sv_Wait_For_Players_Ready &&
+                !g_sv_Wait_For_Players_Ready &&
 #endif
-                                   (((Level().timeServer() - StartTime())) > u32(g_sv_Pending_Wait_Time)))))
+                (((Level().timeServer() - StartTime())) > u32(g_sv_Pending_Wait_Time)))))
     {
         if (!HasMapRotation() || !SwitchToNextMap())
         {
@@ -928,8 +929,7 @@ void game_sv_Deathmatch::CheckItem(game_PlayerState* ps, PIItem pItem, xr_vector
                 CSE_ALifeItemWeapon* pSWeapon = smart_cast<CSE_ALifeItemWeapon*>(get_entity_from_eid(pWeapon->ID()));
                 if (pSWeapon)
                 {
-                    pSWeapon->m_addon_flags.zero();
-                    pSWeapon->m_addon_flags.set(NewAddons, TRUE);
+                    pSWeapon->SetAddonsState(NewAddons); //--#SM+#--
                 }
 
                 NET_Packet P;

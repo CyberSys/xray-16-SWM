@@ -70,7 +70,7 @@ extern u64 g_qwStartGameTime;
 extern u64 g_qwEStartGameTime;
 
 ENGINE_API
-extern float psHUD_FOV;
+extern float psHUD_FOV_def; //--#SM+#--
 extern float psSqueezeVelocity;
 extern int psLUA_GCSTEP;
 
@@ -1452,6 +1452,9 @@ struct CCC_DbgBullets : public CCC_Integer
     }
 };
 
+//--#SM+ Begin#--
+#endif
+
 #include "attachable_item.h"
 #include "attachment_owner.h"
 #include "InventoryOwner.h"
@@ -1499,6 +1502,9 @@ public:
             "allows to change bind rotation and position offsets for attached item, <section_name> given as arguments");
     }
 };
+
+#ifdef DEBUG
+//--#SM+ End#--
 
 class CCC_Crash : public IConsole_Command
 {
@@ -1710,6 +1716,7 @@ class CCC_DBGDrawCashedClear : public IConsole_Command
 {
 public:
     CCC_DBGDrawCashedClear(LPCSTR N) : IConsole_Command(N) { bEmptyArgsHandled = true; }
+
 private:
     virtual void Execute(LPCSTR args) { DBG_CashedClear(); }
 };
@@ -1739,6 +1746,47 @@ public:
             ai_dbg::set_var(name, f);
         }
     }
+};
+
+// SM_TODO: Только в дебаге\девелопе, допилить ?
+// Отыграть худовую анимацию текущего оружия по её anm_ названию из конфига.
+#include "HudItem.h"
+class CCC_HudPlay : public IConsole_Command //--#SM+#--
+{
+public:
+    CCC_HudPlay(LPCSTR N) : IConsole_Command(N) { bEmptyArgsHandled = FALSE; };
+    virtual void Execute(LPCSTR args)
+    {
+        if (NULL == g_pGameLevel)
+        {
+            Msg("! There are no level(s) started");
+        }
+        else
+        {
+            if (Actor())
+            {
+                CInventoryOwner* iowner = Actor()->cast_inventory_owner();
+                PIItem active_item = iowner->m_inventory->ActiveItem();
+                if (active_item && active_item->cast_hud_item())
+                {
+                    u32 bMixIn = 0;
+                    string128 param1, param2;
+                    VERIFY(xr_strlen(args) < sizeof(string128));
+
+                    _GetItem(args, 0, param1, ' ');
+
+                    if (_GetItemCount(args, ' '))
+                    {
+                        _GetItem(args, 1, param2, ' ');
+                        sscanf(param2, "%u", &bMixIn);
+                    }
+
+                    active_item->cast_hud_item()->PlayHUDMotion(param1, bMixIn, NULL, NULL);
+                }
+            }
+        }
+    }
+    // 	virtual void	Save	(IWriter *F)	{;}
 };
 
 void CCC_RegisterCommands()
@@ -1790,10 +1838,12 @@ void CCC_RegisterCommands()
     CMD3(CCC_Mask, "hud_crosshair", &psHUD_Flags, HUD_CROSSHAIR);
     CMD3(CCC_Mask, "hud_crosshair_dist", &psHUD_Flags, HUD_CROSSHAIR_DIST);
 
-#ifdef DEBUG
-    CMD4(CCC_Float, "hud_fov", &psHUD_FOV, 0.1f, 1.0f);
+    //#ifdef DEBUG	//--#SM+#--
+    CMD4(CCC_Float, "hud_fov", &psHUD_FOV_def, 0.1f, 1.0f); //--#SM+#--
     CMD4(CCC_Float, "fov", &g_fov, 5.0f, 180.0f);
-#endif // DEBUG
+    //#endif // DEBUG
+
+    CMD1(CCC_HudPlay, "hud_play_anim"); //--#SM+#--
 
 // Demo
 #if 1 // ndef MASTER_GOLD

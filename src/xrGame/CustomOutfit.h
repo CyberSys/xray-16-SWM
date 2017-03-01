@@ -27,6 +27,7 @@ public:
 
     float HitThroughArmor(float hit_power, s16 element, float ap, bool& add_wound, ALife::EHitType hit_type);
 
+    virtual bool DrawConditionBar() { return true; } //--#SM+#--
     virtual void OnMoveToSlot(const SInvItemPlace& prev);
     virtual void OnMoveToRuck(const SInvItemPlace& previous_place);
     virtual void OnH_A_Chield();
