@@ -13,9 +13,10 @@
 #include "Weapon.h"
 #include "WeaponMagazinedWGrenade.h"
 #include "WeaponAmmo.h"
-#include "Silencer.h"
-#include "Scope.h"
-#include "GrenadeLauncher.h"
+//#include "Silencer.h"
+//#include "Scope.h"
+//#include "GrenadeLauncher.h"
+#include "WeaponAddon.h" //--#SM+#
 #include "trade_parameters.h"
 #include "ActorHelmet.h"
 #include "CustomOutfit.h"
@@ -392,9 +393,10 @@ void CUIActorMenu::InfoCurItem(CUICellItem* cell_item)
             }
         }
 
-        if (!current_item->CanTrade() || (!m_pPartnerInvOwner->trade_parameters().enabled(
-                                              CTradeParameters::action_buy(0), current_item->object().cNameSect()) &&
-                                             item_owner && item_owner == m_pActorInvOwner))
+        if (!current_item->CanTrade() ||
+            (!m_pPartnerInvOwner->trade_parameters().enabled(
+                 CTradeParameters::action_buy(0), current_item->object().cNameSect()) &&
+                item_owner && item_owner == m_pActorInvOwner))
             m_ItemInfo->InitItem(cell_item, compare_item, u32(-1), "st_no_trade_tip_1");
         else if (current_item->GetCondition() < m_pPartnerInvOwner->trade_parameters().buy_item_condition_factor)
             m_ItemInfo->InitItem(cell_item, compare_item, u32(-1), "st_no_trade_tip_2");
@@ -674,7 +676,7 @@ void CUIActorMenu::highlight_weapons_for_ammo(PIItem ammo_item, CUIDragDropListE
     } // for i
 }
 
-bool CUIActorMenu::highlight_addons_for_weapon(PIItem weapon_item, CUICellItem* ci)
+bool CUIActorMenu::highlight_addons_for_weapon(PIItem weapon_item, CUICellItem* ci) //--#SM+#--
 {
     PIItem item = (PIItem)ci->m_pData;
     if (!item)
@@ -682,42 +684,27 @@ bool CUIActorMenu::highlight_addons_for_weapon(PIItem weapon_item, CUICellItem* 
         return false;
     }
 
-    CScope* pScope = smart_cast<CScope*>(item);
-    if (pScope && weapon_item->CanAttach(pScope))
+    CWeapon* pWpn = weapon_item->cast_weapon();
+    if (pWpn != NULL)
     {
-        ci->m_select_armament = true;
-        return true;
+        CWeapon::EAddons iSlot = pWpn->GetAddonSlot(item->cast_game_object());
+        if (iSlot != CWeapon::eNotExist)
+        {
+            if (iSlot == CWeapon::eMagaz)
+                ci->m_select_armament_2 = true;
+            else
+                ci->m_select_armament = true;
+            return true;
+        }
     }
 
-    CSilencer* pSilencer = smart_cast<CSilencer*>(item);
-    if (pSilencer && weapon_item->CanAttach(pSilencer))
-    {
-        ci->m_select_armament = true;
-        return true;
-    }
-
-    CGrenadeLauncher* pGrenadeLauncher = smart_cast<CGrenadeLauncher*>(item);
-    if (pGrenadeLauncher && weapon_item->CanAttach(pGrenadeLauncher))
-    {
-        ci->m_select_armament = true;
-        return true;
-    }
     return false;
 }
 
-void CUIActorMenu::highlight_weapons_for_addon(PIItem addon_item, CUIDragDropListEx* ddlist)
+void CUIActorMenu::highlight_weapons_for_addon(PIItem addon_item, CUIDragDropListEx* ddlist) //--#SM+#--
 {
     VERIFY(addon_item);
     VERIFY(ddlist);
-
-    CScope* pScope = smart_cast<CScope*>(addon_item);
-    CSilencer* pSilencer = smart_cast<CSilencer*>(addon_item);
-    CGrenadeLauncher* pGrenadeLauncher = smart_cast<CGrenadeLauncher*>(addon_item);
-
-    if (!pScope && !pSilencer && !pGrenadeLauncher)
-    {
-        return;
-    }
 
     u32 const cnt = ddlist->ItemsCount();
     for (u32 i = 0; i < cnt; ++i)
@@ -734,17 +721,8 @@ void CUIActorMenu::highlight_weapons_for_addon(PIItem addon_item, CUIDragDropLis
             continue;
         }
 
-        if (pScope && weapon->CanAttach(pScope))
-        {
-            ci->m_select_armament = true;
-            continue;
-        }
-        if (pSilencer && weapon->CanAttach(pSilencer))
-        {
-            ci->m_select_armament = true;
-            continue;
-        }
-        if (pGrenadeLauncher && weapon->CanAttach(pGrenadeLauncher))
+        CWeapon::EAddons iSlot = weapon->GetAddonSlot(addon_item->cast_game_object());
+        if (iSlot != CWeapon::eNotExist)
         {
             ci->m_select_armament = true;
             continue;

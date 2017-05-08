@@ -1,6 +1,7 @@
 #include "stdafx.h"
 
 #include "Restrictions.h"
+#include "Level.h" //--#SM+#--
 #ifdef DEBUG
 #include "xrEngine/xr_ioconsole.h"
 #include "xrEngine/xr_ioc_cmd.h"
@@ -13,6 +14,11 @@ shared_str g_ranks[_RANK_COUNT];
 u32 get_rank(const shared_str& section)
 {
     int res = -1;
+
+    // SM_TODO: Эта функция используется НПС для сравнивания своего оружия <!> Придумай замену
+    if (IsGameTypeSingle())
+        res = 0; //--#SM+#-- MP Rank Fix for SP
+
     if (g_ranks[0].size() == 0)
     { // load
         string32 buff;

@@ -24,11 +24,13 @@ CUICellItem::CUICellItem()
     //-	m_mark				= NULL;
     m_upgrade = NULL;
     m_pConditionState = NULL;
+    m_pUtilityBar = NULL; //--#SM+#--
     m_drawn_frame = 0;
     SetAccelerator(0);
     m_b_destroy_childs = true;
     m_selected = false;
     m_select_armament = false;
+    m_select_armament_2 = false; //--#SM+#--
     m_cur_mark = false;
     m_has_upgrade = false;
 
@@ -72,6 +74,12 @@ void CUICellItem::init()
     AttachChild(m_pConditionState);
     CUIXmlInit::InitProgressBar(uiXml, "condition_progess_bar", 0, m_pConditionState);
     m_pConditionState->Show(true);
+
+    m_pUtilityBar = new CUIProgressBar(); //--#SM+#--
+    m_pUtilityBar->SetAutoDelete(true);
+    AttachChild(m_pUtilityBar);
+    CUIXmlInit::InitProgressBar(uiXml, "utility_progess_bar", 0, m_pUtilityBar);
+    m_pUtilityBar->Show(false);
 }
 
 void CUICellItem::Draw()
@@ -201,13 +209,11 @@ void CUICellItem::SetOwnerList(CUIDragDropListEx* p)
 
 void CUICellItem::UpdateConditionProgressBar()
 {
+    // Condition bar
     if (m_pParentList && m_pParentList->GetConditionProgBarVisibility())
     {
         PIItem itm = (PIItem)m_pData;
-        CWeapon* pWeapon = smart_cast<CWeapon*>(itm);
-        CCustomOutfit* pOutfit = smart_cast<CCustomOutfit*>(itm);
-        CHelmet* pHelmet = smart_cast<CHelmet*>(itm);
-        if (pWeapon || pOutfit || pHelmet)
+        if (itm->DrawConditionBar()) //--#SM+#--
         {
             Ivector2 itm_grid_size = GetGridSize();
             if (m_pParentList->GetVerticalPlacement())
@@ -225,6 +231,37 @@ void CUICellItem::UpdateConditionProgressBar()
         }
     }
     m_pConditionState->Show(false);
+
+    // Utility bar --#SM+#--
+    float fValue = 0.f;
+    bool bNeed2ShowUtilityBar = GetUtilityBarValue(fValue);
+
+    if (m_pParentList && bNeed2ShowUtilityBar == true && m_pParentList->GetConditionProgBarVisibility())
+    {
+        float x = 1.f;
+        float y = 1.f;
+
+        if (m_pConditionState->IsShown())
+        {
+            y = m_pConditionState->GetWndPos().y - m_pUtilityBar->GetHeight() - 2.f;
+        }
+        else
+        {
+            Ivector2 itm_grid_size = GetGridSize();
+            if (m_pParentList->GetVerticalPlacement())
+                std::swap(itm_grid_size.x, itm_grid_size.y);
+
+            Ivector2 cell_size = m_pParentList->CellSize();
+            Ivector2 cell_space = m_pParentList->CellsSpacing();
+            y = itm_grid_size.y * (cell_size.y + cell_space.y) - m_pConditionState->GetHeight() - 2.f;
+        }
+
+        m_pUtilityBar->SetWndPos(Fvector2().set(x, y));
+        m_pUtilityBar->SetProgressPos(iCeil(fValue * 13.0f) / 13.0f);
+        m_pUtilityBar->Show(true);
+        return;
+    }
+    m_pUtilityBar->Show(false);
 }
 
 bool CUICellItem::EqualTo(CUICellItem* itm)

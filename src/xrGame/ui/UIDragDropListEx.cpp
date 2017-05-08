@@ -856,6 +856,10 @@ void CUICellContainer::Draw()
                 {
                     select_mode = 3;
                 }
+                else if (ui_cell.m_item->m_select_armament_2) //--#SM+#--
+                {
+                    select_mode = 2;
+                }
             }
 
             Fvector2 tp;
@@ -907,6 +911,7 @@ void CUICellContainer::clear_select_armament()
         if (cell.m_item)
         {
             cell.m_item->m_select_armament = false;
+            cell.m_item->m_select_armament_2 = false; //--#SM+#--
         }
     }
 }

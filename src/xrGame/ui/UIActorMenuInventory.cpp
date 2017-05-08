@@ -16,9 +16,10 @@
 #include "UIMainIngameWnd.h"
 #include "UIGameCustom.h"
 #include "eatable_item_object.h"
-#include "Silencer.h"
-#include "Scope.h"
-#include "GrenadeLauncher.h"
+//#include "Silencer.h"
+//#include "Scope.h"
+//#include "GrenadeLauncher.h"
+#include "WeaponAddon.h" //--#SM+#-- ^
 #include "Artefact.h"
 #include "eatable_item.h"
 #include "BottleItem.h"
@@ -33,6 +34,7 @@
 #include "CustomDetector.h"
 #include "PDA.h"
 #include "actor_defs.h"
+#include "string_table.h" //--#SM+#--
 
 void move_item_from_to(u16 from_id, u16 to_id, u16 what_id);
 
@@ -875,7 +877,7 @@ void CUIActorMenu::PropertiesBoxForSlots(PIItem item, bool& b_show)
     }
 }
 
-void CUIActorMenu::PropertiesBoxForWeapon(CUICellItem* cell_item, PIItem item, bool& b_show)
+void CUIActorMenu::PropertiesBoxForWeapon(CUICellItem* cell_item, PIItem item, bool& b_show) //--#SM+#--
 {
     //отсоединение аддонов от вещи
     CWeapon* pWeapon = smart_cast<CWeapon*>(item);
@@ -884,69 +886,128 @@ void CUIActorMenu::PropertiesBoxForWeapon(CUICellItem* cell_item, PIItem item, b
         return;
     }
 
-    if (pWeapon->GrenadeLauncherAttachable())
+    // clang-format off
+	#define DEF_DetachAddon(DEF_fAttachable, DEF_fAttached, DEF_fAddonName, DEF_msg)	\
+		if ( DEF_fAttachable )															\
+		{																				\
+			if ( DEF_fAttached && pWeapon->CanDetach(DEF_fAddonName.c_str()) )			\
+			{																			\
+				shared_str str_1 = CStringTable().translate("st_detach_addon");			\
+				shared_str str_2 = CStringTable().translate(DEF_fAddonName);			\
+				str_1.printf("%s %s", str_1.c_str(), str_2.c_str());					\
+				m_UIPropertiesBox->AddItem( str_1.c_str(),  NULL, DEF_msg );			\
+				b_show			= true;													\
+			}																			\
+		}																				\
+
+	DEF_DetachAddon(pWeapon->GrenadeLauncherAttachable(),	pWeapon->IsGrenadeLauncherAttached(),	pWeapon->GetGrenadeLauncherName(),	INVENTORY_DETACH_GRENADE_LAUNCHER_ADDON);
+	DEF_DetachAddon(pWeapon->ScopeAttachable(),				pWeapon->IsScopeAttached(),				pWeapon->GetScopeName(),			INVENTORY_DETACH_SCOPE_ADDON);
+	DEF_DetachAddon(pWeapon->SilencerAttachable(),			pWeapon->IsSilencerAttached(),			pWeapon->GetSilencerName(),			INVENTORY_DETACH_SILENCER_ADDON);
+	DEF_DetachAddon(pWeapon->Special_1_Attachable(),		pWeapon->IsSpecial_1_Attached(),		pWeapon->GetSpecial_1_Name(),		INVENTORY_DETACH_SPECIAL_1_ADDON);
+	DEF_DetachAddon(pWeapon->Special_2_Attachable(),		pWeapon->IsSpecial_2_Attached(),		pWeapon->GetSpecial_2_Name(),		INVENTORY_DETACH_SPECIAL_2_ADDON);
+	DEF_DetachAddon(pWeapon->Special_3_Attachable(),		pWeapon->IsSpecial_3_Attached(),		pWeapon->GetSpecial_3_Name(),		INVENTORY_DETACH_SPECIAL_3_ADDON);
+	DEF_DetachAddon(pWeapon->Special_4_Attachable(),		pWeapon->IsSpecial_4_Attached(),		pWeapon->GetSpecial_4_Name(),		INVENTORY_DETACH_SPECIAL_4_ADDON);
+	DEF_DetachAddon(pWeapon->MagazineAttachable(),			pWeapon->IsMagazineAttached(),			pWeapon->GetMagazineName(),			INVENTORY_DETACH_MAGAZINE_ADDON);
+    // clang-format on
+
+    if (IsGameTypeSingle())
     {
-        if (pWeapon->IsGrenadeLauncherAttached())
+        // Разрядка основного магазина
+        if (smart_cast<CWeaponMagazined*>(pWeapon) && pWeapon->IsMagazineCanBeUnload(false))
         {
-            m_UIPropertiesBox->AddItem("st_detach_gl", NULL, INVENTORY_DETACH_GRENADE_LAUNCHER_ADDON);
-            b_show = true;
-        }
-        else
-        {
-        }
-    }
-    if (pWeapon->ScopeAttachable())
-    {
-        if (pWeapon->IsScopeAttached())
-        {
-            m_UIPropertiesBox->AddItem("st_detach_scope", NULL, INVENTORY_DETACH_SCOPE_ADDON);
-            b_show = true;
-        }
-        else
-        {
-        }
-    }
-    if (pWeapon->SilencerAttachable())
-    {
-        if (pWeapon->IsSilencerAttached())
-        {
-            m_UIPropertiesBox->AddItem("st_detach_silencer", NULL, INVENTORY_DETACH_SILENCER_ADDON);
-            b_show = true;
-        }
-        else
-        {
-        }
-    }
-    if (smart_cast<CWeaponMagazined*>(pWeapon) && IsGameTypeSingle())
-    {
-        bool b = (pWeapon->GetAmmoElapsed() != 0);
-        if (!b)
-        {
-            for (u32 i = 0; i < cell_item->ChildsCount(); ++i)
+            bool b = (pWeapon->GetMainAmmoElapsed() != 0);
+
+            if (!b)
             {
-                CWeaponMagazined* weap_mag = smart_cast<CWeaponMagazined*>((CWeapon*)cell_item->Child(i)->m_pData);
-                if (weap_mag && weap_mag->GetAmmoElapsed())
+                for (u32 i = 0; i < cell_item->ChildsCount(); ++i)
                 {
-                    b = true;
-                    break; // for
+                    CWeaponMagazined* weap_mag = smart_cast<CWeaponMagazined*>((CWeapon*)cell_item->Child(i)->m_pData);
+                    if (weap_mag && weap_mag->GetMainAmmoElapsed())
+                    {
+                        b = true;
+                        break; // for
+                    }
+                }
+            }
+            if (b)
+            {
+                m_UIPropertiesBox->AddItem("st_unload_magazine", NULL, INVENTORY_UNLOAD_MAGAZINE_MAIN);
+                b_show = true;
+
+                if (cell_item->ChildsCount())
+                {
+                    m_UIPropertiesBox->AddItem("st_unload_magazine_all", (void*)33, INVENTORY_UNLOAD_MAGAZINE_MAIN);
                 }
             }
         }
-        if (b)
+
+        // Разрядка вторичного магазина
+        if (smart_cast<CWeaponMagazined*>(pWeapon) && pWeapon->IsMagazineCanBeUnload(true))
         {
-            m_UIPropertiesBox->AddItem("st_unload_magazine", NULL, INVENTORY_UNLOAD_MAGAZINE);
-            b_show = true;
+            bool b = (pWeapon->GetGLAmmoElapsed() != 0);
+            if (!b)
+            {
+                for (u32 i = 0; i < cell_item->ChildsCount(); ++i)
+                {
+                    CWeaponMagazined* weap_mag = smart_cast<CWeaponMagazined*>((CWeapon*)cell_item->Child(i)->m_pData);
+                    if (weap_mag && weap_mag->GetGLAmmoElapsed())
+                    {
+                        b = true;
+                        break; // for
+                    }
+                }
+            }
+            if (b)
+            {
+                m_UIPropertiesBox->AddItem("st_unload_magazine_gl", NULL, INVENTORY_UNLOAD_MAGAZINE_SECOND);
+                b_show = true;
+
+                if (cell_item->ChildsCount())
+                {
+                    m_UIPropertiesBox->AddItem("st_unload_magazine_gl_all", (void*)33, INVENTORY_UNLOAD_MAGAZINE_SECOND);
+                }
+            }
+        }
+
+        // Быстрая зарядка магазина через инвентарь
+        if (smart_cast<CWeaponMagazined*>(pWeapon) && pWeapon->InventoryFastReloadAllowed(false))
+        {
+            bool                   b          = false;
+            xr_vector<shared_str>* vAmmoTypes = pWeapon->GetMainAmmoTypes();
+            CInventory*            pWpnInv    = pWeapon->m_pInventory;
+
+            if (pWpnInv != NULL)
+            {
+                for (u32 i = 0; i < vAmmoTypes->size(); ++i)
+                {
+                    shared_str   sAmmoName = vAmmoTypes->at(i);
+                    CWeaponAmmo* pAmmoBox  = smart_cast<CWeaponAmmo*>(pWpnInv->GetAny(sAmmoName.c_str()));
+                    if (pAmmoBox != NULL)
+                    {
+                        shared_str str_1 = CStringTable().translate("st_fload_ammo_to_mag");
+                        shared_str str_2 = CStringTable().translate(pAmmoBox->m_name.c_str());
+                        str_1.printf("%s %s", str_1.c_str(), str_2.c_str());
+
+                        void* pData = NULL;
+                        pData       = (void*)i; // x64 ?
+                        m_UIPropertiesBox->AddItem(str_1.c_str(), pData, INVENTORY_LOAD_MAGAZINE_FAST);
+                        b = true;
+                    }
+                }
+            }
+
+            if (b)
+            {
+                b_show = true;
+            }
         }
     }
 }
-#include "string_table.h"
-void CUIActorMenu::PropertiesBoxForAddon(PIItem item, bool& b_show)
+
+//#include "string_table.h" --#SM+#--
+void CUIActorMenu::PropertiesBoxForAddon(PIItem item, bool& b_show) //--#SM+#--
 {
     //присоединение аддонов к активному слоту (2 или 3)
-
-    CScope* pScope = smart_cast<CScope*>(item);
-    CSilencer* pSilencer = smart_cast<CSilencer*>(item);
-    CGrenadeLauncher* pGrenadeLauncher = smart_cast<CGrenadeLauncher*>(item);
     CInventory* inv = &m_pActorInvOwner->inventory();
 
     PIItem item_in_slot_2 = inv->ItemFromSlot(INV_SLOT_2);
@@ -955,75 +1016,23 @@ void CUIActorMenu::PropertiesBoxForAddon(PIItem item, bool& b_show)
     if (!item_in_slot_2 && !item_in_slot_3)
         return;
 
-    if (pScope)
+    if (item_in_slot_2 && item_in_slot_2->CanAttach(item))
     {
-        if (item_in_slot_2 && item_in_slot_2->CanAttach(pScope))
-        {
-            shared_str str = CStringTable().translate("st_attach_scope_to_pistol");
-            str.printf("%s %s", str.c_str(), item_in_slot_2->m_name.c_str());
-            m_UIPropertiesBox->AddItem(str.c_str(), (void*)item_in_slot_2, INVENTORY_ATTACH_ADDON);
-            //			m_UIPropertiesBox->AddItem( "st_attach_scope_to_pistol",  (void*)item_in_slot_2,
-            // INVENTORY_ATTACH_ADDON );
-            b_show = true;
-        }
-        if (item_in_slot_3 && item_in_slot_3->CanAttach(pScope))
-        {
-            shared_str str = CStringTable().translate("st_attach_scope_to_pistol");
-            str.printf("%s %s", str.c_str(), item_in_slot_3->m_name.c_str());
-            m_UIPropertiesBox->AddItem(str.c_str(), (void*)item_in_slot_3, INVENTORY_ATTACH_ADDON);
-            //			m_UIPropertiesBox->AddItem( "st_attach_scope_to_rifle",  (void*)item_in_slot_3,
-            // INVENTORY_ATTACH_ADDON );
-            b_show = true;
-        }
-        return;
-    }
+        shared_str str = CStringTable().translate("st_attach_addon_to_item");
 
-    if (pSilencer)
-    {
-        if (item_in_slot_2 && item_in_slot_2->CanAttach(pSilencer))
-        {
-            shared_str str = CStringTable().translate("st_attach_silencer_to_pistol");
-            str.printf("%s %s", str.c_str(), item_in_slot_2->m_name.c_str());
-            m_UIPropertiesBox->AddItem(str.c_str(), (void*)item_in_slot_2, INVENTORY_ATTACH_ADDON);
-            //			m_UIPropertiesBox->AddItem( "st_attach_silencer_to_pistol",  (void*)item_in_slot_2,
-            // INVENTORY_ATTACH_ADDON );
-            b_show = true;
-        }
-        if (item_in_slot_3 && item_in_slot_3->CanAttach(pSilencer))
-        {
-            shared_str str = CStringTable().translate("st_attach_silencer_to_pistol");
-            str.printf("%s %s", str.c_str(), item_in_slot_3->m_name.c_str());
-            m_UIPropertiesBox->AddItem(str.c_str(), (void*)item_in_slot_3, INVENTORY_ATTACH_ADDON);
-            //			m_UIPropertiesBox->AddItem( "st_attach_silencer_to_rifle",  (void*)item_in_slot_3,
-            // INVENTORY_ATTACH_ADDON );
-            b_show = true;
-        }
-        return;
+        str.printf("%s %s", str.c_str(), item_in_slot_2->m_name.c_str());
+        m_UIPropertiesBox->AddItem(str.c_str(), (void*)item_in_slot_2, INVENTORY_ATTACH_ADDON);
+        b_show = true;
     }
+    if (item_in_slot_3 && item_in_slot_3->CanAttach(item))
+    {
+        shared_str str = CStringTable().translate("st_attach_addon_to_item");
 
-    if (pGrenadeLauncher)
-    {
-        if (item_in_slot_2 && item_in_slot_2->CanAttach(pGrenadeLauncher))
-        {
-            shared_str str = CStringTable().translate("st_attach_gl_to_rifle");
-            str.printf("%s %s", str.c_str(), item_in_slot_2->m_name.c_str());
-            m_UIPropertiesBox->AddItem(str.c_str(), (void*)item_in_slot_2, INVENTORY_ATTACH_ADDON);
-            //			m_UIPropertiesBox->AddItem( "st_attach_gl_to_pistol",  (void*)item_in_slot_2,
-            //INVENTORY_ATTACH_ADDON
-            //);
-            b_show = true;
-        }
-        if (item_in_slot_3 && item_in_slot_3->CanAttach(pGrenadeLauncher))
-        {
-            shared_str str = CStringTable().translate("st_attach_gl_to_rifle");
-            str.printf("%s %s", str.c_str(), item_in_slot_3->m_name.c_str());
-            m_UIPropertiesBox->AddItem(str.c_str(), (void*)item_in_slot_3, INVENTORY_ATTACH_ADDON);
-            //			m_UIPropertiesBox->AddItem( "st_attach_gl_to_rifle",  (void*)item_in_slot_3,
-            //INVENTORY_ATTACH_ADDON
-            //);
-            b_show = true;
-        }
+        str.printf("%s %s", str.c_str(), item_in_slot_3->m_name.c_str());
+        m_UIPropertiesBox->AddItem(str.c_str(), (void*)item_in_slot_3, INVENTORY_ATTACH_ADDON);
+        b_show = true;
     }
+    return;
 }
 
 void CUIActorMenu::PropertiesBoxForUsing(PIItem item, bool& b_show)
@@ -1144,7 +1153,7 @@ void CUIActorMenu::ProcessPropertiesBoxClicked(CUIWindow* w, void* d)
         break;
     }
     case INVENTORY_DETACH_SCOPE_ADDON:
-        if (weapon)
+        if (weapon && weapon->IsScopeAttached()) //--#SM+#--
         {
             DetachAddon(weapon->GetScopeName().c_str());
             for (u32 i = 0; i < cell_item->ChildsCount(); ++i)
@@ -1160,7 +1169,7 @@ void CUIActorMenu::ProcessPropertiesBoxClicked(CUIWindow* w, void* d)
         }
         break;
     case INVENTORY_DETACH_SILENCER_ADDON:
-        if (weapon)
+        if (weapon && weapon->IsSilencerAttached()) //--#SM+#--
         {
             DetachAddon(weapon->GetSilencerName().c_str());
             for (u32 i = 0; i < cell_item->ChildsCount(); ++i)
@@ -1176,7 +1185,7 @@ void CUIActorMenu::ProcessPropertiesBoxClicked(CUIWindow* w, void* d)
         }
         break;
     case INVENTORY_DETACH_GRENADE_LAUNCHER_ADDON:
-        if (weapon)
+        if (weapon && weapon->IsGrenadeLauncherAttached()) //--#SM+#--
         {
             DetachAddon(weapon->GetGrenadeLauncherName().c_str());
             for (u32 i = 0; i < cell_item->ChildsCount(); ++i)
@@ -1191,31 +1200,154 @@ void CUIActorMenu::ProcessPropertiesBoxClicked(CUIWindow* w, void* d)
             }
         }
         break;
+    case INVENTORY_DETACH_MAGAZINE_ADDON: //--#SM+#--
+        if (weapon && weapon->IsMagazineAttached())
+        {
+            DetachAddon(weapon->GetMagazineName().c_str());
+            for (u32 i = 0; i < cell_item->ChildsCount(); ++i)
+            {
+                CUICellItem* child_itm  = cell_item->Child(i);
+                PIItem       child_iitm = (PIItem)(child_itm->m_pData);
+                CWeapon*     wpn        = smart_cast<CWeapon*>(child_iitm);
+                if (child_iitm && wpn)
+                {
+                    DetachAddon(wpn->GetMagazineName().c_str(), child_iitm);
+                }
+            }
+        }
+        break;
+    case INVENTORY_DETACH_SPECIAL_1_ADDON: //--#SM+#--
+        if (weapon && weapon->IsSpecial_1_Attached())
+        {
+            DetachAddon(weapon->GetSpecial_1_Name().c_str());
+            for (u32 i = 0; i < cell_item->ChildsCount(); ++i)
+            {
+                CUICellItem* child_itm  = cell_item->Child(i);
+                PIItem       child_iitm = (PIItem)(child_itm->m_pData);
+                CWeapon*     wpn        = smart_cast<CWeapon*>(child_iitm);
+                if (child_iitm && wpn)
+                {
+                    DetachAddon(wpn->GetSpecial_1_Name().c_str(), child_iitm);
+                }
+            }
+        }
+        break;
+    case INVENTORY_DETACH_SPECIAL_2_ADDON: //--#SM+#--
+        if (weapon && weapon->IsSpecial_2_Attached())
+        {
+            DetachAddon(weapon->GetSpecial_2_Name().c_str());
+            for (u32 i = 0; i < cell_item->ChildsCount(); ++i)
+            {
+                CUICellItem* child_itm  = cell_item->Child(i);
+                PIItem       child_iitm = (PIItem)(child_itm->m_pData);
+                CWeapon*     wpn        = smart_cast<CWeapon*>(child_iitm);
+                if (child_iitm && wpn)
+                {
+                    DetachAddon(wpn->GetSpecial_2_Name().c_str(), child_iitm);
+                }
+            }
+        }
+        break;
+    case INVENTORY_DETACH_SPECIAL_3_ADDON: //--#SM+#--
+        if (weapon && weapon->IsSpecial_3_Attached())
+        {
+            DetachAddon(weapon->GetSpecial_3_Name().c_str());
+            for (u32 i = 0; i < cell_item->ChildsCount(); ++i)
+            {
+                CUICellItem* child_itm  = cell_item->Child(i);
+                PIItem       child_iitm = (PIItem)(child_itm->m_pData);
+                CWeapon*     wpn        = smart_cast<CWeapon*>(child_iitm);
+                if (child_iitm && wpn)
+                {
+                    DetachAddon(wpn->GetSpecial_3_Name().c_str(), child_iitm);
+                }
+            }
+        }
+        break;
+    case INVENTORY_DETACH_SPECIAL_4_ADDON: //--#SM+#--
+        if (weapon && weapon->IsSpecial_4_Attached())
+        {
+            DetachAddon(weapon->GetSpecial_4_Name().c_str());
+            for (u32 i = 0; i < cell_item->ChildsCount(); ++i)
+            {
+                CUICellItem* child_itm  = cell_item->Child(i);
+                PIItem       child_iitm = (PIItem)(child_itm->m_pData);
+                CWeapon*     wpn        = smart_cast<CWeapon*>(child_iitm);
+                if (child_iitm && wpn)
+                {
+                    DetachAddon(wpn->GetSpecial_4_Name().c_str(), child_iitm);
+                }
+            }
+        }
+        break;
     case INVENTORY_RELOAD_MAGAZINE:
         if (weapon)
         {
             weapon->Action(kWPN_RELOAD, CMD_START);
         }
         break;
-    case INVENTORY_UNLOAD_MAGAZINE:
-    {
-        CWeaponMagazined* weap_mag = smart_cast<CWeaponMagazined*>((CWeapon*)cell_item->m_pData);
-        if (!weap_mag)
+    case INVENTORY_UNLOAD_MAGAZINE_MAIN: //--#SM+#--
+        if (true)
         {
-            break;
-        }
-        weap_mag->UnloadMagazine();
-        for (u32 i = 0; i < cell_item->ChildsCount(); ++i)
-        {
-            CUICellItem* child_itm = cell_item->Child(i);
-            CWeaponMagazined* child_weap_mag = smart_cast<CWeaponMagazined*>((CWeapon*)child_itm->m_pData);
-            if (child_weap_mag)
+            CWeaponMagazined* weap_mag = smart_cast<CWeaponMagazined*>((CWeapon*)cell_item->m_pData);
+            if (!weap_mag)
             {
-                child_weap_mag->UnloadMagazine();
+                break;
             }
+            weap_mag->UnloadMagazineMain();
+
+            void* d = m_UIPropertiesBox->GetClickedItem()->GetData();
+            if (d == (void*)33)
+            {
+                for (u32 i = 0; i < cell_item->ChildsCount(); ++i)
+                {
+                    CUICellItem*      child_itm      = cell_item->Child(i);
+                    CWeaponMagazined* child_weap_mag = smart_cast<CWeaponMagazined*>((CWeapon*)child_itm->m_pData);
+                    if (child_weap_mag && child_weap_mag->IsMagazineCanBeUnload(false))
+                    {
+                        child_weap_mag->UnloadMagazineMain();
+                    }
+                }
+            }
+            remake_cell_item(cell_item);
         }
         break;
-    }
+    case INVENTORY_UNLOAD_MAGAZINE_SECOND: //--#SM+#--
+        if (true)
+        {
+            CWeaponMagazined* weap_mag = smart_cast<CWeaponMagazined*>((CWeapon*)cell_item->m_pData);
+            if (!weap_mag)
+            {
+                break;
+            }
+            weap_mag->UnloadMagazineGL();
+
+            void* d = m_UIPropertiesBox->GetClickedItem()->GetData();
+            if (d == (void*)33)
+            {
+                for (u32 i = 0; i < cell_item->ChildsCount(); ++i)
+                {
+                    CUICellItem*      child_itm      = cell_item->Child(i);
+                    CWeaponMagazined* child_weap_mag = smart_cast<CWeaponMagazined*>((CWeapon*)child_itm->m_pData);
+                    if (child_weap_mag && child_weap_mag->IsMagazineCanBeUnload(true))
+                    {
+                        child_weap_mag->UnloadMagazineGL();
+                    }
+                }
+            }
+            remake_cell_item(cell_item);
+        }
+        break;
+    case INVENTORY_LOAD_MAGAZINE_FAST: //--#SM+#--
+        if (true)
+        {
+            u8                iAmmoType = (u8)m_UIPropertiesBox->GetClickedItem()->GetData();
+            CWeaponMagazined* weap_mag  = smart_cast<CWeaponMagazined*>((CWeapon*)cell_item->m_pData);
+            if (weap_mag)
+                weap_mag->InventoryFastReload(iAmmoType, false);
+            remake_cell_item(cell_item);
+        }
+        break;
     case INVENTORY_REPAIR:
     {
         TryRepairItem(this, 0);
@@ -1235,6 +1367,7 @@ void CUIActorMenu::ProcessPropertiesBoxClicked(CUIWindow* w, void* d)
     SetCurrentItem(NULL);
     UpdateItemsPlace();
     UpdateConditionProgressBars();
+    cell_item->UpdateConditionProgressBar(); //--#SM+#--
 } // ProcessPropertiesBoxClicked
 
 void CUIActorMenu::UpdateOutfit()

@@ -155,20 +155,40 @@ void CUIAmmoCellItem::UpdateItemText()
     }
 }
 
-CUIWeaponCellItem::CUIWeaponCellItem(CWeapon* itm) : inherited(itm)
+CUIWeaponCellItem::CUIWeaponCellItem(CWeapon* itm) : inherited(itm) //--#SM+#--
 {
     m_addons[eSilencer] = NULL;
     m_addons[eScope] = NULL;
     m_addons[eLauncher] = NULL;
+    m_addons[eMagazine] = NULL;
+    m_addons[eSpecial_1] = NULL;
+    m_addons[eSpecial_2] = NULL;
+    m_addons[eSpecial_3] = NULL;
+    m_addons[eSpecial_4] = NULL;
 
-    if (itm->SilencerAttachable())
+    if (itm->IsSilencerAttached())
         m_addon_offset[eSilencer].set(object()->GetSilencerX(), object()->GetSilencerY());
 
-    if (itm->ScopeAttachable())
+    if (itm->IsScopeAttached())
         m_addon_offset[eScope].set(object()->GetScopeX(), object()->GetScopeY());
 
-    if (itm->GrenadeLauncherAttachable())
+    if (itm->IsGrenadeLauncherAttached())
         m_addon_offset[eLauncher].set(object()->GetGrenadeLauncherX(), object()->GetGrenadeLauncherY());
+
+    if (itm->IsMagazineAttached())
+        m_addon_offset[eMagazine].set(object()->GetMagazineX(), object()->GetMagazineY());
+
+    if (itm->IsSpecial_1_Attached())
+        m_addon_offset[eSpecial_1].set(object()->GetSpecial_1_X(), object()->GetSpecial_1_Y());
+
+    if (itm->IsSpecial_2_Attached())
+        m_addon_offset[eSpecial_2].set(object()->GetSpecial_2_X(), object()->GetSpecial_2_Y());
+
+    if (itm->IsSpecial_3_Attached())
+        m_addon_offset[eSpecial_3].set(object()->GetSpecial_3_X(), object()->GetSpecial_3_Y());
+
+    if (itm->IsSpecial_4_Attached())
+        m_addon_offset[eSpecial_4].set(object()->GetSpecial_4_X(), object()->GetSpecial_4_Y());
 }
 
 #include "Common/object_broker.h"
@@ -178,6 +198,31 @@ bool CUIWeaponCellItem::is_silencer() { return object()->SilencerAttachable() &&
 bool CUIWeaponCellItem::is_launcher()
 {
     return object()->GrenadeLauncherAttachable() && object()->IsGrenadeLauncherAttached();
+}
+
+bool CUIWeaponCellItem::is_magazine() //--#SM+#--
+{
+    return object()->MagazineAttachable() && object()->IsMagazineAttached();
+}
+
+bool CUIWeaponCellItem::is_special_1() //--#SM+#--
+{
+    return object()->Special_1_Attachable() && object()->IsSpecial_1_Attached();
+}
+
+bool CUIWeaponCellItem::is_special_2() //--#SM+#--
+{
+    return object()->Special_2_Attachable() && object()->IsSpecial_2_Attached();
+}
+
+bool CUIWeaponCellItem::is_special_3() //--#SM+#--
+{
+    return object()->Special_3_Attachable() && object()->IsSpecial_3_Attached();
+}
+
+bool CUIWeaponCellItem::is_special_4() //--#SM+#--
+{
+    return object()->Special_4_Attachable() && object()->IsSpecial_4_Attached();
 }
 
 void CUIWeaponCellItem::CreateIcon(eAddonType t)
@@ -200,16 +245,31 @@ void CUIWeaponCellItem::DestroyIcon(eAddonType t)
 }
 
 CUIStatic* CUIWeaponCellItem::GetIcon(eAddonType t) { return m_addons[t]; }
-void CUIWeaponCellItem::RefreshOffset()
+void CUIWeaponCellItem::RefreshOffset() //--#SM+#--
 {
-    if (object()->SilencerAttachable())
+    if (object()->IsSilencerAttached())
         m_addon_offset[eSilencer].set(object()->GetSilencerX(), object()->GetSilencerY());
 
-    if (object()->ScopeAttachable())
+    if (object()->IsScopeAttached())
         m_addon_offset[eScope].set(object()->GetScopeX(), object()->GetScopeY());
 
-    if (object()->GrenadeLauncherAttachable())
+    if (object()->IsGrenadeLauncherAttached())
         m_addon_offset[eLauncher].set(object()->GetGrenadeLauncherX(), object()->GetGrenadeLauncherY());
+
+    if (object()->IsMagazineAttached())
+        m_addon_offset[eMagazine].set(object()->GetMagazineX(), object()->GetMagazineY());
+
+    if (object()->IsSpecial_1_Attached())
+        m_addon_offset[eSpecial_1].set(object()->GetSpecial_1_X(), object()->GetSpecial_1_Y());
+
+    if (object()->IsSpecial_2_Attached())
+        m_addon_offset[eSpecial_2].set(object()->GetSpecial_2_X(), object()->GetSpecial_2_Y());
+
+    if (object()->IsSpecial_3_Attached())
+        m_addon_offset[eSpecial_3].set(object()->GetSpecial_3_X(), object()->GetSpecial_3_Y());
+
+    if (object()->IsSpecial_4_Attached())
+        m_addon_offset[eSpecial_4].set(object()->GetSpecial_4_X(), object()->GetSpecial_4_Y());
 }
 
 void CUIWeaponCellItem::Draw()
@@ -281,6 +341,96 @@ void CUIWeaponCellItem::Update()
                 DestroyIcon(eLauncher);
         }
     }
+
+    if (object()->MagazineAttachable())
+    { //--#SM+#--
+        if (object()->IsMagazineAttached())
+        {
+            if (!GetIcon(eMagazine) || bForceReInitAddons || object()->GetState() == CWeapon::eSwitchMag)
+            {
+                CreateIcon(eMagazine);
+                RefreshOffset();
+                InitAddon(GetIcon(eMagazine), *object()->GetMagazineName(), m_addon_offset[eMagazine], Heading());
+            }
+        }
+        else
+        {
+            if (m_addons[eMagazine])
+                DestroyIcon(eMagazine);
+        }
+    }
+
+    if (object()->Special_1_Attachable())
+    { //--#SM+#--
+        if (object()->IsSpecial_1_Attached())
+        {
+            if (!GetIcon(eSpecial_1) || bForceReInitAddons)
+            {
+                CreateIcon(eSpecial_1);
+                RefreshOffset();
+                InitAddon(GetIcon(eSpecial_1), *object()->GetSpecial_1_Name(), m_addon_offset[eSpecial_1], Heading());
+            }
+        }
+        else
+        {
+            if (m_addons[eSpecial_1])
+                DestroyIcon(eSpecial_1);
+        }
+    }
+
+    if (object()->Special_2_Attachable())
+    { //--#SM+#--
+        if (object()->IsSpecial_2_Attached())
+        {
+            if (!GetIcon(eSpecial_2) || bForceReInitAddons)
+            {
+                CreateIcon(eSpecial_2);
+                RefreshOffset();
+                InitAddon(GetIcon(eSpecial_2), *object()->GetSpecial_2_Name(), m_addon_offset[eSpecial_2], Heading());
+            }
+        }
+        else
+        {
+            if (m_addons[eSpecial_2])
+                DestroyIcon(eSpecial_2);
+        }
+    }
+
+    if (object()->Special_3_Attachable())
+    { //--#SM+#--
+        if (object()->IsSpecial_3_Attached())
+        {
+            if (!GetIcon(eSpecial_3) || bForceReInitAddons)
+            {
+                CreateIcon(eSpecial_3);
+                RefreshOffset();
+                InitAddon(GetIcon(eSpecial_3), *object()->GetSpecial_3_Name(), m_addon_offset[eSpecial_3], Heading());
+            }
+        }
+        else
+        {
+            if (m_addons[eSpecial_3])
+                DestroyIcon(eSpecial_3);
+        }
+    }
+
+    if (object()->Special_4_Attachable())
+    { //--#SM+#--
+        if (object()->IsSpecial_4_Attached())
+        {
+            if (!GetIcon(eSpecial_4) || bForceReInitAddons)
+            {
+                CreateIcon(eSpecial_4);
+                RefreshOffset();
+                InitAddon(GetIcon(eSpecial_4), *object()->GetSpecial_4_Name(), m_addon_offset[eSpecial_4], Heading());
+            }
+        }
+        else
+        {
+            if (m_addons[eSpecial_4])
+                DestroyIcon(eSpecial_4);
+        }
+    }
 }
 
 void CUIWeaponCellItem::SetTextureColor(u32 color)
@@ -298,6 +448,26 @@ void CUIWeaponCellItem::SetTextureColor(u32 color)
     {
         m_addons[eLauncher]->SetTextureColor(color);
     }
+    if (m_addons[eMagazine]) //--#SM+#--
+    {
+        m_addons[eMagazine]->SetTextureColor(color);
+    }
+    if (m_addons[eSpecial_1]) //--#SM+#--
+    {
+        m_addons[eSpecial_1]->SetTextureColor(color);
+    }
+    if (m_addons[eSpecial_2]) //--#SM+#--
+    {
+        m_addons[eSpecial_2]->SetTextureColor(color);
+    }
+    if (m_addons[eSpecial_3]) //--#SM+#--
+    {
+        m_addons[eSpecial_3]->SetTextureColor(color);
+    }
+    if (m_addons[eSpecial_4]) //--#SM+#--
+    {
+        m_addons[eSpecial_4]->SetTextureColor(color);
+    }
 }
 
 void CUIWeaponCellItem::OnAfterChild(CUIDragDropListEx* parent_list)
@@ -312,6 +482,26 @@ void CUIWeaponCellItem::OnAfterChild(CUIDragDropListEx* parent_list)
 
     if (is_launcher() && GetIcon(eLauncher))
         InitAddon(GetIcon(eLauncher), *object()->GetGrenadeLauncherName(), m_addon_offset[eLauncher],
+            parent_list->GetVerticalPlacement());
+
+    if (is_magazine() && GetIcon(eMagazine)) //--#SM+#--
+        InitAddon(GetIcon(eMagazine), *object()->GetMagazineName(), m_addon_offset[eMagazine],
+            parent_list->GetVerticalPlacement());
+
+    if (is_special_1() && GetIcon(eSpecial_1)) //--#SM+#--
+        InitAddon(GetIcon(eSpecial_1), *object()->GetSpecial_1_Name(), m_addon_offset[eSpecial_1],
+            parent_list->GetVerticalPlacement());
+
+    if (is_special_2() && GetIcon(eSpecial_2)) //--#SM+#--
+        InitAddon(GetIcon(eSpecial_2), *object()->GetSpecial_2_Name(), m_addon_offset[eSpecial_2],
+            parent_list->GetVerticalPlacement());
+
+    if (is_special_3() && GetIcon(eSpecial_3)) //--#SM+#--
+        InitAddon(GetIcon(eSpecial_3), *object()->GetSpecial_3_Name(), m_addon_offset[eSpecial_3],
+            parent_list->GetVerticalPlacement());
+
+    if (is_special_4() && GetIcon(eSpecial_4)) //--#SM+#--
+        InitAddon(GetIcon(eSpecial_4), *object()->GetSpecial_4_Name(), m_addon_offset[eSpecial_4],
             parent_list->GetVerticalPlacement());
 }
 
@@ -331,18 +521,27 @@ void CUIWeaponCellItem::InitAddon(CUIStatic* s, LPCSTR section, Fvector2 addon_o
         base_scale.y = GetHeight() / (INV_GRID_HEIGHTF * m_grid_size.y);
     }
     Fvector2 cell_size;
-    cell_size.x = pSettings->r_u32(section, "inv_grid_width") * INV_GRID_WIDTHF;
-    cell_size.y = pSettings->r_u32(section, "inv_grid_height") * INV_GRID_HEIGHTF;
+    cell_size.x = READ_IF_EXISTS(pSettings, r_u32, section, "inv_grid_inst_width",
+        READ_IF_EXISTS(pSettings, r_u32, section, "inv_grid_width", 0)); //--#SM+#--
+    cell_size.x *= INV_GRID_WIDTHF;
 
-    tex_rect.x1 = pSettings->r_u32(section, "inv_grid_x") * INV_GRID_WIDTHF;
-    tex_rect.y1 = pSettings->r_u32(section, "inv_grid_y") * INV_GRID_HEIGHTF;
+    cell_size.y = READ_IF_EXISTS(pSettings, r_u32, section, "inv_grid_inst_height",
+        READ_IF_EXISTS(pSettings, r_u32, section, "inv_grid_height", 0)); //--#SM+#--
+    cell_size.y *= INV_GRID_HEIGHTF;
 
+    tex_rect.x1 = READ_IF_EXISTS(pSettings, r_u32, section, "inv_grid_inst_x",
+        READ_IF_EXISTS(pSettings, r_u32, section, "inv_grid_x", 0)); //--#SM+#--
+    tex_rect.x1 *= INV_GRID_WIDTHF;
+
+    tex_rect.y1 = READ_IF_EXISTS(pSettings, r_u32, section, "inv_grid_inst_y",
+        READ_IF_EXISTS(pSettings, r_u32, section, "inv_grid_y", 0)); //--#SM+#--
+    tex_rect.y1 *= INV_GRID_HEIGHTF;
     tex_rect.rb.add(tex_rect.lt, cell_size);
 
     cell_size.mul(base_scale);
 
     if (b_rotate)
-    {
+    { // SM_TODO: Fix streching \ зафикси растяжку текстуры
         s->SetWndSize(Fvector2().set(cell_size.y, cell_size.x));
         Fvector2 new_offset;
         new_offset.x = addon_offset.y * base_scale.x;
@@ -405,10 +604,61 @@ CUIDragItem* CUIWeaponCellItem::CreateDragItem()
         s->SetTextureColor(i->wnd()->GetTextureColor());
         i->wnd()->AttachChild(s);
     }
+
+    if (GetIcon(eMagazine)) //--#SM+#--
+    {
+        s = new CUIStatic();
+        s->SetAutoDelete(true);
+        s->SetShader(InventoryUtilities::GetEquipmentIconsShader());
+        InitAddon(s, *object()->GetMagazineName(), m_addon_offset[eMagazine], false);
+        s->SetTextureColor(i->wnd()->GetTextureColor());
+        i->wnd()->AttachChild(s);
+    }
+
+    if (GetIcon(eSpecial_1)) //--#SM+#--
+    {
+        s = new CUIStatic();
+        s->SetAutoDelete(true);
+        s->SetShader(InventoryUtilities::GetEquipmentIconsShader());
+        InitAddon(s, *object()->GetSpecial_1_Name(), m_addon_offset[eSpecial_1], false);
+        s->SetTextureColor(i->wnd()->GetTextureColor());
+        i->wnd()->AttachChild(s);
+    }
+
+    if (GetIcon(eSpecial_2)) //--#SM+#--
+    {
+        s = new CUIStatic();
+        s->SetAutoDelete(true);
+        s->SetShader(InventoryUtilities::GetEquipmentIconsShader());
+        InitAddon(s, *object()->GetSpecial_2_Name(), m_addon_offset[eSpecial_2], false);
+        s->SetTextureColor(i->wnd()->GetTextureColor());
+        i->wnd()->AttachChild(s);
+    }
+
+    if (GetIcon(eSpecial_3)) //--#SM+#--
+    {
+        s = new CUIStatic();
+        s->SetAutoDelete(true);
+        s->SetShader(InventoryUtilities::GetEquipmentIconsShader());
+        InitAddon(s, *object()->GetSpecial_3_Name(), m_addon_offset[eSpecial_3], false);
+        s->SetTextureColor(i->wnd()->GetTextureColor());
+        i->wnd()->AttachChild(s);
+    }
+
+    if (GetIcon(eSpecial_4)) //--#SM+#--
+    {
+        s = new CUIStatic();
+        s->SetAutoDelete(true);
+        s->SetShader(InventoryUtilities::GetEquipmentIconsShader());
+        InitAddon(s, *object()->GetSpecial_4_Name(), m_addon_offset[eSpecial_4], false);
+        s->SetTextureColor(i->wnd()->GetTextureColor());
+        i->wnd()->AttachChild(s);
+    }
+
     return i;
 }
 
-bool CUIWeaponCellItem::EqualTo(CUICellItem* itm)
+bool CUIWeaponCellItem::EqualTo(CUICellItem* itm) //--#SM+#--
 {
     if (!inherited::EqualTo(itm))
         return false;
@@ -417,21 +667,53 @@ bool CUIWeaponCellItem::EqualTo(CUICellItem* itm)
     if (!ci)
         return false;
 
-    //	bool b_addons					= ( (object()->GetAddonsState() == ci->object()->GetAddonsState()) );
-    if (object()->GetAddonsState() != ci->object()->GetAddonsState())
+    CWeapon* pWpn = object()->cast_weapon();
+    CWeapon* pWpn2 = ci->object()->cast_weapon();
+
+    if (pWpn != NULL && pWpn2 != NULL && pWpn->IsMagazine() && pWpn2->IsMagazine())
     {
+        return (pWpn->GetMainMagSize() == pWpn2->GetMainMagSize()) &&
+            (pWpn->GetMainAmmoElapsed() == pWpn2->GetMainAmmoElapsed());
+    }
+
+    if (!object()->IsAddonsEqual(ci->object()))
         return false;
-    }
-    if (this->is_scope() && ci->is_scope())
-    {
-        if (object()->GetScopeName() != ci->object()->GetScopeName())
-        {
-            return false;
-        }
-    }
-    //	bool b_place					= ( (object()->m_eItemCurrPlace == ci->object()->m_eItemCurrPlace) );
 
     return true;
+}
+
+void CUIWeaponCellItem::UpdateItemText() //--#SM+#--
+{
+    /*
+    CWeapon* pWpn = object()->cast_weapon();
+    if (pWpn && pWpn->IsMagazine())
+    {
+    m_text->Show( false );
+    if ( !m_custom_draw )
+    {
+    string32			str;
+    xr_sprintf			(str, " [%d]", pWpn->GetMainAmmoElapsed());
+    m_text->TextItemControl()->SetText(str);
+    m_text->Show		(true);
+    }
+    return;
+    }
+    */
+    inherited::UpdateItemText();
+}
+
+bool CUIWeaponCellItem::GetUtilityBarValue(float& fRetVal) //--#SM+#--
+{
+    // return inherited::GetUtilityBarValue(fRetVal);
+
+    CWeapon* pWpn = object()->cast_weapon();
+    if (pWpn && pWpn->IsMagazine())
+    {
+        fRetVal = (float)pWpn->GetMainAmmoElapsed() / (float)pWpn->GetMainMagSize();
+        return true;
+    }
+
+    return false;
 }
 
 CBuyItemCustomDrawCell::CBuyItemCustomDrawCell(LPCSTR str, CGameFont* pFont)

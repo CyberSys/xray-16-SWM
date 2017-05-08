@@ -32,6 +32,7 @@ protected:
 
     CUIDragDropListEx* m_pParentList;
     CUIProgressBar* m_pConditionState;
+    CUIProgressBar* m_pUtilityBar; //--#SM+#--
     Ivector2 m_grid_size;
     ICustomDrawCellItem* m_custom_draw;
     int m_accelerator;
@@ -71,6 +72,8 @@ public:
     CUIStatic& get_ui_text() const { return *m_text; }
     virtual bool IsHelper() { return false; }
     virtual void SetIsHelper(bool is_helper) { ; }
+    virtual bool GetUtilityBarValue(float& fRetVal) { return false; } //--#SM+#--
+
 public:
     static CUICellItem* m_mouse_selected_item;
     void* m_pData;
@@ -79,6 +82,7 @@ public:
     bool m_b_destroy_childs;
     bool m_selected;
     bool m_select_armament;
+    bool m_select_armament_2; //--#SM+#--
     bool m_cur_mark;
     bool m_has_upgrade;
 };
