@@ -68,7 +68,7 @@ void InitSettings()
 #ifdef DEBUG
     Msg("Updated path to system.ltx is %s", fname);
 #endif
-    pSettings = new CInifile(fname, TRUE);
+    pSettings = new CInifile(fname, FALSE, TRUE, FALSE);   //--#SM+#-- Разрешаем запись в system.ltx [allow system.ltx in-game editing]
     CHECK_OR_EXIT(pSettings->section_count(),
         make_string("Cannot find file %s.\nReinstalling application may fix this problem.", fname));
     xr_auth_strings_t ignoredPaths, checkedPaths;

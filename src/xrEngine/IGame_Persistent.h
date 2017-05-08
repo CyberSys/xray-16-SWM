@@ -7,6 +7,7 @@
 #include "Environment.h"
 #include "IGame_ObjectPool.h"
 #endif
+#include "ShadersExternalData.h" //--#SM+#--
 
 class IRenderVisual;
 class IMainMenu;
@@ -90,6 +91,8 @@ public:
     IMainMenu* m_pMainMenu;
 
     ParticleStatistics stats;
+
+    ShadersExternalData* m_pGShaderConstants; //--#SM+#--
 
     const ParticleStatistics& GetStats() { return stats; }
     virtual bool OnRenderPPUI_query() { return FALSE; }; // should return true if we want to have second function called

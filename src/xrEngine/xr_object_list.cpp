@@ -277,6 +277,16 @@ void CObjectList::Update(bool bForce)
             for (IGameObject** i = b; i != e; ++i)
                 SingleUpdate(*i);
 
+            //--#SM+#-- PostUpdateCL для всех клиентских объектов [for crowed and non-crowed]
+            for (u32 i = 0; i < objects_active.size(); i++)
+            {
+                objects_active[i]->PostUpdateCL(false);
+            }
+            for (u32 i = 0; i < objects_sleeping.size(); i++)
+            {
+                objects_sleeping[i]->PostUpdateCL(true);
+            }
+
             stats.Update.End();
         }
     }
