@@ -167,7 +167,8 @@ public:
 };
 
 // Main configuration file
-extern XRCORE_API CInifile const* pSettings;
+
+extern XRCORE_API CInifile* pSettings;  //--#SM+#-- Убираем const - разрешаем запись в system.ltx [allow system.ltx in-game editing]
 extern XRCORE_API CInifile const* pSettingsAuth;
 
 #endif //__XR_INI_H__
