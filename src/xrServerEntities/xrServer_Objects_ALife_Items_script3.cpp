@@ -3,7 +3,7 @@
 //	Created 	: 19.09.2002
 //  Modified 	: 04.06.2003
 //	Author		: Dmitriy Iassenev
-//	Description : Server items for ALife simulator, script export, the second part
+//	Description : Server items for ALife simulator, script export, the third part
 ////////////////////////////////////////////////////////////////////////////
 
 #include "pch_script.h"

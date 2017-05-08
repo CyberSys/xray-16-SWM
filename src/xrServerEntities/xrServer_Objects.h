@@ -164,8 +164,9 @@
 //       CSE_ALifeTraderAbstract		added property m_deadbody_can_take, m_deadbody_closed
 // 127	 CSE_ALifeObjectClimable		added material;
 // 128	 CSE_ALifeObjectClimable		added can_fire in smart covers;
+// 129	 CSE_ALifeItemWeapon			refactoring of weapon classes;	//--#SM+#--
 //------------------------------------------------------------------------------
-#define SPAWN_VERSION u16(128)
+#define SPAWN_VERSION u16(129) //--#SM+#--
 
 class CSE_Shape : public IServerEntityShape, public CShapeData
 {
@@ -232,6 +233,7 @@ public:
     virtual void set_sorce_id(u16 si) { source_id = si; }
     virtual u16 get_source_id() { return source_id; }
     virtual CSE_Abstract* cast_abstract() { return 0; }
+
 protected:
     virtual void data_load(NET_Packet& tNetPacket);
     virtual void data_save(NET_Packet& tNetPacket);

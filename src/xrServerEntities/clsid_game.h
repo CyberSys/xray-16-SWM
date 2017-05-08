@@ -106,6 +106,7 @@
 #define CLSID_OBJECT_W_SCOPE MK_CLSID('W', '_', 'S', 'C', 'O', 'P', 'E', ' ')
 #define CLSID_OBJECT_W_SILENCER MK_CLSID('W', '_', 'S', 'I', 'L', 'E', 'N', 'C')
 #define CLSID_OBJECT_W_GLAUNCHER MK_CLSID('W', '_', 'G', 'L', 'A', 'U', 'N', 'C')
+#define CLSID_OBJECT_W_ADDON MK_CLSID('W', '_', 'A', 'D', 'D', 'O', 'N', ' ') //--#SM+#--
 
 // Modifiers
 #define CLSID_OBJECT_M_QDAMAGE MK_CLSID('O', '_', 'Q', 'D', 'M', 'G', ' ', ' ')
@@ -190,6 +191,9 @@
 #define CLSID_OBJECT_G_RPG7 MK_CLSID('G', '_', 'R', 'P', 'G', '7', ' ', ' ')
 #define CLSID_GRENADE_RGD5 MK_CLSID('G', '_', 'R', 'G', 'D', '5', ' ', ' ')
 #define CLSID_OBJECT_G_FAKE MK_CLSID('G', '_', 'F', 'A', 'K', 'E', ' ', ' ')
+
+// Bullet Shell --#SM+#--
+#define CLSID_WPN_SHELL MK_CLSID('W', '_', 'S', 'H', 'E', 'L', 'L', ' ')
 
 //---------------------------------------------------------------------------------
 #define CLSID_OBJECT_PLAYERS_BAG MK_CLSID('M', 'P', '_', 'P', 'L', 'B', 'A', 'G')

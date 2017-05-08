@@ -97,9 +97,13 @@
 #include "weaponRG6.h"
 #include "WeaponStatMgun.h"
 
-#include "scope.h"
-#include "silencer.h"
-#include "grenadelauncher.h"
+//--#SM+# Begin--
+//#include "scope.h"
+//#include "silencer.h"
+//#include "grenadelauncher.h"
+#include "WeaponAddon.h"
+#include "CustomShell.h"
+//--#SM+# End--
 
 #include "bolt.h"
 #include "medkit.h"
@@ -311,6 +315,7 @@ void CObjectFactory::register_classes()
     ADD(CScope, CSE_ALifeItem, CLSID_OBJECT_W_SCOPE, "wpn_scope");
     ADD(CSilencer, CSE_ALifeItem, CLSID_OBJECT_W_SILENCER, "wpn_silencer");
     ADD(CGrenadeLauncher, CSE_ALifeItem, CLSID_OBJECT_W_GLAUNCHER, "wpn_grenade_launcher");
+    ADD(CWeaponAddon, CSE_ALifeItem, CLSID_OBJECT_W_ADDON, "wpn_addon"); //--#SM+#--
 
     // Inventory
     ADD(CBolt, CSE_ALifeItemBolt, CLSID_IITEM_BOLT, "obj_bolt");
@@ -339,6 +344,9 @@ void CObjectFactory::register_classes()
     // Rockets
     ADD(CExplosiveRocket, CSE_Temporary, CLSID_OBJECT_G_RPG7, "wpn_grenade_rpg7");
     ADD(CExplosiveRocket, CSE_Temporary, CLSID_OBJECT_G_FAKE, "wpn_grenade_fake");
+
+    // Bullet Shells
+    ADD(CCustomShell, CSE_Temporary, CLSID_WPN_SHELL, "wpn_bullet_shell"); //--#SM+#--
 
     //-----------------------------------------------------------------------------------------------------------------
     ADD(CMPPlayersBag, CSE_ALifeItem, CLSID_OBJECT_PLAYERS_BAG, "mp_players_bag");
