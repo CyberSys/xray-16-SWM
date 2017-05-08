@@ -32,14 +32,14 @@ void bwdithermap(int levels, int magic[16][16])
     float N = 255.0f / (levels - 1);
 
     /*
-    * Expand 4x4 dither pattern to 16x16.  4x4 leaves obvious patterning,
-    * and doesn't give us full intensity range (only 17 sublevels).
-    *
-    * magicfact is (N - 1)/16 so that we get numbers in the matrix from 0 to
-    * N - 1: mod N gives numbers in 0 to N - 1, don't ever want all
-    * pixels incremented to the next level (this is reserved for the
-    * pixel value with mod N == 0 at the next level).
-    */
+     * Expand 4x4 dither pattern to 16x16.  4x4 leaves obvious patterning,
+     * and doesn't give us full intensity range (only 17 sublevels).
+     *
+     * magicfact is (N - 1)/16 so that we get numbers in the matrix from 0 to
+     * N - 1: mod N gives numbers in 0 to N - 1, don't ever want all
+     * pixels incremented to the next level (this is reserved for the
+     * pixel value with mod N == 0 at the next level).
+     */
 
     float magicfact = (N - 1) / 16;
     for (int i = 0; i < 4; i++)
@@ -91,7 +91,7 @@ CDetailManager::CDetailManager() : xrc("detail manager")
 
 CDetailManager::~CDetailManager() {}
 /*
-*/
+ */
 #ifndef _EDITOR
 
 /*
@@ -233,7 +233,7 @@ void CDetailManager::UpdateVisibleM()
                 Slot* PS = *MS.slots[_i];
                 Slot& S = *PS;
 
-                //if (_i+1<dwCC);
+                // if (_i+1<dwCC);
                 //    _mm_prefetch((char*)*MS.slots[_i+1], _MM_HINT_T1);
 
                 // if slot empty - continue
@@ -340,6 +340,7 @@ void CDetailManager::Render()
     MT_SYNC();
 
     RImplementation.BasicStats.DetailRender.Begin();
+    g_pGamePersistent->m_pGShaderConstants->m_blender_mode.w = 1.0f; //--#SM+#-- Флаг начала рендера травы [begin of grass render]
 
 #ifndef _EDITOR
     float factor = g_pGamePersistent->Environment().wind_strength_factor;
@@ -355,6 +356,8 @@ void CDetailManager::Render()
     else
         soft_Render();
     RCache.set_CullMode(CULL_CCW);
+
+    g_pGamePersistent->m_pGShaderConstants->m_blender_mode.w = 0.0f; //--#SM+#-- Флаг конца рендера травы [end of grass render]
     RImplementation.BasicStats.DetailRender.End();
     m_frame_rendered = RDEVICE.dwFrame;
 }

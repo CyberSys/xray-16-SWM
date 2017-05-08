@@ -34,6 +34,8 @@ void __fastcall mapNormal_Render(mapNormalItems& N)
 #ifdef USE_DX11
         RCache.LOD.set_LOD(LOD);
 #endif
+        RCache.hemi.c_update(
+            Ni.pVisual); //--#SM+#-- Обновляем шейдерные данные модели [update shader values for this model]
         Ni.pVisual->Render(LOD);
     }
 }
@@ -56,6 +58,8 @@ void __fastcall mapMatrix_Render(mapMatrixItems& N)
 #ifdef USE_DX11
         RCache.LOD.set_LOD(LOD);
 #endif
+        RCache.hemi.c_update(
+            Ni.pVisual); //--#SM+#-- Обновляем шейдерные данные модели [update shader values for this model]
         Ni.pVisual->Render(LOD);
     }
     N.clear();
@@ -71,11 +75,59 @@ void __fastcall sorted_L1(mapSorted_Node* N)
     RCache.set_xform_world(N->val.Matrix);
     RImplementation.apply_object(N->val.pObject);
     RImplementation.apply_lmaterial();
+    RCache.hemi.c_update(V); //--#SM+#-- Обновляем шейдерные данные модели [update shader values for this model]
     V->Render(calcLOD(N->key, V->vis.sphere.R));
+}
+
+// ALPHA + HUD with dynamic FOV --#SM+#--
+void __fastcall sorted_L1_HUD(mapSorted_Node* N)
+{
+    // HACK: [Dynamic HUD FOV] Т.к дополнительные худовые модели из OnRenderHUD() рендерятся после основного худа, то
+    // для них мы можем менять матрицу проекции прямо здесь, не создавая отдельную функцию, т.к разница в скорости будет
+    // минимальной (для основного худа матрица будет, как и раньше, просчитана лишь раз, если он не использует
+    // динамический HUD FOV)
+
+    VERIFY(N);
+    dxRender_Visual* V = N->val.pVisual;
+    VERIFY(V && V->shader._get());
+
+    bool bNeed2RestoreProjection = false;
+    Fmatrix Pold, FTold;
+
+    float fCustomFOV = V->getVisData().obj_data->m_hud_custom_fov;
+    if (fCustomFOV > 1.0f)
+    {
+        // Change projection (Dynamic HUD FOV)
+        Pold = Device.mProject;
+        FTold = Device.mFullTransform;
+        Device.mProject.build_projection(
+            deg2rad(fCustomFOV), Device.fASPECT, VIEWPORT_NEAR, g_pGamePersistent->Environment().CurrentEnv->far_plane);
+
+        Device.mFullTransform.mul(Device.mProject, Device.mView);
+        RCache.set_xform_project(Device.mProject);
+
+        bNeed2RestoreProjection = true;
+    }
+
+    RCache.set_Element(N->val.se);
+    RCache.set_xform_world(N->val.Matrix);
+    RImplementation.apply_object(N->val.pObject);
+    RImplementation.apply_lmaterial();
+    RCache.hemi.c_update(V); //--#SM+#--
+    V->Render(calcLOD(N->key, V->vis.sphere.R));
+
+    if (bNeed2RestoreProjection)
+    {
+        // Restore projection (Dynamic HUD FOV)
+        Device.mProject = Pold;
+        Device.mFullTransform = FTold;
+        RCache.set_xform_project(Device.mProject);
+    }
 }
 
 IC bool cmp_vs_nrm(mapNormalVS::TNode* N1, mapNormalVS::TNode* N2) { return (N1->val.ssa > N2->val.ssa); }
 IC bool cmp_vs_mat(mapMatrixVS::TNode* N1, mapMatrixVS::TNode* N2) { return (N1->val.ssa > N2->val.ssa); }
+
 IC bool cmp_ps_nrm(mapNormalPS::TNode* N1, mapNormalPS::TNode* N2)
 {
 #ifdef USE_DX11
@@ -530,7 +582,7 @@ void D3DXRenderBase::r_dsgraph_render_hud()
 
     // Rendering
     rmNear();
-    mapHUD.traverseLR(sorted_L1);
+    mapHUD.traverseLR(sorted_L1_HUD); //--#SM+#--
     mapHUD.clear();
 
 #if RENDER == R_R1
@@ -639,6 +691,34 @@ void D3DXRenderBase::r_dsgraph_render_sorted()
     // Sorted (back to front)
     mapSorted.traverseRL(sorted_L1);
     mapSorted.clear();
+
+    // HUD Render ALPHA
+    if (mapHUDSorted.size()) //--#SM+#--
+    {
+        extern ENGINE_API float psHUD_FOV;
+
+        // Change projection
+        Fmatrix Pold = Device.mProject;
+        Fmatrix FTold = Device.mFullTransform;
+        Device.mProject.build_projection(deg2rad(psHUD_FOV * Device.fFOV /* *Device.fASPECT*/), Device.fASPECT,
+            VIEWPORT_NEAR, g_pGamePersistent->Environment().CurrentEnv->far_plane);
+
+        Device.mFullTransform.mul(Device.mProject, Device.mView);
+        RCache.set_xform_project(Device.mProject);
+
+        // Rendering
+        rmNear();
+        // Sorted (back to front)
+        mapHUDSorted.traverseLR(sorted_L1_HUD);
+        mapHUDSorted.clear();
+
+        rmNormal();
+
+        // Restore projection
+        Device.mProject = Pold;
+        Device.mFullTransform = FTold;
+        RCache.set_xform_project(Device.mProject);
+    }
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -666,7 +746,7 @@ void D3DXRenderBase::r_dsgraph_render_emissive()
     // Rendering
     rmNear();
     // Sorted (back to front)
-    mapHUDEmissive.traverseLR(sorted_L1);
+    mapHUDEmissive.traverseLR(sorted_L1_HUD); //--#SM+#--
     mapHUDEmissive.clear();
 
     rmNormal();
@@ -804,7 +884,7 @@ void D3DXRenderBase::r_dsgraph_render_R1_box(IRender_Sector* _S, Fbox& BB, int s
         dxRender_Visual* V = lstVisuals[test];
 
         // Visual is 100% visible - simply add it
-        xr_vector<dxRender_Visual *>::iterator I, E; // it may be usefull for 'hierrarhy' visuals
+        xr_vector<dxRender_Visual*>::iterator I, E; // it may be usefull for 'hierrarhy' visuals
 
         switch (V->Type)
         {

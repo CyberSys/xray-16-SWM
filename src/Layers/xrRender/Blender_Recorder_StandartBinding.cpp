@@ -14,11 +14,11 @@
 #include "xrEngine/Environment.h"
 
 // matrices
-#define BIND_DECLARE(xf)\
-    class cl_xform_##xf : public R_constant_setup\
-    {\
-        virtual void setup(R_constant* C) {RCache.xforms.set_c_##xf(C); }\
-    };\
+#define BIND_DECLARE(xf)                                                   \
+    class cl_xform_##xf : public R_constant_setup                          \
+    {                                                                      \
+        virtual void setup(R_constant* C) { RCache.xforms.set_c_##xf(C); } \
+    };                                                                     \
     static cl_xform_##xf binder_##xf
 BIND_DECLARE(w);
 BIND_DECLARE(invw);
@@ -28,11 +28,11 @@ BIND_DECLARE(wv);
 BIND_DECLARE(vp);
 BIND_DECLARE(wvp);
 
-#define DECLARE_TREE_BIND(c)\
-    class cl_tree_##c : public R_constant_setup\
-    {\
-        virtual void setup(R_constant* C) { RCache.tree.set_c_##c(C); }\
-    };\
+#define DECLARE_TREE_BIND(c)                                            \
+    class cl_tree_##c : public R_constant_setup                         \
+    {                                                                   \
+        virtual void setup(R_constant* C) { RCache.tree.set_c_##c(C); } \
+    };                                                                  \
     static cl_tree_##c tree_binder_##c
 
 DECLARE_TREE_BIND(m_xform_v);
@@ -318,9 +318,53 @@ static class cl_screen_res : public R_constant_setup
     }
 } binder_screen_res;
 
+// SM_TODO: RCache.hemi заменить на более "логичное" место
+static class cl_hud_params : public R_constant_setup //--#SM+#--
+{
+    virtual void setup(R_constant* C) { RCache.set_c(C, g_pGamePersistent->m_pGShaderConstants->hud_params); }
+} binder_hud_params;
+
+static class cl_script_params : public R_constant_setup //--#SM+#--
+{
+    virtual void setup(R_constant* C) { RCache.set_c(C, g_pGamePersistent->m_pGShaderConstants->m_script_params); }
+} binder_script_params;
+
+static class cl_blend_mode : public R_constant_setup //--#SM+#--
+{
+    virtual void setup(R_constant* C) { RCache.set_c(C, g_pGamePersistent->m_pGShaderConstants->m_blender_mode); }
+} binder_blend_mode;
+
+class cl_camo_data : public R_constant_setup //--#SM+#--
+{
+    virtual void setup(R_constant* C) { RCache.hemi.c_camo_data = C; }
+};
+static cl_camo_data binder_camo_data;
+
+class cl_custom_data : public R_constant_setup //--#SM+#--
+{
+    virtual void setup(R_constant* C) { RCache.hemi.c_custom_data = C; }
+};
+static cl_custom_data binder_custom_data;
+
+class cl_entity_data : public R_constant_setup //--#SM+#--
+{
+    virtual void setup(R_constant* C) { RCache.hemi.c_entity_data = C; }
+};
+static cl_entity_data binder_entity_data;
+
 // Standart constant-binding
 void CBlender_Compile::SetMapping()
 {
+    // misc
+    r_Constant("m_hud_params", &binder_hud_params); //--#SM+#--
+    r_Constant("m_script_params", &binder_script_params); //--#SM+#--
+    r_Constant("m_blender_mode", &binder_blend_mode); //--#SM+#--
+
+    // objects data
+    r_Constant("m_obj_camo_data", &binder_camo_data); //--#SM+#--
+    r_Constant("m_obj_custom_data", &binder_custom_data); //--#SM+#--
+    r_Constant("m_obj_entity_data", &binder_entity_data); //--#SM+#--
+
     // matrices
     r_Constant("m_W", &binder_w);
     r_Constant("m_invW", &binder_invw);
@@ -367,14 +411,14 @@ void CBlender_Compile::SetMapping()
     r_Constant("L_sun_color", &binder_sun0_color);
     r_Constant("L_sun_dir_w", &binder_sun0_dir_w);
     r_Constant("L_sun_dir_e", &binder_sun0_dir_e);
-    //r_Constant("L_lmap_color", &binder_lm_color);
+    // r_Constant("L_lmap_color", &binder_lm_color);
     r_Constant("L_hemi_color", &binder_hemi_color);
     r_Constant("L_ambient", &binder_amb_color);
 #endif
     r_Constant("screen_res", &binder_screen_res);
 
     // detail
-    //if (bDetail  && detail_scaler)
+    // if (bDetail  && detail_scaler)
     // Igor: bDetail can be overridden by no_detail_texture option.
     // But shader can be deatiled implicitly, so try to set this parameter
     // anyway.

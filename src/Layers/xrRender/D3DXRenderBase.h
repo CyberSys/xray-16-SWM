@@ -37,6 +37,7 @@ public:
     // R_dsgraph::mapMatrix_T										mapMatrix	[2]		;
     R_dsgraph::mapMatrixPasses_T mapMatrixPasses[2];
     R_dsgraph::mapSorted_T mapSorted;
+    R_dsgraph::mapSorted_T mapHUDSorted; //--#SM+#--
     R_dsgraph::mapHUD_T mapHUD;
     R_dsgraph::mapLOD_T mapLOD;
     R_dsgraph::mapSorted_T mapDistort;
@@ -110,6 +111,7 @@ public:
         d = counter_D;
     }
     void clear_Counters() { counter_S = counter_D = 0; }
+
 public:
     D3DXRenderBase();
 

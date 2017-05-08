@@ -84,7 +84,7 @@ void D3DXRenderBase::r_dsgraph_insert_dynamic(dxRender_Visual* pVisual, Fvector&
     {
         if (sh->flags.bStrictB2F)
         {
-            mapSorted_Node* N = mapSorted.insertInAnyWay(distSQ);
+            mapSorted_Node* N = mapHUDSorted.insertInAnyWay(distSQ); //--#SM+#--
             N->val.ssa = SSA;
             N->val.pObject = RI.val_pObject;
             N->val.pVisual = pVisual;
@@ -465,7 +465,7 @@ void CRender::add_leafs_Dynamic(dxRender_Visual* pVisual)
         return;
 
     // Visual is 100% visible - simply add it
-    xr_vector<dxRender_Visual *>::iterator I, E; // it may be useful for 'hierrarhy' visual
+    xr_vector<dxRender_Visual*>::iterator I, E; // it may be useful for 'hierrarhy' visual
 
     switch (pVisual->Type)
     {
@@ -493,8 +493,13 @@ void CRender::add_leafs_Dynamic(dxRender_Visual* pVisual)
         FHierrarhyVisual* pV = (FHierrarhyVisual*)pVisual;
         I = pV->children.begin();
         E = pV->children.end();
-        for (; I != E; I++)
+        for (; I != E; I++) //--#SM+#--
+        {
+            (*I)->vis.obj_data = pV->getVisData().obj_data; // Ќаследники используют шейдерные данные от родительского
+                                                            // визуала [use shader data from parent model, rather than
+                                                            // it childrens]
             add_leafs_Dynamic(*I);
+        }
     }
         return;
     case MT_SKELETON_ANIM:
@@ -522,8 +527,13 @@ void CRender::add_leafs_Dynamic(dxRender_Visual* pVisual)
             pV->CalculateWallmarks(); //. bug?
             I = pV->children.begin();
             E = pV->children.end();
-            for (; I != E; I++)
+            for (; I != E; I++) //--#SM+#--
+            {
+                (*I)->vis.obj_data = pV->getVisData().obj_data; // Ќаследники используют шейдерные данные от
+                                                                // родительского визуала [use shader data from parent
+                                                                // model, rather than it childrens]
                 add_leafs_Dynamic(*I);
+            }
         }
     }
         return;
@@ -545,7 +555,7 @@ void CRender::add_leafs_Static(dxRender_Visual* pVisual)
         return;
 
     // Visual is 100% visible - simply add it
-    xr_vector<dxRender_Visual *>::iterator I, E; // it may be usefull for 'hierrarhy' visuals
+    xr_vector<dxRender_Visual*>::iterator I, E; // it may be usefull for 'hierrarhy' visuals
 
     switch (pVisual->Type)
     {
@@ -573,8 +583,13 @@ void CRender::add_leafs_Static(dxRender_Visual* pVisual)
         FHierrarhyVisual* pV = (FHierrarhyVisual*)pVisual;
         I = pV->children.begin();
         E = pV->children.end();
-        for (; I != E; I++)
+        for (; I != E; I++) //--#SM+#--
+        {
+            (*I)->vis.obj_data = pV->getVisData().obj_data; // Ќаследники используют шейдерные данные от родительского
+                                                            // визуала [use shader data from parent model, rather than
+                                                            // it childrens]
             add_leafs_Static(*I);
+        }
     }
         return;
     case MT_SKELETON_ANIM:
@@ -585,8 +600,13 @@ void CRender::add_leafs_Static(dxRender_Visual* pVisual)
         pV->CalculateBones(TRUE);
         I = pV->children.begin();
         E = pV->children.end();
-        for (; I != E; I++)
+        for (; I != E; I++) //--#SM+#--
+        {
+            (*I)->vis.obj_data = pV->getVisData().obj_data; // Ќаследники используют шейдерные данные от родительского
+                                                            // визуала [use shader data from parent model, rather than
+                                                            // it childrens]
             add_leafs_Static(*I);
+        }
     }
         return;
     case MT_LOD:
@@ -612,8 +632,14 @@ void CRender::add_leafs_Static(dxRender_Visual* pVisual)
             // Add all children, doesn't perform any tests
             I = pV->children.begin();
             E = pV->children.end();
-            for (; I != E; I++)
+            for (; I != E; I++) //--#SM+#--
+            {
+                (*I)->vis.obj_data =
+                    pV->getVisData().obj_data; // Ќаследники используют шейдерные данные от родительского
+                                               // визуала [use shader data from parent model, rather than
+                                               // it childrens]
                 add_leafs_Static(*I);
+            }
         }
     }
         return;
@@ -648,7 +674,7 @@ BOOL CRender::add_Dynamic(dxRender_Visual* pVisual, u32 planes)
         return FALSE;
 
     // If we get here visual is visible or partially visible
-    xr_vector<dxRender_Visual *>::iterator I, E; // it may be usefull for 'hierrarhy' visuals
+    xr_vector<dxRender_Visual*>::iterator I, E; // it may be usefull for 'hierrarhy' visuals
 
     switch (pVisual->Type)
     {
@@ -764,7 +790,7 @@ void CRender::add_Static(dxRender_Visual* pVisual, u32 planes)
         return;
 
     // If we get here visual is visible or partially visible
-    xr_vector<dxRender_Visual *>::iterator I, E; // it may be usefull for 'hierrarhy' visuals
+    xr_vector<dxRender_Visual*>::iterator I, E; // it may be usefull for 'hierrarhy' visuals
 
     switch (pVisual->Type)
     {
@@ -1145,8 +1171,10 @@ void D3DXRenderBase::Clear()
         HW.pContext->ClearRenderTargetView(RCache.get_RT(), ColorRGBA);
     }
 #else
-    CHK_DX(HW.pDevice->Clear(0, 0, D3DCLEAR_ZBUFFER | (psDeviceFlags.test(rsClearBB) ? D3DCLEAR_TARGET : 0) |
-        (HW.Caps.bStencil ? D3DCLEAR_STENCIL : 0), color_xrgb(0, 0, 0), 1, 0));
+    CHK_DX(HW.pDevice->Clear(0, 0,
+        D3DCLEAR_ZBUFFER | (psDeviceFlags.test(rsClearBB) ? D3DCLEAR_TARGET : 0) |
+            (HW.Caps.bStencil ? D3DCLEAR_STENCIL : 0),
+        color_xrgb(0, 0, 0), 1, 0));
 #endif
 }
 
@@ -1161,7 +1189,8 @@ void D3DXRenderBase::End()
     Memory.dbg_check();
     DoAsyncScreenshot();
 #if defined(USE_DX10) || defined(USE_DX11)
-    bool bUseVSync = psDeviceFlags.is(rsFullscreen) && psDeviceFlags.test(rsVSync); //xxx: weird tearing glitches when VSync turned on for windowed mode in DX10\11
+    bool bUseVSync = psDeviceFlags.is(rsFullscreen) &&
+        psDeviceFlags.test(rsVSync); // xxx: weird tearing glitches when VSync turned on for windowed mode in DX10\11
     HW.m_pSwapChain->Present(bUseVSync ? 1 : 0, 0);
 #else
     CHK_DX(HW.pDevice->EndScene());
