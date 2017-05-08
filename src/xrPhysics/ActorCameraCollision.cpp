@@ -10,7 +10,7 @@
 #include "PHShell.h"
 #include "matrix_utils.h"
 #include "iphysicsshellholder.h"
-
+#include "xrEngine/xr_object.h" //--#SM+#--
 #include "GeometryBits.h"
 
 #ifdef DEBUG
@@ -42,6 +42,9 @@ static void cammera_shell_collide_callback_common(
 
     VERIFY(my_data);
     if (oposite_data && oposite_data->ph_ref_object == my_data->ph_ref_object)
+        return;
+    if (oposite_data && oposite_data->ph_ref_object &&
+        !oposite_data->ph_ref_object->IsCollideWithActorCamera()) //--#SM+#--
         return;
     if (c.geom.depth > camera_collision_sckin_depth / 2.f)
         cam_collided = true;
@@ -203,9 +206,9 @@ void set_camera_collision(const Fvector& box_size, const Fmatrix& xform, CPhysic
     // CBoxGeom* character_collision_geom = smart_cast<CBoxGeom*>( roote->geometry( 1 ) );
     CCylinderGeom* character_collision_geom = smart_cast<CCylinderGeom*>(roote->geometry(1));
     VERIFY(character_collision_geom);
-    const Fvector character_collision_box_size =
-        Fvector().add(box_size, Fvector().set(camera_collision_character_skin_depth,
-                                    camera_collision_character_skin_depth, camera_collision_character_skin_depth));
+    const Fvector character_collision_box_size = Fvector().add(box_size,
+        Fvector().set(camera_collision_character_skin_depth, camera_collision_character_skin_depth,
+            camera_collision_character_skin_depth));
     // character_collision_geom->set_size( character_collision_box_size );
     character_collision_geom->set_radius(character_collision_box_size.x);
     VERIFY(_valid(xform));
@@ -314,6 +317,19 @@ bool test_camera_box(const Fvector& box_size, const Fmatrix& xform, IPhysicsShel
     set_camera_collision(old_box_size, old_form, roote, box);
 
     return ret;
+}
+
+// Test only, generate box from camera --#SM+#--
+bool test_camera_collide(
+    CCameraBase& camera, float _viewport_near, IPhysicsShellHolder* l_actor, Fvector& vPosOffset, float fBoxSizeMod)
+{
+    Fvector box_size;
+    Fmatrix xform;
+    get_camera_box(box_size, xform, camera, _viewport_near);
+    box_size.mul(fBoxSizeMod);
+    xform.c.mad(camera.Direction(), vPosOffset);
+
+    return test_camera_box(box_size, xform, l_actor);
 }
 
 void collide_camera(CCameraBase& camera, float _viewport_near, IPhysicsShellHolder* l_actor)
