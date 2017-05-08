@@ -18,6 +18,7 @@ public:
     virtual shared_str getDebugName() = 0;
 #endif
 
+    virtual IRenderVisual* getSubModel(u8 idx) { return 0; } //--#SM+#--
     virtual IKinematics* dcast_PKinematics() { return 0; }
     virtual IKinematicsAnimated* dcast_PKinematicsAnimated() { return 0; }
     virtual IParticleCustom* dcast_ParticleCustom() { return 0; }
