@@ -648,7 +648,8 @@ public:
     virtual void Info(TInfo& I) { xr_sprintf(I, sizeof(I), "hide console"); }
 };
 
-ENGINE_API float psHUD_FOV = 0.45f;
+ENGINE_API float psHUD_FOV_def = 0.39f; //--#SM+#-- Default HUD FOV (as a percentage of Camera FOV)
+ENGINE_API float psHUD_FOV = psHUD_FOV_def; //--#SM+#-- Current HUD FOV (as a percentage of Camera FOV)
 
 // extern int psSkeletonUpdate;
 extern int rsDVB_Size;
