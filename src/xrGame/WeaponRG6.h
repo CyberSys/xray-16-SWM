@@ -1,20 +1,10 @@
 #pragma once
 
-#include "rocketlauncher.h"
-#include "weaponShotgun.h"
+#include "WeaponMagazinedWGrenade.h"
 
-class CWeaponRG6 : public CRocketLauncher, public CWeaponShotgun
+class CWeaponRG6 : public CWeaponMagazinedWGrenade //--#SM+#--
 {
-    typedef CRocketLauncher inheritedRL;
-    typedef CWeaponShotgun inheritedSG;
-
 public:
+    CWeaponRG6();
     virtual ~CWeaponRG6();
-    virtual BOOL net_Spawn(CSE_Abstract* DC);
-    virtual void Load(LPCSTR section);
-    virtual void OnEvent(NET_Packet& P, u16 type);
-
-protected:
-    virtual void FireStart();
-    virtual u8 AddCartridge(u8 cnt);
 };

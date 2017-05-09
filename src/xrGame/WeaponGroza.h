@@ -1,11 +1,9 @@
 #pragma once
 
-#include "weaponmagazinedwgrenade.h"
+#include "WeaponMagazinedWGrenade.h"
 
-class CWeaponGroza : public CWeaponMagazinedWGrenade
+class CWeaponGroza : public CWeaponMagazinedWGrenade //--#SM+#--
 {
-    typedef CWeaponMagazinedWGrenade inherited;
-
 public:
     CWeaponGroza();
     virtual ~CWeaponGroza();

@@ -19,19 +19,22 @@ CCartridge::CCartridge()
     m_ammoSect = NULL;
     param_s.Init();
     bullet_material_idx = u16(-1);
+    m_sHudVisual        = NULL; //--#SM+#--
+    m_sWorldVisual      = NULL; //--#SM+#--
+    m_sShellVisual      = NULL; //--#SM+#--
 }
 
 void CCartridge::Load(LPCSTR section, u8 LocalAmmoType)
 {
-    m_ammoSect = section;
+    m_ammoSect      = section;
     m_LocalAmmoType = LocalAmmoType;
-    param_s.kDist = pSettings->r_float(section, "k_dist");
-    param_s.kDisp = pSettings->r_float(section, "k_disp");
-    param_s.kHit = pSettings->r_float(section, "k_hit");
+    param_s.kDist   = pSettings->r_float(section, "k_dist");
+    param_s.kDisp   = pSettings->r_float(section, "k_disp");
+    param_s.kHit    = pSettings->r_float(section, "k_hit");
     //.	param_s.kCritical			= pSettings->r_float(section, "k_hit_critical");
     param_s.kImpulse = pSettings->r_float(section, "k_impulse");
     // m_kPierce				= pSettings->r_float(section, "k_pierce");
-    param_s.kAP = pSettings->r_float(section, "k_ap");
+    param_s.kAP       = pSettings->r_float(section, "k_ap");
     param_s.u8ColorID = READ_IF_EXISTS(pSettings, r_u8, section, "tracer_color_ID", 0);
 
     if (pSettings->line_exist(section, "k_air_resistance"))
@@ -40,8 +43,8 @@ void CCartridge::Load(LPCSTR section, u8 LocalAmmoType)
         param_s.kAirRes = pSettings->r_float(BULLET_MANAGER_SECTION, "air_resistance_k");
 
     m_flags.set(cfTracer, pSettings->r_bool(section, "tracer"));
-    param_s.buckShot = pSettings->r_s32(section, "buck_shot");
-    param_s.impair = pSettings->r_float(section, "impair");
+    param_s.buckShot      = pSettings->r_s32(section, "buck_shot");
+    param_s.impair        = pSettings->r_float(section, "impair");
     param_s.fWallmarkSize = pSettings->r_float(section, "wm_size");
 
     m_flags.set(cfCanBeUnlimited | cfRicochet, TRUE);
@@ -68,6 +71,10 @@ void CCartridge::Load(LPCSTR section, u8 LocalAmmoType)
     VERIFY(param_s.fWallmarkSize > 0);
 
     m_InvShortName = CStringTable().translate(pSettings->r_string(section, "inv_name_short"));
+
+    m_sHudVisual   = READ_IF_EXISTS(pSettings, r_string, section, "bullet_hud", NULL); //--#SM+#--
+    m_sWorldVisual = READ_IF_EXISTS(pSettings, r_string, section, "bullet_vis", NULL); //--#SM+#--
+    m_sShellVisual = READ_IF_EXISTS(pSettings, r_string, section, "shell_hud", NULL);  //--#SM+#--
 }
 
 CWeaponAmmo::CWeaponAmmo(void) {}
@@ -78,20 +85,20 @@ void CWeaponAmmo::Load(LPCSTR section)
 
     cartridge_param.kDist = pSettings->r_float(section, "k_dist");
     cartridge_param.kDisp = pSettings->r_float(section, "k_disp");
-    cartridge_param.kHit = pSettings->r_float(section, "k_hit");
+    cartridge_param.kHit  = pSettings->r_float(section, "k_hit");
     //.	cartridge_param.kCritical	= pSettings->r_float(section, "k_hit_critical");
     cartridge_param.kImpulse = pSettings->r_float(section, "k_impulse");
     // m_kPierce				= pSettings->r_float(section, "k_pierce");
-    cartridge_param.kAP = pSettings->r_float(section, "k_ap");
+    cartridge_param.kAP       = pSettings->r_float(section, "k_ap");
     cartridge_param.u8ColorID = READ_IF_EXISTS(pSettings, r_u8, section, "tracer_color_ID", 0);
 
     if (pSettings->line_exist(section, "k_air_resistance"))
         cartridge_param.kAirRes = pSettings->r_float(section, "k_air_resistance");
     else
         cartridge_param.kAirRes = pSettings->r_float(BULLET_MANAGER_SECTION, "air_resistance_k");
-    m_tracer = !!pSettings->r_bool(section, "tracer");
-    cartridge_param.buckShot = pSettings->r_s32(section, "buck_shot");
-    cartridge_param.impair = pSettings->r_float(section, "impair");
+    m_tracer                      = !!pSettings->r_bool(section, "tracer");
+    cartridge_param.buckShot      = pSettings->r_s32(section, "buck_shot");
+    cartridge_param.impair        = pSettings->r_float(section, "impair");
     cartridge_param.fWallmarkSize = pSettings->r_float(section, "wm_size");
     R_ASSERT(cartridge_param.fWallmarkSize > 0);
 
@@ -101,10 +108,10 @@ void CWeaponAmmo::Load(LPCSTR section)
 
 BOOL CWeaponAmmo::net_Spawn(CSE_Abstract* DC)
 {
-    BOOL bResult = inherited::net_Spawn(DC);
-    CSE_Abstract* e = (CSE_Abstract*)(DC);
-    CSE_ALifeItemAmmo* l_pW = smart_cast<CSE_ALifeItemAmmo*>(e);
-    m_boxCurr = l_pW->a_elapsed;
+    BOOL               bResult = inherited::net_Spawn(DC);
+    CSE_Abstract*      e       = (CSE_Abstract*)(DC);
+    CSE_ALifeItemAmmo* l_pW    = smart_cast<CSE_ALifeItemAmmo*>(e);
+    m_boxCurr                  = l_pW->a_elapsed;
 
     if (m_boxCurr > m_boxSize)
         l_pW->a_elapsed = m_boxCurr = m_boxSize;
@@ -144,17 +151,19 @@ s32 CWeaponAmmo::Sort(PIItem pIItem)
     else return -1;
 }
 */
-bool CWeaponAmmo::Get(CCartridge& cartridge)
+bool CWeaponAmmo::Get(CCartridge& cartridge, bool bWithoutParams) //--#SM+#--
 {
     if (!m_boxCurr)
         return false;
-    cartridge.m_ammoSect = cNameSect();
 
-    cartridge.param_s = cartridge_param;
-
-    cartridge.m_flags.set(CCartridge::cfTracer, m_tracer);
-    cartridge.bullet_material_idx = GMLib.GetMaterialIdx(WEAPON_MATERIAL_NAME);
-    cartridge.m_InvShortName = NameShort();
+    if (!bWithoutParams)
+    {
+        cartridge.m_ammoSect = cNameSect();
+        cartridge.param_s    = cartridge_param;
+        cartridge.m_flags.set(CCartridge::cfTracer, m_tracer);
+        cartridge.bullet_material_idx = GMLib.GetMaterialIdx(WEAPON_MATERIAL_NAME);
+        cartridge.m_InvShortName      = NameShort();
+    }
     --m_boxCurr;
     if (m_pInventory)
         m_pInventory->InvalidateState();
@@ -204,8 +213,7 @@ CInventoryItem* CWeaponAmmo::can_make_killing(const CInventory* inventory) const
         CWeapon* weapon = smart_cast<CWeapon*>(*I);
         if (!weapon)
             continue;
-        xr_vector<shared_str>::const_iterator i =
-            std::find(weapon->m_ammoTypes.begin(), weapon->m_ammoTypes.end(), cNameSect());
+        xr_vector<shared_str>::const_iterator i = std::find(weapon->m_ammoTypes.begin(), weapon->m_ammoTypes.end(), cNameSect());
         if (i != weapon->m_ammoTypes.end())
             return (weapon);
     }

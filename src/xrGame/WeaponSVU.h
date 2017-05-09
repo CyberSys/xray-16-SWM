@@ -1,12 +1,10 @@
 #pragma once
 
-#include "weaponcustompistol.h"
+#include "WeaponMagazinedWGrenade.h"
 
-class CWeaponSVU : public CWeaponCustomPistol
+class CWeaponSVU : public CWeaponMagazinedWGrenade //--#SM+#--
 {
-    typedef CWeaponCustomPistol inherited;
-
 public:
-    CWeaponSVU(void);
-    virtual ~CWeaponSVU(void);
+    CWeaponSVU();
+    virtual ~CWeaponSVU();
 };
