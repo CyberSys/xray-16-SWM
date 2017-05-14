@@ -1,4 +1,4 @@
-#include "pch_script.h"
+﻿#include "pch_script.h"
 #include "Level.h"
 #include "Level_Bullet_Manager.h"
 #include "xrserver.h"
@@ -173,14 +173,18 @@ void CLevel::net_Stop()
 
 void CLevel::ClientSend()
 {
-    if (GameID() == eGameIDSingle || OnClient())
+    //--#SM+#-- Фикс для SP, когда UPDATE_READ\UPDATE_WRITE не вызывался на каждом кадре из-за net_HasBandwidth
+    // if (GameID() == eGameIDSingle || OnClient())
+    // SM_TODO: Провести сравнительные тесты производительности в подземке с 20 сталкерами
+    // возможно стоит вернуть как было, но отключать проверку только в момент сохранения
+    if (GameID() != eGameIDSingle && OnClient())
     {
         if (!net_HasBandwidth())
             return;
     };
 
     NET_Packet P;
-    u32 start = 0;
+    u32        start = 0;
     //----------- for E3 -----------------------------
     //	if ()
     {
