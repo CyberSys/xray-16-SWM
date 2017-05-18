@@ -604,6 +604,8 @@ extern void draw_wnds_rects();
 
 void CLevel::OnRender()
 {
+    GlobalEnv.Render->BeforeWorldRender();	//--#SM+#-- +SecondVP+
+
     inherited::OnRender();
     if (!game)
         return;
@@ -611,6 +613,9 @@ void CLevel::OnRender()
     // Device.Statistic->TEST1.Begin();
     BulletManager().Render();
     // Device.Statistic->TEST1.End();
+
+    GlobalEnv.Render->AfterWorldRender(); //--#SM+#-- +SecondVP+
+
     HUD().RenderUI();
 #ifdef DEBUG
     draw_wnds_rects();

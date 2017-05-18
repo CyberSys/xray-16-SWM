@@ -495,8 +495,8 @@ void CRender::add_leafs_Dynamic(dxRender_Visual* pVisual)
         E = pV->children.end();
         for (; I != E; I++) //--#SM+#--
         {
-            (*I)->vis.obj_data = pV->getVisData().obj_data; // Íàñëåäíèêè èñïîëüçóþò øåéäåðíûå äàííûå îò ðîäèòåëüñêîãî
-                                                            // âèçóàëà [use shader data from parent model, rather than
+            (*I)->vis.obj_data = pV->getVisData().obj_data; // ÐÐ°ÑÐ»ÐµÐ´Ð½Ð¸ÐºÐ¸ Ð¸ÑÐ¿Ð¾Ð»ÑŒÐ·ÑƒÑŽÑ‚ ÑˆÐµÐ¹Ð´ÐµÑ€Ð½Ñ‹Ðµ Ð´Ð°Ð½Ð½Ñ‹Ðµ Ð¾Ñ‚ Ñ€Ð¾Ð´Ð¸Ñ‚ÐµÐ»ÑŒÑÐºÐ¾Ð³Ð¾
+                                                            // Ð²Ð¸Ð·ÑƒÐ°Ð»Ð° [use shader data from parent model, rather than
                                                             // it childrens]
             add_leafs_Dynamic(*I);
         }
@@ -529,8 +529,8 @@ void CRender::add_leafs_Dynamic(dxRender_Visual* pVisual)
             E = pV->children.end();
             for (; I != E; I++) //--#SM+#--
             {
-                (*I)->vis.obj_data = pV->getVisData().obj_data; // Íàñëåäíèêè èñïîëüçóþò øåéäåðíûå äàííûå îò
-                                                                // ðîäèòåëüñêîãî âèçóàëà [use shader data from parent
+                (*I)->vis.obj_data = pV->getVisData().obj_data; // ÐÐ°ÑÐ»ÐµÐ´Ð½Ð¸ÐºÐ¸ Ð¸ÑÐ¿Ð¾Ð»ÑŒÐ·ÑƒÑŽÑ‚ ÑˆÐµÐ¹Ð´ÐµÑ€Ð½Ñ‹Ðµ Ð´Ð°Ð½Ð½Ñ‹Ðµ Ð¾Ñ‚
+                                                                // Ñ€Ð¾Ð´Ð¸Ñ‚ÐµÐ»ÑŒÑÐºÐ¾Ð³Ð¾ Ð²Ð¸Ð·ÑƒÐ°Ð»Ð° [use shader data from parent
                                                                 // model, rather than it childrens]
                 add_leafs_Dynamic(*I);
             }
@@ -585,8 +585,8 @@ void CRender::add_leafs_Static(dxRender_Visual* pVisual)
         E = pV->children.end();
         for (; I != E; I++) //--#SM+#--
         {
-            (*I)->vis.obj_data = pV->getVisData().obj_data; // Íàñëåäíèêè èñïîëüçóþò øåéäåðíûå äàííûå îò ðîäèòåëüñêîãî
-                                                            // âèçóàëà [use shader data from parent model, rather than
+            (*I)->vis.obj_data = pV->getVisData().obj_data; // ÐÐ°ÑÐ»ÐµÐ´Ð½Ð¸ÐºÐ¸ Ð¸ÑÐ¿Ð¾Ð»ÑŒÐ·ÑƒÑŽÑ‚ ÑˆÐµÐ¹Ð´ÐµÑ€Ð½Ñ‹Ðµ Ð´Ð°Ð½Ð½Ñ‹Ðµ Ð¾Ñ‚ Ñ€Ð¾Ð´Ð¸Ñ‚ÐµÐ»ÑŒÑÐºÐ¾Ð³Ð¾
+                                                            // Ð²Ð¸Ð·ÑƒÐ°Ð»Ð° [use shader data from parent model, rather than
                                                             // it childrens]
             add_leafs_Static(*I);
         }
@@ -602,8 +602,8 @@ void CRender::add_leafs_Static(dxRender_Visual* pVisual)
         E = pV->children.end();
         for (; I != E; I++) //--#SM+#--
         {
-            (*I)->vis.obj_data = pV->getVisData().obj_data; // Íàñëåäíèêè èñïîëüçóþò øåéäåðíûå äàííûå îò ðîäèòåëüñêîãî
-                                                            // âèçóàëà [use shader data from parent model, rather than
+            (*I)->vis.obj_data = pV->getVisData().obj_data; // ÐÐ°ÑÐ»ÐµÐ´Ð½Ð¸ÐºÐ¸ Ð¸ÑÐ¿Ð¾Ð»ÑŒÐ·ÑƒÑŽÑ‚ ÑˆÐµÐ¹Ð´ÐµÑ€Ð½Ñ‹Ðµ Ð´Ð°Ð½Ð½Ñ‹Ðµ Ð¾Ñ‚ Ñ€Ð¾Ð´Ð¸Ñ‚ÐµÐ»ÑŒÑÐºÐ¾Ð³Ð¾
+                                                            // Ð²Ð¸Ð·ÑƒÐ°Ð»Ð° [use shader data from parent model, rather than
                                                             // it childrens]
             add_leafs_Static(*I);
         }
@@ -635,8 +635,8 @@ void CRender::add_leafs_Static(dxRender_Visual* pVisual)
             for (; I != E; I++) //--#SM+#--
             {
                 (*I)->vis.obj_data =
-                    pV->getVisData().obj_data; // Íàñëåäíèêè èñïîëüçóþò øåéäåðíûå äàííûå îò ðîäèòåëüñêîãî
-                                               // âèçóàëà [use shader data from parent model, rather than
+                    pV->getVisData().obj_data; // ÐÐ°ÑÐ»ÐµÐ´Ð½Ð¸ÐºÐ¸ Ð¸ÑÐ¿Ð¾Ð»ÑŒÐ·ÑƒÑŽÑ‚ ÑˆÐµÐ¹Ð´ÐµÑ€Ð½Ñ‹Ðµ Ð´Ð°Ð½Ð½Ñ‹Ðµ Ð¾Ñ‚ Ñ€Ð¾Ð´Ð¸Ñ‚ÐµÐ»ÑŒÑÐºÐ¾Ð³Ð¾
+                                               // Ð²Ð¸Ð·ÑƒÐ°Ð»Ð° [use shader data from parent model, rather than
                                                // it childrens]
                 add_leafs_Static(*I);
             }
@@ -1188,14 +1188,19 @@ void D3DXRenderBase::End()
     RCache.OnFrameEnd();
     Memory.dbg_check();
     DoAsyncScreenshot();
+
+    // clang-format off
 #if defined(USE_DX10) || defined(USE_DX11)
     bool bUseVSync = psDeviceFlags.is(rsFullscreen) &&
         psDeviceFlags.test(rsVSync); // xxx: weird tearing glitches when VSync turned on for windowed mode in DX10\11
-    HW.m_pSwapChain->Present(bUseVSync ? 1 : 0, 0);
+	if (!Device.m_SecondViewport.IsSVPFrame() && !Device.m_SecondViewport.m_bCamReady) //--#SM+#-- +SecondVP+ ÐÐµ Ð²Ñ‹Ð²Ð¾Ð´Ð¸Ð¼ ÐºÐ°Ð´Ñ€ Ð¸Ð· Ð²Ñ‚Ð¾Ñ€Ð¾Ð³Ð¾ Ð²ÑŒÑŽÐ¿Ð¾Ñ€Ñ‚Ð° Ð½Ð° ÑÐºÑ€Ð°Ð½ (Ð½Ð° Ð¿Ñ€Ð°ÐºÑ‚Ð¸ÐºÐµ Ñƒ Ð½Ð°Ñ ÑÐºÑ€Ð°Ð½Ð½Ð°Ñ ÐºÐ°Ñ€Ñ‚Ð¸Ð½ÐºÐ° Ð¾Ð±Ð½Ð¾Ð²Ð»ÑÐµÑ‚ÑÑ Ð¼Ð¸Ð½Ð¸Ð¼ÑƒÐ¼ Ð² Ð´Ð²Ð° Ñ€Ð°Ð·Ð° Ñ€ÐµÐ¶Ðµ) [don't flush image into display for SecondVP-frame]
+		HW.m_pSwapChain->Present(bUseVSync ? 1 : 0, 0);
 #else
-    CHK_DX(HW.pDevice->EndScene());
-    HW.pDevice->Present(NULL, NULL, NULL, NULL);
+	CHK_DX(HW.pDevice->EndScene());
+	if (!Device.m_SecondViewport.IsSVPFrame() && !Device.m_SecondViewport.m_bCamReady) //--#SM+#-- +SecondVP+ ÐÐµ Ð²Ñ‹Ð²Ð¾Ð´Ð¸Ð¼ ÐºÐ°Ð´Ñ€ Ð¸Ð· Ð²Ñ‚Ð¾Ñ€Ð¾Ð³Ð¾ Ð²ÑŒÑŽÐ¿Ð¾Ñ€Ñ‚Ð° Ð½Ð° ÑÐºÑ€Ð°Ð½ (Ð½Ð° Ð¿Ñ€Ð°ÐºÑ‚Ð¸ÐºÐµ Ñƒ Ð½Ð°Ñ ÑÐºÑ€Ð°Ð½Ð½Ð°Ñ ÐºÐ°Ñ€Ñ‚Ð¸Ð½ÐºÐ° Ð¾Ð±Ð½Ð¾Ð²Ð»ÑÐµÑ‚ÑÑ Ð¼Ð¸Ð½Ð¸Ð¼ÑƒÐ¼ Ð² Ð´Ð²Ð° Ñ€Ð°Ð·Ð° Ñ€ÐµÐ¶Ðµ) [don't flush image into display for SecondVP-frame]
+		HW.pDevice->Present(NULL, NULL, NULL, NULL);
 #endif
+    // clang-format on
 }
 
 void D3DXRenderBase::ResourcesDestroyNecessaryTextures() { Resources->DestroyNecessaryTextures(); }

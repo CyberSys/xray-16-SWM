@@ -989,7 +989,9 @@ void CActor::UpdateCL()
 
             fire_disp_full = m_fdisp_controller.GetCurrentDispertion();
 
-            HUD().SetCrosshairDisp(fire_disp_full, 0.02f);
+            if (!Device.m_SecondViewport.IsSVPFrame()) //--#SM+#-- +SecondVP+ Чтобы перекрестие не скакало из за смены FOV (Sin!) [fix for crosshair shaking while SecondVP]
+                HUD().SetCrosshairDisp(fire_disp_full, 0.02f);
+
             HUD().ShowCrosshair(pWeapon->use_crosshair());
 #ifdef DEBUG
             HUD().SetFirstBulletCrosshairDisp(pWeapon->GetFirstBulletDisp());
@@ -1005,6 +1007,9 @@ void CActor::UpdateCL()
 
             psHUD_Flags.set(HUD_DRAW_RT, pWeapon->show_indicators());
 
+			// Обновляем двойной рендер от оружия [Update SecondVP with weapon data]
+			pWeapon->UpdateSecondVP();	//--#SM+#-- +SecondVP+
+
             // Обновляем информацию об оружии в шейдерах
             g_pGamePersistent->m_pGShaderConstants->hud_params.x = pWeapon->GetZRotatingFactor(); //--#SM+#--
             g_pGamePersistent->m_pGShaderConstants->hud_params.y = pWeapon->GetSecondVP_FovFactor(); //--#SM+#--
@@ -1019,6 +1024,10 @@ void CActor::UpdateCL()
 
             // Очищаем информацию об оружии в шейдерах
             g_pGamePersistent->m_pGShaderConstants->hud_params.set(0.f, 0.f, 0.f, 0.f); //--#SM+#--
+
+            // Отключаем второй вьюпорт  [Turn off SecondVP]
+            // + CWeapon::UpdateSecondVP();
+            Device.m_SecondViewport.SetSVPActive(false); //--#SM+#-- +SecondVP+
         }
     }
 
