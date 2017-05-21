@@ -18,8 +18,7 @@
 #include "xrCore/fastdelegate.h"
 #include "xrCore/ModuleLookup.hpp"
 
-#define VIEWPORT_NEAR 0.2f
-#define VIEWPORT_NEAR_HUD 0.2f //--#SM+#-- Фикс обрезания оружия при слишком близком нахождении к камере \ Fix for HUD clipping
+#define VIEWPORT_NEAR 0.05f //--#SM+#-- (Old: 0.2f) Фикс обрезания оружия при слишком близком нахождении к камере \ Fix for HUD clipping
 
 #define DEVICE_RESET_PRECACHE_FRAME_COUNT 10
 
