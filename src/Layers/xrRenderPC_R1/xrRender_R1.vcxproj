@@ -118,7 +118,7 @@
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
-      <AdditionalOptions>-Zm150 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>-Zm150 /wd4996 /wd4091 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <AdditionalDependencies>LuaJIT.lib;luabind.lib;nvapi.lib;amd_ags_x86.lib;oalib.lib;%(AdditionalDependencies)</AdditionalDependencies>

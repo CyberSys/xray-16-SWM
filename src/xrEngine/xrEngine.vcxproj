@@ -232,6 +232,7 @@
       <BrowseInformation />
       <WarningLevel>Level3</WarningLevel>
       <CompileAs>Default</CompileAs>
+      <AdditionalOptions>/wd4996 /wd4091 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
