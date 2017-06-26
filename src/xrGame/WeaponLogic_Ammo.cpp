@@ -11,9 +11,6 @@ bool CWeapon::IsMagazineCanBeUnload(bool bForGL)
     if (bForGL)
         return true;
 
-    if (m_bUseMagazines)
-        return false;
-
     return m_bAllowUnload;
 }
 
