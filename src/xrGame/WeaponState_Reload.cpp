@@ -5,6 +5,8 @@
 #include "stdafx.h"
 #include "Weapon_Shared.h"
 
+// Логика перезарядки для НПС в CObjectActionReload()
+
 // Пробуем начать перезарядку на клиенте
 bool CWeapon::Try2Reload(bool bCheckOnlyMode)
 {
@@ -138,8 +140,15 @@ bool CWeapon::Try2ReloadAmmoBelt()
 // Автоперезарядка при опустошении магазина
 bool CWeapon::Try2AutoReload()
 {
+    // НПС перезаряжаются из отдельной логики
+    if (!ParentIsActor())
+        return false;
+
+    // Проверяем условия авто-перезарядки
     if (m_bAllowAutoReload && GetAmmoElapsed() < GetAmmoMagSize())
         return Try2Reload();
+    
+    // Иначе не перезаряжаемся
     return false;
 }
 

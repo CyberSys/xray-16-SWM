@@ -296,7 +296,11 @@ void CWeapon::OnH_A_Chield()
     else
         SetQueueSize(WEAPON_ININITE_QUEUE); //--> Для НПС оружие всегда стреляет очередью
 
+    // Обновляем видимость аддонов
     UpdateAddonsVisibility();
+
+    // Обновляем параметры магазинного питания
+    LoadMagazinesParams(cNameSect_str());
 };
 
 // Колбек на активацию оружия (взяли в руки)

@@ -134,17 +134,11 @@ void CWeapon::Load(LPCSTR section)
             m_second_attack = new CWeaponKnifeHit(sSecondAttack, this);
     }
 
-    // Данное оружие является магазином
-    m_bIsMagazine = READ_IF_EXISTS(pSettings, r_bool, section, "is_magazine", false);
-
-    // Использовать магазины для перезарядки
-    m_bUseMagazines = READ_IF_EXISTS(pSettings, r_bool, section, "use_magazines", false);
-
     // Режим патронташа
     m_bUseAmmoBeltMode = READ_IF_EXISTS(pSettings, r_bool, section, "use_ammo_belt_mode", false);
 
-    //--> Патронташ и магазины не могут использоваться одновременно
-    R_ASSERT2((m_bUseMagazines && m_bUseAmmoBeltMode) == false, "Using ammo belt together with magazines not allowed!");
+    // Загружаем параметры магазинного питания
+    LoadMagazinesParams(section);
 
     // Визуализация патрона во время перезарядки и гильзы после выстрела
     m_sBulletVisual = READ_IF_EXISTS(pSettings, r_string, section, "hud_bullet_visual", NULL);
@@ -251,6 +245,22 @@ void CWeapon::LoadMainAmmoParams(LPCSTR section, bool bFromLoad, bool bDontUnloa
 
     if (bGMode)
         PerformSwitchGL();
+}
+
+// Загружаем параметры магазинного питания
+void CWeapon::LoadMagazinesParams(LPCSTR section)
+{
+    // Данное оружие является магазином
+    m_bIsMagazine = READ_IF_EXISTS(pSettings, r_bool, section, "is_magazine", false);
+
+    // Использовать магазины для перезарядки (только игрок)
+    if (ParentIsActor())
+        m_bUseMagazines = READ_IF_EXISTS(pSettings, r_bool, section, "use_magazines", false);
+    else
+        m_bUseMagazines = false;
+
+    //--> Патронташ и магазины не могут использоваться одновременно
+    R_ASSERT2((m_bUseMagazines && m_bUseAmmoBeltMode) == false, "Using ammo belt together with magazines not allowed!");
 }
 
 // Загрузить боевые характеристики пули
