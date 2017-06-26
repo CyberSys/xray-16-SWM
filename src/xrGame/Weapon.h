@@ -1314,6 +1314,7 @@ public:
     CWeapon* GetBestMagazine(LPCSTR section = NULL);
 
     virtual void LoadMainAmmoParams(LPCSTR section, bool bFromLoad = false, bool bDontUnload = false);
+    virtual void LoadMagazinesParams(LPCSTR section);
 
     bool       m_bUseAmmoBeltMode; // Пусть при одевании аддона устанавливается у клиента
     EAddons    m_AmmoBeltSlot;
