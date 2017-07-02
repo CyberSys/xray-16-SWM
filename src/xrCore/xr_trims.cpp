@@ -89,6 +89,50 @@ LPSTR _GetItem(LPCSTR src, int index, LPSTR dst, u32 const dst_size, char separa
     return dst;
 }
 
+// Get random part of the string with predefined probability
+LPSTR _GetRandomItem(LPCSTR src, LPSTR dst, u32 const dst_size, char sep_1, char sep_2, bool trim)
+{
+    string1024 sTempStr;
+    u8         count = _GetItemCount(src, sep_1);
+    s32        total = 0;
+
+    if (count > 0)
+    {
+        // Calculate probability vector for all parts of the string
+        U8Vec vecStringProb(count);
+        for (u8 i = 0; i < count; i++)
+        {
+            _GetItem(src, i, sTempStr, sep_1, "", false);
+            _GetItem(sTempStr, 1, sTempStr, sep_2, "1", true);
+            vecStringProb[i] = atoi(sTempStr);
+            total += vecStringProb[i];
+        }
+
+        // Get random part of the string
+        s32 rnd  = 1 + Random.randI(total); // randI(4) = 0 ... 3
+        s32 prev = 0;
+        for (u8 i = 0; i < count; i++)
+        {
+            if (rnd <= (prev + vecStringProb[i]))
+            {
+                // Extract part of the string
+                _GetItem(src, i, sTempStr, sep_1, "", false);
+
+                // Clean-up result from service data
+                _GetItem(sTempStr, 0, sTempStr, sep_2, "", trim);
+
+                // Return result
+                xr_strcpy(dst, dst_size, sTempStr);
+                break;
+            }
+            else
+                prev += vecStringProb[i]; // Check out next
+        }
+    }
+
+    return dst;
+}
+
 LPSTR _GetItems(LPCSTR src, int idx_start, int idx_end, LPSTR dst, char separator)
 {
     LPSTR n = dst;
