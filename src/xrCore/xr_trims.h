@@ -30,6 +30,15 @@ inline LPSTR _GetItem(
     return _GetItem(src, index, dst, count, separator, def, trim);
 }
 
+XRCORE_API LPSTR _GetRandomItem(LPCSTR src, LPSTR dst, u32 const dst_size, char sep_1 = ',', char sep_2 = ':', bool trim = true);
+
+template <int count>
+inline LPSTR _GetRandomItem(
+    LPCSTR src, char (&dst)[count], char sep_1 = ',', char sep_2 = ':', LPCSTR def = "", bool trim = true)
+{
+    return _GetRandomItem(src, dst, count, sep_1, sep_2, trim);
+}
+
 XRCORE_API LPSTR _GetItems(LPCSTR, int, int, LPSTR, char separator = ',');
 XRCORE_API pcstr _GetItems(pcstr, int, int, xr_string&, char);
 XRCORE_API LPCSTR _SetPos(LPCSTR src, u32 pos, char separator = ',');
