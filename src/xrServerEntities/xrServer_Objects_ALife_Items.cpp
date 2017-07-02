@@ -508,9 +508,51 @@ CSE_ALifeItemWeapon::CSE_ALifeItemWeapon(LPCSTR caSection) : CSE_ALifeItem(caSec
 
     m_ef_main_weapon_type = READ_IF_EXISTS(pSettings, r_u32, caSection, "ef_main_weapon_type", u32(-1));
     m_ef_weapon_type = READ_IF_EXISTS(pSettings, r_u32, caSection, "ef_weapon_type", u32(-1));
+
+    // Загружаем аддоны, установленные по умолчанию
+#define DEF_LoadDefaultAddon(DEF_status, DEF_output, DEF_line)                                \
+    {                                                                                         \
+        if (DEF_status == ALife::eAddonAttachable && pSettings->line_exist(s_name, DEF_line)) \
+        {                                                                                     \
+            string256 sTemp;                                                                  \
+            LPCSTR sAllAddons = pSettings->r_string(s_name, DEF_line);                        \
+            _GetRandomItem(sAllAddons, sTemp);                                                \
+            if (xr_strcmp(sTemp, "none") != 0)                                                \
+                DEF_output = sTemp;                                                           \
+        }                                                                                     \
+    }
+
+    DEF_LoadDefaultAddon(m_scope_status, m_scope_section, "scope_by_default");
+    DEF_LoadDefaultAddon(m_silencer_status, m_muzzle_section, "sil_by_default");
+    DEF_LoadDefaultAddon(m_grenade_launcher_status, m_launcher_section, "gl_by_default");
+    DEF_LoadDefaultAddon(m_magazine_status, m_magaz_section, "magaz_by_default");
+    DEF_LoadDefaultAddon(m_spec_1_status, m_spec_1_section, "spec_1_by_default");
+    DEF_LoadDefaultAddon(m_spec_2_status, m_spec_2_section, "spec_2_by_default");
+    DEF_LoadDefaultAddon(m_spec_3_status, m_spec_3_section, "spec_3_by_default");
+    DEF_LoadDefaultAddon(m_spec_4_status, m_spec_4_section, "spec_4_by_default");
+
+    AddonsLoad();
 }
 
 CSE_ALifeItemWeapon::~CSE_ALifeItemWeapon() {}
+
+void CSE_ALifeItemWeapon::refill_with_ammo(bool bForce)
+{
+    if (m_magaz_idx != u8(-1) && m_magaz_section != NULL)
+    { // При установленном магазине считываем из него
+        bool bFillMagazWithAmmo = bForce || READ_IF_EXISTS(pSettings, r_bool, s_name, "magaz_spawn_ammo", false);
+        if (bFillMagazWithAmmo)
+        {
+            LPCSTR sMagazineSect = READ_IF_EXISTS(pSettings, r_string, m_magaz_section, "magazine_name", NULL);
+            if (sMagazineSect != NULL)
+                a_elapsed = READ_IF_EXISTS(pSettings, r_u16, sMagazineSect, "ammo_mag_size", 0);
+        }
+    }
+    else
+    {
+        a_elapsed = get_ammo_magsize();
+    }
+}
 
 u32 CSE_ALifeItemWeapon::ef_main_weapon_type() const
 {
