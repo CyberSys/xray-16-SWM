@@ -268,6 +268,8 @@ public:
     u16 get_ammo_magsize();
     void clone_addons(CSE_ALifeItemWeapon* parent);
 
+    void refill_with_ammo(bool bForce = false); //--#SM+#--
+
     virtual BOOL Net_Relevant();
 
     virtual CSE_ALifeItemWeapon* cast_item_weapon() { return this; }

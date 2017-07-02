@@ -29,7 +29,7 @@ CSE_ALifeInventoryItem::CSE_ALifeInventoryItem(LPCSTR caSection)
     //—Ç–µ–∫—É—â–µ–µ —Å–æ—Å—Ç–æ—è–Ω–∏–µ –≤–µ—â–∏
     m_fCondition = 1.0f;
 
-    m_fMass = pSettings->r_float(caSection, "inv_weight");
+    m_fMass  = pSettings->r_float(caSection, "inv_weight");
     m_dwCost = pSettings->r_u32(caSection, "cost");
 
     if (pSettings->line_exist(caSection, "condition"))
@@ -98,8 +98,8 @@ void CSE_ALifeInventoryItem::STATE_Read(NET_Packet& tNetPacket, u16 size)
 }
 
 static inline bool check(const u8& mask, const u8& test) { return (!!(mask & test)); }
-const u32 CSE_ALifeInventoryItem::m_freeze_delta_time = 1000;
-const u32 CSE_ALifeInventoryItem::random_limit = 120;
+const u32          CSE_ALifeInventoryItem::m_freeze_delta_time = 1000;
+const u32          CSE_ALifeInventoryItem::random_limit        = 120;
 
 // if TRUE, then object sends update packet
 BOOL CSE_ALifeInventoryItem::Net_Relevant()
@@ -136,7 +136,7 @@ void CSE_ALifeInventoryItem::UPDATE_Write(NET_Packet& tNetPacket)
     }
 
     mask_num_items num_items;
-    num_items.mask = 0;
+    num_items.mask      = 0;
     num_items.num_items = m_u8NumItems;
 
     R_ASSERT2(num_items.num_items < (u8(1) << 5), make_string("%d", num_items.num_items));
@@ -195,7 +195,7 @@ void CSE_ALifeInventoryItem::UPDATE_Read(NET_Packet& tNetPacket)
 
     mask_num_items num_items;
     num_items.common = m_u8NumItems;
-    m_u8NumItems = num_items.num_items;
+    m_u8NumItems     = num_items.num_items;
 
     R_ASSERT2(m_u8NumItems < (u8(1) << 5), make_string("%d", m_u8NumItems));
 
@@ -274,15 +274,14 @@ void CSE_ALifeInventoryItem::FillProps(LPCSTR pref, PropItemVec& values)
     PHelper().CreateFloat(values, PrepareKey(pref, *base()->s_name, "Item condition"), &m_fCondition, 0.f, 1.f);
     CSE_ALifeObject* alife_object = smart_cast<CSE_ALifeObject*>(base());
     R_ASSERT(alife_object);
-    PHelper().CreateFlag32(values, PrepareKey(pref, *base()->s_name, "ALife\\Useful for AI"), &alife_object->m_flags,
-        CSE_ALifeObject::flUsefulForAI);
-    PHelper().CreateFlag32(values, PrepareKey(pref, *base()->s_name, "ALife\\Visible for AI"), &alife_object->m_flags,
-        CSE_ALifeObject::flVisibleForAI);
+    PHelper().CreateFlag32(values, PrepareKey(pref, *base()->s_name, "ALife\\Useful for AI"), &alife_object->m_flags, CSE_ALifeObject::flUsefulForAI);
+    PHelper().CreateFlag32(
+        values, PrepareKey(pref, *base()->s_name, "ALife\\Visible for AI"), &alife_object->m_flags, CSE_ALifeObject::flVisibleForAI);
 }
 #endif // #ifndef XRGAME_EXPORTS
 
 bool CSE_ALifeInventoryItem::bfUseful() { return (true); }
-u32 CSE_ALifeInventoryItem::update_rate() const { return (1000); }
+u32  CSE_ALifeInventoryItem::update_rate() const { return (1000); }
 bool CSE_ALifeInventoryItem::has_upgrade(const shared_str& upgrade_id)
 {
     return (std::find(m_upgrades.begin(), m_upgrades.end(), upgrade_id) != m_upgrades.end());
@@ -301,8 +300,7 @@ void CSE_ALifeInventoryItem::add_upgrade(const shared_str& upgrade_id)
 ////////////////////////////////////////////////////////////////////////////
 // CSE_ALifeItem
 ////////////////////////////////////////////////////////////////////////////
-CSE_ALifeItem::CSE_ALifeItem(LPCSTR caSection)
-    : CSE_ALifeDynamicObjectVisual(caSection), CSE_ALifeInventoryItem(caSection)
+CSE_ALifeItem::CSE_ALifeItem(LPCSTR caSection) : CSE_ALifeDynamicObjectVisual(caSection), CSE_ALifeInventoryItem(caSection)
 {
     m_physics_disabled = false;
 }
@@ -315,9 +313,9 @@ CSE_Abstract* CSE_ALifeItem::init()
     return (base());
 }
 
-CSE_Abstract* CSE_ALifeItem::base() { return (inherited1::base()); }
+CSE_Abstract*       CSE_ALifeItem::base() { return (inherited1::base()); }
 const CSE_Abstract* CSE_ALifeItem::base() const { return (inherited1::base()); }
-void CSE_ALifeItem::STATE_Write(NET_Packet& tNetPacket)
+void                CSE_ALifeItem::STATE_Write(NET_Packet& tNetPacket)
 {
     inherited1::STATE_Write(tNetPacket);
     inherited2::STATE_Write(tNetPacket);
@@ -399,9 +397,9 @@ void CSE_ALifeItem::OnEvent(NET_Packet& tNetPacket, u16 type, u32 time, ClientID
 ////////////////////////////////////////////////////////////////////////////
 CSE_ALifeItemTorch::CSE_ALifeItemTorch(LPCSTR caSection) : CSE_ALifeItem(caSection)
 {
-    m_active = false;
+    m_active             = false;
     m_nightvision_active = false;
-    m_attached = false;
+    m_attached           = false;
 }
 
 CSE_ALifeItemTorch::~CSE_ALifeItemTorch() {}
@@ -423,10 +421,10 @@ void CSE_ALifeItemTorch::UPDATE_Read(NET_Packet& tNetPacket)
 {
     inherited::UPDATE_Read(tNetPacket);
 
-    BYTE F = tNetPacket.r_u8();
-    m_active = !!(F & eTorchActive);
+    BYTE F               = tNetPacket.r_u8();
+    m_active             = !!(F & eTorchActive);
     m_nightvision_active = !!(F & eNightVisionActive);
-    m_attached = !!(F & eAttached);
+    m_attached           = !!(F & eAttached);
 }
 
 void CSE_ALifeItemTorch::UPDATE_Write(NET_Packet& tNetPacket)
@@ -449,9 +447,9 @@ void CSE_ALifeItemTorch::FillProps(LPCSTR pref, PropItemVec& values) { inherited
 ////////////////////////////////////////////////////////////////////////////
 CSE_ALifeItemWeapon::CSE_ALifeItemWeapon(LPCSTR caSection) : CSE_ALifeItem(caSection)
 {
-    a_current = 90;
-    a_elapsed = 0;
-    ammo_type = 0;
+    a_current   = 90;
+    a_elapsed   = 0;
+    ammo_type   = 0;
     a_elapsed_2 = 0;
     ammo_type_2 = 0;
 
@@ -459,34 +457,34 @@ CSE_ALifeItemWeapon::CSE_ALifeItemWeapon(LPCSTR caSection) : CSE_ALifeItem(caSec
     wpn_state = 0;
 
     m_u8CurFireMode = 0;
-    m_bGrenadeMode = 0;
+    m_bGrenadeMode  = 0;
 
     m_AmmoIDs.clear();
 
-    m_fHitPower = pSettings->r_float(caSection, "hit_power");
-    m_tHitType = ALife::g_tfString2HitType(pSettings->r_string(caSection, "hit_type"));
+    m_fHitPower      = pSettings->r_float(caSection, "hit_power");
+    m_tHitType       = ALife::g_tfString2HitType(pSettings->r_string(caSection, "hit_type"));
     m_caAmmoSections = pSettings->r_string(caSection, "ammo_class");
 
     if (pSettings->section_exist(caSection) && pSettings->line_exist(caSection, "visual"))
         set_visual(pSettings->r_string(caSection, "visual"));
 
-    m_scope_idx = u8(-1);
-    m_muzzle_idx = u8(-1);
+    m_scope_idx    = u8(-1);
+    m_muzzle_idx   = u8(-1);
     m_launcher_idx = u8(-1);
-    m_magaz_idx = u8(-1);
-    m_spec_1_idx = u8(-1);
-    m_spec_2_idx = u8(-1);
-    m_spec_3_idx = u8(-1);
-    m_spec_4_idx = u8(-1);
+    m_magaz_idx    = u8(-1);
+    m_spec_1_idx   = u8(-1);
+    m_spec_2_idx   = u8(-1);
+    m_spec_3_idx   = u8(-1);
+    m_spec_4_idx   = u8(-1);
 
-    m_scope_section = NULL;
-    m_muzzle_section = NULL;
+    m_scope_section    = NULL;
+    m_muzzle_section   = NULL;
     m_launcher_section = NULL;
-    m_magaz_section = NULL;
-    m_spec_1_section = NULL;
-    m_spec_2_section = NULL;
-    m_spec_3_section = NULL;
-    m_spec_4_section = NULL;
+    m_magaz_section    = NULL;
+    m_spec_1_section   = NULL;
+    m_spec_2_section   = NULL;
+    m_spec_3_section   = NULL;
+    m_spec_4_section   = NULL;
 
     load_addon_data("scopes_sect", m_scope_list);
     load_addon_data("muzzles_sect", m_muzzle_list);
@@ -497,21 +495,62 @@ CSE_ALifeItemWeapon::CSE_ALifeItemWeapon(LPCSTR caSection) : CSE_ALifeItem(caSec
     load_addon_data("specials_3_sect", m_spec_3_list);
     load_addon_data("specials_4_sect", m_spec_4_list);
 
-    m_scope_status = (EWeaponAddonStatus)(READ_IF_EXISTS(pSettings, r_s32, s_name, "scope_status", 0));
-    m_silencer_status = (EWeaponAddonStatus)(READ_IF_EXISTS(pSettings, r_s32, s_name, "silencer_status", 0));
-    m_grenade_launcher_status =
-        (EWeaponAddonStatus)(READ_IF_EXISTS(pSettings, r_s32, s_name, "grenade_launcher_status", 0));
-    m_magazine_status = (EWeaponAddonStatus)(READ_IF_EXISTS(pSettings, r_s32, s_name, "magazine_status", 0));
-    m_spec_1_status = (EWeaponAddonStatus)(READ_IF_EXISTS(pSettings, r_s32, s_name, "special_1_status", 0));
-    m_spec_2_status = (EWeaponAddonStatus)(READ_IF_EXISTS(pSettings, r_s32, s_name, "special_2_status", 0));
-    m_spec_3_status = (EWeaponAddonStatus)(READ_IF_EXISTS(pSettings, r_s32, s_name, "special_3_status", 0));
-    m_spec_4_status = (EWeaponAddonStatus)(READ_IF_EXISTS(pSettings, r_s32, s_name, "special_4_status", 0));
+    m_scope_status            = (EWeaponAddonStatus)(READ_IF_EXISTS(pSettings, r_s32, s_name, "scope_status", 0));
+    m_silencer_status         = (EWeaponAddonStatus)(READ_IF_EXISTS(pSettings, r_s32, s_name, "silencer_status", 0));
+    m_grenade_launcher_status = (EWeaponAddonStatus)(READ_IF_EXISTS(pSettings, r_s32, s_name, "grenade_launcher_status", 0));
+    m_magazine_status         = (EWeaponAddonStatus)(READ_IF_EXISTS(pSettings, r_s32, s_name, "magazine_status", 0));
+    m_spec_1_status           = (EWeaponAddonStatus)(READ_IF_EXISTS(pSettings, r_s32, s_name, "special_1_status", 0));
+    m_spec_2_status           = (EWeaponAddonStatus)(READ_IF_EXISTS(pSettings, r_s32, s_name, "special_2_status", 0));
+    m_spec_3_status           = (EWeaponAddonStatus)(READ_IF_EXISTS(pSettings, r_s32, s_name, "special_3_status", 0));
+    m_spec_4_status           = (EWeaponAddonStatus)(READ_IF_EXISTS(pSettings, r_s32, s_name, "special_4_status", 0));
 
     m_ef_main_weapon_type = READ_IF_EXISTS(pSettings, r_u32, caSection, "ef_main_weapon_type", u32(-1));
     m_ef_weapon_type = READ_IF_EXISTS(pSettings, r_u32, caSection, "ef_weapon_type", u32(-1));
+
+    // –ó–∞–≥—Ä—É–∂–∞–µ–º –∞–¥–¥–æ–Ω—ã, —É—Å—Ç–∞–Ω–æ–≤–ª–µ–Ω–Ω—ã–µ –ø–æ —É–º–æ–ª—á–∞–Ω–∏—é
+#define DEF_LoadDefaultAddon(DEF_status, DEF_output, DEF_line)                                \
+    {                                                                                         \
+        if (DEF_status == ALife::eAddonAttachable && pSettings->line_exist(s_name, DEF_line)) \
+        {                                                                                     \
+            string256 sTemp;                                                                  \
+            LPCSTR    sAllAddons = pSettings->r_string(s_name, DEF_line);                     \
+            _GetRandomItem(sAllAddons, sTemp);                                                \
+            if (xr_strcmp(sTemp, "none") != 0)                                                \
+                DEF_output = sTemp;                                                           \
+        }                                                                                     \
+    }
+
+    DEF_LoadDefaultAddon(m_scope_status, m_scope_section, "scope_by_default");
+    DEF_LoadDefaultAddon(m_silencer_status, m_muzzle_section, "sil_by_default");
+    DEF_LoadDefaultAddon(m_grenade_launcher_status, m_launcher_section, "gl_by_default");
+    DEF_LoadDefaultAddon(m_magazine_status, m_magaz_section, "magaz_by_default");
+    DEF_LoadDefaultAddon(m_spec_1_status, m_spec_1_section, "spec_1_by_default");
+    DEF_LoadDefaultAddon(m_spec_2_status, m_spec_2_section, "spec_2_by_default");
+    DEF_LoadDefaultAddon(m_spec_3_status, m_spec_3_section, "spec_3_by_default");
+    DEF_LoadDefaultAddon(m_spec_4_status, m_spec_4_section, "spec_4_by_default");
+
+    AddonsLoad();
 }
 
 CSE_ALifeItemWeapon::~CSE_ALifeItemWeapon() {}
+
+void CSE_ALifeItemWeapon::refill_with_ammo(bool bForce)
+{
+    if (m_magaz_idx != u8(-1) && m_magaz_section != NULL)
+    { // –ü—Ä–∏ —É—Å—Ç–∞–Ω–æ–≤–ª–µ–Ω–Ω–æ–º –º–∞–≥–∞–∑–∏–Ω–µ —Å—á–∏—Ç—ã–≤–∞–µ–º –∏–∑ –Ω–µ–≥–æ
+        bool bFillMagazWithAmmo = bForce || READ_IF_EXISTS(pSettings, r_bool, s_name, "magaz_spawn_ammo", false);
+        if (bFillMagazWithAmmo)
+        {
+            LPCSTR sMagazineSect = READ_IF_EXISTS(pSettings, r_string, m_magaz_section, "magazine_name", NULL);
+            if (sMagazineSect != NULL)
+                a_elapsed = READ_IF_EXISTS(pSettings, r_u16, sMagazineSect, "ammo_mag_size", 0);
+        }
+    }
+    else
+    {
+        a_elapsed = get_ammo_magsize();
+    }
+}
 
 void CSE_ALifeItemWeapon::load_addon_data(LPCSTR sAddonsList, ADDONS_VECTOR& m_addons_list)
 {
@@ -596,7 +635,7 @@ void CSE_ALifeItemWeapon::AddonsUpdate()
         m_scope_section = m_scope_list[m_scope_idx];
     else
     {
-        m_scope_idx = u8(-1);
+        m_scope_idx     = u8(-1);
         m_scope_section = NULL;
     }
 
@@ -604,7 +643,7 @@ void CSE_ALifeItemWeapon::AddonsUpdate()
         m_muzzle_section = m_muzzle_list[m_muzzle_idx];
     else
     {
-        m_muzzle_idx = u8(-1);
+        m_muzzle_idx     = u8(-1);
         m_muzzle_section = NULL;
     }
 
@@ -612,7 +651,7 @@ void CSE_ALifeItemWeapon::AddonsUpdate()
         m_launcher_section = m_launcher_list[m_launcher_idx];
     else
     {
-        m_launcher_idx = u8(-1);
+        m_launcher_idx     = u8(-1);
         m_launcher_section = NULL;
     }
 
@@ -620,7 +659,7 @@ void CSE_ALifeItemWeapon::AddonsUpdate()
         m_magaz_section = m_magaz_list[m_magaz_idx];
     else
     {
-        m_magaz_idx = u8(-1);
+        m_magaz_idx     = u8(-1);
         m_magaz_section = NULL;
     }
 
@@ -628,7 +667,7 @@ void CSE_ALifeItemWeapon::AddonsUpdate()
         m_spec_1_section = m_spec_1_list[m_spec_1_idx];
     else
     {
-        m_spec_1_idx = u8(-1);
+        m_spec_1_idx     = u8(-1);
         m_spec_1_section = NULL;
     }
 
@@ -636,7 +675,7 @@ void CSE_ALifeItemWeapon::AddonsUpdate()
         m_spec_2_section = m_spec_2_list[m_spec_2_idx];
     else
     {
-        m_spec_2_idx = u8(-1);
+        m_spec_2_idx     = u8(-1);
         m_spec_2_section = NULL;
     }
 
@@ -644,7 +683,7 @@ void CSE_ALifeItemWeapon::AddonsUpdate()
         m_spec_3_section = m_spec_3_list[m_spec_3_idx];
     else
     {
-        m_spec_3_idx = u8(-1);
+        m_spec_3_idx     = u8(-1);
         m_spec_3_section = NULL;
     }
 
@@ -652,21 +691,21 @@ void CSE_ALifeItemWeapon::AddonsUpdate()
         m_spec_4_section = m_spec_4_list[m_spec_4_idx];
     else
     {
-        m_spec_4_idx = u8(-1);
+        m_spec_4_idx     = u8(-1);
         m_spec_4_section = NULL;
     }
 }
 
 void CSE_ALifeItemWeapon::AddonsLoad()
 {
-    m_scope_idx = u8(-1);
-    m_muzzle_idx = u8(-1);
+    m_scope_idx    = u8(-1);
+    m_muzzle_idx   = u8(-1);
     m_launcher_idx = u8(-1);
-    m_magaz_idx = u8(-1);
-    m_spec_1_idx = u8(-1);
-    m_spec_2_idx = u8(-1);
-    m_spec_3_idx = u8(-1);
-    m_spec_4_idx = u8(-1);
+    m_magaz_idx    = u8(-1);
+    m_spec_1_idx   = u8(-1);
+    m_spec_2_idx   = u8(-1);
+    m_spec_3_idx   = u8(-1);
+    m_spec_4_idx   = u8(-1);
 
 #define DEF_LoadAddonIDX(DEF_list, DEF_section, DEF_idx) \
     {                                                    \
@@ -696,14 +735,14 @@ void CSE_ALifeItemWeapon::clone_addons(CSE_ALifeItemWeapon* parent)
 {
     parent->AddonsUpdate();
 
-    m_scope_section = parent->m_scope_section;
-    m_muzzle_section = parent->m_muzzle_section;
+    m_scope_section    = parent->m_scope_section;
+    m_muzzle_section   = parent->m_muzzle_section;
     m_launcher_section = parent->m_launcher_section;
-    m_magaz_section = parent->m_magaz_section;
-    m_spec_1_section = parent->m_spec_1_section;
-    m_spec_2_section = parent->m_spec_2_section;
-    m_spec_3_section = parent->m_spec_3_section;
-    m_spec_4_section = parent->m_spec_4_section;
+    m_magaz_section    = parent->m_magaz_section;
+    m_spec_1_section   = parent->m_spec_1_section;
+    m_spec_2_section   = parent->m_spec_2_section;
+    m_spec_3_section   = parent->m_spec_3_section;
+    m_spec_4_section   = parent->m_spec_4_section;
 
     AddonsLoad();
 }
@@ -746,7 +785,7 @@ void CSE_ALifeItemWeapon::UPDATE_Read(NET_Packet& tNetPacket)
     tNetPacket.r_u8(m_spec_3_idx);
     tNetPacket.r_u8(m_spec_4_idx);
 
-    // SM_TODO —Óı‡ÌÂÌËÂ ÚËÔÓ‚ Ô‡ÚÓÌÓ‚ <!>
+    // SM_TODO –°–æ—Ö—Ä–∞–Ω–µ–Ω–∏–µ —Ç–∏–ø–æ–≤ –ø–∞—Ç—Ä–æ–Ω–æ–≤ <!>
     /*
     m_AmmoIDs.clear();
     u8 AmmoCount = tNetPacket.r_u8();
@@ -795,7 +834,7 @@ void CSE_ALifeItemWeapon::UPDATE_Write(NET_Packet& tNetPacket)
 
 void CSE_ALifeItemWeapon::STATE_Read(NET_Packet& tNetPacket, u16 size)
 {
-    // SM_TODO: “ÛÚ Ë ‚ÂÁ‰Â ˜ÚÂÌËÂ ‚ÂÒËÈ Ò‰ÂÎ‡È, ˜ÚÓ·˚ ÒÓ‚ÏÂÒÚËÏÓÒÚ¸ Ò all.spawn Ë —ƒ  ÌÂ ÔÓÙË„‡˜ËÚ¸ !!!
+    // SM_TODO: –¢—É—Ç –∏ –≤–µ–∑–¥–µ —á—Ç–µ–Ω–∏–µ –≤–µ—Ä—Å–∏–π —Å–¥–µ–ª–∞–π, —á—Ç–æ–±—ã —Å–æ–≤–º–µ—Å—Ç–∏–º–æ—Å—Ç—å —Å all.spawn –∏ –°–î–ö –Ω–µ –ø–æ—Ñ–∏–≥–∞—á–∏—Ç—å !!!
     // if (m_wVersion > 40)
 
     inherited::STATE_Read(tNetPacket, size);
@@ -863,7 +902,7 @@ void CSE_ALifeItemWeapon::OnEvent(NET_Packet& tNetPacket, u16 type, u32 time, Cl
     }
 }
 
-u8 CSE_ALifeItemWeapon::get_slot() { return ((u8)pSettings->r_u8(s_name, "slot")); }
+u8  CSE_ALifeItemWeapon::get_slot() { return ((u8)pSettings->r_u8(s_name, "slot")); }
 u16 CSE_ALifeItemWeapon::get_ammo_limit() { return (u16)pSettings->r_u16(s_name, "ammo_limit"); }
 u16 CSE_ALifeItemWeapon::get_ammo_total() { return ((u16)a_current); }
 u16 CSE_ALifeItemWeapon::get_ammo_elapsed() { return ((u16)a_elapsed); }
@@ -890,7 +929,7 @@ void CSE_ALifeItemWeapon::FillProps(LPCSTR pref, PropItemVec& items)
     PHelper().CreateU8(items, PrepareKey(pref, *s_name, "Ammo type:"), &ammo_type, 0, 255, 1);
     PHelper().CreateU16(items, PrepareKey(pref, *s_name, "Ammo: in magazine"), &a_elapsed, 0, 30, 1);
 
-    // SM_TODO: ÕÓ‚˚Â ‡‰‰ÓÌ˚, m_addon_flags ÛÊÂ ÌÂ ÒÛ˘ÂÒÚ‚ÛÂÚ
+    // SM_TODO: –ù–æ–≤—ã–µ –∞–¥–¥–æ–Ω—ã, m_addon_flags —É–∂–µ –Ω–µ —Å—É—â–µ—Å—Ç–≤—É–µ—Ç
     /*
     if (m_scope_status == ALife::eAddonAttachable)
         PHelper().CreateFlag8(items, PrepareKey(pref, *s_name, "Addons\\Scope"), &m_addon_flags, eWeaponAddonScope);
@@ -922,9 +961,7 @@ void CSE_ALifeItemWeaponShotGun::FillProps(LPCSTR pref, PropItemVec& items) { in
 ////////////////////////////////////////////////////////////////////////////
 // CSE_ALifeItemWeaponAutoShotGun   --#SM+#--
 ////////////////////////////////////////////////////////////////////////////
-CSE_ALifeItemWeaponAutoShotGun::CSE_ALifeItemWeaponAutoShotGun(LPCSTR caSection) : CSE_ALifeItemWeaponShotGun(caSection)
-{
-}
+CSE_ALifeItemWeaponAutoShotGun::CSE_ALifeItemWeaponAutoShotGun(LPCSTR caSection) : CSE_ALifeItemWeaponShotGun(caSection) {}
 
 CSE_ALifeItemWeaponAutoShotGun::~CSE_ALifeItemWeaponAutoShotGun() {}
 void CSE_ALifeItemWeaponAutoShotGun::UPDATE_Read(NET_Packet& P) { inherited::UPDATE_Read(P); }
@@ -951,10 +988,7 @@ void CSE_ALifeItemWeaponMagazined::FillProps(LPCSTR pref, PropItemVec& items) { 
 ////////////////////////////////////////////////////////////////////////////
 // CSE_ALifeItemWeaponMagazinedWGL  --#SM+#--
 ////////////////////////////////////////////////////////////////////////////
-CSE_ALifeItemWeaponMagazinedWGL::CSE_ALifeItemWeaponMagazinedWGL(LPCSTR caSection)
-    : CSE_ALifeItemWeaponMagazined(caSection)
-{
-}
+CSE_ALifeItemWeaponMagazinedWGL::CSE_ALifeItemWeaponMagazinedWGL(LPCSTR caSection) : CSE_ALifeItemWeaponMagazined(caSection) {}
 
 CSE_ALifeItemWeaponMagazinedWGL::~CSE_ALifeItemWeaponMagazinedWGL() {}
 void CSE_ALifeItemWeaponMagazinedWGL::UPDATE_Read(NET_Packet& P) { inherited::UPDATE_Read(P); }
@@ -1021,7 +1055,7 @@ CSE_ALifeItemDetector::CSE_ALifeItemDetector(LPCSTR caSection) : CSE_ALifeItem(c
 }
 
 CSE_ALifeItemDetector::~CSE_ALifeItemDetector() {}
-u32 CSE_ALifeItemDetector::ef_detector_type() const { return (m_ef_detector_type); }
+u32  CSE_ALifeItemDetector::ef_detector_type() const { return (m_ef_detector_type); }
 void CSE_ALifeItemDetector::STATE_Read(NET_Packet& tNetPacket, u16 size)
 {
     if (m_wVersion > 20)
@@ -1065,9 +1099,9 @@ BOOL CSE_ALifeItemArtefact::Net_Relevant()
 ////////////////////////////////////////////////////////////////////////////
 CSE_ALifeItemPDA::CSE_ALifeItemPDA(LPCSTR caSection) : CSE_ALifeItem(caSection)
 {
-    m_original_owner = 0xffff;
+    m_original_owner     = 0xffff;
     m_specific_character = NULL;
-    m_info_portion = NULL;
+    m_info_portion       = NULL;
 }
 
 CSE_ALifeItemPDA::~CSE_ALifeItemPDA() {}
@@ -1084,7 +1118,7 @@ void CSE_ALifeItemPDA::STATE_Read(NET_Packet& tNetPacket, u16 size)
             int tmp, tmp2;
             tNetPacket.r(&tmp, sizeof(int));
             tNetPacket.r(&tmp2, sizeof(int));
-            m_info_portion = NULL;
+            m_info_portion       = NULL;
             m_specific_character = NULL;
         }
         else
@@ -1227,11 +1261,8 @@ CSE_ALifeItemCustomOutfit::CSE_ALifeItemCustomOutfit(LPCSTR caSection) : CSE_ALi
 }
 
 CSE_ALifeItemCustomOutfit::~CSE_ALifeItemCustomOutfit() {}
-u32 CSE_ALifeItemCustomOutfit::ef_equipment_type() const { return (m_ef_equipment_type); }
-void CSE_ALifeItemCustomOutfit::STATE_Read(NET_Packet& tNetPacket, u16 size)
-{
-    inherited::STATE_Read(tNetPacket, size);
-}
+u32  CSE_ALifeItemCustomOutfit::ef_equipment_type() const { return (m_ef_equipment_type); }
+void CSE_ALifeItemCustomOutfit::STATE_Read(NET_Packet& tNetPacket, u16 size) { inherited::STATE_Read(tNetPacket, size); }
 
 void CSE_ALifeItemCustomOutfit::STATE_Write(NET_Packet& tNetPacket) { inherited::STATE_Write(tNetPacket); }
 void CSE_ALifeItemCustomOutfit::UPDATE_Read(NET_Packet& tNetPacket)
