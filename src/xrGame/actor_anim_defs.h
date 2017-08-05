@@ -39,6 +39,13 @@ struct STorsoWpn
     MotionID all_attack_0;
     MotionID all_attack_1;
     MotionID all_attack_2;
+
+    //анимации для удара прикладом --#SM+#--
+    MotionID butt_kick;
+
+    //костыли для доступа к анимации перезарядки в три стадии --#SM+#--
+    MotionID reload_insert_bullet;
+
     void Create(IKinematicsAnimated* K, LPCSTR base0, LPCSTR base1);
 };
 

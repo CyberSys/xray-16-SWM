@@ -20,6 +20,8 @@ CWeapon::CWeapon() : CShellLauncher(this)
     m_bTriStateReload_gl   = false;
     m_bTriStateReload_ab   = false;
     m_bTriStateReload_frab = false;
+    
+    m_bTriStateReload_anim_hack = false;
 
     m_Offset.identity();
     m_StrapOffset.identity();

@@ -128,6 +128,11 @@ void STorsoWpn::Create(IKinematicsAnimated* K, LPCSTR base0, LPCSTR base1)
     all_attack_0 = K->ID_Cycle_Safe(strconcat(sizeof(buf), buf, base0, "_all", base1, "_attack_0"));
     all_attack_1 = K->ID_Cycle_Safe(strconcat(sizeof(buf), buf, base0, "_all", base1, "_attack_1"));
     all_attack_2 = K->ID_Cycle_Safe(strconcat(sizeof(buf), buf, base0, "_all", base1, "_attack_2"));
+
+    //--#SM+# Begin--
+    butt_kick            = K->ID_Cycle_Safe("norm_torso_5_attack_0");
+    reload_insert_bullet = K->ID_Cycle_Safe(strconcat(sizeof(buf), buf, base0, "_torso", "_9", "_reload_1"));
+    //--#SM+# End--
 }
 void SAnimState::Create(IKinematicsAnimated* K, LPCSTR base0, LPCSTR base1)
 {
@@ -483,7 +488,8 @@ void CActor::g_SetAnimation(u32 mstate_rl)
                                 else
                                     M_torso = TW->fire_idle;
                                 break;
-
+                            case CWeapon::eReloadFrAB: //--#SM+#--
+                            case CWeapon::eSwitchMag:  //--#SM+#--
                             case CWeapon::eReload: M_torso = TW->reload; break;
                             case CWeapon::eShowing: M_torso = TW->draw; break;
                             case CWeapon::eHiding: M_torso = TW->holster; break;
@@ -494,20 +500,24 @@ void CActor::g_SetAnimation(u32 mstate_rl)
                         {
                             switch (W->GetState())
                             {
+                            case CWeapon::eKick: M_torso = W->IsKickAtRunActive() ? TW->zoom : TW->butt_kick; break;    //--#SM+#--
                             case CWeapon::eIdle: M_torso = W->IsZoomed() ? TW->zoom : TW->moving[moving_idx]; break;
+                            case CWeapon::ePump: //--#SM+#--
                             case CWeapon::eFire: M_torso = W->IsZoomed() ? TW->attack_zoom : TW->attack; break;
                             case CWeapon::eFire2: M_torso = W->IsZoomed() ? TW->attack_zoom : TW->attack; break;
+                            case CWeapon::eReloadFrAB: //--#SM+#--
+                            case CWeapon::eSwitchMag:  //--#SM+#--
                             case CWeapon::eReload:
                                 if (!R3)
                                     M_torso = TW->reload;
                                 else
                                 {
                                     CWeapon::EWeaponSubStates sub_st = W->GetReloadState();
-                                    switch (sub_st)
+                                    switch (sub_st) //--#SM+#--
                                     {
                                     case CWeapon::eSubstateReloadBegin: M_torso = TW->reload; break;
-                                    case CWeapon::eSubstateReloadInProcess: M_torso = TW->reload_1; break;
-                                    case CWeapon::eSubstateReloadEnd: M_torso = TW->reload_2; break;
+                                    case CWeapon::eSubstateReloadInProcess: M_torso = W->TriStateReloadAnimHack() ? TW->reload_insert_bullet : TW->reload_1; break;
+                                    case CWeapon::eSubstateReloadEnd: M_torso = W->TriStateReloadAnimHack() ? TW->draw : TW->reload_2; break;
                                     default: M_torso = TW->reload; break;
                                     }
                                 }

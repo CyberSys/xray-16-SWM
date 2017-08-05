@@ -454,11 +454,15 @@ public:
     bool             IsTriStateReload() const;
     EWeaponSubStates GetReloadState() const { return (EWeaponSubStates)m_sub_state; }
 
+    IC bool TriStateReloadAnimHack() const { return m_bTriStateReload_anim_hack; }
+
 protected:
     bool m_bTriStateReload_main;
     bool m_bTriStateReload_gl;
     bool m_bTriStateReload_ab;
     bool m_bTriStateReload_frab;
+
+    bool m_bTriStateReload_anim_hack;
 
     u8 m_sub_state;
     // a misfire happens, you'll need to rearm weapon
@@ -863,6 +867,8 @@ protected:
 
 public:
     IC bool Need2Pump() { return m_bNeed2Pump; }
+
+    IC bool IsKickAtRunActive() { return m_bKickAtRun; }
 
     float         GetBaseDispersion(float cartridge_k);
     float         GetFireDispersion(bool with_cartridge, bool for_crosshair = false);
