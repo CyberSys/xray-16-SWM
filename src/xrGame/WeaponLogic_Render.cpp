@@ -935,3 +935,65 @@ void CWeapon::UpdateActorTorchLightPosFromHUD(Fvector* pTorchPos)
     if (m_bipods.m_iBipodState != bipods_data::eBS_SwitchedOFF)
         UpdateActorTorchLightPosFromBipods(pTorchPos);
 }
+
+// Обновление магазина на мировой модели во время перезарядки
+void CWeapon::UpdateMagazine3p(bool bForceUpdate)
+{
+    SAddonData*  pMagaz       = GetAddonBySlot(eMagaz);
+    IGameObject* pParent      = H_Parent();
+    bool         bValidState  = (GetState() == eReload || GetState() == eSwitchMag);
+    bool         bValidTime   = CurrStateTime() > m_iMagaz3pHideStartTime && CurrStateTime() <= m_iMagaz3pHideEndTime;
+    bool         bValidParent = pParent == NULL ? false : (!!pParent->cast_stalker() || !!pParent->cast_actor());
+    bool         bIsHidden    = IsHidden();
+
+    if (!bIsHidden && m_bMagaz3pHideWhileReload && pMagaz->bActive && bValidState && bValidParent && bValidTime)
+    {
+        if (!m_bMagaz3pIsHidden || bForceUpdate)
+        {
+            // Скрываем магазин на самом оружии
+            pMagaz->bHideVis3p = true;
+
+            // Цепляем магазин к NPC
+            LPCSTR world_vis = pMagaz->GetVisuals("visuals_world", true).c_str();
+
+            if (bForceUpdate)
+                H_Parent()->cast_game_object()->DetachAdditionalVisual("attachable_magazin_3p");
+
+            if (world_vis != NULL)
+            {
+                string256 str_buffer;
+                xr_sprintf(str_buffer, "%s__reload", world_vis);
+
+                if (pSettings->section_exist(str_buffer))
+                {
+                    attachable_visual* pOut          = NULL;
+                    bool               bAttachResult = H_Parent()->cast_game_object()->AttachAdditionalVisual("attachable_magazin_3p", &pOut);
+
+                    // Загружаем параметры аттача магазина в руках НПС
+                    if (pOut != NULL && (bAttachResult == true))
+                    {
+                        pOut->ReLoad(str_buffer);
+                    }
+                }
+            }
+
+            // Устанавливаем флаг
+            m_bMagaz3pIsHidden = true;
+        }
+    }
+    else
+    {
+        if (m_bMagaz3pIsHidden)
+        {
+            // Отображаем магазин на оружии
+            pMagaz->bHideVis3p = false;
+
+            // Скрываем его у НПС
+            if (bValidParent)
+                H_Parent()->cast_game_object()->DetachAdditionalVisual("attachable_magazin_3p");
+
+            // Снимаем флаг
+            m_bMagaz3pIsHidden = false;
+        }
+    }
+}

@@ -4,8 +4,9 @@
 //--#SM_TODO+#--
 SAddonData::SAddonData()
 {
-    bActive   = false;
-    addon_idx = empty_addon_idx;
+    bActive    = false;
+    bHideVis3p = false;
+    addon_idx  = empty_addon_idx;
 }
 
 SAddonData::~SAddonData() { delete_data(m_addons_list); }
@@ -15,6 +16,7 @@ u32 SAddonData::AddonsCount() { return m_addons_list.size(); }
 void SAddonData::Initialize(LPCSTR section, LPCSTR sAddonsList, LPCSTR sAddonAlias, LPCSTR sAttachAlias, LPCSTR sAddonBone) // TODO: В конструктор
 {
     bActive     = false;
+    bHideVis3p  = false;
     addon_idx   = empty_addon_idx; // Это индекс аддона в таблице (его номер) а не тип аддона
     m_condition = 0.0f;
     m_battery   = 0.0f;

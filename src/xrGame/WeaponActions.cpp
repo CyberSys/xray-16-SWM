@@ -258,6 +258,7 @@ void CWeapon::OnH_B_Independent(bool just_before_destroy)
     m_zoom_params.m_bIsZoomModeNow = false;
 
     UpdateXForm();
+    UpdateMagazine3p();
 }
 
 // Колбек ПОСЛЕ детача объекта от старого родителя, новый родитель уже указан
@@ -301,6 +302,9 @@ void CWeapon::OnH_A_Chield()
 
     // Обновляем параметры магазинного питания
     LoadMagazinesParams(cNameSect_str());
+
+    // Обновляем магазин от третьего лица
+    UpdateMagazine3p();
 };
 
 // Колбек на активацию оружия (взяли в руки)
@@ -448,4 +452,7 @@ void CWeapon::UpdateCL()
 
     // Обновляем сошки
     UpdateBipods();
+
+    // Обновляем магазин от третьего лица
+    UpdateMagazine3p();
 }
