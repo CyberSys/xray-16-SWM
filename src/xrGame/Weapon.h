@@ -378,6 +378,8 @@ public:
     bool PlaySoundMotion(const shared_str& M, BOOL bMixIn, LPCSTR alias, bool bAssert = false, int anim_idx = -1);
     bool IsWGLAnimRequired();
 
+    bool PlayWorldMotion(const shared_str& M, BOOL bMixIn);
+
     virtual void ReloadAllSounds(); // --#SM+#-- Перезагрузить все звуки оружия, с учётом текущих аддонов
     void         ReloadSound(       // --#SM+#-- Перезагрузить конкретный звук, с учётом текущих аддонов
                 shared_str const& strName,

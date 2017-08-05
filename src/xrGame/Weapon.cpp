@@ -208,17 +208,6 @@ BOOL CWeapon::net_Spawn(CSE_Abstract* DC)
     SetAmmoTypeSafeFor(E->ammo_type_2, true);
     VERIFY((u32)iAmmoElapsed2 == m_magazine2.size());
 
-    // TODO: Переделать SM_TODO
-    if (pSettings->line_exist(this->cNameSect_str(), "anm_world_idle"))
-    {
-        IKinematicsAnimated* pWeaponVisual = Visual()->dcast_PKinematicsAnimated();
-        if (pWeaponVisual)
-        {
-            // Msg("Animation [%s] played for [%s]", pSettings->r_string(this->cNameSect_str(), "anm_world_idle"), this->cNameSect_str());
-            pWeaponVisual->PlayCycle(pSettings->r_string(this->cNameSect_str(), "anm_world_idle"), TRUE);
-        }
-    }
-
     return inherited::net_Spawn(DC);
 }
 
