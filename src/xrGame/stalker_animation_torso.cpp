@@ -170,6 +170,7 @@ MotionID CStalkerAnimationManager::unknown_object_animation(u32 slot, const EBod
 MotionID CStalkerAnimationManager::weapon_animation(u32 slot, const EBodyState& body_state)
 {
     const xr_vector<CAniVector>& animation = m_data_storage->m_part_animations.A[body_state].m_torso.A[slot].A;
+    const xr_vector<CAniVector>& animation_9 = m_data_storage->m_part_animations.A[body_state].m_torso.A[9].A;  //--#SM+#--
 
     switch (m_weapon->GetState())
     {
@@ -178,8 +179,8 @@ MotionID CStalkerAnimationManager::weapon_animation(u32 slot, const EBodyState& 
         switch (m_weapon->GetReloadState())
         {
         case CWeapon::eSubstateReloadBegin: return (animation[4].A[0]);
-        case CWeapon::eSubstateReloadInProcess: return (animation[4].A[1]);
-        case CWeapon::eSubstateReloadEnd: return (animation[4].A[2]);
+        case CWeapon::eSubstateReloadInProcess: return (m_weapon->TriStateReloadAnimHack() ? animation_9[4].A[1] : animation[4].A[1]);  //--#SM+#--
+        case CWeapon::eSubstateReloadEnd: return (m_weapon->TriStateReloadAnimHack() ? torso().select(animation[0].A) : animation[4].A[2]);    //--#SM+#--
 
         default: NODEFAULT;
         }
@@ -190,6 +191,7 @@ MotionID CStalkerAnimationManager::weapon_animation(u32 slot, const EBodyState& 
     case CWeapon::eShowing: return (torso().select(animation[0].A));
     case CWeapon::eHiding: return (torso().select(animation[3].A));
     case CWeapon::eHidden: return (no_object_animation(body_state));
+    case CWeapon::ePump:  //--#SM+#--
     case CWeapon::eFire:
     case CWeapon::eFire2:
     {

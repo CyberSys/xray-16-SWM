@@ -26,6 +26,8 @@ void CWeapon::Load(LPCSTR section)
     m_bTriStateReload_ab   = READ_IF_EXISTS(pSettings, r_bool, section, "tri_state_reload_ab", false);
     m_bTriStateReload_frab = READ_IF_EXISTS(pSettings, r_bool, section, "tri_state_reload_frab", false);
 
+    m_bTriStateReload_anim_hack = READ_IF_EXISTS(pSettings, r_bool, section, "tri_state_rld_anim_hack", false);
+
     // Параметры износа
     misfireStartCondition   = pSettings->r_float(section, "misfire_start_condition");
     misfireEndCondition     = READ_IF_EXISTS(pSettings, r_float, section, "misfire_end_condition", 0.f);
