@@ -862,6 +862,8 @@ protected:
     virtual void StopShotEffector();
 
 public:
+    IC bool Need2Pump() { return m_bNeed2Pump; }
+
     float         GetBaseDispersion(float cartridge_k);
     float         GetFireDispersion(bool with_cartridge, bool for_crosshair = false);
     virtual float GetFireDispersion(float cartridge_k, bool for_crosshair = false);

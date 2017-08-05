@@ -110,7 +110,7 @@ const CInventoryItem* CWeapon::can_kill(const xr_vector<const CGameObject*>& ite
 // Проверка для AI - готово-ли оружие для использования
 bool CWeapon::ready_to_kill() const
 {
-    return (!IsMisfire() && ((GetState() == eIdle) || (GetState() == eFire) || (GetState() == eFire2)) && GetAmmoElapsed());
+    return (!IsMisfire() && ((GetState() == eIdle) || (GetState() == eFire) || (GetState() == eFire2) || (GetState() == ePump)) && GetAmmoElapsed());
 }
 
 // Возвращает тип поведения АИ с этим оружием

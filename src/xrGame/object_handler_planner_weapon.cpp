@@ -46,6 +46,7 @@ void CObjectHandlerPlanner::add_evaluators(CWeapon* weapon)
     add_evaluator(uid(id, eWorldPropertyReady2), new CObjectPropertyEvaluatorReady(weapon, m_object, 1));
     add_evaluator(uid(id, eWorldPropertyQueueWait1), new CObjectPropertyEvaluatorQueue(weapon, m_object, 0));
     add_evaluator(uid(id, eWorldPropertyQueueWait2), new CObjectPropertyEvaluatorQueue(weapon, m_object, 1));
+    add_evaluator(uid(id, eWorldPropertyNeedPump), new CObjectPropertyEvaluatorPump(weapon, m_object)); //--#SM+#--
 
     // temporary const properties
     add_evaluator(uid(id, eWorldPropertySwitch1), new CObjectPropertyEvaluatorConst(true));
@@ -242,6 +243,7 @@ void CObjectHandlerPlanner::add_operators(CWeapon* weapon)
     add_condition(action, id, eWorldPropertyAmmo1, true);
     add_condition(action, id, eWorldPropertyStrapped, false);
     add_condition(action, id, eWorldPropertyStrapped2Idle, false);
+    add_condition(action, id, eWorldPropertyNeedPump, false); //--#SM+#--
     add_effect(action, id, eWorldPropertyEmpty1, false);
     add_effect(action, id, eWorldPropertyReady1, true);
     add_effect(action, id, eWorldPropertyAimed1, false);
@@ -255,6 +257,7 @@ void CObjectHandlerPlanner::add_operators(CWeapon* weapon)
     add_condition(action, id, eWorldPropertyAmmo2, true);
     add_condition(action, id, eWorldPropertyStrapped, false);
     add_condition(action, id, eWorldPropertyStrapped2Idle, false);
+    add_condition(action, id, eWorldPropertyNeedPump, false); //--#SM+#--
     add_effect(action, id, eWorldPropertyEmpty2, false);
     add_effect(action, id, eWorldPropertyReady2, true);
     add_effect(action, id, eWorldPropertyAimed1, false);
@@ -268,6 +271,7 @@ void CObjectHandlerPlanner::add_operators(CWeapon* weapon)
     add_condition(action, id, eWorldPropertyAmmo1, true);
     add_condition(action, id, eWorldPropertyStrapped, false);
     add_condition(action, id, eWorldPropertyStrapped2Idle, false);
+    add_condition(action, id, eWorldPropertyNeedPump, false); //--#SM+#--
     add_effect(action, id, eWorldPropertyEmpty1, false);
     add_effect(action, id, eWorldPropertyReady1, true);
     add_effect(action, id, eWorldPropertyFull1, true);
@@ -282,6 +286,7 @@ void CObjectHandlerPlanner::add_operators(CWeapon* weapon)
     add_condition(action, id, eWorldPropertyAmmo2, true);
     add_condition(action, id, eWorldPropertyStrapped, false);
     add_condition(action, id, eWorldPropertyStrapped2Idle, false);
+    add_condition(action, id, eWorldPropertyNeedPump, false); //--#SM+#--
     add_effect(action, id, eWorldPropertyEmpty2, false);
     add_effect(action, id, eWorldPropertyReady2, true);
     add_effect(action, id, eWorldPropertyFull2, true);
