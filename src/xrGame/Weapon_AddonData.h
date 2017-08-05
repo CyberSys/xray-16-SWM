@@ -16,9 +16,11 @@ public:
     shared_str                m_addon_alias;
     shared_str                m_addon_bone;
     bool                      bActive;
+    bool                      bHideVis3p;
     u8                        addon_idx;
     float                     m_condition;
     float                     m_battery;
+
     //IAmmoDepot* m_pAmmo;
 
     SAddonData();

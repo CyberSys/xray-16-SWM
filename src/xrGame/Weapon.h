@@ -325,6 +325,13 @@ public:
     virtual void BipodsSetCameraLimits(CCameraBase* pCam, bool bLimit);
     virtual void BipodsZoom(u32 flags);
 
+    // Magazine 3P
+    bool         m_bMagaz3pHideWhileReload;
+    bool         m_bMagaz3pIsHidden;
+    u16          m_iMagaz3pHideStartTime;
+    u16          m_iMagaz3pHideEndTime;
+    virtual void UpdateMagazine3p(bool bForceUpdate = false);
+
     // Generic
     virtual void Load(LPCSTR section);
     virtual void PostLoad(LPCSTR section); //--#SM+#--

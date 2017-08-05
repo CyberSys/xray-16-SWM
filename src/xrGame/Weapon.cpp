@@ -139,6 +139,11 @@ CWeapon::CWeapon() : CShellLauncher(this)
     m_fLR_MovingFactor = 0.f;
 
     m_bDisableMovEffAtZoom = false;
+
+    m_bMagaz3pHideWhileReload = false;
+    m_bMagaz3pIsHidden        = false;
+    m_iMagaz3pHideStartTime   = 0;
+    m_iMagaz3pHideEndTime     = 0;
 }
 
 // Деструктор
@@ -229,6 +234,8 @@ void CWeapon::net_Destroy()
         m_magazine.pop_back();
     while (m_magazine2.size())
         m_magazine2.pop_back();
+
+    UpdateMagazine3p();
 }
 
 // Экспорт данных в серверный объект и по сети

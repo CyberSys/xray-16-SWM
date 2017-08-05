@@ -458,6 +458,23 @@ void CWeapon::InitAddons()
         ResetSilencerKoeffs();
     }
 
+    //******** Магазин от третьего лица во время перезарядки ********//
+    if (IsMagazineAttached())
+    {
+        m_bMagaz3pHideWhileReload = READ_ADDON_DATA(r_bool, "hide_magaz3p_while_reload", GetMagazineSetSect(), GetMagazineName(), false);
+        m_iMagaz3pHideStartTime   = READ_ADDON_DATA(r_u16, "hide_magaz3p_start_time", GetMagazineSetSect(), GetMagazineName(), 300);
+        m_iMagaz3pHideEndTime     = READ_ADDON_DATA(r_u16, "hide_magaz3p_end_time", GetMagazineSetSect(), GetMagazineName(), 1700);
+
+        R_ASSERT3(m_iMagaz3pHideStartTime < m_iMagaz3pHideEndTime, "hide_magaz3p_start_time can't be > hide_magaz3p_end_time", GetMagazineSetSect().c_str());
+    }
+    else
+    {
+        m_bMagaz3pHideWhileReload = false;
+        m_iMagaz3pHideStartTime   = 0;
+        m_iMagaz3pHideEndTime     = 0;
+    }
+    UpdateMagazine3p(true);
+
     //******** Инициализируем параметры патронташа ********//
     UpdateAmmoBeltParams();
 
@@ -800,7 +817,7 @@ void CWeapon::_UpdateAddonsVisibility(SAddonData* m_pAddon)
         for (u32 j = 0; j < ext_vis_vec.size(); j++)
             if (bIsAddonActive || std::find(ext_vis_attached.begin(), ext_vis_attached.end(), ext_vis_vec[j]) == ext_vis_attached.end())
             {
-                if (bIsAddonActive)
+                if (!m_pAddon->bHideVis3p && bIsAddonActive)
                     this->AttachAdditionalVisual(ext_vis_vec[j]);
                 else
                     this->DetachAdditionalVisual(ext_vis_vec[j]);
