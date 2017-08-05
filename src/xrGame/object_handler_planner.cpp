@@ -471,6 +471,11 @@ LPCSTR CObjectHandlerPlanner::property2string(const _condition_type& id)
         xr_strcat(m_temp_string, "QueueWait2");
         break;
     }
+    case ObjectHandlerSpace::eWorldPropertyNeedPump:    //--#SM+#--
+    {
+        xr_strcat(m_temp_string, "NeedPump");
+        break;
+    }
     case ObjectHandlerSpace::eWorldPropertyThrowStarted:
     {
         xr_strcat(m_temp_string, "ThrowStarted");

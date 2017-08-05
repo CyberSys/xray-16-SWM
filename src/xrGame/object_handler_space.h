@@ -39,6 +39,7 @@ enum EWorldProperties
     eWorldPropertyDropped,
     eWorldPropertyQueueWait1,
     eWorldPropertyQueueWait2,
+    eWorldPropertyNeedPump,    //--#SM+#--
     eWorldPropertyAimingReady1,
     eWorldPropertyAimingReady2,
     eWorldPropertyAimForceFull1,
