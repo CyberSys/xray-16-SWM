@@ -1166,7 +1166,7 @@ public:
     virtual bool CanAttach(PIItem pIItem);
     virtual bool CanDetach(const char* item_section_name);
 
-    virtual void OnDetacAddonSpawn(const char* item_section_name, CSE_ALifeDynamicObject* E);
+    virtual void OnDetachAddonSpawn(const char* item_section_name, CSE_ALifeDynamicObject* E);
 
     bool         IsAmmoAvailable();
     virtual void UnloadMagazine(bool spawn_ammo = true);
