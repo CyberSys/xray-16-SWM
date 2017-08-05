@@ -259,7 +259,7 @@ void CWeapon::OnAddonUnistall(EAddons iSlot, const shared_str& sAddonDataName)
 }
 
 // Колбэк на спавн аддона после снятия
-void CWeapon::OnDetacAddonSpawn(const char* item_section_name, CSE_ALifeDynamicObject* E)
+void CWeapon::OnDetachAddonSpawn(const char* item_section_name, CSE_ALifeDynamicObject* E)
 {
     if (m_bUseMagazines == false)
         return;
