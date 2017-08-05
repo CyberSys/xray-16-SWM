@@ -261,14 +261,15 @@ bool CWeapon::PlaySoundMotion(const shared_str& M, BOOL bMixIn, LPCSTR alias, bo
         }
     }
 
-    // Если такая анимация существует - пробуем подыскать к ней особый звук
+    // Если такая анимация существует...
     if (bFound)
     {
+        // Отыгрыаем звук
         string256 sSnd;
         xr_sprintf(sSnd, "%s%s", "snd_", sAnm);
 
         if (m_sounds.FindSoundItem(sSnd, false))
-        {
+        { //--> Пробуем подыскать к ней особый звук
             PlaySound(sSnd, get_LastFP());
             if (m_fLastAnimStartTime > 0.0f)
                 m_sounds.SetCurentTime(sSnd, m_fLastAnimStartTime);
@@ -287,6 +288,18 @@ bool CWeapon::PlaySoundMotion(const shared_str& M, BOOL bMixIn, LPCSTR alias, bo
     return bFound;
 }
 
+// Проиграть мировую анимацию оружия
+bool CWeapon::PlayWorldMotion(const shared_str& M, BOOL bMixIn)
+{
+    IKinematicsAnimated* pWeaponVisual = Visual()->dcast_PKinematicsAnimated();
+    if (pWeaponVisual != NULL && pWeaponVisual->ID_Cycle_Safe(M).valid())
+    {
+        pWeaponVisual->PlayCycle(M.c_str(), bMixIn);
+        return true;
+    }
+    return false;
+}
+
 // Возвращает необходимость проиграть анимацию с префиксом _wgl
 bool CWeapon::IsWGLAnimRequired() { return IsGrenadeLauncherAttached() || IsForegripAttached(); }
 
@@ -299,6 +312,15 @@ bool CWeapon::IsWGLAnimRequired() { return IsGrenadeLauncherAttached() || IsFore
 // Анимация покоя (включая анимации ходьбы и бега)
 void CWeapon::PlayAnimIdle()
 {
+    // Мировая анимация
+    int  iAmmo       = GetMainAmmoElapsed();
+    bool bEmptyExist = false;
+    if (iAmmo == 0)
+        bEmptyExist = PlayWorldMotion("idle_empty", true);
+    if (bEmptyExist == false)
+        PlayWorldMotion("idle", true);
+
+    // Худовая анимация
     if (m_ZoomAnimState == eZANone)     // Проверяем что мы не играем анимацию зума
         if (TryPlayAnimIdle() == false) // Пробуем сперва проиграть анимации для ходьбы\бега
             PlayAnimIdleOnly();         // Иначе играем анимацию в покое
@@ -647,15 +669,34 @@ void CWeapon::PlayAnimReload()
 {
     UpdBulletHideTimer();
 
+    int iAmmo = m_overridenAmmoForReloadAnm;
+    if (iAmmo < 0)
+        iAmmo = GetMainAmmoElapsed();
+
+    // Мировая анимация
+    if (!def_IsGL_Mode)
+    {
+        bool bPlayAnim = true;
+        if (GetState() == eSwitchMag &&
+            (m_sub_state != eSubstateReloadBegin && m_sub_state != eSubstateMagazDetach && m_sub_state != eSubstateMagazMisfire))
+            bPlayAnim = false;
+
+        if (bPlayAnim)
+        {
+            bool bEmptyExist = false;
+            if (iAmmo == 0)
+                bEmptyExist = PlayWorldMotion("reload_world_empty", false);
+            if (bEmptyExist == false)
+                PlayWorldMotion("reload_world", false);
+        }
+    }
+
+    // Худовая анимация
     if (m_bIsReloadFromAB)
         return PlayAnimReloadFrAB();
 
     if (IsAmmoBeltReloadNow())
         return PlayAnimReloadAB();
-
-    int iAmmo = m_overridenAmmoForReloadAnm;
-    if (iAmmo < 0)
-        iAmmo = GetMainAmmoElapsed();
 
     if (def_IsGL_Mode)
     {
@@ -1316,6 +1357,17 @@ void CWeapon::PlayAnimShoot()
     int  iAmmo       = GetMainAmmoElapsed() + 1; //--> Т.к анимация стрельбы играется ПОСЛЕ выстрела
     bool bLastBullet = (iAmmo == 1);
 
+    // Мировая анимация
+    if (!def_IsGL_Mode)
+    {
+        bool bLastExist = false;
+        if (bLastBullet)
+            bLastExist = PlayWorldMotion("shoot_last", false);
+        if (bLastExist == false)
+            PlayWorldMotion("shoot", false);
+    }
+
+    // Худовая анимация
     if (IsZoomed())
     {
         if (def_IsGL_Mode)
