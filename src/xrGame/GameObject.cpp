@@ -1640,13 +1640,24 @@ bool CGameObject::nonscript_usable() { return m_bNonscriptUsable; }
 void CGameObject::set_nonscript_usable(bool usable) { m_bNonscriptUsable = usable; }
 
 // Присоединить дополнительный визуал к главному [add extra visual] --#SM+#--
-bool CGameObject::AttachAdditionalVisual(const shared_str& sect_name)
+// Если такой визуал уже добавлен - в pOut запишет указатель на него и вернёт false
+// [if visual already exist - return false and pOut - pointer to that visual]
+bool CGameObject::AttachAdditionalVisual(const shared_str& sect_name, attachable_visual** pOut)
 {
-    if (FindAdditionalVisual(sect_name) != nullptr)
+    attachable_visual* pFindVis = FindAdditionalVisual(sect_name);
+
+    if (pFindVis != nullptr)
+    {
+        if (pOut != nullptr)
+            *pOut = pFindVis;
         return false;
+    }
 
     attachable_visual* vis = new attachable_visual(this, sect_name);
     m_attached_visuals.push_back(vis);
+
+    if (pOut != nullptr)
+        *pOut = vis;
 
     return true;
 }

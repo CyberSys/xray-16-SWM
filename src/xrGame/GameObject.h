@@ -119,7 +119,7 @@ public:
 
     xr_vector<attachable_visual*> m_attached_visuals; // Дополнительные прикреплённые визуалы [extra visuals]
 
-    bool AttachAdditionalVisual(const shared_str& sect_name); // Прикрепить доп визуал [attach visual]
+    bool AttachAdditionalVisual(const shared_str& sect_name, attachable_visual** pOut = nullptr); // Прикрепить доп визуал [attach visual]
     bool DetachAdditionalVisual(const shared_str& sect_name); // Открепить доп визуал [detach visual]
 
     // Найти присоединённый визуал по его секции (не ищет внутри самих визуалов <!>) [search for
