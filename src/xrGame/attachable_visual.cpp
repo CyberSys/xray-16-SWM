@@ -23,6 +23,8 @@ attachable_visual::attachable_visual(CGameObject* _parent, const shared_str& sec
     m_cfg_vis_name = NULL;
     m_cur_vis_name = NULL;
 
+    m_pExtRenderTransform = NULL;
+
     ReLoad(m_sect_name);
 };
 // Деструктор
@@ -58,8 +60,12 @@ void attachable_visual::ReLoad(const shared_str& sect_name)
     m_bone_name = READ_IF_EXISTS(pSettings, r_string, sect_name, "visual_attach_bone", NULL);
 
     // Устанавливаем визуал
-    m_cfg_vis_name = READ_IF_EXISTS(pSettings, r_string, sect_name, "visual", NULL);
-    SetVisual(m_cfg_vis_name);
+    shared_str visual = READ_IF_EXISTS(pSettings, r_string, sect_name, "visual", NULL);
+    if (visual == NULL || visual.equal("_dont_change_") == false)
+    {
+        m_cfg_vis_name = visual;
+        SetVisual(m_cfg_vis_name);
+    }
 };
 
 // Установить визуал
@@ -130,19 +136,29 @@ void attachable_visual::Render()
             m_bone_id = BI_NONE;
 
         // Обновляем позицию для рендеринга
-        if (pParentKVis != NULL && m_bone_id != BI_NONE)
-        {
-            // Цепляем предмет относительно родительской кости
-            m_render_transform.mul_43(pParentKVis->LL_GetBoneInstance(m_bone_id).mTransform, m_attach_offset);
-            m_render_transform.mulA_43(GetParentXFORM());
+        Fmatrix* m_pRenderTransform = NULL;
+        if (m_pExtRenderTransform != NULL)
+        { // Используем матрицу трансформации, переданную извне
+            m_pRenderTransform = m_pExtRenderTransform;
         }
         else
-        {
-            // Цепляем предмет относительно центра объекта
-            m_render_transform.mul_43(GetParentXFORM(), m_attach_offset);
+        { // Считываем матрицу трансформации на основе родительского объекта
+            if (pParentKVis != NULL && m_bone_id != BI_NONE)
+            {
+                // Цепляем предмет относительно родительской кости
+                m_render_transform.mul_43(pParentKVis->LL_GetBoneInstance(m_bone_id).mTransform, m_attach_offset);
+                m_render_transform.mulA_43(GetParentXFORM());
+            }
+            else
+            {
+                // Цепляем предмет относительно центра объекта
+                m_render_transform.mul_43(GetParentXFORM(), m_attach_offset);
+            }
+
+            m_pRenderTransform = &m_render_transform;
         }
 
-        GlobalEnv.Render->set_Transform(&m_render_transform);
+        GlobalEnv.Render->set_Transform(m_pRenderTransform);
         GlobalEnv.Render->add_Visual(m_model->dcast_RenderVisual());
     }
 

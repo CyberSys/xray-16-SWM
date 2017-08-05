@@ -23,6 +23,8 @@ public:
     Fmatrix m_attach_offset;    // Матрица смещений нашей модели относительно родительского объекта
     Fmatrix m_render_transform; // Матрица, используемая для отрисовки модели
 
+    Fmatrix* m_pExtRenderTransform; // Указатель на матрицу, которая если есть, то будет использована вместо m_render_transform
+
     void Render();
     void Update();
 
@@ -45,4 +47,7 @@ public:
 
     // Получить список абсолютно всех attachable_visual, которые привязаны к нам
     void GetAllInheritedAVisuals(xr_vector<attachable_visual*>& tOutAVisList);
+
+    // Использовать
+    IC void UseThisRenderTransform(Fmatrix* pTransform = NULL) { m_pExtRenderTransform = pTransform; }
 };
