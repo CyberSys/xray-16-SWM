@@ -332,18 +332,24 @@ void CWeapon::net_Import(NET_Packet& P)
     if (m_iCurFireMode >= m_aFireModes.size())
         m_iCurFireMode = 0;
 
-    // clang-format off
-	// Аддоны
-	u8 idx = u8(-1);
-	P.r_u8(idx); InstallAddon(eScope,	idx, true);
-	P.r_u8(idx); InstallAddon(eMuzzle,	idx, true);
-	P.r_u8(idx); InstallAddon(eLauncher, idx, true);
-	P.r_u8(idx); InstallAddon(eMagaz,	idx, true);
-	P.r_u8(idx); InstallAddon(eSpec_1,	idx, true);
-	P.r_u8(idx); InstallAddon(eSpec_2,	idx, true);
-	P.r_u8(idx); InstallAddon(eSpec_3,	idx, true);
-	P.r_u8(idx); InstallAddon(eSpec_4,	idx, true);
-    // clang-format on
+    // Аддоны
+    u8 idx = empty_addon_idx;
+
+#define DEF_ImportAddon(DEF_slot)                       \
+    {                                                   \
+        P.r_u8(idx);                                    \
+        if (GetAddonBySlot(DEF_slot)->addon_idx != idx) \
+            InstallAddon(eScope, idx, true);            \
+    }
+
+    DEF_ImportAddon(eScope);
+    DEF_ImportAddon(eMuzzle);
+    DEF_ImportAddon(eLauncher);
+    DEF_ImportAddon(eMagaz);
+    DEF_ImportAddon(eSpec_1);
+    DEF_ImportAddon(eSpec_2);
+    DEF_ImportAddon(eSpec_3);
+    DEF_ImportAddon(eSpec_4);
 
     UpdateAddons();
 
