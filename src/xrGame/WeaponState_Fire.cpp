@@ -162,8 +162,6 @@ void CWeapon::switchFrom_Fire(u32 newS)
     m_iShotNum = 0;
     if (m_fOldBulletSpeed != 0.f)
         SetBulletSpeed(m_fOldBulletSpeed);
-
-    Try2Pump();
 }
 
 // Обновление оружия в состоянии "Стрельба"
@@ -241,12 +239,16 @@ void CWeapon::state_Fire(float dt)
             }
 
             // После выстрела тестируем на осечку
-            if (CheckForMisfire())
-                return;
+            bool bIsMisfife = CheckForMisfire();
 
+            // Передёргиваем помпу
             if (m_bUsePumpMode && !m_bGrenadeMode)
             {
                 m_bNeed2Pump = true;
+
+                if (!bIsMisfife)
+                    Try2Pump();
+
                 break;
             }
         }
