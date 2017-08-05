@@ -36,16 +36,18 @@ protected:
     u32 m_dw_curr_substate_time;
 
 public:
-    CHUDState() { SetState(eHidden); }
+    CHUDState() { m_hud_item_state = eHidden; m_dw_curr_state_time = Device.dwTimeGlobal; SetState(m_hud_item_state); } //--#SM+#--
     IC u32 GetNextState() const { return m_nextState; }
     IC u32 GetState() const { return m_hud_item_state; }
     IC void SetState(u32 v)
     {
-        OnBeforeStateSwitch(GetState(), v); //--#SM+#--
+        u32 curr_stae = GetState();
+        OnBeforeStateSwitch(curr_stae, v);
         m_hud_item_state = v;
-        m_dw_curr_state_time = Device.dwTimeGlobal;
+        if (curr_stae != v) // Не перезапускаем таймер, если новый стэйт равен прошлому
+            m_dw_curr_state_time = Device.dwTimeGlobal;
         ResetSubStateTime();
-    }
+    }; //--#SM+#--
     IC void SetNextState(u32 v) { m_nextState = v; }
     IC u32 CurrStateTime() const { return Device.dwTimeGlobal - m_dw_curr_state_time; }
     IC void ResetSubStateTime() { m_dw_curr_substate_time = Device.dwTimeGlobal; }
