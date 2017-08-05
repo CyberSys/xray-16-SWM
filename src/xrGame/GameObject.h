@@ -72,7 +72,7 @@ public:
 
     xr_vector<attachable_visual*> m_attached_visuals; // Дополнительные прикреплённые визуалы
 
-    bool AttachAdditionalVisual(const shared_str& sect_name); // Прикрепить доп визуал
+    bool AttachAdditionalVisual(const shared_str& sect_name, attachable_visual** pOut = NULL); // Прикрепить доп визуал
     bool DetachAdditionalVisual(const shared_str& sect_name); // Открепить доп визуал
     attachable_visual* FindAdditionalVisual(
         const shared_str& sect_name, xr_vector<attachable_visual*>::iterator* it_child = NULL); // Найти доп визуал

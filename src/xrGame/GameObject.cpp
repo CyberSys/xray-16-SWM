@@ -1621,14 +1621,20 @@ bool CGameObject::nonscript_usable() { return m_bNonscriptUsable; }
 void CGameObject::set_nonscript_usable(bool usable) { m_bNonscriptUsable = usable; }
 
 // Присоединить дополнительный визуал к главному --#SM+#--
-bool CGameObject::AttachAdditionalVisual(const shared_str& sect_name)
+bool CGameObject::AttachAdditionalVisual(const shared_str& sect_name, attachable_visual** pOut)
 {
-    if (FindAdditionalVisual(sect_name) != NULL)
+    attachable_visual* pFindVis = FindAdditionalVisual(sect_name);
+
+    if (pFindVis != NULL)
+    {
+        if (pOut != NULL) *pOut = pFindVis;
         return false;
+    }
 
     attachable_visual* vis = new attachable_visual(this, sect_name);
     m_attached_visuals.push_back(vis);
 
+    if (pOut != NULL) *pOut = vis;
     return true;
 }
 
