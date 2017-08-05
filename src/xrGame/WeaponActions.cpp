@@ -374,6 +374,13 @@ void CWeapon::UpdateCL()
     // Подсветка от выстрела
     UpdateLight();
 
+    // Обновляем таймер скорострельности оружия вне стэйта стрельбы
+    if (GetState() != eFire)
+    {
+        fShotTimeCounter -= Device.fTimeDelta;
+        clamp(fShotTimeCounter, 0.0f, flt_max);
+    }
+
     // Нарисовать партиклы
     UpdateFlameParticles();
     UpdateFlameParticles2();

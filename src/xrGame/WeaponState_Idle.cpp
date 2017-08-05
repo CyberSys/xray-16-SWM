@@ -28,10 +28,6 @@ void CWeapon::switchFrom_Idle(u32 newS)
 // Обновление оружия в состоянии "Покой"
 void CWeapon::state_Idle(float dt)
 {
-    // Таймер скорострельности оружия
-    fShotTimeCounter -= dt;
-    clamp(fShotTimeCounter, 0.0f, flt_max);
-
     // Помпа, если не сработала раньше.
     if (!m_bGrenadeMode)
         Try2Pump();
