@@ -196,6 +196,16 @@ void CWeapon::OnAddonInstall(EAddons iSlot, const shared_str& sAddonDataName)
         m_bipods.OnBipodsAttach(iSlot, sAddonDataName);
     }
 
+    // Установка штык-ножа
+    bool bIsBayonet = READ_IF_EXISTS(pSettings, r_bool, sAddonDataName, "is_bayonet", false);
+    if (bIsBayonet)
+    {
+        R_ASSERT4(
+            IsBayonetAttached() == false, "Bayonet already installed <!>", sAddonDataName.c_str(), GetAddonBySlot(m_BayonetSlot)->GetName().c_str());
+        Need2Stop_Kick();
+        m_BayonetSlot = iSlot;
+    }
+
     R_ASSERT4((IsGrenadeLauncherAttached() == false) || m_ForegripSlot == eNotExist,
         "Grenade Launcher and Foregrip can't be combined <!>",
         GetAddonBySlot(m_ForegripSlot)->GetName().c_str(),
@@ -256,6 +266,14 @@ void CWeapon::OnAddonUnistall(EAddons iSlot, const shared_str& sAddonDataName)
     bool bIsBipods = (IsBipodsAttached() && iSlot == m_bipods.m_BipodsSlot);
     if (bIsBipods)
         m_bipods.OnBipodsDetach(sAddonDataName);
+
+    // Снятие штык-ножа
+    bool bIsBayonet = (IsBayonetAttached() && iSlot == m_BayonetSlot);
+    if (bIsBayonet)
+    {
+        Need2Stop_Kick();
+        m_BayonetSlot = eNotExist;
+    }
 }
 
 // Колбэк на спавн аддона после снятия
@@ -465,7 +483,9 @@ void CWeapon::InitAddons()
         m_iMagaz3pHideStartTime   = READ_ADDON_DATA(r_u16, "hide_magaz3p_start_time", GetMagazineSetSect(), GetMagazineName(), 300);
         m_iMagaz3pHideEndTime     = READ_ADDON_DATA(r_u16, "hide_magaz3p_end_time", GetMagazineSetSect(), GetMagazineName(), 1700);
 
-        R_ASSERT3(m_iMagaz3pHideStartTime < m_iMagaz3pHideEndTime, "hide_magaz3p_start_time can't be > hide_magaz3p_end_time", GetMagazineSetSect().c_str());
+        R_ASSERT3(m_iMagaz3pHideStartTime < m_iMagaz3pHideEndTime,
+            "hide_magaz3p_start_time can't be > hide_magaz3p_end_time",
+            GetMagazineSetSect().c_str());
     }
     else
     {
@@ -474,6 +494,9 @@ void CWeapon::InitAddons()
         m_iMagaz3pHideEndTime     = 0;
     }
     UpdateMagazine3p(true);
+
+    //******** Инициализируем параметры удара прикладом ********//
+    UpdateBayonetParams();
 
     //******** Инициализируем параметры патронташа ********//
     UpdateAmmoBeltParams();
@@ -1208,4 +1231,35 @@ void CWeapon::UpdateGLParams()
 
         iMagazineSize2 = 0;
     }
+}
+
+//******** Прочие вспомогательные функции ********//
+
+// Обновляем данные для удара прикладом/штык-ножа
+void CWeapon::UpdateBayonetParams()
+{
+    const shared_str sBayoneteSetSect = IsBayonetAttached() ? GetAddonBySlot(m_BayonetSlot)->GetName() : cNameSect();
+    const shared_str sBayoneteName    = IsBayonetAttached() ? GetAddonBySlot(m_BayonetSlot)->GetAddonName() : cNameSect();
+
+    shared_str sMainAttack = READ_ADDON_DATA(r_string, "kick_attack_main", sBayoneteSetSect, sBayoneteName, NULL);
+    if ((sMainAttack != NULL) && !sMainAttack.equal("none"))
+    {
+        if (m_kicker_main == NULL)
+            m_kicker_main = new CWeaponKnifeHit(sMainAttack, this);
+        else
+            m_kicker_main->ReLoad(sMainAttack);
+    }
+    else
+        xr_delete(m_kicker_main);
+
+    shared_str sAltAttack = READ_ADDON_DATA(r_string, "kick_attack_alt", sBayoneteSetSect, sBayoneteName, NULL);
+    if ((sAltAttack != NULL) && !sAltAttack.equal("none"))
+    {
+        if (m_kicker_alt == NULL)
+            m_kicker_alt = new CWeaponKnifeHit(sAltAttack, this);
+        else
+            m_kicker_alt->ReLoad(sAltAttack);
+    }
+    else
+        xr_delete(m_kicker_alt);
 }

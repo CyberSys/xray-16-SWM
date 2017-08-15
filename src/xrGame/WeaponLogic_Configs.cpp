@@ -108,25 +108,15 @@ void CWeapon::Load(LPCSTR section)
     // Режим болтовки или помпы
     m_bUsePumpMode = READ_IF_EXISTS(pSettings, r_bool, section, "use_pump_mode", false);
 
-    // Удар прикладом
-    shared_str sMainAttack = READ_IF_EXISTS(pSettings, r_string, section, "kick_attack_main", NULL);
-    if ((sMainAttack != NULL) && !sMainAttack.equal("none"))
-        m_kicker_main = new CWeaponKnifeHit(sMainAttack, this);
-    else
-        m_kicker_main = NULL;
-
-    shared_str sAltAttack = READ_IF_EXISTS(pSettings, r_string, section, "kick_attack_alt", NULL);
-    if ((sAltAttack != NULL) && !sAltAttack.equal("none"))
-        m_kicker_alt = new CWeaponKnifeHit(sAltAttack, this);
-    else
-        m_kicker_alt = NULL;
-
     // Атаки ножом
     if (m_bKnifeMode != true) //--> for CWeaponKnife
         m_bKnifeMode = READ_IF_EXISTS(pSettings, r_bool, section, "use_knife_mode", false);
 
     if (m_bKnifeMode == true)
     {
+        R_ASSERT(m_first_attack == NULL);
+        R_ASSERT(m_second_attack == NULL);
+
         LPCSTR sFirstAttack = READ_IF_EXISTS(pSettings, r_string, section, "knife_attack_1", NULL);
         R_ASSERT2(sFirstAttack != NULL, "Use new Knife config !!! (knife_attack_1 = <section>)");
         m_first_attack = new CWeaponKnifeHit(sFirstAttack, this);

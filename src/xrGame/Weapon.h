@@ -1364,6 +1364,10 @@ public:
     void UpdateAmmoBeltParams(); //--#SM+#--
     void UpdateGLParams();       //--#SM+#--
 
+    EAddons m_BayonetSlot;
+    IC bool IsBayonetAttached() { return m_BayonetSlot != eNotExist; }
+    void    UpdateBayonetParams(); //--#SM+#--
+
     bool m_bNeed2StopTriStateReload;
     bool m_bIsReloadFromAB;
     bool m_bSwitchAddAnimation;

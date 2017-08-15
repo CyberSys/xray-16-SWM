@@ -40,6 +40,10 @@ void CWeapon::switch2_Kick()
         return;
     }
 
+    // Сбрасываем прицеливание
+    if (IsZoomed())
+        OnZoomOut();
+
     // Если мы бежим, то вместо обычной атаки пробуем запустить атаку на бегу
     if (m_kicker_alt != NULL)
     {

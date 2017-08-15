@@ -144,6 +144,8 @@ CWeapon::CWeapon() : CShellLauncher(this)
     m_bMagaz3pIsHidden        = false;
     m_iMagaz3pHideStartTime   = 0;
     m_iMagaz3pHideEndTime     = 0;
+
+    m_BayonetSlot = eNotExist;
 }
 
 // Деструктор
