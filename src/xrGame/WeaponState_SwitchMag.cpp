@@ -37,9 +37,13 @@ bool CWeapon::Try2SwitchMag(bool bCheckOnlyMode, bool bFromDetach)
         if (iAmmoElapsed >= iMagazineSize)
             return false;
 
-        // И что в новом магазине патронов больше чем в текущем
+        // Проверяем есть-ли вообще магазин на замену
         CWeapon* pNewMagaz = GetBestMagazine();
-        if (pNewMagaz != NULL && pNewMagaz->GetMainAmmoElapsed() <= iAmmoElapsed)
+        if (pNewMagaz == NULL)
+            return false;
+
+        // И что в нём магазине патронов больше чем в текущем
+        if (pNewMagaz->GetMainAmmoElapsed() <= iAmmoElapsed)
             return false;
     }
 
