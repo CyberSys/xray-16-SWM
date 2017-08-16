@@ -1371,4 +1371,7 @@ public:
     bool m_bNeed2StopTriStateReload;
     bool m_bIsReloadFromAB;
     bool m_bSwitchAddAnimation;
+
+    bool DetectorCheckCompability(bool bAllowAim);
+    bool DetectorHideCondition(bool bAllowAim);
 };

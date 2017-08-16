@@ -172,3 +172,21 @@ BOOL CWeapon::IsUpdating()
     bool bIsActiveItem = m_pInventory && m_pInventory->ActiveItem() == this;
     return bIsActiveItem || bWorking; // || IsPending() || getVisible();
 }
+
+// Проверка можем-ли мы достать детектор в данный момент
+bool CWeapon::DetectorCheckCompability(bool bAllowAim)
+{
+    u32  state     = GetState();
+    bool bAimCheck = bAllowAim ? true : !IsZoomed();
+    return bAimCheck && (state != CHUDState::eBore) && (state != CWeapon::eReload) && (state != CWeapon::eReloadFrAB) &&
+           (state != CWeapon::eSwitchMag) && (state != CWeapon::eKick) && (state != CWeapon::ePump) && (state != CWeapon::eSwitch);
+}
+
+// Проверяет нужно-ли скрыть детектор в данный момент
+bool CWeapon::DetectorHideCondition(bool bAllowAim)
+{
+    u32  state     = GetState();
+    bool bAimCheck = bAllowAim ? false : IsZoomed();
+    return (bAimCheck || state == CWeapon::eReload || state == CWeapon::eReloadFrAB || state == CWeapon::eSwitchMag || state == CWeapon::ePump ||
+            state == CWeapon::eSwitch);
+}

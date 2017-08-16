@@ -125,6 +125,11 @@ protected:
     bool m_bNeedActivation;
 
 public:
+    enum EDetectorStates //--#SM+#--
+    {
+        eDetectorKick = eLastBaseState + 1,
+    };
+
     CCustomDetector();
     virtual ~CCustomDetector();
 
@@ -168,6 +173,9 @@ protected:
     float m_fAfVisRadius;
 
     CAfList m_artefacts;
+
+    bool m_bCanBeUsedInAim; //--#SM+#--
+    bool m_bUseKickAnimHUD; //--#SM+#--
 };
 
 class CZoneList : public CDetectList<CCustomZone>
