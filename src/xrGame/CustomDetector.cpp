@@ -57,8 +57,7 @@ bool CCustomDetector::CheckCompatibilityInt(CHudItem* itm, u16* slot_to_activate
     {
         CWeapon* W = smart_cast<CWeapon*>(itm);
         if (W)
-            bres = bres && (W->GetState() != CHUDState::eBore) && (W->GetState() != CWeapon::eReload) &&
-                (W->GetState() != CWeapon::eSwitch) && !W->IsZoomed();
+            bres = bres && W->DetectorCheckCompability(m_bCanBeUsedInAim); //--#SM+#--
     }
     return bres;
 }
@@ -146,6 +145,13 @@ void CCustomDetector::OnStateSwitch(u32 S, u32 oldState)
         PlayAnimIdle();
         SetPending(FALSE);
     }
+    break; //--#SM+#--
+    case eDetectorKick:
+    {
+        R_ASSERT(m_bUseKickAnimHUD == true);
+        PlayHUDMotion("anm_kick", FALSE, this, GetState());
+        SetPending(TRUE);
+    }
     break;
     }
 }
@@ -155,7 +161,8 @@ void CCustomDetector::OnAnimationEnd(u32 state)
     inherited::OnAnimationEnd(state);
     switch (state)
     {
-    case eShowing:
+    case eShowing: 
+    case eDetectorKick: //--#SM+#--
     {
         SwitchState(eIdle);
         if (IsUsingCondition() && m_fDecayRate > 0.f)
@@ -206,6 +213,10 @@ void CCustomDetector::Load(LPCSTR section)
 
     m_sounds.LoadSound(section, "snd_draw", "sndShow");
     m_sounds.LoadSound(section, "snd_holster", "sndHide");
+
+    m_bCanBeUsedInAim = READ_IF_EXISTS(pSettings, r_bool, section, "show_while_aiming", false); //--#SM+#--
+
+    m_bUseKickAnimHUD = READ_IF_EXISTS(pSettings, r_bool, section, "hud_use_anm_kick", false); //--#SM+#--
 }
 
 void CCustomDetector::shedule_Update(u32 dt)
@@ -248,13 +259,20 @@ void CCustomDetector::UpdateVisibility()
         else
         {
             CWeapon* wpn = smart_cast<CWeapon*>(i0->m_parent_hud_item);
-            if (wpn)
+            if (wpn) //--#SM+#--
             {
-                u32 state = wpn->GetState();
-                if (wpn->IsZoomed() || state == CWeapon::eReload || state == CWeapon::eSwitch)
+                if (wpn->DetectorHideCondition(m_bCanBeUsedInAim))
                 {
                     HideDetector(true);
                     m_bNeedActivation = true;
+                }
+                else
+                {
+                    // Отлавливаем момент начала удара прикладом оружия в правой руке
+                    if (m_bUseKickAnimHUD && !IsPending() && (wpn->GetState() == CWeapon::eKick && wpn->CurrStateTime() <= 150))
+                    {
+                        SwitchState(eDetectorKick);
+                    }
                 }
             }
         }
