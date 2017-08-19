@@ -259,6 +259,8 @@ void CWeapon::OnH_B_Independent(bool just_before_destroy)
 
     UpdateXForm();
     UpdateMagazine3p();
+
+    m_nearwall_last_hud_fov = psHUD_FOV_def;
 }
 
 // Колбек ПОСЛЕ детача объекта от старого родителя, новый родитель уже указан
@@ -284,6 +286,8 @@ void CWeapon::OnH_B_Chield()
     m_set_next_ammoType_on_reload = undefined_ammo_type;
     m_set_next_magaz_on_reload    = empty_addon_idx;
     m_set_next_magaz_by_id        = u16(-1);
+
+    m_nearwall_last_hud_fov = psHUD_FOV_def;
 }
 
 // Колбэк ПОСЛЕ аттача объекта к новому родителю, новый родитель уже указан

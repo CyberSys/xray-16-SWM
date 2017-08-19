@@ -5,6 +5,7 @@
 #include "stdafx.h"
 #include "Weapon_Shared.h"
 #include "attachable_visual.h"
+#include "HUDManager.h"
 
 #define BULLET_BONE_NAME "wpn_bullet" // Имя кости, вариации которой будут показаны\скрыты в зависимости от числа патронов в оружии
 
@@ -223,21 +224,46 @@ float CWeapon::GetFov()
 // Получить HUD FOV текущего оружия
 float CWeapon::GetHudFov()
 {
+    // Рассчитываем HUD FOV от бедра (с учётом упирания в стены)
+    if (ParentIsActor() && Level().CurrentViewEntity() == H_Parent())
+    {
+        // Получаем расстояние от камеры до точки в прицеле
+        CCameraBase*        pCam = H_Parent()->cast_actor()->cam_Active();
+        collide::rq_result& RQ   = HUD().GetCurrentRayQuery();
+        float               dist = RQ.range;
+
+        // Интерполируем расстояние в диапазон от 0 (min) до 1 (max)
+        clamp(dist, m_nearwall_dist_min, m_nearwall_dist_max);
+        float fDistanceMod = ((dist - m_nearwall_dist_min) / (m_nearwall_dist_max - m_nearwall_dist_min)); // 0.f ... 1.f
+
+        // Рассчитываем базовый HUD FOV от бедра
+        float fBaseFov = psHUD_FOV_def + m_hud_fov_add_mod;
+        clamp(fBaseFov, 0.0f, FLT_MAX);
+
+        // Плавно высчитываем итоговый FOV от бедра
+        float src = m_nearwall_speed_mod * Device.fTimeDelta;
+        clamp(src, 0.f, 1.f);
+
+        float fTrgFov           = m_nearwall_target_hud_fov + fDistanceMod * (fBaseFov - m_nearwall_target_hud_fov);
+        m_nearwall_last_hud_fov = m_nearwall_last_hud_fov * (1 - src) + fTrgFov * src;
+    }
+
     if (IsBipodsDeployed())
     { // При разложенных сошках
         return m_bipods.m_fHUD_FOV;
     }
 
+    // Возвращаем итоговый HUD FOV
     if (m_zoom_params.m_fZoomRotationFactor > 0.0f)
     {
         // В процессе зума
-        float fDiff = psHUD_FOV_def - m_zoom_params.m_fZoomHudFov;
+        float fDiff = m_nearwall_last_hud_fov - m_zoom_params.m_fZoomHudFov;
         return m_zoom_params.m_fZoomHudFov + (fDiff * (1 - m_zoom_params.m_fZoomRotationFactor));
     }
     else
     {
         // От бедра
-        return psHUD_FOV_def;
+        return m_nearwall_last_hud_fov;
     }
 }
 
