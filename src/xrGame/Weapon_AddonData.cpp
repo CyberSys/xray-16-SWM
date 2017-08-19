@@ -74,3 +74,24 @@ const shared_str SAddonData::GetNameByIdx(u8 idx) const
 }
 
 const shared_str SAddonData::GetAddonNameByIdx(u8 idx) const { return pSettings->r_string(GetNameByIdx(idx).c_str(), m_addon_alias.c_str()); }
+
+const shared_str SAddonData::GetVisuals(LPCSTR vis_alias, bool bOnlyFirst, u8 idx) const
+{
+    if (idx == empty_addon_idx)
+        R_ASSERT(bActive == true);
+
+    const shared_str& addon_set_sect = (idx == empty_addon_idx ? GetName() : m_addons_list[idx]);
+    const shared_str& addon_name_sect =
+        (idx == empty_addon_idx ? GetAddonName() : pSettings->r_string(addon_set_sect.c_str(), m_addon_alias.c_str()));
+
+    LPCSTR sRes =
+        READ_IF_EXISTS(pSettings, r_string, addon_set_sect, vis_alias, READ_IF_EXISTS(pSettings, r_string, addon_name_sect, vis_alias, NULL));
+
+    if (bOnlyFirst == true && sRes != NULL)
+    {
+        string128 _itm_name;
+        return _GetItem(sRes, 0, _itm_name);
+    }
+
+    return sRes;
+}

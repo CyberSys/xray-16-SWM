@@ -36,4 +36,6 @@ public:
     const shared_str GetNameByIdx(u8 idx) const;
 
     const shared_str GetAddonNameByIdx(u8 idx) const;
+
+    const shared_str GetVisuals(LPCSTR vis_alias, bool bOnlyFirst = false, u8 idx = empty_addon_idx) const;
 };
