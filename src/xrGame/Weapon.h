@@ -1381,4 +1381,7 @@ public:
 
     bool DetectorCheckCompability(bool bAllowAim);
     bool DetectorHideCondition(bool bAllowAim);
+
+    float         m_fScopeInertionFactor;
+    virtual float GetControlInertionFactor() const;
 };
