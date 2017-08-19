@@ -571,9 +571,7 @@ void CWeapon::_UpdateHUDAddonVisibility(SAddonData* m_pAddon)
 		LPCSTR show_bones = READ_IF_EXISTS(pSettings, r_string, addon_set_sect,		"show_bones_hud",									
 							READ_IF_EXISTS(pSettings, r_string, addon_name_sect,	"show_bones_hud", NULL)								
 		);																															
-		LPCSTR hud_vis	  = READ_IF_EXISTS(pSettings, r_string, addon_set_sect,		"visuals_hud",										
-							READ_IF_EXISTS(pSettings, r_string, addon_name_sect,	"visuals_hud",	  NULL)								
-		);
+		LPCSTR hud_vis	  = m_pAddon->GetVisuals("visuals_hud", false, i).c_str();
         // clang-format on
 
         // Парсим строки
@@ -736,9 +734,7 @@ void CWeapon::_UpdateAddonsVisibility(SAddonData* m_pAddon)
 		LPCSTR show_bones = READ_IF_EXISTS(pSettings, r_string, addon_set_sect,		"show_bones",									
 							READ_IF_EXISTS(pSettings, r_string, addon_name_sect,	"show_bones",	 NULL)								
 		);																															
-		LPCSTR hud_vis	  = READ_IF_EXISTS(pSettings, r_string, addon_set_sect,		"visuals_world",										
-							READ_IF_EXISTS(pSettings, r_string, addon_name_sect,	"visuals_world", NULL)								
-		);
+        LPCSTR world_vis  = m_pAddon->GetVisuals("visuals_world", false, i).c_str();
         // clang-format on
 
         // Парсим строки
@@ -768,13 +764,13 @@ void CWeapon::_UpdateAddonsVisibility(SAddonData* m_pAddon)
                     show_bones_attached.push_back(_itm);
             }
         }
-        if (hud_vis)
+        if (world_vis)
         {
             string128 _itm_name;
-            int       count = _GetItemCount(hud_vis);
+            int       count = _GetItemCount(world_vis);
             for (int it = 0; it < count; ++it)
             {
-                LPCSTR _itm = _GetItem(hud_vis, it, _itm_name);
+                LPCSTR _itm = _GetItem(world_vis, it, _itm_name);
                 ext_vis_vec.push_back(_itm);
 
                 if (bIsAddonActive)
@@ -1088,8 +1084,8 @@ void CWeapon::UpdateAmmoBeltParams()
     {
         SAddonData* pAddonAB = GetAddonBySlot(m_AmmoBeltSlot);
 
-        m_sAB_hud = READ_IF_EXISTS(pSettings, r_string, pAddonAB->GetName(), "visuals_hud", NULL);
-        m_sAB_vis = READ_IF_EXISTS(pSettings, r_string, pAddonAB->GetName(), "visuals_world", NULL);
+        m_sAB_hud = pAddonAB->GetVisuals("visuals_hud", true);
+        m_sAB_vis = pAddonAB->GetVisuals("visuals_world", true);
 
         iMagazineSize2 = READ_ADDON_DATA(r_s32, "ammo_belt_mag_size", pAddonAB->GetName(), pAddonAB->GetAddonName(), iMagazineSize);
 

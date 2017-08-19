@@ -67,8 +67,8 @@ void CWeapon::UpdateBipodsParams()
 
     SAddonData* pAddonBipods = GetAddonBySlot(m_bipods.m_BipodsSlot);
 
-    m_bipods.m_sBipod_hud = READ_IF_EXISTS(pSettings, r_string, pAddonBipods->GetName(), "visuals_hud", NULL);
-    m_bipods.m_sBipod_vis = READ_IF_EXISTS(pSettings, r_string, pAddonBipods->GetName(), "visuals_world", NULL);
+    m_bipods.m_sBipod_hud = pAddonBipods->GetVisuals("visuals_hud", true);
+    m_bipods.m_sBipod_vis = pAddonBipods->GetVisuals("visuals_world", true);
 
     Fvector2 vNoLimits = {-PI, PI};
     Fvector  vZero     = {0.f, 0.f, 0.f};
