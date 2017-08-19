@@ -405,6 +405,9 @@ void CWeapon::InitAddons()
     {
         //**** Прицел одет ****//
 
+        // Параметры чувствительности мышки в прицеливании
+        m_fScopeInertionFactor = READ_ADDON_DATA(r_float, "scope_inertion_factor", GetScopeSetSect(), GetScopeName(), m_fControlInertionFactor);
+
         // Параметры НПС
         m_addon_holder_range_modifier = READ_ADDON_DATA(r_float, "holder_range_modifier", GetScopeSetSect(), GetScopeName(), m_holder_range_modifier);
         m_addon_holder_fov_modifier   = READ_ADDON_DATA(r_float, "holder_fov_modifier", GetScopeSetSect(), GetScopeName(), m_holder_fov_modifier);

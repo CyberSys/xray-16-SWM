@@ -205,3 +205,13 @@ bool CWeapon::UseScopeTexture()
 
     return true;
 };
+
+// Чувствительность мышкии с оружием в руках
+float CWeapon::GetControlInertionFactor() const
+{
+    float fInertionFactor = inherited::GetControlInertionFactor();
+    if (IsScopeAttached() && IsZoomed())
+        return m_fScopeInertionFactor;
+
+    return fInertionFactor;
+}
