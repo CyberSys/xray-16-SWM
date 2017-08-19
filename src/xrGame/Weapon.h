@@ -281,8 +281,7 @@ public:
         float    m_translation_factor; // 0.f - 1.f
 
         bipods_data()
-            : m_bInstalled(false), m_bUseZoomFov(false), m_iBipodState(eBS_SwitchedOFF), m_translation_factor(0.0f),
-              m_fCurScopeZoomFov(0.0f)
+            : m_bInstalled(false), m_bUseZoomFov(false), m_iBipodState(eBS_SwitchedOFF), m_translation_factor(0.0f), m_fCurScopeZoomFov(0.0f)
         {
             m_vPrevYP.set(0.f, 0.f);
         }
@@ -709,6 +708,14 @@ public:
 
     IC float GetZoomFactor() const { return m_zoom_params.m_fCurrentZoomFactor; }
     IC void  SetZoomFactor(float f) { m_zoom_params.m_fCurrentZoomFactor = f; }
+
+    float m_hud_fov_add_mod;
+
+    float m_nearwall_dist_max;
+    float m_nearwall_dist_min;
+    float m_nearwall_last_hud_fov;
+    float m_nearwall_target_hud_fov;
+    float m_nearwall_speed_mod;
 
     float GetFov();    //--#SM+#--
     float GetHudFov(); //--#SM+#--

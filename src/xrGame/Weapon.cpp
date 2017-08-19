@@ -22,7 +22,7 @@ CWeapon::CWeapon() : CShellLauncher(this)
     m_bTriStateReload_gl   = false;
     m_bTriStateReload_ab   = false;
     m_bTriStateReload_frab = false;
-    
+
     m_bTriStateReload_anim_hack = false;
 
     m_Offset.identity();
@@ -146,6 +146,8 @@ CWeapon::CWeapon() : CShellLauncher(this)
     m_iMagaz3pHideEndTime     = 0;
 
     m_BayonetSlot = eNotExist;
+
+    m_nearwall_last_hud_fov = psHUD_FOV_def;
 }
 
 // Деструктор
