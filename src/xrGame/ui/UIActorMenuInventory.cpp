@@ -44,6 +44,7 @@ void CUIActorMenu::InitInventoryMode()
     m_pInventoryBeltList->Show(true);
     m_pInventoryOutfitList->Show(true);
     m_pInventoryHelmetList->Show(true);
+    m_pInventoryKnifeList->Show(true); //--#SM+#--
     m_pInventoryDetectorList->Show(true);
     m_pInventoryPistolList->Show(true);
     m_pInventoryAutomaticList->Show(true);
@@ -233,9 +234,17 @@ bool RemoveItemFromList(CUIDragDropListEx* lst, PIItem pItem)
 
 void CUIActorMenu::OnInventoryAction(PIItem pItem, u16 action_type)
 {
-    CUIDragDropListEx* all_lists[] = {m_pInventoryBeltList, m_pInventoryPistolList, m_pInventoryAutomaticList,
-        m_pInventoryOutfitList, m_pInventoryHelmetList, m_pInventoryDetectorList, m_pInventoryBagList,
-        m_pTradeActorBagList, m_pTradeActorList, NULL};
+    CUIDragDropListEx* all_lists[] = {m_pInventoryBeltList,
+        m_pInventoryPistolList,
+        m_pInventoryAutomaticList,
+        m_pInventoryOutfitList,
+        m_pInventoryHelmetList,
+        m_pInventoryKnifeList, //--#SM+#--
+        m_pInventoryDetectorList,
+        m_pInventoryBagList,
+        m_pTradeActorBagList,
+        m_pTradeActorList,
+        NULL};
 
     switch (action_type)
     {
@@ -412,6 +421,7 @@ void CUIActorMenu::InitInventoryContents(CUIDragDropListEx* pBagList)
     InitCellForSlot(INV_SLOT_2);
     InitCellForSlot(INV_SLOT_3);
     InitCellForSlot(OUTFIT_SLOT);
+    InitCellForSlot(KNIFE_SLOT); //--#SM+#--
     InitCellForSlot(DETECTOR_SLOT);
     InitCellForSlot(GRENADE_SLOT);
     InitCellForSlot(HELMET_SLOT);
@@ -685,6 +695,8 @@ CUIDragDropListEx* CUIActorMenu::GetSlotList(u16 slot_idx)
     case OUTFIT_SLOT: return m_pInventoryOutfitList; break;
 
     case HELMET_SLOT: return m_pInventoryHelmetList; break;
+
+    case KNIFE_SLOT: return m_pInventoryKnifeList; break; //--#SM+#--
 
     case DETECTOR_SLOT: return m_pInventoryDetectorList; break;
 
