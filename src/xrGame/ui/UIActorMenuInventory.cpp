@@ -46,6 +46,7 @@ void CUIActorMenu::InitInventoryMode()
     m_pInventoryHelmetList->Show(true);
     m_pInventoryKnifeList->Show(true); //--#SM+#--
     m_pInventoryDetectorList->Show(true);
+    m_pInventoryBinocularList->Show(true); //--#SM+#--
     m_pInventoryPistolList->Show(true);
     m_pInventoryAutomaticList->Show(true);
     m_pQuickSlot->Show(true);
@@ -241,6 +242,7 @@ void CUIActorMenu::OnInventoryAction(PIItem pItem, u16 action_type)
         m_pInventoryHelmetList,
         m_pInventoryKnifeList, //--#SM+#--
         m_pInventoryDetectorList,
+        m_pInventoryBinocularList, //--#SM+#--
         m_pInventoryBagList,
         m_pTradeActorBagList,
         m_pTradeActorList,
@@ -423,6 +425,7 @@ void CUIActorMenu::InitInventoryContents(CUIDragDropListEx* pBagList)
     InitCellForSlot(OUTFIT_SLOT);
     InitCellForSlot(KNIFE_SLOT); //--#SM+#--
     InitCellForSlot(DETECTOR_SLOT);
+    InitCellForSlot(BINOCULAR_SLOT); //--#SM+#--
     InitCellForSlot(GRENADE_SLOT);
     InitCellForSlot(HELMET_SLOT);
 
@@ -699,6 +702,8 @@ CUIDragDropListEx* CUIActorMenu::GetSlotList(u16 slot_idx)
     case KNIFE_SLOT: return m_pInventoryKnifeList; break; //--#SM+#--
 
     case DETECTOR_SLOT: return m_pInventoryDetectorList; break;
+
+    case BINOCULAR_SLOT: return m_pInventoryBinocularList; break; //--#SM+#--
 
     case GRENADE_SLOT: // fake
         if (m_currMenuMode == mmTrade)
