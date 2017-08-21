@@ -900,8 +900,9 @@ void CWeapon::UpdateSecondVP()
     bool bCond_1 = m_zoom_params.m_fZoomRotationFactor > 0.05f;    // Мы должны целиться
     bool bCond_2 = m_zoom_params.m_fSecondVP_FovFactor > 0.0f;     // В конфиге должен быть прописан фактор зума (scope_lense_fov_factor) больше чем 0
     bool bCond_3 = pActor->cam_Active() == pActor->cam_FirstEye(); // Мы должны быть от 1-го лица
+    bool bCond_4 = m_bGrenadeMode == false;                        // Мы не должны быть в режиме подствольника
 
-    Device.m_SecondViewport.SetSVPActive(bCond_1 && bCond_2 && bCond_3);
+    Device.m_SecondViewport.SetSVPActive(bCond_1 && bCond_2 && bCond_3 && bCond_4);
 }
 
 // Статическая функция. Считывает из модели число костей с привязкой к числу патронов
