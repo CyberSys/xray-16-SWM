@@ -285,6 +285,8 @@ EDDListType CUIActorMenu::GetListType(CUIDragDropListEx* l)
         return iActorSlot;
     if (l == m_pInventoryDetectorList)
         return iActorSlot;
+    if (l == m_pInventoryBinocularList) //--#SM+#--
+        return iActorSlot;
 
     if (l == m_pTradeActorBagList)
         return iActorBag;
@@ -444,6 +446,7 @@ void CUIActorMenu::clear_highlight_lists()
     m_OutfitSlotHighlight->Show(false);
     m_KnifeSlotHighlight->Show(false); //--#SM+#--
     m_DetectorSlotHighlight->Show(false);
+    m_BinocularSlotHighlight->Show(false); //--#SM+#--
     for (u8 i = 0; i < 4; i++)
         m_QuickSlotsHighlight[i]->Show(false);
     for (u8 i = 0; i < e_af_count; i++)
@@ -494,6 +497,11 @@ void CUIActorMenu::highlight_item_slot(CUICellItem* cell_item)
     {
         m_InvSlot2Highlight->Show(true);
         m_InvSlot3Highlight->Show(true);
+        return;
+    }
+    if (weapon && item_slot == BINOCULAR_SLOT)
+    {
+        m_BinocularSlotHighlight->Show(true);
         return;
     }
     if (helmet && item_slot == HELMET_SLOT)
@@ -756,6 +764,7 @@ void CUIActorMenu::ClearAllLists()
     m_pInventoryHelmetList->ClearAll(true);
     m_pInventoryKnifeList->ClearAll(true); //--#SM+#--
     m_pInventoryDetectorList->ClearAll(true);
+    m_pInventoryBinocularList->ClearAll(true); //--#SM+#--
     m_pInventoryPistolList->ClearAll(true);
     m_pInventoryAutomaticList->ClearAll(true);
     m_pQuickSlot->ClearAll(true);

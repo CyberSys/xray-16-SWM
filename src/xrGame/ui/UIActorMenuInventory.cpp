@@ -48,6 +48,7 @@ void CUIActorMenu::InitInventoryMode()
     m_pInventoryHelmetList->Show(true);
     m_pInventoryKnifeList->Show(true); //--#SM+#--
     m_pInventoryDetectorList->Show(true);
+    m_pInventoryBinocularList->Show(true); //--#SM+#--
     m_pInventoryPistolList->Show(true);
     m_pInventoryAutomaticList->Show(true);
     m_pQuickSlot->Show(true);
@@ -243,6 +244,7 @@ void CUIActorMenu::OnInventoryAction(PIItem pItem, u16 action_type)
         m_pInventoryHelmetList,
         m_pInventoryKnifeList, //--#SM+#--
         m_pInventoryDetectorList,
+        m_pInventoryBinocularList, //--#SM+#--
         m_pInventoryBagList,
         m_pTradeActorBagList,
         m_pTradeActorList,
@@ -425,14 +427,15 @@ void CUIActorMenu::InitInventoryContents(CUIDragDropListEx* pBagList)
     InitCellForSlot(OUTFIT_SLOT);
     InitCellForSlot(KNIFE_SLOT); //--#SM+#--
     InitCellForSlot(DETECTOR_SLOT);
+    InitCellForSlot(BINOCULAR_SLOT); //--#SM+#--
     InitCellForSlot(GRENADE_SLOT);
     InitCellForSlot(HELMET_SLOT);
 
     //Alundaio
     // if (!m_pActorInvOwner->inventory().SlotIsPersistent(KNIFE_SLOT)) //--#SM+#--
     //    InitCellForSlot(KNIFE_SLOT);
-    if (!m_pActorInvOwner->inventory().SlotIsPersistent(BINOCULAR_SLOT))
-        InitCellForSlot(BINOCULAR_SLOT);
+    // if (!m_pActorInvOwner->inventory().SlotIsPersistent(BINOCULAR_SLOT)) //--#SM+#--
+    //    InitCellForSlot(BINOCULAR_SLOT);
     if (!m_pActorInvOwner->inventory().SlotIsPersistent(ARTEFACT_SLOT))
         InitCellForSlot(ARTEFACT_SLOT);
     if (!m_pActorInvOwner->inventory().SlotIsPersistent(PDA_SLOT))
@@ -754,10 +757,12 @@ CUIDragDropListEx* CUIActorMenu::GetSlotList(u16 slot_idx)
 
     case DETECTOR_SLOT: return m_pInventoryDetectorList; break;
 
+    case BINOCULAR_SLOT: return m_pInventoryBinocularList; break; //--#SM+#--
+
     case PDA_SLOT:
     case TORCH_SLOT:
     case ARTEFACT_SLOT:
-    case BINOCULAR_SLOT:
+    // case BINOCULAR_SLOT: //--#SM+#--
     // case KNIFE_SLOT: //--#SM+#--
 
     case GRENADE_SLOT: // fake
