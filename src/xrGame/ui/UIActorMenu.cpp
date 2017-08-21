@@ -281,6 +281,8 @@ EDDListType CUIActorMenu::GetListType(CUIDragDropListEx* l)
         return iActorSlot;
     if (l == m_pInventoryHelmetList)
         return iActorSlot;
+    if (l == m_pInventoryKnifeList) //--#SM+#--
+        return iActorSlot;
     if (l == m_pInventoryDetectorList)
         return iActorSlot;
 
@@ -440,6 +442,7 @@ void CUIActorMenu::clear_highlight_lists()
     m_InvSlot3Highlight->Show(false);
     m_HelmetSlotHighlight->Show(false);
     m_OutfitSlotHighlight->Show(false);
+    m_KnifeSlotHighlight->Show(false); //--#SM+#--
     m_DetectorSlotHighlight->Show(false);
     for (u8 i = 0; i < 4; i++)
         m_QuickSlotsHighlight[i]->Show(false);
@@ -479,28 +482,36 @@ void CUIActorMenu::highlight_item_slot(CUICellItem* cell_item)
     CEatableItem* eatable = smart_cast<CEatableItem*>(item);
     CArtefact* artefact = smart_cast<CArtefact*>(item);
 
-    u16 slot_id = item->BaseSlot();
-    if (weapon && (slot_id == INV_SLOT_2 || slot_id == INV_SLOT_3))
+    //--#SM+ Begin#--
+    u32 item_slot = item->BaseSlot();
+
+    if (weapon && (item_slot == KNIFE_SLOT))
+    {
+        m_KnifeSlotHighlight->Show(true);
+        return;
+    }
+    if (weapon && (item_slot == INV_SLOT_2 || item_slot == INV_SLOT_3))
     {
         m_InvSlot2Highlight->Show(true);
         m_InvSlot3Highlight->Show(true);
         return;
     }
-    if (helmet && slot_id == HELMET_SLOT)
+    if (helmet && item_slot == HELMET_SLOT)
     {
         m_HelmetSlotHighlight->Show(true);
         return;
     }
-    if (outfit && slot_id == OUTFIT_SLOT)
+    if (outfit && item_slot == OUTFIT_SLOT)
     {
         m_OutfitSlotHighlight->Show(true);
         return;
     }
-    if (detector && slot_id == DETECTOR_SLOT)
+    if (detector && item_slot == DETECTOR_SLOT)
     {
         m_DetectorSlotHighlight->Show(true);
         return;
     }
+    //--#SM+ End#--
     if (eatable)
     {
         if (cell_item->OwnerList() && GetListType(cell_item->OwnerList()) == iQuickSlot)
@@ -743,6 +754,7 @@ void CUIActorMenu::ClearAllLists()
     m_pInventoryBeltList->ClearAll(true);
     m_pInventoryOutfitList->ClearAll(true);
     m_pInventoryHelmetList->ClearAll(true);
+    m_pInventoryKnifeList->ClearAll(true); //--#SM+#--
     m_pInventoryDetectorList->ClearAll(true);
     m_pInventoryPistolList->ClearAll(true);
     m_pInventoryAutomaticList->ClearAll(true);
