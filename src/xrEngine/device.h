@@ -132,7 +132,7 @@ public:
         u8   m_FrameDelay; // На каком кадре с момента прошлого рендера во второй вьюпорт мы начнём новый (не может быть меньше 2 - каждый второй кадр, чем больше тем более низкий FPS во втором вьюпорте)
     public:
         IC bool IsSVPActive() { return m_bIsActive; }
-        IC void SetSVPActive(bool bState) { m_bIsActive = bState; }
+        void    SetSVPActive(bool bState);
         bool    IsSVPFrame();
 
         IC u8 GetSVPFrameDelay() { return m_FrameDelay; }
