@@ -485,6 +485,9 @@ void CWeapon::PlayAnimIdleMoving()
 // Анимация бега
 void CWeapon::PlayAnimIdleSprint()
 {
+    if (IsZoomed())
+        return PlayAnimIdleOnly();
+
     int iAmmo = GetMainAmmoElapsed();
 
     if (def_IsGL_Mode)
