@@ -182,6 +182,17 @@ BOOL CWeapon::net_Spawn(CSE_Abstract* DC)
         inherited::net_Spawn_install_upgrades(E->m_upgrades);
     }
 
+    // Аддоны
+    InstallAddon(eScope, E->m_scope_idx, true);
+    InstallAddon(eMuzzle, E->m_muzzle_idx, true);
+    InstallAddon(eLauncher, E->m_launcher_idx, true);
+    InstallAddon(eMagaz, E->m_magaz_idx, true);
+    InstallAddon(eSpec_1, E->m_spec_1_idx, true);
+    InstallAddon(eSpec_2, E->m_spec_2_idx, true);
+    InstallAddon(eSpec_3, E->m_spec_3_idx, true);
+    InstallAddon(eSpec_4, E->m_spec_4_idx, true);
+    UpdateAddons(); // <-- Данные из конфигов аддонов незагружены до этого момента <!>
+
     // Разное
     m_fRTZoomFactor    = m_zoom_params.m_fScopeZoomFactor;
     m_bIdleFromZoomOut = false;
@@ -192,18 +203,6 @@ BOOL CWeapon::net_Spawn(CSE_Abstract* DC)
     m_dwWeaponIndependencyTime = 0;
     m_bAmmoWasSpawned          = false;
     SetPending(FALSE);
-
-    // Аддоны
-    InstallAddon(eScope, E->m_scope_idx, true);
-    InstallAddon(eMuzzle, E->m_muzzle_idx, true);
-    InstallAddon(eLauncher, E->m_launcher_idx, true);
-    InstallAddon(eMagaz, E->m_magaz_idx, true);
-    InstallAddon(eSpec_1, E->m_spec_1_idx, true);
-    InstallAddon(eSpec_2, E->m_spec_2_idx, true);
-    InstallAddon(eSpec_3, E->m_spec_3_idx, true);
-    InstallAddon(eSpec_4, E->m_spec_4_idx, true);
-
-    UpdateAddons();
 
     // Патроны - Основной ствол
     SetAmmoElapsedFor(E->a_elapsed, false);
@@ -398,6 +397,7 @@ void CWeapon::save(NET_Packet& output_packet)
     inherited::save(output_packet);
 
     save_data(m_zoom_params.m_bIsZoomModeNow, output_packet);
+    save_data(m_fRTZoomFactor, output_packet);
     save_data(m_bRememberActorNVisnStatus, output_packet);
     save_data(m_iQueueSize, output_packet);
     save_data(m_iShotNum, output_packet);
@@ -414,6 +414,7 @@ void CWeapon::load(IReader& input_packet)
     bool bGL = false;
 
     load_data(m_zoom_params.m_bIsZoomModeNow, input_packet);
+    load_data(m_fRTZoomFactor, input_packet);
     load_data(m_bRememberActorNVisnStatus, input_packet);
     load_data(m_iQueueSize, input_packet);
     load_data(m_iShotNum, input_packet);

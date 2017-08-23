@@ -247,13 +247,21 @@ void CWeapon::UpdateSounds()
 // Звук входа в прицеливание
 void CWeapon::PlaySoundZoomIn()
 {
+    IGameObject* pParent = H_Parent();
+    if (pParent == NULL)
+        return;
+
     m_sounds.StopSound("sndZoomOut");
-    PlaySound("sndZoomIn", get_LastFP());
+    PlaySound("sndZoomIn", pParent->Position());
 }
 
 // Звук выхода из прицеливания
 void CWeapon::PlaySoundZoomOut()
 {
+    IGameObject* pParent = H_Parent();
+    if (pParent == NULL)
+        return;
+
     m_sounds.StopSound("sndZoomIn");
-    PlaySound("sndZoomOut", get_LastFP());
+    PlaySound("sndZoomOut", pParent->Position());
 }

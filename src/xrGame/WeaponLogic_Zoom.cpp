@@ -68,10 +68,7 @@ void CWeapon::OnZoomIn()
     }
 
     // Динамический или простой зум
-    if (m_zoom_params.m_bUseDynamicZoom)
-        SetZoomFactor(m_fRTZoomFactor);
-    else
-        m_zoom_params.m_fCurrentZoomFactor = CurrentZoomFactor();
+    SetZoomFactor(m_zoom_params.m_bUseDynamicZoom ? m_fRTZoomFactor : CurrentZoomFactor());
 
     // Отключаем инерцию (Заменено GetInertionFactor())
     // EnableHudInertion	(FALSE);
@@ -137,9 +134,9 @@ void CWeapon::OnZoomOut()
         }
     }
 
+    m_fRTZoomFactor = GetZoomFactor(); // Сохраняем текущий динамический зум
     m_zoom_params.m_bIsZoomModeNow     = false;
-    m_zoom_params.m_fCurrentZoomFactor = g_fov;
-    m_fRTZoomFactor                    = GetZoomFactor(); //store current
+    SetZoomFactor(g_fov);
 
     ResetSubStateTime();
 
