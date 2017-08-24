@@ -46,6 +46,11 @@ void CWeapon::switch2_Pump()
 // Переключение на другой стэйт из стэйта "Помпа"
 void CWeapon::switchFrom_Pump(u32 newS)
 {
+    m_sounds.StopSound("sndPump");
+    m_sounds.StopSound("sndPumpWGL");
+    m_sounds.StopSound("sndPumpAim");
+    m_sounds.StopSound("sndPumpAimWGL");
+
     if (iAmmoElapsed == 0)
         Try2AutoReload();
 }

@@ -35,10 +35,10 @@ void CWeapon::ReloadAllSounds()
 	ReloadSound( "snd_kick",					"sndKick"				, false,	SOUND_TYPE_IDLE						);
 	ReloadSound( "snd_zoomin",					"sndZoomIn"				, true,		SOUND_TYPE_ITEM_USING				);
 	ReloadSound( "snd_zoomout",					"sndZoomOut"			, true,		SOUND_TYPE_ITEM_USING				);
-	ReloadSound( "snd_pump",					"sndPump"				, true,		SOUND_TYPE_WEAPON_RECHARGING		);
-	ReloadSound( "snd_pump_w_gl",				"sndPumpWGL"			, true,		SOUND_TYPE_WEAPON_RECHARGING		);
-	ReloadSound( "snd_pump_aim",				"sndPumpAim"			, true,		SOUND_TYPE_WEAPON_RECHARGING		);
-	ReloadSound( "snd_pump_aim_w_gl",			"sndPumpAimWGL"			, true,		SOUND_TYPE_WEAPON_RECHARGING		);
+	ReloadSound( "snd_pump",					"sndPump"				, false,    SOUND_TYPE_WEAPON_RECHARGING		);
+	ReloadSound( "snd_pump_w_gl",				"sndPumpWGL"			, false,    SOUND_TYPE_WEAPON_RECHARGING		);
+	ReloadSound( "snd_pump_aim",				"sndPumpAim"			, false,    SOUND_TYPE_WEAPON_RECHARGING		);
+	ReloadSound( "snd_pump_aim_w_gl",			"sndPumpAimWGL"			, false,    SOUND_TYPE_WEAPON_RECHARGING		);
 	ReloadSound( "snd_bipods_deploy",			"sndBipodsD"			, false,	SOUND_TYPE_ITEM_USING				);
 	ReloadSound( "snd_bipods_retract",			"sndBipodsU"			, false,	SOUND_TYPE_ITEM_USING				);
 
