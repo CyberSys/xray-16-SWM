@@ -149,7 +149,7 @@ Fvector& attachable_hud_item::hands_offset_rot()
     return m_measures.m_hands_offset[1][idx];
 }
 
-void attachable_hud_item::set_bone_visible(const shared_str& bone_names, BOOL bVisibility, BOOL bSilent) //--#SM+#--
+void attachable_hud_item::set_bone_visible(const shared_str& bone_names, BOOL bVisibility, BOOL bSilent, BOOL bCheckVisibility) //--#SM+#--
 {
     string128 _bone_name;
     int count = _GetItemCount(bone_names.c_str());
@@ -160,7 +160,6 @@ void attachable_hud_item::set_bone_visible(const shared_str& bone_names, BOOL bV
 
         ///////////////////////////////////////////////////////////////
         u16 bone_id;
-        //BOOL bVisibleNow;
         bone_id = m_model->LL_BoneID(bone_name);
         if (bone_id == BI_NONE)
         {
@@ -170,8 +169,7 @@ void attachable_hud_item::set_bone_visible(const shared_str& bone_names, BOOL bV
                 0, make_string("model [%s] has no bone [%s]", pSettings->r_string(m_sect_name, "item_visual"), bone_name.c_str()).c_str());
         }
 
-        //bVisibleNow		= m_model->LL_GetBoneVisible	(bone_id);
-        //if(bVisibleNow!=bVisibility)
+        if (bCheckVisibility == FALSE || m_model->LL_GetBoneVisible(bone_id) != bVisibility)
         {
             m_model->LL_SetBoneVisible(bone_id, bVisibility, TRUE);
         }

@@ -423,6 +423,10 @@ void CWeapon::InitAddons()
         // Параметры сошек
         m_bipods.m_fCurScopeZoomFov = READ_ADDON_DATA(r_float, "scope_bipods_fov", GetScopeSetSect(), GetScopeName(), -1.f);
 
+        // Коллиматорная метка, должна быть скрыта без зума
+        m_sHolographBone           = READ_ADDON_DATA(r_string, "holograph_bone", GetScopeSetSect(), GetScopeName(), NULL);
+        m_fHolographRotationFactor = READ_ADDON_DATA(r_float, "holograph_rotation_factor", GetScopeSetSect(), GetScopeName(), 1.0f);
+
         // Текстура прицельной сетки
         shared_str scope_tex_name = READ_ADDON_DATA(r_string, "scope_texture", GetScopeSetSect(), GetScopeName(), "none");
 

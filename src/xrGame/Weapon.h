@@ -1393,4 +1393,7 @@ public:
 
     float         m_fScopeInertionFactor;
     virtual float GetControlInertionFactor() const;
+
+    shared_str m_sHolographBone;
+    float      m_fHolographRotationFactor;
 };

@@ -146,6 +146,9 @@ CWeapon::CWeapon() : CShellLauncher(this)
     m_BayonetSlot = eNotExist;
 
     m_nearwall_last_hud_fov = psHUD_FOV_def;
+
+    m_sHolographBone           = NULL;
+    m_fHolographRotationFactor = 1.f;
 }
 
 // Деструктор

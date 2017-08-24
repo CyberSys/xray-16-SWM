@@ -794,6 +794,13 @@ void CWeapon::UpdateWpnVisuals()
                     {
                         vis_object_data* object_data = pVis->getVisData().obj_data;
 
+                        // Скрываем кости голографа вне зума
+                        if (IsScopeAttached() && m_sHolographBone != NULL)
+                        {
+                            bool bShow = (m_bGrenadeMode == false && GetZRotatingFactor() >= m_fHolographRotationFactor);
+                            item->set_bone_visible(m_sHolographBone, bShow, TRUE);
+                        }
+
                         // Получаем число костей, привязанных к числу патронов
                         int max_bullet_bones = object_data->m_max_bullet_bones;
                         if (max_bullet_bones <= 0)
