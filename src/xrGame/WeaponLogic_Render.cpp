@@ -4,6 +4,7 @@
 
 #include "stdafx.h"
 #include "Weapon_Shared.h"
+#include "WeaponBinocularsVision.h"
 #include "attachable_visual.h"
 #include "HUDManager.h"
 
@@ -42,14 +43,18 @@ u8 CWeapon::GetCurrentHudOffsetIdx()
     if (!pActor)
         return 0;
 
-    bool b_aiming = ((IsZoomed() && m_zoom_params.m_fZoomRotationFactor <= 1.f) || (!IsZoomed() && m_zoom_params.m_fZoomRotationFactor > 0.f));
+    bool b_aiming = ((IsZoomed() && m_fZoomRotationFactor <= 1.f) || (!IsZoomed() && m_fZoomRotationFactor > 0.f));
 
     if (!b_aiming)
         return 0;
-    else if (m_bGrenadeMode)
-        return 2;
-    else
+    else if (GetZoomType() == eZoomMain)
         return 1;
+    else if (GetZoomType() == eZoomGL)
+        return 2;
+    else if (GetZoomType() == eZoomAlt)
+        return 3;
+    else
+        R_ASSERT2("Unknown zoom type", GetZoomType());
 }
 
 // Обновление координат текущего худа
@@ -65,7 +70,7 @@ void CWeapon::UpdateHudAdditonal(Fmatrix& trans)
     u8 idx = GetCurrentHudOffsetIdx();
 
     // Поворот ствола во время аима
-    if ((IsZoomed() && m_zoom_params.m_fZoomRotationFactor <= 1.f) || (!IsZoomed() && m_zoom_params.m_fZoomRotationFactor > 0.f))
+    if ((IsZoomed() && m_fZoomRotationFactor <= 1.f) || (!IsZoomed() && m_fZoomRotationFactor > 0.f))
     {
         Fvector curr_offs, curr_rot;
         curr_offs = hi->m_measures.m_hands_offset[0][idx]; //pos,aim
@@ -76,8 +81,8 @@ void CWeapon::UpdateHudAdditonal(Fmatrix& trans)
             curr_offs.z += m_bipods.m_hud_z_offset;
         }
 
-        curr_offs.mul(m_zoom_params.m_fZoomRotationFactor);
-        curr_rot.mul(m_zoom_params.m_fZoomRotationFactor);
+        curr_offs.mul(m_fZoomRotationFactor);
+        curr_rot.mul(m_fZoomRotationFactor);
 
         Fmatrix hud_rotation;
         hud_rotation.identity();
@@ -96,11 +101,11 @@ void CWeapon::UpdateHudAdditonal(Fmatrix& trans)
         trans.mulB_43(hud_rotation);
 
         if (pActor->IsZoomAimingMode())
-            m_zoom_params.m_fZoomRotationFactor += Device.fTimeDelta / m_zoom_params.m_fZoomRotateTime;
+            m_fZoomRotationFactor += Device.fTimeDelta / m_fZoomRotateTime;
         else
-            m_zoom_params.m_fZoomRotationFactor -= Device.fTimeDelta / m_zoom_params.m_fZoomRotateTime;
+            m_fZoomRotationFactor -= Device.fTimeDelta / m_fZoomRotateTime;
 
-        clamp(m_zoom_params.m_fZoomRotationFactor, 0.f, 1.f);
+        clamp(m_fZoomRotationFactor, 0.f, 1.f);
     }
 
     // Боковой стрейф с оружием
@@ -160,13 +165,13 @@ void CWeapon::UpdateHudAdditonal(Fmatrix& trans)
 
         if (_idx == 0)
         { // От бедра
-            curr_offs.mul(1.f - m_zoom_params.m_fZoomRotationFactor);
-            curr_rot.mul(1.f - m_zoom_params.m_fZoomRotationFactor);
+            curr_offs.mul(1.f - m_fZoomRotationFactor);
+            curr_rot.mul(1.f - m_fZoomRotationFactor);
         }
         else
         { // Во время аима
-            curr_offs.mul(m_zoom_params.m_fZoomRotationFactor);
-            curr_rot.mul(m_zoom_params.m_fZoomRotationFactor);
+            curr_offs.mul(m_fZoomRotationFactor);
+            curr_rot.mul(m_fZoomRotationFactor);
         }
 
         Fmatrix hud_rotation;
@@ -188,16 +193,7 @@ void CWeapon::UpdateHudAdditonal(Fmatrix& trans)
     }
 }
 
-// Получить текущий FOV для зума
-float CWeapon::CurrentZoomFactor()
-{
-    if (IsGrenadeLauncherAttached() && m_bGrenadeMode)
-        return m_zoom_params.m_fIronSightZoomFactor;
-
-    return IsScopeAttached() ? m_zoom_params.m_fScopeZoomFactor : m_zoom_params.m_fIronSightZoomFactor;
-};
-
-// Получить FOV текущего оружия
+// Получить FOV от текущего оружия игрока
 float CWeapon::GetFov()
 {
     if (IsBipodsDeployed() && !ZoomTexture())
@@ -213,15 +209,32 @@ float CWeapon::GetFov()
     { // FOV при обычном зуме
         if (IsZoomed() && (!ZoomTexture() || (!IsRotatingToZoom() && ZoomTexture())))
         {
-            return GetZoomFactor() * (0.75f);
+            float fCurZoomFactor =
+                (GetZoomParams().m_bUseDynamicZoom && !IsSecondVPZoomPresent()) ? GetZoomParams().m_fRTZoomFactor : GetAimZoomFactor();
+
+            // Считаем FOV по старому (как в оригинале)
+            if (m_bUseOldZoomFactor)
+                return fCurZoomFactor * 0.75f;
+
+            // По новому (ZoomFactor в процентах)
+            return (fCurZoomFactor / 100.f) * g_fov;
         }
     }
 
-    // Дефолт
+    // Дефолт (от бедра)
     return g_fov;
 }
 
-// Получить HUD FOV текущего оружия
+// Получить FOV от текущего оружия игрока для второго рендера
+float CWeapon::GetSecondVPFov()
+{
+    if (GetZoomParams().m_bUseDynamicZoom && IsSecondVPZoomPresent())
+        return (GetZoomParams().m_fRTZoomFactor / 100.f) * g_fov;
+
+    return GetSecondVPZoomFactor() * g_fov;
+}
+
+// Получить HUD FOV от текущего оружия игрока
 float CWeapon::GetHudFov()
 {
     // Рассчитываем HUD FOV от бедра (с учётом упирания в стены)
@@ -237,7 +250,7 @@ float CWeapon::GetHudFov()
         float fDistanceMod = ((dist - m_nearwall_dist_min) / (m_nearwall_dist_max - m_nearwall_dist_min)); // 0.f ... 1.f
 
         // Рассчитываем базовый HUD FOV от бедра
-        float fBaseFov = psHUD_FOV_def + m_hud_fov_add_mod;
+        float fBaseFov = psHUD_FOV_def + m_HudFovAddition;
         clamp(fBaseFov, 0.0f, FLT_MAX);
 
         // Плавно высчитываем итоговый FOV от бедра
@@ -254,11 +267,11 @@ float CWeapon::GetHudFov()
     }
 
     // Возвращаем итоговый HUD FOV
-    if (m_zoom_params.m_fZoomRotationFactor > 0.0f)
+    if (m_fZoomRotationFactor > 0.0f)
     {
         // В процессе зума
-        float fDiff = m_nearwall_last_hud_fov - m_zoom_params.m_fZoomHudFov;
-        return m_zoom_params.m_fZoomHudFov + (fDiff * (1 - m_zoom_params.m_fZoomRotationFactor));
+        float fDiff = m_nearwall_last_hud_fov - GetZoomParams().m_fZoomHudFov;
+        return GetZoomParams().m_fZoomHudFov + (fDiff * (1 - m_fZoomRotationFactor));
     }
     else
     {
@@ -292,8 +305,8 @@ bool CWeapon::render_item_ui_query()
 // Отрисовать UI оружия
 void CWeapon::render_item_ui()
 {
-    if (m_zoom_params.m_pVision != NULL)
-        m_zoom_params.m_pVision->Draw();
+    if (GetZoomParams().m_pVision != NULL)
+        GetZoomParams().m_pVision->Draw();
 
     ZoomTexture()->Update();
     ZoomTexture()->Draw();
@@ -904,12 +917,11 @@ void CWeapon::UpdateSecondVP()
 
     CActor* pActor = H_Parent()->cast_actor();
 
-    bool bCond_1 = m_zoom_params.m_fZoomRotationFactor > 0.05f;    // Мы должны целиться
-    bool bCond_2 = m_zoom_params.m_fSecondVP_FovFactor > 0.0f;     // В конфиге должен быть прописан фактор зума (scope_lense_fov_factor) больше чем 0
+    bool bCond_1 = m_fZoomRotationFactor > 0.05f; // Мы должны целиться
+    bool bCond_2 = IsSecondVPZoomPresent();       // В конфиге должен быть прописан фактор зума для линзы (scope_lense_factor больше чем 0)
     bool bCond_3 = pActor->cam_Active() == pActor->cam_FirstEye(); // Мы должны быть от 1-го лица
-    bool bCond_4 = m_bGrenadeMode == false;                        // Мы не должны быть в режиме подствольника
 
-    Device.m_SecondViewport.SetSVPActive(bCond_1 && bCond_2 && bCond_3 && bCond_4);
+    Device.m_SecondViewport.SetSVPActive(bCond_1 && bCond_2 && bCond_3);
 }
 
 // Статическая функция. Считывает из модели число костей с привязкой к числу патронов

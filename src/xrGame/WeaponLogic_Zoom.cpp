@@ -4,11 +4,13 @@
 
 #include "stdafx.h"
 #include "Weapon_Shared.h"
+#include "WeaponBinocularsVision.h"
+#include "Torch.h"
 
 // Получить необходимые параметры для динамического зума
-void GetZoomData(const float scope_factor, float& delta, float& min_zoom_factor)
+void GetZoomData(const float scope_factor, float& delta, float& min_zoom_factor, bool bOldMode = true)
 {
-    float def_fov            = float(g_fov);
+    float def_fov            = (bOldMode ? float(g_fov) : 100.0f);
     float min_zoom_k         = 0.3f;
     float zoom_step_count    = 3.0f;
     float delta_factor_total = def_fov - scope_factor;
@@ -18,81 +20,86 @@ void GetZoomData(const float scope_factor, float& delta, float& min_zoom_factor)
 }
 
 // Увеличение динамического зума
-void CWeapon::ZoomInc()
-{
-    if (!IsScopeAttached())
-        return;
-    if (!m_zoom_params.m_bUseDynamicZoom)
-        return;
-    float delta, min_zoom_factor;
-    GetZoomData(m_zoom_params.m_fScopeZoomFactor, delta, min_zoom_factor);
-
-    float f = GetZoomFactor() - delta;
-    clamp(f, m_zoom_params.m_fScopeZoomFactor, min_zoom_factor);
-    SetZoomFactor(f);
-}
+void CWeapon::ZoomInc(bool bForceLimit) { ZoomDynamicMod(true, bForceLimit); }
 
 // Уменьшение динамического зума
-void CWeapon::ZoomDec()
-{
-    if (!IsScopeAttached())
-        return;
-    if (!m_zoom_params.m_bUseDynamicZoom)
-        return;
-    float delta, min_zoom_factor;
-    GetZoomData(m_zoom_params.m_fScopeZoomFactor, delta, min_zoom_factor);
+void CWeapon::ZoomDec(bool bForceLimit) { ZoomDynamicMod(false, bForceLimit); }
 
-    float f = GetZoomFactor() + delta;
-    clamp(f, m_zoom_params.m_fScopeZoomFactor, min_zoom_factor);
-    SetZoomFactor(f);
+// Меняем динамический зум в обе стороны
+void CWeapon::ZoomDynamicMod(bool bIncrement, bool bForceLimit)
+{
+    if (!GetZoomParams().m_bUseDynamicZoom)
+        return;
+
+    float delta, min_zoom_factor, max_zoom_factor;
+    max_zoom_factor = (IsSecondVPZoomPresent() ? (GetSecondVPZoomFactor() * 100.f) : GetAimZoomFactor());
+    GetZoomData(max_zoom_factor, delta, min_zoom_factor, (m_bUseOldZoomFactor && !IsSecondVPZoomPresent()));
+
+    if (bForceLimit)
+    {
+        GetZoomParams().m_fRTZoomFactor = (bIncrement ? max_zoom_factor : min_zoom_factor);
+    }
+    else
+    {
+        R_ASSERT(GetZoomParams().m_fRTZoomFactor >= 0.0f);
+
+        float f = (bIncrement ? GetZoomParams().m_fRTZoomFactor - delta : GetZoomParams().m_fRTZoomFactor + delta);
+        clamp(f, max_zoom_factor, min_zoom_factor);
+
+        GetZoomParams().m_fRTZoomFactor = f;
+    }
 }
 
 // Вход в зум
-void CWeapon::OnZoomIn()
+void CWeapon::OnZoomIn(bool bSilent)
 {
     if (IsZoomed())
         return;
 
-    if (m_bDisableFireWhileZooming)
-        Need2Stop_Fire();
+    m_bIsZoomModeNow = true;
 
-    PlaySoundZoomIn();
-
-    m_zoom_params.m_bIsZoomModeNow = true;
-    m_bIdleFromZoomOut             = false;
-
-    if (m_bNeed2Pump == false && (GetState() == eIdle || GetState() == eFire))
+    if (bSilent == false)
     {
-        m_ZoomAnimState = eZAIn;
-        PlayAnimZoom();
+        if (m_bDisableFireWhileZooming)
+            Need2Stop_Fire();
+
+        PlaySoundZoomIn();
+
+        m_bIdleFromZoomOut = false;
+
+        if (m_bNeed2Pump == false && (GetState() == eIdle || GetState() == eFire))
+        {
+            m_ZoomAnimState = eZAIn;
+            PlayAnimZoom();
+        }
     }
 
-    // Динамический или простой зум
-    SetZoomFactor(m_zoom_params.m_bUseDynamicZoom ? m_fRTZoomFactor : CurrentZoomFactor());
+    // Инициализируем динамический зум
+    if (GetZoomParams().m_bUseDynamicZoom && GetZoomParams().m_fRTZoomFactor < 0.0f)
+        ZoomDec(true); //--> По умолчанию динамический зум на минимуме
 
     // Отключаем инерцию (Заменено GetInertionFactor())
     // EnableHudInertion	(FALSE);
 
-    // Zoom DoF SM_TODO: Реализовать в будущем аля ЧН
-    //if(m_zoom_params.m_bZoomDofEnabled && !IsScopeAttached())
-    //	GamePersistent().SetEffectorDOF	(m_zoom_params.m_ZoomDof);
+    //if(GetZoomParams().m_bZoomDofEnabled && !IsScopeAttached()) ! Проверять на текстуру 2D-прицела
+    //	GamePersistent().SetEffectorDOF	(GetZoomParams().m_ZoomDof);
 
     if (GetHUDmode())
         GamePersistent().SetPickableEffectorDOF(true);
 
     // Использовать рамки от бинокля?
-    if (m_zoom_params.m_sUseBinocularVision.size() && IsScopeAttached() && NULL == m_zoom_params.m_pVision)
-        m_zoom_params.m_pVision = new CBinocularsVision(m_zoom_params.m_sUseBinocularVision);
+    if (GetZoomParams().m_sUseBinocularVision.size() && IsScopeAttached() && NULL == GetZoomParams().m_pVision)
+        GetZoomParams().m_pVision = new CBinocularsVision(GetZoomParams().m_sUseBinocularVision);
 
     // Использовать постэффект для зума
-    if (m_zoom_params.m_sUseZoomPostprocess.size() && IsScopeAttached())
+    if (GetZoomParams().m_sUseZoomPostprocess.size() && IsScopeAttached())
     {
         CActor* pA = smart_cast<CActor*>(H_Parent());
         if (pA)
         {
-            if (NULL == m_zoom_params.m_pNight_vision)
+            if (NULL == GetZoomParams().m_pNight_vision)
             {
-                m_zoom_params.m_pNight_vision = new CNightVisionEffector(m_zoom_params.m_sUseZoomPostprocess /*"device_torch"*/);
+                GetZoomParams().m_pNight_vision = new CNightVisionEffector(GetZoomParams().m_sUseZoomPostprocess /*"device_torch"*/);
             }
         }
     }
@@ -113,30 +120,31 @@ void CWeapon::OnZoomIn()
 }
 
 // Выход из зума
-void CWeapon::OnZoomOut()
+void CWeapon::OnZoomOut(bool bSilent)
 {
     if (!IsZoomed())
         return;
 
-    if (m_bDisableFireWhileZooming)
-        Need2Stop_Fire();
-
-    PlaySoundZoomOut();
-
-    if (GetState() == eIdle || GetState() == eFire)
+    if (bSilent == false)
     {
-        m_bIdleFromZoomOut = true;
+        if (m_bDisableFireWhileZooming)
+            Need2Stop_Fire();
 
-        if (m_bNeed2Pump == false)
+        PlaySoundZoomOut();
+
+        if (GetState() == eIdle || GetState() == eFire)
         {
-            m_ZoomAnimState = eZAOut;
-            PlayAnimZoom();
+            m_bIdleFromZoomOut = true;
+
+            if (m_bNeed2Pump == false)
+            {
+                m_ZoomAnimState = eZAOut;
+                PlayAnimZoom();
+            }
         }
     }
 
-    m_fRTZoomFactor = GetZoomFactor(); // Сохраняем текущий динамический зум
-    m_zoom_params.m_bIsZoomModeNow     = false;
-    SetZoomFactor(g_fov);
+    m_bIsZoomModeNow = false;
 
     ResetSubStateTime();
 
@@ -150,11 +158,11 @@ void CWeapon::OnZoomOut()
         GamePersistent().SetPickableEffectorDOF(false);
 
     // Отключить постэффект зума
-    xr_delete(m_zoom_params.m_pVision);
-    if (m_zoom_params.m_pNight_vision)
+    xr_delete(GetZoomParams().m_pVision);
+    if (GetZoomParams().m_pNight_vision)
     {
-        m_zoom_params.m_pNight_vision->Stop(100000.0f, false);
-        xr_delete(m_zoom_params.m_pNight_vision);
+        GetZoomParams().m_pNight_vision->Stop(100000.0f, false);
+        xr_delete(GetZoomParams().m_pNight_vision);
     }
 
     // Убрать эффект камеры
@@ -186,7 +194,7 @@ void CWeapon::EnableActorNVisnAfterZoom()
 CUIWindow* CWeapon::ZoomTexture()
 {
     if (UseScopeTexture())
-        return m_UIScope;
+        return GetZoomParams().m_UIScope;
     else
         return NULL;
 }
@@ -194,9 +202,6 @@ CUIWindow* CWeapon::ZoomTexture()
 // Можно-ли использовать текстурный прицел при зуме?
 bool CWeapon::UseScopeTexture()
 {
-    if (IsGrenadeLauncherAttached() && m_bGrenadeMode)
-        return false;
-
     if (IsBipodsDeployed() && !m_bipods.m_bUseZoomFov)
         return false;
 
@@ -211,4 +216,32 @@ float CWeapon::GetControlInertionFactor() const
         return m_fScopeInertionFactor;
 
     return fInertionFactor;
+}
+
+// Переключение режимов прицеливания (Обычный\Альтернативный)
+void CWeapon::SwitchZoomType(EZoomTypes iType)
+{
+    bool bZoomed = IsZoomed();
+
+    // <!> Тип зума ещё старый
+    if (bZoomed)
+        OnZoomOut(true);
+
+    // Меняем тип зума
+    m_iPrevZoomType = m_iCurZoomType;
+    m_iCurZoomType  = iType;
+
+    // <!> Тип зума уже новый
+    if (iType != eZoomMain || IsScopeAttached()) //--> Только ради обратной совместимости с конфигами оригиниальной игры
+        GetZoomParams().UpdateUIScope();
+
+    if (bZoomed)
+        OnZoomIn(true);
+}
+
+void CWeapon::SwitchZoomType(EZoomTypes iCurType, EZoomTypes iPrevType)
+{
+    m_iPrevZoomType = iPrevType;
+    SwitchZoomType(iCurType);
+    m_iPrevZoomType = iPrevType;
 }

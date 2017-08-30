@@ -2275,6 +2275,9 @@
     <Filter Include="Core\Client\Objects\items &amp; weapons\Weapons\Logics\AmmoCompresser">
       <UniqueIdentifier>{a86b8e90-089a-4dfd-b732-47d8038185fa}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Core\Client\Objects\items &amp; weapons\Weapons\Logics\ZoomParams">
+      <UniqueIdentifier>{ac6e550e-5ea5-40d5-a3cd-342a0698aa10}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="mt_config.h">
@@ -6516,6 +6519,9 @@
       <Filter>Core\Client\Objects\items &amp; weapons\Weapons\Shooters</Filter>
     </ClInclude>
     <ClInclude Include="ui\UILoadingScreenHardcoded.h" />
+    <ClInclude Include="Weapon_ZoomParams.h" />
+      <Filter>Core\Client\Objects\items &amp; weapons\Weapons\Logics\ZoomParams</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="damage_manager.cpp">
@@ -9945,6 +9951,9 @@
     </ClCompile>
     <ClCompile Include="WeaponStatesController.cpp">
       <Filter>Core\Client\Objects\items &amp; weapons\Weapons\States</Filter>
+    </ClCompile>
+    <ClCompile Include="Weapon_ZoomParams.cpp">
+      <Filter>Core\Client\Objects\items &amp; weapons\Weapons\Logics\ZoomParams</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

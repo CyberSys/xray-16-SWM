@@ -1,5 +1,7 @@
 #include "stdafx.h"
 #include "Weapon_Shared.h"
+#include "WeaponBinocularsVision.h"
+#include "Torch.h"
 
 /**********************************************/
 /***** Различные колбэки, экшены и эвенты *****/ //--#SM+#--
@@ -113,22 +115,17 @@ bool CWeapon::Action(u16 cmd, u32 flags)
             return Try2Fire();
         else if (m_bNeed2Pump == false && GetCurrentFireMode() == WEAPON_ININITE_QUEUE)
             Need2Stop_Fire();
-    }
+
         return true;
+    }
     ///////////////////////////////////////
     case kWPN_KICK: //--> Удар прикладом
     {
         if (flags & CMD_START)
             Try2Kick();
-    }
+
         return true;
-    ///////////////////////////////////////
-    case kWPN_BIPODS: //--> Установка\Снятие сошек
-    {
-        if (flags & CMD_START)
-            Try2DeployBipods();
     }
-        return true;
     ///////////////////////////////////////
     case kWPN_ZOOM: //--> Прицеливание
     {
@@ -169,15 +166,16 @@ bool CWeapon::Action(u16 cmd, u32 flags)
                 }
             }
         }
-    }
+
         return true;
+    }
     ///////////////////////////////////////
     case kWPN_ZOOM_INC: //--> Увеличение\уменьшение зума
     case kWPN_ZOOM_DEC:
     {
         if (flags & CMD_START)
         {
-            if (IsZoomEnabled() && IsZoomed())
+            if (IsZoomEnabled() && IsZoomed() && !IsBipodsDeployed())
             {
                 if (cmd == kWPN_ZOOM_INC)
                     ZoomInc();
@@ -185,15 +183,17 @@ bool CWeapon::Action(u16 cmd, u32 flags)
                     ZoomDec();
             }
         }
-    }
+
         return true;
+    }
     ///////////////////////////////////////
     case kWPN_NEXT: //--> Смена типа патронов
     {
         if (flags & CMD_START)
             SwitchAmmoType();
-    }
+
         return true;
+    }
     ///////////////////////////////////////
     case kWPN_RELOAD: //--> Перезарядка
     {
@@ -210,8 +210,9 @@ bool CWeapon::Action(u16 cmd, u32 flags)
             // Обычная перезарядка
             Try2Reload();
         }
-    }
+
         return true;
+    }
     ///////////////////////////////////////
     case kWPN_FIREMODE_PREV: //--> Следующий режим стрельбы
     {
@@ -224,8 +225,9 @@ bool CWeapon::Action(u16 cmd, u32 flags)
     {
         if (flags & CMD_START)
             OnNextFireMode();
-    }
+
         return true;
+    }
     ///////////////////////////////////////
     case kWPN_FUNC: //--> Переключение основной ствол\подствол
     {
@@ -236,8 +238,33 @@ bool CWeapon::Action(u16 cmd, u32 flags)
             else
                 Try2ReloadFrAB();
         }
-    }
+
         return true;
+    }
+    ///////////////////////////////////////
+    case kWPN_ACTION: //--> Различные действия в зависимости от контекста
+    {
+        if (IsZoomed())
+        { //--> Переключаем типы зума
+            if (!m_bGrenadeMode && IsAltZoomEnabled())
+            {
+                if (flags & CMD_START)
+                {
+                    if (GetZoomType() == eZoomMain)
+                        SwitchZoomType(eZoomAlt);
+                    else
+                        SwitchZoomType(eZoomMain);
+                }
+            }
+        }
+        else
+        { //--> Раскладываем сошки
+            if (flags & CMD_START)
+                Try2DeployBipods();
+        }
+
+        return true;
+    }
     }
 
     return false;
@@ -248,14 +275,15 @@ void CWeapon::OnH_B_Independent(bool just_before_destroy)
 {
     inherited::OnH_B_Independent(just_before_destroy);
 
+    OnZoomOut();
+
     StopAllEffects();
     Need2Stop_Fire();
 
     SetPending(FALSE);
     SwitchState(eHidden);
 
-    m_strapped_mode                = false;
-    m_zoom_params.m_bIsZoomModeNow = false;
+    m_strapped_mode  = false;
 
     UpdateXForm();
     UpdateMagazine3p();
@@ -279,8 +307,6 @@ void CWeapon::OnH_A_Independent()
 void CWeapon::OnH_B_Chield()
 {
     inherited::OnH_B_Chield();
-
-    OnZoomOut();
 
     m_dwWeaponIndependencyTime    = 0;
     m_set_next_ammoType_on_reload = undefined_ammo_type;
@@ -411,9 +437,9 @@ void CWeapon::UpdateCL()
         }
     }
 
-    if (m_zoom_params.m_pNight_vision && !need_renderable())
+    if (GetZoomParams().m_pNight_vision && !need_renderable())
     {
-        if (!m_zoom_params.m_pNight_vision->IsActive())
+        if (!GetZoomParams().m_pNight_vision->IsActive())
         {
             CActor* pA = smart_cast<CActor*>(H_Parent());
             R_ASSERT(pA);
@@ -423,7 +449,7 @@ void CWeapon::UpdateCL()
                 m_bRememberActorNVisnStatus = pTorch->GetNightVisionStatus();
                 pTorch->SwitchNightVision(false, false);
             }
-            m_zoom_params.m_pNight_vision->Start(m_zoom_params.m_sUseZoomPostprocess, pA, false);
+            GetZoomParams().m_pNight_vision->Start(GetZoomParams().m_sUseZoomPostprocess, pA, false);
         }
     }
     else if (m_bRememberActorNVisnStatus)
@@ -432,8 +458,8 @@ void CWeapon::UpdateCL()
         EnableActorNVisnAfterZoom();
     }
 
-    if (m_zoom_params.m_pVision != NULL && IsZoomed() && !IsRotatingToZoom())
-        m_zoom_params.m_pVision->Update();
+    if (GetZoomParams().m_pVision != NULL && IsZoomed() && !IsRotatingToZoom())
+        GetZoomParams().m_pVision->Update();
 
     UpdateStates(Device.fTimeDelta);
     UpdateSounds();

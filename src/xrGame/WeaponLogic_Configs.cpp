@@ -178,7 +178,7 @@ void CWeapon::Load(LPCSTR section)
     CShellLauncher::ReLoadShellData(section, hud_sect);
 
     // Модификатор для HUD FOV от бедра
-    m_hud_fov_add_mod = READ_IF_EXISTS(pSettings, r_float, section, "hud_fov_addition_modifier", 0.f);
+    m_HudFovAddition = READ_IF_EXISTS(pSettings, r_float, section, "hud_fov_addition_modifier", 0.f);
 
     // Параметры изменения HUD FOV когда игрок стоит вплотную к стене
     m_nearwall_dist_min       = READ_IF_EXISTS(pSettings, r_float, section, "nearwall_dist_min", 0.5f);
@@ -410,31 +410,31 @@ void CWeapon::LoadRecoilParams(LPCSTR section)
 void CWeapon::LoadZoomParams(LPCSTR section)
 {
     // Разрешён-ли зум
-    m_zoom_params.m_bZoomEnabled = !!pSettings->r_bool(section, "zoom_enabled");
+    m_bZoomEnabled = pSettings->r_bool(section, "zoom_enabled");
+
+    // Разрешён-ли альтернативный зум
+    m_bAltZoomEnabled = READ_IF_EXISTS(pSettings, r_bool, section, "zoom_alt_enabled", false);
 
     // Скорость зуминга
-    m_zoom_params.m_fZoomRotateTime = pSettings->r_float(section, "zoom_rotate_time");
-
-    // FOV зума
-    m_zoom_params.m_fZoomHudFov = READ_IF_EXISTS(pSettings, r_float, section, "scope_zoom_hud_fov", psHUD_FOV_def);
-
-    // FOV второго вьюпорта при зуме
-    m_zoom_params.m_fSecondVP_FovFactor = READ_IF_EXISTS(pSettings, r_float, section, "scope_lense_fov_factor", 0.0f);
+    m_fZoomRotateTime = pSettings->r_float(section, "zoom_rotate_time");
 
     // Скрыть прицел при зуме
-    m_zoom_params.m_bHideCrosshairInZoom = READ_IF_EXISTS(pSettings, r_bool, hud_sect, "zoom_hide_crosshair", true);
+    m_bHideCrosshairInZoom = READ_IF_EXISTS(pSettings, r_bool, hud_sect, "zoom_hide_crosshair", true);
 
-    // Использовать динамический зум
-    m_zoom_params.m_bUseDynamicZoom = READ_IF_EXISTS(pSettings, r_bool, section, "scope_dynamic_zoom", false);
+    // Модификатор для всего прицеливания ("совместимость" с конфигами оригинальной игры)
+    m_bUseOldZoomFactor = READ_IF_EXISTS(pSettings, r_bool, section, "zoom_old_mode", true);
 
-    // Постпроцесс зума
-    m_zoom_params.m_sUseZoomPostprocess = NULL;
+    // Основной зум
+    GetZoomParams(eZoomMain).Initialize(section);
 
-    // Режим бинокля
-    m_zoom_params.m_sUseBinocularVision = NULL;
+    // Альтернативный зум
+    GetZoomParams(eZoomAlt).Initialize(section, "_alt");
+
+    // <!> Текстура прицельной сетки здесь не создаётся в целях оптимизации - у нас ещё не загружены данные аддонов
+    // GetZoomParams().UpdateUIScope();
 }
 
-// В каких случаях вызывается, посмотри может PostLoad убрать
+// Вызывается при net_Spawn, после Load
 void CWeapon::reload(LPCSTR section)
 {
     CShootingObject::reload(section);

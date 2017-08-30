@@ -1607,6 +1607,7 @@
     <ClInclude Include="Weapon_AddonData.h" />
     <ClInclude Include="Weapon_AmmoCompress.h" />
     <ClInclude Include="Weapon_Shared.h" />
+    <ClInclude Include="Weapon_ZoomParams.h" />
     <ClInclude Include="Wound.h" />
     <ClInclude Include="wrapper_abstract.h" />
     <ClInclude Include="wrapper_abstract_inline.h" />
@@ -3632,6 +3633,7 @@
     <ClCompile Include="Weapon_AmmoCompressr.cpp" />
     <ClCompile Include="weapon_ammo_dump_impl.cpp" />
     <ClCompile Include="weapon_dump_impl.cpp" />
+    <ClCompile Include="Weapon_ZoomParams.cpp" />
     <ClCompile Include="Wound.cpp" />
     <ClCompile Include="xrClientsPool.cpp" />
     <ClCompile Include="xrGame.cpp" />

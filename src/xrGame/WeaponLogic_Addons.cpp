@@ -5,6 +5,8 @@
 /***** Аддоны оружия *****/ //--#SM+#--
 /*************************/
 
+extern float g_defScopeZoomFactor;
+
 // Проверяет одинаковы-ли аддоны двух CWeapon
 bool CWeapon::IsAddonsEqual(CWeapon* pWpn2Cmp)
 {
@@ -363,6 +365,10 @@ void CWeapon::LoadAddons(LPCSTR section)
         pSettings->w_string(m_sGrenadeLauncherName_str, "launcher_name", m_sGrenadeLauncherName);
         pSettings->w_s32(m_sGrenadeLauncherName_str, "launcher_x", m_iGrenadeLauncherX);
         pSettings->w_s32(m_sGrenadeLauncherName_str, "launcher_y", m_iGrenadeLauncherY);
+
+        if (!pSettings->line_exist(section, "scope_zoom_factor_gl"))
+            pSettings->w_float(
+                section, "scope_zoom_factor_gl", READ_IF_EXISTS(pSettings, r_float, section, "scope_zoom_factor", g_defScopeZoomFactor));
     }
 
     //******** Инициализируем массив аддонов оружия ********//
@@ -379,27 +385,9 @@ void CWeapon::LoadAddons(LPCSTR section)
 
 //****** Инициализируем текущие аддоны на оружии ******//
 
-// Создать UI-окно прицела
-void createWpnScopeXML()
-{
-    if (!pWpnScopeXml)
-    {
-        pWpnScopeXml = new CUIXml();
-        pWpnScopeXml->Load(CONFIG_PATH, UI_PATH, "scopes.xml");
-    }
-}
-
 // Обновить параметры оружия в соответствии одетым аддонам
 void CWeapon::InitAddons()
 {
-    //******** Инициализируем параметры мушки ********//
-    if (IsZoomEnabled())
-    {
-        m_zoom_params.m_fIronSightZoomFactor = READ_IF_EXISTS(pSettings, r_float, cNameSect(), "scope_zoom_factor", 50.0f);
-        m_zoom_params.m_fSecondVP_FovFactor  = READ_IF_EXISTS(pSettings, r_float, cNameSect(), "scope_lense_fov_factor", 0.0f);
-        m_zoom_params.m_fZoomHudFov          = READ_IF_EXISTS(pSettings, r_float, cNameSect(), "scope_zoom_hud_fov", psHUD_FOV_def);
-    }
-
     //******** Инициализируем параметры прицела ********//
     if (IsScopeAttached())
     {
@@ -413,12 +401,27 @@ void CWeapon::InitAddons()
         m_addon_holder_fov_modifier   = READ_ADDON_DATA(r_float, "holder_fov_modifier", GetScopeSetSect(), GetScopeName(), m_holder_fov_modifier);
 
         // Параметры зума
-        m_zoom_params.m_fScopeZoomFactor    = READ_ADDON_DATA(r_float, "scope_zoom_factor", GetScopeSetSect(), GetScopeName(), 50.f);
-        m_zoom_params.m_sUseZoomPostprocess = READ_ADDON_DATA(r_string, "scope_nightvision", GetScopeSetSect(), GetScopeName(), NULL);
-        m_zoom_params.m_bUseDynamicZoom     = READ_ADDON_DATA(r_bool, "scope_dynamic_zoom", GetScopeSetSect(), GetScopeName(), FALSE);
-        m_zoom_params.m_sUseBinocularVision = READ_ADDON_DATA(r_string, "scope_alive_detector", GetScopeSetSect(), GetScopeName(), NULL);
-        m_zoom_params.m_fSecondVP_FovFactor = READ_ADDON_DATA(r_float, "scope_lense_fov_factor", GetScopeSetSect(), GetScopeName(), 0.0f);
-        m_zoom_params.m_fZoomHudFov         = READ_ADDON_DATA(r_float, "scope_zoom_hud_fov", GetScopeSetSect(), GetScopeName(), psHUD_FOV_def);
+        LPCSTR section = cNameSect_str();
+
+        m_bZoomEnabled = true; //--> Всегда разрешаем зум с прицелом
+
+        //--> Разрешён-ли альтернативный зум
+        m_bAltZoomEnabled = READ_ADDON_DATA(r_bool, "zoom_alt_enabled", GetScopeSetSect(), GetScopeName(), false);
+
+        //--> Считываем основну из главной секции
+        GetZoomParams(eZoomMain).Initialize(section, NULL, false);
+        if (IsAltZoomEnabled())
+            GetZoomParams(eZoomAlt).Initialize(section, "_alt", false);
+
+        //--> Переписываем данными из секции аддона
+        GetZoomParams(eZoomMain).Initialize(GetScopeName().c_str(), NULL, true);
+        if (IsAltZoomEnabled())
+            GetZoomParams(eZoomAlt).Initialize(GetScopeName().c_str(), "_alt", true);
+
+        //--> Переписываем данными из секции аддона в оружии
+        GetZoomParams(eZoomMain).Initialize(GetScopeSetSect().c_str(), NULL, true);
+        if (IsAltZoomEnabled())
+            GetZoomParams(eZoomAlt).Initialize(GetScopeSetSect().c_str(), "_alt", true);
 
         // Параметры сошек
         m_bipods.m_fCurScopeZoomFov = READ_ADDON_DATA(r_float, "scope_bipods_fov", GetScopeSetSect(), GetScopeName(), -1.f);
@@ -426,27 +429,15 @@ void CWeapon::InitAddons()
         // Коллиматорная метка, должна быть скрыта без зума
         m_sHolographBone           = READ_ADDON_DATA(r_string, "holograph_bone", GetScopeSetSect(), GetScopeName(), NULL);
         m_fHolographRotationFactor = READ_ADDON_DATA(r_float, "holograph_rotation_factor", GetScopeSetSect(), GetScopeName(), 1.0f);
-
-        // Текстура прицельной сетки
-        shared_str scope_tex_name = READ_ADDON_DATA(r_string, "scope_texture", GetScopeSetSect(), GetScopeName(), "none");
-
-        xr_delete(m_UIScope); //--> Удаляем старую
-
-        if (!g_dedicated_server)
-        {
-            if (!scope_tex_name.equal("none")) //--> Создаём новую
-            {
-                m_UIScope = new CUIWindow();
-                createWpnScopeXML();
-                CUIXmlInit::InitWindow(*pWpnScopeXml, scope_tex_name.c_str(), 0, m_UIScope);
-            }
-        }
     }
     else
     {
-        //**** Прицел не одет ****//
-        xr_delete(m_UIScope);
+        //**** Прицел не одет - грузим дефолт ****//
+        LoadZoomParams(cNameSect_str());
     }
+
+    // Обновляем тип прицеливания при смене любых аддонов
+    SwitchZoomType(IsAltZoomEnabled() ? GetZoomType() : eZoomMain);
 
     //******** Инициализируем параметры глушителя ********//
     LoadSilencerKoeffs(); //--> Загружаем баллистические параметры глушителя
@@ -1104,6 +1095,11 @@ void CWeapon::PerformSwitchGL()
 {
     m_bGrenadeMode = !m_bGrenadeMode;
 
+    if (m_bGrenadeMode)
+        SwitchZoomType(eZoomGL);
+    else
+        SwitchZoomType(GetPrevZoomType());
+
     m_ammoTypes.swap(m_ammoTypes2);
     m_AmmoCartidges.swap(m_AmmoCartidges2);
     m_magazine.swap(m_magazine2);
@@ -1226,6 +1222,18 @@ void CWeapon::UpdateGLParams()
         }
 
         SetAmmoTypeSafeFor(m_bGrenadeMode ? m_ammoType : m_ammoType2, true);
+
+        // Подствольный зум
+        LPCSTR section = cNameSect_str();
+
+        //--> Считываем основну из главной секции
+        GetZoomParams(eZoomGL).Initialize(section, "_gl", false);
+
+        //--> Переписываем данными из секции аддона
+        GetZoomParams(eZoomGL).Initialize(GetGrenadeLauncherName().c_str(), "_gl", true);
+
+        //--> Переписываем данными из секции аддона в оружии
+        GetZoomParams(eZoomGL).Initialize(GetGrenadeLauncherSetSect().c_str(), "_gl", true);
     }
     else
     {

@@ -129,11 +129,11 @@ bool CWeapon::install_upgrade_disp(LPCSTR section, bool test)
     result |= process_if_exists(section, "misfire_start_prob", &CInifile::r_float, misfireStartProbability, test);
     result |= process_if_exists(section, "misfire_end_prob", &CInifile::r_float, misfireEndProbability, test);
 
-    BOOL value   = m_zoom_params.m_bZoomEnabled;
+    BOOL value   = m_bZoomEnabled;
     bool result2 = process_if_exists_set(section, "zoom_enabled", &CInifile::r_bool, value, test);
     if (result2 && !test)
     {
-        m_zoom_params.m_bZoomEnabled = !!value;
+        m_bZoomEnabled = !!value;
     }
     result |= result2;
 
@@ -225,7 +225,7 @@ bool CWeapon::install_upgrade_addon(LPCSTR section, bool test)
 {
     bool result = false;
 
-    //TODO: Расскоменти и доделай --#SM+#--
+    //SM_TODO: Расскоменти и доделай --#SM+#--
     /*
 	//LPCSTR weapon_section = cNameSect().c_str(); 
 
@@ -401,6 +401,8 @@ bool CWeapon::install_upgrade_impl(LPCSTR section, bool test)
         result |= result2;
     }
 
+    //--#SM+#-- SM_TODO - Переделать
+    /*
     // fov for zoom mode
     result |= process_if_exists(section, "ironsight_zoom_factor", &CInifile::r_float, m_zoom_params.m_fIronSightZoomFactor, test);
 
@@ -419,6 +421,7 @@ bool CWeapon::install_upgrade_impl(LPCSTR section, bool test)
             result |= process_if_exists(section, "scope_zoom_factor", &CInifile::r_float, m_zoom_params.m_fIronSightZoomFactor, test);
         }
     }
+    */
 
     // WGL
     //return result;

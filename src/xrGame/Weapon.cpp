@@ -5,21 +5,24 @@
 /***** Ядро оружейного класса *****/ //--#SM+#--
 /**********************************/
 
-BOOL    b_toggle_weapon_aim = FALSE;
-CUIXml* pWpnScopeXml        = NULL;
+BOOL b_toggle_weapon_aim = FALSE;
 
 // Конструктор
 CWeapon::CWeapon() : CShellLauncher(this)
 {
+    m_flags.set(FUsingCondition, TRUE);
+
     SetState(eHidden);
     SetNextState(eHidden);
-    SetDefaults();
+    SetPending(FALSE);
 
     m_sub_state            = eSubstateReloadBegin;
     m_bTriStateReload_main = false;
     m_bTriStateReload_gl   = false;
     m_bTriStateReload_ab   = false;
     m_bTriStateReload_frab = false;
+
+    bMisfire = false;
 
     m_bTriStateReload_anim_hack = false;
 
@@ -47,11 +50,12 @@ CWeapon::CWeapon() : CShellLauncher(this)
 
     eHandDependence = hdNone;
 
-    m_zoom_params.m_fCurrentZoomFactor  = g_fov;
-    m_zoom_params.m_fZoomRotationFactor = 0.f;
-    m_zoom_params.m_pVision             = NULL;
-    m_zoom_params.m_pNight_vision       = NULL;
-    m_bIdleFromZoomOut                  = false;
+    m_fZoomRotationFactor = 0.f;
+    m_bIdleFromZoomOut    = false;
+    m_bIsZoomModeNow      = false;
+    m_bUseOldZoomFactor   = false;
+    m_iCurZoomType        = eZoomMain;
+    m_iPrevZoomType       = m_iCurZoomType;
 
     m_pCurrentAmmo = NULL;
 
@@ -67,7 +71,6 @@ CWeapon::CWeapon() : CShellLauncher(this)
     m_can_be_strapped               = false;
     m_ef_main_weapon_type           = u32(-1);
     m_ef_weapon_type                = u32(-1);
-    m_UIScope                       = NULL;
     m_set_next_ammoType_on_reload   = undefined_ammo_type;
     m_crosshair_inertion            = 0.f;
     m_activation_speed_is_overriden = false;
@@ -154,7 +157,6 @@ CWeapon::CWeapon() : CShellLauncher(this)
 // Деструктор
 CWeapon::~CWeapon()
 {
-    xr_delete(m_UIScope);
     xr_delete(m_kicker_main);
     xr_delete(m_kicker_alt);
     xr_delete(m_first_attack);
@@ -162,16 +164,6 @@ CWeapon::~CWeapon()
     delete_data(m_AmmoCartidges);
     delete_data(m_AmmoCartidges2);
     delete_data(m_AmmoBeltData);
-}
-
-// Установка дефолтного состояния у оружия
-void CWeapon::SetDefaults()
-{
-    m_flags.set(FUsingCondition, TRUE);
-    SetPending(FALSE);
-    bMisfire                       = false;
-    m_zoom_params.m_bIsZoomModeNow = false;
-    m_bIdleFromZoomOut             = false;
 }
 
 // Появление в онлайне
@@ -197,7 +189,6 @@ BOOL CWeapon::net_Spawn(CSE_Abstract* DC)
     UpdateAddons(); // <-- Данные из конфигов аддонов незагружены до этого момента <!>
 
     // Разное
-    m_fRTZoomFactor    = m_zoom_params.m_fScopeZoomFactor;
     m_bIdleFromZoomOut = false;
 
     SetState(E->wpn_state);
@@ -399,8 +390,15 @@ void CWeapon::save(NET_Packet& output_packet)
 {
     inherited::save(output_packet);
 
-    save_data(m_zoom_params.m_bIsZoomModeNow, output_packet);
-    save_data(m_fRTZoomFactor, output_packet);
+    save_data(IsZoomed(), output_packet);
+    save_data(GetZoomType(), output_packet);
+    save_data(GetPrevZoomType(), output_packet);
+    save_data(EZoomTypes::eZoomTypesCnt, output_packet);
+    for (int i = 0; i < EZoomTypes::eZoomTypesCnt; i++)
+    {
+        save_data(GetZoomParams((EZoomTypes)i).m_fRTZoomFactor, output_packet);
+    }
+
     save_data(m_bRememberActorNVisnStatus, output_packet);
     save_data(m_iQueueSize, output_packet);
     save_data(m_iShotNum, output_packet);
@@ -414,10 +412,20 @@ void CWeapon::load(IReader& input_packet)
 {
     inherited::load(input_packet);
 
-    bool bGL = false;
+    bool       bGL           = false;
+    EZoomTypes iCurZoomType  = eZoomMain;
+    EZoomTypes iPrevZoomType = iCurZoomType;
+    int        iZoomTypesCnt = 0;
 
-    load_data(m_zoom_params.m_bIsZoomModeNow, input_packet);
-    load_data(m_fRTZoomFactor, input_packet);
+    load_data(m_bIsZoomModeNow, input_packet);
+    load_data(iCurZoomType, input_packet);
+    load_data(iPrevZoomType, input_packet);
+    load_data(iZoomTypesCnt, input_packet);
+    for (int i = 0; i < EZoomTypes::eZoomTypesCnt && i < iZoomTypesCnt; i++)
+    {
+        load_data(GetZoomParams((EZoomTypes)i).m_fRTZoomFactor, input_packet);
+    }
+
     load_data(m_bRememberActorNVisnStatus, input_packet);
     load_data(m_iQueueSize, input_packet);
     load_data(m_iShotNum, input_packet);
@@ -433,7 +441,9 @@ void CWeapon::load(IReader& input_packet)
     if (m_iCurFireMode >= m_aFireModes.size())
         m_iCurFireMode = 0;
 
-    if (m_zoom_params.m_bIsZoomModeNow)
+    SwitchZoomType(iCurZoomType, iPrevZoomType);
+
+    if (IsZoomed())
         OnZoomIn();
     else
         OnZoomOut();

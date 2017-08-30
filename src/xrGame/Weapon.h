@@ -20,6 +20,7 @@
 #include "game_cl_single.h"
 #include "Weapon_AmmoCompress.h"
 #include "Weapon_AddonData.h"
+#include "Weapon_ZoomParams.h"
 
 class CEntity;
 class ENGINE_API CMotionDef;
@@ -660,74 +661,73 @@ protected:
 	int	m_iGrenadeLauncherX, m_iGrenadeLauncherY;
 	*/
 
-protected:
-    struct SZoomParams
+public:
+    enum EZoomTypes
     {
-        bool m_bZoomEnabled; //разрешение режима приближения
-        bool m_bHideCrosshairInZoom;
-        bool m_bZoomDofEnabled;
+        eZoomMain = 0,
+        eZoomAlt,
+        eZoomGL,
+        eZoomTypesCnt
+    };
 
-        bool  m_bIsZoomModeNow;     //когда режим приближения включен
-        float m_fCurrentZoomFactor; //текущий фактор приближения
-        float m_fZoomRotateTime;    //время приближения
+protected:
+    SZoomParams m_zoom_params[EZoomTypes::eZoomTypesCnt]; // main, alt, gl
 
-        float m_fIronSightZoomFactor; //коэффициент увеличения прицеливания
-        float m_fScopeZoomFactor;     //коэффициент увеличения прицела
-
-        float m_fZoomHudFov; //целевой HUD FOV при зуме --#SM+#--
-
-        float m_fZoomRotationFactor;
-        float m_fSecondVP_FovFactor; //модификатор изменения FOV во втором вьюпорте при зуме
-
-        Fvector               m_ZoomDof;
-        Fvector4              m_ReloadDof;
-        BOOL                  m_bUseDynamicZoom;
-        shared_str            m_sUseZoomPostprocess;
-        shared_str            m_sUseBinocularVision;
-        CBinocularsVision*    m_pVision;
-        CNightVisionEffector* m_pNight_vision;
-
-    } m_zoom_params;
-
-    float      m_fRTZoomFactor; //run-time zoom factor
-    CUIWindow* m_UIScope;
+    EZoomTypes m_iCurZoomType;         // Текущий тип прицеливания
+    EZoomTypes m_iPrevZoomType;        // Прошлый тип прицеливания
+    bool       m_bZoomEnabled;         // Прицеливание разрешено
+    bool       m_bAltZoomEnabled;      // Альтернативное прицеливание разрешено
+    bool       m_bIsZoomModeNow;       // Целимся-ли мы сейчас
+    bool       m_bHideCrosshairInZoom; // Скрывать перекрестие во время зума
+    float      m_fZoomRotationFactor;  // Степень разворота ствола от бедра к прицеливанию [0.f - 1.f]
+    float      m_fZoomRotateTime;      // Скорость прицеливания
+    float      m_bUseOldZoomFactor;    // Использовать старый механизм увеличения (FOV прицеливания = m_fCurrentZoomFactor * 0.75f)
 
 private:
     bool m_bIdleFromZoomOut;
 
 public:
-    IC bool      IsZoomEnabled() const { return m_zoom_params.m_bZoomEnabled; }
-    virtual void ZoomInc();
-    virtual void ZoomDec();
-    virtual void OnZoomIn();
-    virtual void OnZoomOut();
-    IC bool      IsZoomed() const { return m_zoom_params.m_bIsZoomModeNow; };
-    CUIWindow*   ZoomTexture();
+    IC bool IsZoomEnabled() const { return m_bZoomEnabled; }
+    IC bool IsAltZoomEnabled() const { return m_bAltZoomEnabled; }
+    IC bool IsZoomed() const { return m_bIsZoomModeNow; };
 
-    bool ZoomHideCrosshair() { return m_zoom_params.m_bHideCrosshairInZoom || ZoomTexture(); }
+    IC SZoomParams& GetZoomParams() const { return C_THIS->m_zoom_params[m_iCurZoomType]; }
+    IC SZoomParams& GetZoomParams(EZoomTypes iType) const { return C_THIS->m_zoom_params[iType]; }
 
-    IC float GetZoomFactor() const { return m_zoom_params.m_fCurrentZoomFactor; }
-    IC void  SetZoomFactor(float f) { m_zoom_params.m_fCurrentZoomFactor = f; }
+    IC EZoomTypes GetZoomType() { return m_iCurZoomType; }
+    IC EZoomTypes GetPrevZoomType() { return m_iPrevZoomType; }
+    virtual void  SwitchZoomType(EZoomTypes iType);
+    virtual void  SwitchZoomType(EZoomTypes iCurType, EZoomTypes iPrevType);
 
-    float m_hud_fov_add_mod;
+    IC float GetAimZoomFactor() const { return GetZoomParams().m_fZoomFovFactor; }
+    IC float GetSecondVPZoomFactor() const { return GetZoomParams().m_fSecondVPFovFactor; }
+    IC float IsSecondVPZoomPresent() const { return GetSecondVPZoomFactor() > 0.000f; }
+
+    IC float GetZRotatingFactor() const { return m_fZoomRotationFactor; }
+    IC bool  IsRotatingToZoom() const { return (m_fZoomRotationFactor < 1.f); }
+
+    virtual void ZoomDynamicMod(bool bIncrement, bool bForceLimit);
+    virtual void ZoomInc(bool bForceLimit = false);
+    virtual void ZoomDec(bool bForceLimit = false);
+    virtual void OnZoomIn(bool bSilent = false);
+    virtual void OnZoomOut(bool bSilent = false);
+
+    virtual float GetFov();
+    virtual float GetSecondVPFov();
+    virtual float GetHudFov();
+
+    CUIWindow* ZoomTexture();
+    bool       ZoomHideCrosshair() { return m_bHideCrosshairInZoom || ZoomTexture(); }
+
+    virtual u8 GetCurrentHudOffsetIdx();
+
+    float m_HudFovAddition;
 
     float m_nearwall_dist_max;
     float m_nearwall_dist_min;
     float m_nearwall_last_hud_fov;
     float m_nearwall_target_hud_fov;
     float m_nearwall_speed_mod;
-
-    float GetFov();    //--#SM+#--
-    float GetHudFov(); //--#SM+#--
-
-    virtual float CurrentZoomFactor();
-    //показывает, что оружие находится в соостоянии поворота для приближенного прицеливания
-    bool IsRotatingToZoom() const { return (m_zoom_params.m_fZoomRotationFactor < 1.f); }
-
-    float GetZRotatingFactor() const { return m_zoom_params.m_fZoomRotationFactor; }    //--#SM+#--
-    float GetSecondVP_FovFactor() const { return m_zoom_params.m_fSecondVP_FovFactor; } //--#SM+#--
-
-    virtual u8 GetCurrentHudOffsetIdx();
 
     virtual float Weight() const;
     virtual u32   Cost() const;
@@ -809,8 +809,6 @@ public:
     virtual void debug_draw_firedeps();
 
 protected:
-    virtual void SetDefaults();
-
     //	virtual bool			MovingAnimAllowedNow	();
     virtual void OnStateSwitch(u32 S, u32 oldState);
     virtual void OnAnimationEnd(u32 state);
@@ -1321,7 +1319,7 @@ public:
 
     virtual bool SwapBulletFromAB();
 
-    bool m_bGrenadeMode;
+    bool m_bGrenadeMode; // SM_TODO: В приват
 
     bool m_bUseMagazines;
     bool m_bIsMagazine;

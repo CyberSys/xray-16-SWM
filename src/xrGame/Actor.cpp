@@ -1039,7 +1039,7 @@ void CActor::UpdateCL()
 
             // Обновляем информацию об оружии в шейдерах
             g_pGamePersistent->m_pGShaderConstants->hud_params.x = pWeapon->GetZRotatingFactor(); //--#SM+#--
-            g_pGamePersistent->m_pGShaderConstants->hud_params.y = pWeapon->GetSecondVP_FovFactor(); //--#SM+#--
+            g_pGamePersistent->m_pGShaderConstants->hud_params.y = pWeapon->GetSecondVPFov();     //--#SM+#--
         }
     }
     else

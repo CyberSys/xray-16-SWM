@@ -408,6 +408,14 @@ void hud_item_measures::load(const shared_str& sect_name, IKinematics* K)
 
     ////////////////////////////////////////////
     //--#SM+# Begin--
+
+    // Альтернативное прицеливание
+    strconcat(sizeof(val_name), val_name, "aim_hud_offset_alt_pos", _prefix);
+    m_hands_offset[0][3] = READ_IF_EXISTS(pSettings, r_fvector3, sect_name, val_name, zero_vel);
+    strconcat(sizeof(val_name), val_name, "aim_hud_offset_alt_rot", _prefix);
+    m_hands_offset[1][3] = READ_IF_EXISTS(pSettings, r_fvector3, sect_name, val_name, zero_vel);
+
+    // Настройки стрейфа
     Fvector vDefStrafeValue;
     vDefStrafeValue.set(0.f, 0.f, 0.f);
 
@@ -471,6 +479,11 @@ void hud_item_measures::reload_aim_from(hud_item_measures& new_measures)
         m_hands_offset[0][1].set(new_measures.m_hands_offset[0][1]);
         // aim_hud_offset_rot
         m_hands_offset[1][1].set(new_measures.m_hands_offset[1][1]);
+
+        // aim_hud_offset_pos
+        m_hands_offset[0][3].set(new_measures.m_hands_offset[0][3]);
+        // aim_hud_offset_rot
+        m_hands_offset[1][3].set(new_measures.m_hands_offset[1][3]);
     }
 
     // SM_TODO

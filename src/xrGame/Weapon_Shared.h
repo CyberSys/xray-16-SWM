@@ -32,10 +32,6 @@
 #include "debug_renderer.h"
 #include "static_cast_checked.hpp"
 #include "clsid_game.h"
-#include "weaponBinocularsVision.h"
-#include "ui/UIWindow.h"
-#include "ui/UIXmlInit.h"
-#include "Torch.h"
 
 //#include "pch_script.h"
 

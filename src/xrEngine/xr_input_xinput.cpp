@@ -45,7 +45,7 @@ _action actions[] = {
     { "wpn_next",          kWPN_NEXT,          _both }, // means next ammo type
     { "wpn_fire",          kWPN_FIRE,          _both },
 	{ "wpn_kick",          kWPN_KICK,          _both },	//--#SM+#--
-	{ "wpn_bipods",        kWPN_BIPODS,        _both },	//--#SM+#--
+    { "wpn_action",        kWPN_ACTION,        _both }, //--#SM+#--
     { "wpn_zoom",          kWPN_ZOOM,          _both },
     { "wpn_zoom_inc",      kWPN_ZOOM_INC,      _both },
     { "wpn_zoom_dec",      kWPN_ZOOM_DEC,      _both },

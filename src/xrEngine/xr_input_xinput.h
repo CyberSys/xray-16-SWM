@@ -42,7 +42,7 @@ enum EGameActions
     kWPN_NEXT,
     kWPN_FIRE,
     kWPN_KICK, //--#SM+#--
-    kWPN_BIPODS, //--#SM+#--
+    kWPN_ACTION, //--#SM+#--
     kWPN_ZOOM,
     kWPN_ZOOM_INC,
     kWPN_ZOOM_DEC,

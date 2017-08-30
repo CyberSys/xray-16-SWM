@@ -333,7 +333,7 @@ void CCameraManager::ApplyDevice()
     if (Device.m_SecondViewport.IsSVPFrame() && !Device.IsAnselActive)
     {
         // Для второго вьюпорта FOV выставляем здесь
-        Device.fFOV *= g_pGamePersistent->m_pGShaderConstants->hud_params.y;
+        Device.fFOV = g_pGamePersistent->m_pGShaderConstants->hud_params.y;
 
         // Предупреждаем что мы изменили настройки камеры
         Device.m_SecondViewport.isCamReady = true;
