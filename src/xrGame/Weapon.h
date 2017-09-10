@@ -873,7 +873,7 @@ protected:
     virtual u8 AddCartridgeFrAB(u8 cnt);
 
     // обработка визуализации выстрела
-    virtual void OnShot(bool bIsRocket = false);
+    virtual void OnShot(bool bIsRocket = false, bool bIsBaseDispersionedBullet = false);
     virtual void AddShotEffector();
     virtual void RemoveShotEffector();
     virtual void ClearShotEffector();
@@ -1224,7 +1224,6 @@ protected:
     float m_fBaseDispersionedBulletsSpeed;
     //скорость вылета остальных патронов
     float   m_fOldBulletSpeed;
-    Fvector m_vStartPos, m_vStartDir;
     //флаг того, что мы остановились после того как выстреляли
     //ровно столько патронов, сколько было задано в m_iQueueSize
     bool m_bStopedAfterQueueFired;

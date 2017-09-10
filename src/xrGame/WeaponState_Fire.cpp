@@ -178,12 +178,9 @@ void CWeapon::state_Fire(float dt)
     {
         VERIFY(fOneShotTime > 0.f);
 
-        Fvector p1, d;
-        p1.set(get_LastFP());
-        d.set(get_LastFD());
-
         if (!H_Parent())
             return;
+
         if (smart_cast<CMPPlayersBag*>(H_Parent()) != NULL)
         {
             Msg("! WARNING: state_Fire of object [%d][%s] while parent is CMPPlayerBag...", ID(), cNameSect().c_str());
@@ -199,62 +196,82 @@ void CWeapon::state_Fire(float dt)
             Log("H_Parent", H_Parent()->cNameSect().c_str());
         }
 
-        // Обрабатываем позицию и направление выстрела через владельца оружия
-        CEntity* E = smart_cast<CEntity*>(H_Parent());
-        E->g_fireParams(this, p1, d);
-
-        // Если владелец не может стрелять, то отменяем стрельбу
-        if (!E->g_stateFire())
+        if (fShotTimeCounter < 0)
         {
-            Need2Idle();
-            return;
-        }
-
-        // Если это первый выстрел, то устанавливаем его позицию
-        if (m_iShotNum == 0)
-        {
-            m_vStartPos = p1;
-            m_vStartDir = d;
-        };
-
-        R_ASSERT(!m_magazine.empty());
-
-        // Стреляем пока есть патроны и число выстрелов не превысило размер очереди
-        while (!m_magazine.empty() && fShotTimeCounter < 0 && (IsWorking() || m_bFireSingleShot) && (m_iQueueSize < 0 || m_iShotNum < m_iQueueSize))
-        {
-            m_bFireSingleShot = false;
-            fShotTimeCounter += fOneShotTime; //-> Регулируем скорострельность
-            ++m_iShotNum;
-
-            if (!SpawnAndLaunchRocket()) // На случаи если патрон - граната
+            // Если владелец не может стрелять, то отменяем стрельбу
+            CEntity* E = smart_cast<CEntity*>(H_Parent());
+            if (!E->g_stateFire())
             {
-                // Иначе стреляем пулей
-                // Разброс для первого и последующих выстрелов
-                if (m_iShotNum > m_iBaseDispersionedBulletsCount)
-                    FireTrace(p1, d);
-                else
-                    FireTrace(m_vStartPos, m_vStartDir);
-
-                OnShot();
+                Need2Idle();
+                return;
             }
 
-            // После выстрела тестируем на осечку
-            bool bIsMisfife = CheckForMisfire();
+            // Изначальная позиция выстрела
+            Fvector p1, d;
+            p1.set(get_LastFP());
+            d.set(get_LastFD());
 
-            // Передёргиваем помпу
-            if (m_bUsePumpMode && !m_bGrenadeMode)
+            // Обрабатываем позицию и направление выстрела через владельца оружия
+            E->g_fireParams(this, p1, d);
+
+            R_ASSERT(!m_magazine.empty());
+
+            // Стреляем пока есть патроны и число выстрелов не превысило размер очереди
+            while (
+                !m_magazine.empty() && fShotTimeCounter < 0 && (IsWorking() || m_bFireSingleShot) && (m_iQueueSize < 0 || m_iShotNum < m_iQueueSize))
             {
-                m_bNeed2Pump = true;
+                m_bFireSingleShot = false;
+                fShotTimeCounter += fOneShotTime; //--> Регулируем скорострельность
+                ++m_iShotNum;
 
-                if (!bIsMisfife)
-                    Try2Pump();
+                // Сперва пробуем стрельнуть патроном как гранатой\ракетой
+                if (!SpawnAndLaunchRocket())
+                { // Иначе стреляем обычной пулей
+                    if (m_iShotNum == 1 && m_iBaseDispersionedBulletsCount > 0)
+                    { //--> Для Абакана - делаем несколько выстрелов за один кадр
+                        for (int i = 0; i < m_iBaseDispersionedBulletsCount; i++)
+                        {
+                            //--> Со второй пули начинаем повторно проверять возможность стрельбы
+                            if (i > 0)
+                            {
+                                // С каждым "выстрелом" повторно проверяем что мы ещё можем стрелять
+                                if (!m_magazine.empty() && (m_iQueueSize < 0 || m_iShotNum < m_iQueueSize))
+                                    ++m_iShotNum;
+                                else
+                                    break;
+                            }
 
-                break;
+                            FireTrace(p1, d);
+                            OnShot(false, true);
+                        }
+                    }
+                    else
+                    { //--> Обычный одинарный выстрел
+                        FireTrace(p1, d);
+                        OnShot(false);
+                    }
+                }
+
+                // После выстрела тестируем на осечку
+                bool bIsMisfife = CheckForMisfire();
+
+                // Передёргиваем помпу
+                if (m_bUsePumpMode && !m_bGrenadeMode)
+                {
+                    m_bNeed2Pump = true;
+
+                    if (!bIsMisfife)
+                        Try2Pump();
+
+                    break;
+                }
+            }
+
+            if (!m_bStopedAfterQueueFired && m_iShotNum == m_iQueueSize)
+            {
+                m_bStopedAfterQueueFired = true;
             }
         }
-
-        if (m_iShotNum == m_iQueueSize)
-            m_bStopedAfterQueueFired = true;
     }
 
     // Таймер скорострельности
@@ -325,44 +342,53 @@ void CWeapon::OnEmptyClick(bool bFromMisfire)
 }
 
 // Калбэк на выстрел
-void CWeapon::OnShot(bool bIsRocket)
+void CWeapon::OnShot(bool bIsRocket, bool bIsBaseDispersionedBullet)
 {
-    PlayAnimShoot();   // Анимация выстрела
-    AddShotEffector(); // Эффекты экрана
+    Fvector vel;
+    PHGetLinearVell(vel);
 
-    // Звук
-    if (m_bGrenadeMode)
-        PlaySound("sndShotG", get_LastFP2());
-    else
-        PlaySound(m_sSndShotCurrent.c_str(), get_LastFP());
-
-    // Партиклы и эффекты
-    if (m_bGrenadeMode)
+    // Партиклы, звуки, анимации, эффекты
+    if (bIsBaseDispersionedBullet == false || m_iShotNum == 1)
     {
-        // Огонь из ствола
-        StartFlameParticles2();
+        PlayAnimShoot();   // Анимация выстрела
+        AddShotEffector(); // Эффекты экрана (отдача от выстрела)
+
+        // Звук
+        if (m_bGrenadeMode)
+            PlaySound("sndShotG", get_LastFP2());
+        else
+            PlaySound(m_sSndShotCurrent.c_str(), get_LastFP());
+
+        // Партиклы
+        if (m_bGrenadeMode)
+        {
+            // Огонь из ствола
+            StartFlameParticles2();
+        }
+        else
+        {
+            // Огонь из ствола
+            StartFlameParticles();
+
+            // Дым из ствола
+            ForceUpdateFireParticles();
+            StartSmokeParticles(get_LastFP(), vel);
+        }
     }
-    else
-    {
-        Fvector vel;
-        PHGetLinearVell(vel);
 
-        // Гильзы
+    // Гильзы
+    if (m_bGrenadeMode == false)
+    {
+        // 2D-Гильзы
         if (!m_bUsePumpMode)
             DropShell(&vel);
 
-        // Огонь из ствола
-        StartFlameParticles();
-
-        // Дым из ствола
-        ForceUpdateFireParticles();
-        StartSmokeParticles(get_LastFP(), vel);
-    }
-
-    if (ParentIsActor())
-    {
-        for (int _idx = 1; _idx <= GetLPCount(); _idx++)
-            CShellLauncher::LaunchShell(_idx, NULL); //SWM_GILZA SM_TODO
+        // 3D-Гильзы
+        if (ParentIsActor())
+        {
+            for (int _idx = 1; _idx <= GetLPCount(); _idx++)
+                CShellLauncher::LaunchShell(_idx, NULL); //SWM_GILZA SM_TODO
+        }
     }
 }
 
@@ -568,15 +594,24 @@ void CWeapon::FireTrace(const Fvector& P, const Fvector& D)
 void CWeapon::FireBullet(
     const Fvector& pos, const Fvector& shot_dir, float fire_disp, const CCartridge& cartridge, u16 parent_id, u16 weapon_id, bool send_hit)
 {
+    // Для Абакана - пускаем первые пули с немного другой скоростью, чтобы они не сливались вместе во время полёта
     if (m_iBaseDispersionedBulletsCount)
     {
-        if (m_iShotNum <= 1)
-        {
-            m_fOldBulletSpeed = GetBulletSpeed();
-            SetBulletSpeed(m_fBaseDispersionedBulletsSpeed);
+        if (m_iShotNum <= m_iBaseDispersionedBulletsCount)
+        { // "Сверхточные пули"
+            if (m_iShotNum == 1)
+            { //--> При первом выстреле запоминаем текущую скорость
+                m_fOldBulletSpeed = GetBulletSpeed();
+                SetBulletSpeed(m_fBaseDispersionedBulletsSpeed);
+            }
+            else
+            { //--> Линейно интерполируем скорость пули с каждым следующим выстрелом
+                float fSpeedStep = (m_fBaseDispersionedBulletsSpeed - m_fOldBulletSpeed) / (float)m_iBaseDispersionedBulletsCount;
+                SetBulletSpeed(GetBulletSpeed() - fSpeedStep);
+            }
         }
-        else if (m_iShotNum > m_iBaseDispersionedBulletsCount)
-        {
+        else
+        { // Обычные пули
             SetBulletSpeed(m_fOldBulletSpeed);
         }
     }
