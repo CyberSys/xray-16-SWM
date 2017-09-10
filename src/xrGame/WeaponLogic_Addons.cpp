@@ -11,14 +11,14 @@ extern float g_defScopeZoomFactor;
 bool CWeapon::IsAddonsEqual(CWeapon* pWpn2Cmp)
 {
     // Сперва проверяем типы аддонов
-    for (int i = 0; i < eSIZE; i++)
+    for (int i = 0; i < EAddons::eAddonsSize; i++)
     {
         if (m_addons[i].bActive != pWpn2Cmp->m_addons[i].bActive)
             return false;
     }
 
     // Потом, если понадобилось, сравниваем их секции
-    for (int i = 0; i < eSIZE; i++)
+    for (int i = 0; i < EAddons::eAddonsSize; i++)
     {
         if (m_addons[i].bActive == true && pWpn2Cmp->m_addons[i].bActive == true)
             if (m_addons[i].GetName() != pWpn2Cmp->m_addons[i].GetName())

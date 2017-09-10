@@ -87,26 +87,26 @@ public:
 
     enum EAddons
     {
-        eScope    = 0,
-        eMuzzle   = 1,
-        eLauncher = 2,
-        eMagaz    = 3,
-        eSpec_1   = 4,
-        eSpec_2   = 5,
-        eSpec_3   = 6,
-        eSpec_4   = 7,
-        eSIZE     = 8,
-        eNotExist = 9,
+        eScope      = 0,
+        eMuzzle     = 1,
+        eLauncher   = 2,
+        eMagaz      = 3,
+        eSpec_1     = 4,
+        eSpec_2     = 5,
+        eSpec_3     = 6,
+        eSpec_4     = 7,
+        eAddonsSize = 8,
+        eNotExist   = 9,
     };
 
-    SAddonData m_addons[eSIZE];
+    SAddonData m_addons[EAddons::eAddonsSize];
 
     EAddons GetAddonSlot(IGameObject* pObj, u8* idx = NULL);
     EAddons GetAddonSlot(LPCSTR section, u8* idx = NULL);
 
     SAddonData* GetAddonBySlot(EAddons slotID)
     {
-        R_ASSERT(slotID >= 0 && slotID < eSIZE);
+        R_ASSERT(slotID >= 0 && slotID < EAddons::eAddonsSize);
         SAddonData* pTest = &(m_addons[slotID]);
         return (SAddonData*)(pTest);
     }
