@@ -1159,6 +1159,15 @@ void CWeapon::UpdateAmmoBeltParams()
 
             iAmmoIdx++;
         }
+
+        //--> Вид анимации зарядки в\из патронташа - одинарная или в три стадии
+        m_bTriStateReload_ab   = READ_ADDON_DATA(r_bool, "tri_state_reload_ab", pAddonAB->GetName(), pAddonAB->GetAddonName(), false);
+        m_bTriStateReload_frab = READ_ADDON_DATA(r_bool, "tri_state_reload_frab", pAddonAB->GetName(), pAddonAB->GetAddonName(), false);
+    }
+    else
+    {
+        m_bTriStateReload_ab   = false;
+        m_bTriStateReload_frab = false;
     }
 
     // В режиме патронташа загружаем в магазин от подствола иные данные
@@ -1234,6 +1243,9 @@ void CWeapon::UpdateGLParams()
 
         //--> Переписываем данными из секции аддона в оружии
         GetZoomParams(eZoomGL).Initialize(GetGrenadeLauncherSetSect().c_str(), "_gl", true);
+
+        //--> Вид анимации перезарядки - одинарная или в три стадии
+        m_bTriStateReload_gl = READ_ADDON_DATA(r_bool, "tri_state_reload_gl", GetGrenadeLauncherSetSect(), GetGrenadeLauncherName(), false);
     }
     else
     {
@@ -1245,6 +1257,8 @@ void CWeapon::UpdateGLParams()
         m_AmmoCartidges2.clear();
 
         iMagazineSize2 = 0;
+
+        m_bTriStateReload_gl = false;
     }
 }
 

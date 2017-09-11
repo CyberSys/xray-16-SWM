@@ -21,11 +21,7 @@ void CWeapon::Load(LPCSTR section)
     LoadMainAmmoParams(section, true);
 
     // Параметры перезарядки
-    m_bTriStateReload_main = READ_IF_EXISTS(pSettings, r_bool, section, "tri_state_reload", false);
-    m_bTriStateReload_gl   = READ_IF_EXISTS(pSettings, r_bool, section, "tri_state_reload_gl", false);
-    m_bTriStateReload_ab   = READ_IF_EXISTS(pSettings, r_bool, section, "tri_state_reload_ab", false);
-    m_bTriStateReload_frab = READ_IF_EXISTS(pSettings, r_bool, section, "tri_state_reload_frab", false);
-
+    m_bTriStateReload_main      = READ_IF_EXISTS(pSettings, r_bool, section, "tri_state_reload", false);
     m_bTriStateReload_anim_hack = READ_IF_EXISTS(pSettings, r_bool, section, "tri_state_rld_anim_hack", false);
 
     // Параметры износа
