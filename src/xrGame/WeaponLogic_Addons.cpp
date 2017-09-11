@@ -1188,7 +1188,7 @@ void CWeapon::UpdateGLParams()
 
         // load ammo classes SECOND (grenade_class)
 
-        iMagazineSize2 = READ_ADDON_DATA(r_s32, "ammo_mag_size_gl", GetGrenadeLauncherSetSect(), GetGrenadeLauncherName(), 1);
+        iMagazineSize2 = 1; //-> Максимальное число гранат в подстволе
 
         xr_vector<shared_str>* ammoTypes     = NULL;
         xr_vector<CCartridge>* AmmoCartidges = NULL;

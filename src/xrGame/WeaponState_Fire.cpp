@@ -196,7 +196,7 @@ void CWeapon::state_Fire(float dt)
             Log("H_Parent", H_Parent()->cNameSect().c_str());
         }
 
-        if (fShotTimeCounter < 0)
+        if (m_bGrenadeMode || fShotTimeCounter < 0)
         {
             // Если владелец не может стрелять, то отменяем стрельбу
             CEntity* E = smart_cast<CEntity*>(H_Parent());
@@ -217,11 +217,11 @@ void CWeapon::state_Fire(float dt)
             R_ASSERT(!m_magazine.empty());
 
             // Стреляем пока есть патроны и число выстрелов не превысило размер очереди
-            while (
-                !m_magazine.empty() && fShotTimeCounter < 0 && (IsWorking() || m_bFireSingleShot) && (m_iQueueSize < 0 || m_iShotNum < m_iQueueSize))
+            while (!m_magazine.empty() && (m_bGrenadeMode || fShotTimeCounter < 0) && (IsWorking() || m_bFireSingleShot) &&
+                   (m_iQueueSize < 0 || m_iShotNum < m_iQueueSize))
             {
                 m_bFireSingleShot = false;
-                fShotTimeCounter += fOneShotTime; //--> Регулируем скорострельность
+                fShotTimeCounter += (m_bGrenadeMode ? 0.0f : fOneShotTime); //--> Регулируем скорострельность
                 ++m_iShotNum;
 
                 // Сперва пробуем стрельнуть патроном как гранатой\ракетой
@@ -252,18 +252,21 @@ void CWeapon::state_Fire(float dt)
                     }
                 }
 
-                // После выстрела тестируем на осечку
-                bool bIsMisfife = CheckForMisfire();
-
-                // Передёргиваем помпу
-                if (m_bUsePumpMode && !m_bGrenadeMode)
+                if (!m_bGrenadeMode)
                 {
-                    m_bNeed2Pump = true;
+                    // После выстрела тестируем на осечку
+                    bool bIsMisfife = CheckForMisfire();
 
-                    if (!bIsMisfife)
-                        Try2Pump();
+                    // Передёргиваем помпу
+                    if (m_bUsePumpMode)
+                    {
+                        m_bNeed2Pump = true;
 
-                    break;
+                        if (!bIsMisfife)
+                            Try2Pump();
+
+                        break;
+                    }
                 }
             }
 
