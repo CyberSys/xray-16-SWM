@@ -53,6 +53,14 @@ float CWeapon::Weight() const
         res += w * (iAmmoElapsed / bs);
     }
 
+    if (iAmmoElapsed2)
+    {
+        float w = pSettings->r_float(m_ammoTypes2[m_ammoType2].c_str(), "inv_weight");
+        float bs = pSettings->r_float(m_ammoTypes2[m_ammoType2].c_str(), "box_size");
+
+        res += w * (iAmmoElapsed2 / bs);
+    }
+
     return res;
 }
 
@@ -102,6 +110,14 @@ u32 CWeapon::Cost() const
         float bs = pSettings->r_float(m_ammoTypes[m_ammoType].c_str(), "box_size");
 
         res += iFloor(w * (iAmmoElapsed / bs));
+    }
+
+    if (iAmmoElapsed2)
+    {
+        float w = pSettings->r_float(m_ammoTypes2[m_ammoType2].c_str(), "cost");
+        float bs = pSettings->r_float(m_ammoTypes2[m_ammoType2].c_str(), "box_size");
+
+        res += iFloor(w * (iAmmoElapsed2 / bs));
     }
 
     return res;
