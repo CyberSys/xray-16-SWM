@@ -403,6 +403,17 @@ void player_hud::tune(Ivector _values) //--#SM+#--
                 hi->m_measures.m_hands_offset[1][1].z)
                 .c_str());
 
+        pHudCfg->w_string(sect_name, //--#SM+#--
+            make_string("aim_hud_offset_alt_pos%s", (is_16x9) ? "_16x9" : "").c_str(),
+            make_string("%f,%f,%f", hi->m_measures.m_hands_offset[0][3].x, hi->m_measures.m_hands_offset[0][3].y,
+                hi->m_measures.m_hands_offset[0][3].z)
+                .c_str());
+        pHudCfg->w_string(sect_name, //--#SM+#--
+            make_string("aim_hud_offset_alt_rot%s", (is_16x9) ? "_16x9" : "").c_str(),
+            make_string("%f,%f,%f", hi->m_measures.m_hands_offset[1][3].x, hi->m_measures.m_hands_offset[1][3].y,
+                hi->m_measures.m_hands_offset[1][3].z)
+                .c_str());
+
         pHudCfg->w_string(sect_name, make_string("hands_position%s", (is_16x9) ? "_16x9" : "").c_str(),
             make_string("%f,%f,%f", hi->m_measures.m_hands_attach[0].x, hi->m_measures.m_hands_attach[0].y,
                 hi->m_measures.m_hands_attach[0].z)
@@ -460,6 +471,13 @@ void player_hud::tune(Ivector _values) //--#SM+#--
             make_string("aim_hud_offset_pos%s", (is_16x9) ? "_16x9" : "").c_str(), hi->m_measures.m_hands_offset[0][1]);
         hi->m_measures.m_hands_offset[1][1] = READ_IF_EXISTS(pHudCfg, r_fvector3, sect_name,
             make_string("aim_hud_offset_rot%s", (is_16x9) ? "_16x9" : "").c_str(), hi->m_measures.m_hands_offset[1][1]);
+
+        hi->m_measures.m_hands_offset[0][3] = READ_IF_EXISTS(pHudCfg, //--#SM+#--
+            r_fvector3, sect_name, make_string("aim_hud_offset_alt_pos%s", (is_16x9) ? "_16x9" : "").c_str(),
+            hi->m_measures.m_hands_offset[0][3]);
+        hi->m_measures.m_hands_offset[1][3] = READ_IF_EXISTS(pHudCfg, //--#SM+#--
+            r_fvector3, sect_name, make_string("aim_hud_offset_alt_rot%s", (is_16x9) ? "_16x9" : "").c_str(),
+            hi->m_measures.m_hands_offset[1][3]);
 
         hi->m_measures.m_hands_offset[0][2] = READ_IF_EXISTS(pHudCfg, r_fvector3, sect_name,
             make_string("gl_hud_offset_pos%s", (is_16x9) ? "_16x9" : "").c_str(), hi->m_measures.m_hands_offset[0][2]);
