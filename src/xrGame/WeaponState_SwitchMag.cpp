@@ -67,18 +67,22 @@ void CWeapon::Need2Stop_SwitchMag()
 // Переключение стэйта на "Смена магазина"
 void CWeapon::switch2_SwitchMag()
 {
+    // Требуется завершить смену магазина
+    if (m_sub_state == eSubstateMagazFinish)
+    {
+        bMisfire = false;
+        goto label_SwitchMag_End;
+    }
+
+    // Повторная проверка для МП, где вызов стэйтов идёт в обход Try-функций
     if (m_sub_state == eSubstateReloadBegin ||
         m_sub_state == eSubstateMagazDetach) // Если мы уже в процессе смены магазина, то игнорируем этот участок
     {
-        if (!Try2SwitchMag(true)) //--> Повторная проверка для МП, где вызов стэйтов идёт в обход Try-функций
+        if (!Try2SwitchMag(true))
             goto label_SwitchMag_End;
 
         m_overridenAmmoForReloadAnm = GetMainAmmoElapsed();
     }
-
-    // Требуется завершить смену
-    if (m_sub_state == eSubstateMagazFinish)
-        goto label_SwitchMag_End;
 
     OnZoomOut();
 
@@ -115,7 +119,7 @@ void CWeapon::switch2_SwitchMag()
     switch (m_sub_state)
     {
     case eSubstateMagazMisfire:             //--> Требуется исправить осечку (просто играем анимацию)
-        m_sub_state = eSubstateMagazFinish; //--> Осечку снимем в OnBeforeMotionPlayed
+        m_sub_state = eSubstateMagazFinish;
         break;
     ////////////////////////////////////////////////////////////////////////////////////////////////
     case eSubstateMagazDetach: //--> Требуется снять текущий магазин
