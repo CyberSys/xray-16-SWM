@@ -3,7 +3,7 @@
 #include "FileSystem.h"
 #include "xrCore/xr_token.h"
 
-XRCORE_API CInifile const* pSettings = nullptr;
+XRCORE_API CInifile      * pSettings = nullptr; //--#SM+#-- Убираем const - разрешаем запись в system.ltx [allow system.ltx realtime edit from code]
 XRCORE_API CInifile const* pSettingsAuth = nullptr;
 
 #if defined(LINUX)
@@ -682,6 +682,11 @@ bool CInifile::section_exist(const shared_str& S) const { return section_exist(*
 //--------------------------------------------------------------------------------------
 CInifile::Sect& CInifile::r_section(pcstr S) const
 {
+    if (S == nullptr) //--#SM+#--
+	{
+		xrDebug::Fatal(DEBUG_INFO, "Empty section (null) passed into CInifile::r_section(). See info above ^, check your configs and 'call stack'.");
+	}
+
     char section[256];
     xr_strcpy(section, sizeof section, S);
     xr_strlwr(section);
@@ -689,25 +694,33 @@ CInifile::Sect& CInifile::r_section(pcstr S) const
     if (I == DATA.cend())
         xrDebug::Fatal(DEBUG_INFO, "Can't find section '%s'.", S);
     else if (xr_strcmp(*(*I)->Name, section))
-    {
-        // g_pStringContainer->verify();
+    { //--#SM+#--
 
-        // string_path ini_dump_fn, path;
-        // strconcat (sizeof(ini_dump_fn), ini_dump_fn, Core.ApplicationName, "_", Core.UserName, ".ini_log");
-        //
-        // FS.update_path (path, "$logs$", ini_dump_fn);
-        // IWriter* F = FS.w_open_ex(path);
-        // save_as (*F);
+        g_pStringContainer->verify();
+
+        string_path ini_dump_fn, path;
+        strconcat(sizeof(ini_dump_fn), ini_dump_fn, Core.ApplicationName, "_", Core.UserName, ".ini_log");
+
+        FS.update_path(path, "$logs$", ini_dump_fn);
+        IWriter* F = FS.w_open_ex(path);
+        save_as(*F);
         // F->w_string ("shared strings:");
         // g_pStringContainer->dump(F);
-        // FS.w_close (F);
+        FS.w_close(F);
+
         xrDebug::Fatal(DEBUG_INFO, "Can't open section '%s' (only '%s' avail). Please attach [*.ini_log] file to your bug report", section, *(*I)->Name);
     }
+
     return **I;
 }
 
 pcstr CInifile::r_string(pcstr S, pcstr L) const
 {
+    if (S == nullptr || L == nullptr) //--#SM+#-- Extra info for one of "xrDebug - Invalid handler" errors
+	{
+		Msg("[ERROR] CInifile::r_string: S = [%s], L = [%s]", S, L);
+	}
+
     Sect const& I = r_section(S);
     auto A = std::lower_bound(I.Data.cbegin(), I.Data.cend(), L, item_pred);
 
