@@ -376,7 +376,7 @@ void CRender::add_leafs_Dynamic(dxRender_Visual* pVisual)
         for (auto &i : pV->children)
         {
             i->vis.obj_data = pV->getVisData().obj_data; // Наследники используют шейдерные данные от родительского визуала
-                                                                                   // [use shader data from parent model, rather than it childrens]
+                                                                                   // [use shader data from parent model, rather than it childrens] --#SM+#--
 
             add_leafs_Dynamic(i);
         }
@@ -408,7 +408,7 @@ void CRender::add_leafs_Dynamic(dxRender_Visual* pVisual)
             for (auto &i : pV->children)
             {
                 i->vis.obj_data = pV->getVisData().obj_data; // Наследники используют шейдерные данные от родительского визуала
-                                                                                       // [use shader data from parent model, rather than it childrens]
+                                                                                       // [use shader data from parent model, rather than it childrens] --#SM+#--
                 add_leafs_Dynamic(i);
             }
         }
@@ -457,7 +457,7 @@ void CRender::add_leafs_Static(dxRender_Visual* pVisual)
         for (auto &i : pV->children)
         {
             i->vis.obj_data = pV->getVisData().obj_data; // Наследники используют шейдерные данные от родительского визуала
-                                                         // [use shader data from parent model, rather than it childrens]
+                                                         // [use shader data from parent model, rather than it childrens] --#SM+#--
             add_leafs_Static(i);
         }
     }
@@ -471,7 +471,7 @@ void CRender::add_leafs_Static(dxRender_Visual* pVisual)
         for (auto &i : pV->children)
         {
             i->vis.obj_data = pV->getVisData().obj_data; // Наследники используют шейдерные данные от родительского визуала
-                                                         // [use shader data from parent model, rather than it childrens]
+                                                         // [use shader data from parent model, rather than it childrens] --#SM+#--
             add_leafs_Static(i);
         }
     }
@@ -498,7 +498,7 @@ void CRender::add_leafs_Static(dxRender_Visual* pVisual)
             for (auto &i : pV->children)
             {
                 i->vis.obj_data = pV->getVisData().obj_data; // Наследники используют шейдерные данные от родительского визуала
-                                                                                       // [use shader data from parent model, rather than it childrens]
+                                                                                       // [use shader data from parent model, rather than it childrens] --#SM+#--
                 add_leafs_Static(i);
             }
         }
@@ -1061,12 +1061,23 @@ void D3DXRenderBase::End()
         overdrawEnd();
     RCache.OnFrameEnd();
     DoAsyncScreenshot();
+
 #ifndef USE_DX9
-    bool bUseVSync = psDeviceFlags.is(rsFullscreen) && psDeviceFlags.test(rsVSync); //xxx: weird tearing glitches when VSync turned on for windowed mode in DX10\11
-    HW.m_pSwapChain->Present(bUseVSync ? 1 : 0, 0);
+    if (!Device.m_SecondViewport.IsSVPFrame() &&
+        !Device.m_SecondViewport.isCamReady)  //--#SM+#-- +SecondVP+ Не выводим кадр из второго рендера на экран (на
+                                              //практике у нас экранная картинка обновляется минимум в два раза реже)
+    {
+        bool bUseVSync = psDeviceFlags.is(rsFullscreen) &&
+            psDeviceFlags.test(rsVSync); // xxx: weird tearing glitches when VSync turned on for windowed mode in DX10\11
+
+        HW.m_pSwapChain->Present(bUseVSync ? 1 : 0, 0);
+    }
 #else
     CHK_DX(HW.pDevice->EndScene());
-    HW.pDevice->Present(nullptr, nullptr, nullptr, nullptr);
+    if (!Device.m_SecondViewport.IsSVPFrame() &&
+        !Device.m_SecondViewport.isCamReady)  //--#SM+#-- +SecondVP+ Не выводим кадр из второго рендера на экран (на
+                                              //практике у нас экранная картинка обновляется минимум в два раза реже)
+        HW.pDevice->Present(nullptr, nullptr, nullptr, nullptr);
 #endif
 }
 
