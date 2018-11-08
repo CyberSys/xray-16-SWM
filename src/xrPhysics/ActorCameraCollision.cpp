@@ -319,7 +319,7 @@ bool test_camera_box(const Fvector& box_size, const Fmatrix& xform, IPhysicsShel
     return ret;
 }
 
-// Test only, generate box from camera --#SM+#--
+// Протестировать камеру на факт столкновения с геометрией [Test camera collide with geometry, generate box from camera] --#SM+#--
 bool test_camera_collide(
     CCameraBase& camera, float _viewport_near, IPhysicsShellHolder* l_actor, Fvector& vPosOffset, float fBoxSizeMod)
 {
