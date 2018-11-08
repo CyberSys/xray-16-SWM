@@ -79,7 +79,7 @@ ENGINE_API void InitSettings()
 #ifdef DEBUG
     Msg("Updated path to system.ltx is %s", fname);
 #endif
-    pSettings = new CInifile(fname, TRUE);
+    pSettings = new CInifile(fname, false, true, false); // Разрешить запись в загруженный system.ltx [allow r\w to system.ltx] --#SM+#--
     CHECK_OR_EXIT(pSettings->section_count(),
         make_string("Cannot find file %s.\nReinstalling application may fix this problem.", fname));
     xr_auth_strings_t ignoredPaths, checkedPaths;
