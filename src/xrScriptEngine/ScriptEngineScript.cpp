@@ -24,6 +24,11 @@ void LuaLog(pcstr caMessage)
 #endif
 }
 
+void LuaMsg(LPCSTR caMessage) //--#SM+#--
+{
+    Msg(caMessage);
+}
+
 void ErrorLog(pcstr caMessage)
 {
     GEnv.ScriptEngine->error_log("%s", caMessage);
@@ -151,6 +156,7 @@ SCRIPT_EXPORT(CScriptEngine, (),
             .def("stop", &profile_timer_script::stop)
             .def("time", &profile_timer_script::time),
 
+        def("msg", &LuaMsg), //--#SM+#--
         def("log", &LuaLog),
         def("error_log", &ErrorLog),
         def("flush", &FlushLogs),
