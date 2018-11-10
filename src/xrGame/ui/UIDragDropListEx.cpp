@@ -876,6 +876,8 @@ void CUICellContainer::Draw()
                     select_mode = 1;
                 else if (ui_cell.m_item->m_select_armament)
                     select_mode = 3;
+                else if (ui_cell.m_item->m_select_armament_2) //--#SM+#--
+                    select_mode = 2;
                 else
                 {
                     //Alundaio: Highlight equipped items
@@ -939,6 +941,7 @@ void CUICellContainer::clear_select_armament()
         if (cell.m_item)
         {
             cell.m_item->m_select_armament = false;
+            cell.m_item->m_select_armament_2 = false; //--#SM+#--
         }
     }
 }

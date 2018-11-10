@@ -44,8 +44,13 @@ public:
         eSilencer = 0,
         eScope,
         eLauncher,
+        eMagazine,
+        eSpecial_1,
+        eSpecial_2,
+        eSpecial_3,
+        eSpecial_4,
         eMaxAddon
-    };
+    }; //--#SM+#--
 
 protected:
     CUIStatic* m_addons[eMaxAddon];
@@ -58,6 +63,11 @@ protected:
     bool is_scope();
     bool is_silencer();
     bool is_launcher();
+    bool is_magazine(); //--#SM+#--
+    bool is_special_1(); //--#SM+#--
+    bool is_special_2(); //--#SM+#--
+    bool is_special_3(); //--#SM+#--
+    bool is_special_4(); //--#SM+#--
 
 public:
     CUIWeaponCellItem(CWeapon* itm);
@@ -65,6 +75,8 @@ public:
     virtual void Update();
     virtual void Draw();
     virtual void SetTextureColor(u32 color);
+    virtual void UpdateItemText(); //--#SM+#--
+    virtual bool GetUtilityBarValue(float& fRetVal); //--#SM+#--
 
     CWeapon* object() { return (CWeapon*)m_pData; }
     virtual void OnAfterChild(CUIDragDropListEx* parent_list);

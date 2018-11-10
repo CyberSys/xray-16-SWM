@@ -13,9 +13,12 @@
 #include "Weapon.h"
 #include "WeaponMagazinedWGrenade.h"
 #include "WeaponAmmo.h"
-#include "Silencer.h"
-#include "Scope.h"
-#include "GrenadeLauncher.h"
+//--#SM+# Begin --
+//#include "Silencer.h"
+//#include "Scope.h"
+//#include "GrenadeLauncher.h"
+#include "WeaponAddon.h"
+//--#SM+# End --
 #include "trade_parameters.h"
 #include "ActorHelmet.h"
 #include "CustomOutfit.h"
@@ -676,7 +679,7 @@ void CUIActorMenu::highlight_weapons_for_ammo(PIItem ammo_item, CUIDragDropListE
     } // for i
 }
 
-bool CUIActorMenu::highlight_addons_for_weapon(PIItem weapon_item, CUICellItem* ci)
+bool CUIActorMenu::highlight_addons_for_weapon(PIItem weapon_item, CUICellItem* ci) //--#SM+#--
 {
     PIItem item = (PIItem)ci->m_pData;
     if (!item)
@@ -684,42 +687,27 @@ bool CUIActorMenu::highlight_addons_for_weapon(PIItem weapon_item, CUICellItem* 
         return false;
     }
 
-    CScope* pScope = smart_cast<CScope*>(item);
-    if (pScope && weapon_item->CanAttach(pScope))
+	CWeapon* pWpn = weapon_item->cast_weapon();
+    if (pWpn != NULL)
     {
-        ci->m_select_armament = true;
-        return true;
+        CWeapon::EAddons iSlot = pWpn->GetAddonSlot(item->cast_game_object());
+        if (iSlot != CWeapon::eNotExist)
+        {
+            if (iSlot == CWeapon::eMagaz)
+                ci->m_select_armament_2 = true;
+            else
+                ci->m_select_armament = true;
+            return true;
+        }
     }
 
-    CSilencer* pSilencer = smart_cast<CSilencer*>(item);
-    if (pSilencer && weapon_item->CanAttach(pSilencer))
-    {
-        ci->m_select_armament = true;
-        return true;
-    }
-
-    CGrenadeLauncher* pGrenadeLauncher = smart_cast<CGrenadeLauncher*>(item);
-    if (pGrenadeLauncher && weapon_item->CanAttach(pGrenadeLauncher))
-    {
-        ci->m_select_armament = true;
-        return true;
-    }
     return false;
 }
 
-void CUIActorMenu::highlight_weapons_for_addon(PIItem addon_item, CUIDragDropListEx* ddlist)
+void CUIActorMenu::highlight_weapons_for_addon(PIItem addon_item, CUIDragDropListEx* ddlist) //--#SM+#--
 {
     VERIFY(addon_item);
     VERIFY(ddlist);
-
-    CScope* pScope = smart_cast<CScope*>(addon_item);
-    CSilencer* pSilencer = smart_cast<CSilencer*>(addon_item);
-    CGrenadeLauncher* pGrenadeLauncher = smart_cast<CGrenadeLauncher*>(addon_item);
-
-    if (!pScope && !pSilencer && !pGrenadeLauncher)
-    {
-        return;
-    }
 
     u32 const cnt = ddlist->ItemsCount();
     for (u32 i = 0; i < cnt; ++i)
@@ -736,17 +724,8 @@ void CUIActorMenu::highlight_weapons_for_addon(PIItem addon_item, CUIDragDropLis
             continue;
         }
 
-        if (pScope && weapon->CanAttach(pScope))
-        {
-            ci->m_select_armament = true;
-            continue;
-        }
-        if (pSilencer && weapon->CanAttach(pSilencer))
-        {
-            ci->m_select_armament = true;
-            continue;
-        }
-        if (pGrenadeLauncher && weapon->CanAttach(pGrenadeLauncher))
+		CWeapon::EAddons iSlot = weapon->GetAddonSlot(addon_item->cast_game_object());
+        if (iSlot != CWeapon::eNotExist)
         {
             ci->m_select_armament = true;
             continue;
