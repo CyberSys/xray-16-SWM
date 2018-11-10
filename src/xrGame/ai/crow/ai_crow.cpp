@@ -128,6 +128,10 @@ void CAI_Crow::Load(LPCSTR section)
     fIdleSoundDelta = pSettings->r_float(section, "idle_sound_delta");
     fIdleSoundTime = fIdleSoundDelta + fIdleSoundDelta * Random.randF(-.5f, .5f);
     VERIFY2(valid_pos(Position()), dbg_valide_pos_string(Position(), this, "CAI_Crow::Load( LPCSTR section )"));
+
+	//SM_TODO: В конфиги? Тогда из Entity тоже
+    m_common_values.m_fIRNV_value = m_common_values.m_fIRNV_value_max; //--#SM+#--
+    m_common_values.m_fIRNV_max_or_min = true; //--#SM+#--
 }
 
 BOOL CAI_Crow::net_Spawn(CSE_Abstract* DC)
