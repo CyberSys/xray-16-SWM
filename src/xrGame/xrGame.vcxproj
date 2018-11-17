@@ -745,6 +745,7 @@
     <ClInclude Include="atlas_submit_queue.h" />
     <ClInclude Include="attachable_item.h" />
     <ClInclude Include="attachable_item_inline.h" />
+    <ClInclude Include="attachable_visual.h" />
     <ClInclude Include="attachment_owner.h" />
     <ClInclude Include="autosave_manager.h" />
     <ClInclude Include="autosave_manager_inline.h" />
@@ -804,6 +805,7 @@
     <ClInclude Include="CustomMonster_inline.h" />
     <ClInclude Include="CustomOutfit.h" />
     <ClInclude Include="CustomRocket.h" />
+    <ClInclude Include="CustomShell.h" />
     <ClInclude Include="CustomZone.h" />
     <ClInclude Include="DamagableItem.h" />
     <ClInclude Include="damage_manager.h" />
@@ -1273,6 +1275,7 @@
     <ClInclude Include="server_entity_wrapper_inline.h" />
     <ClInclude Include="setup_manager.h" />
     <ClInclude Include="setup_manager_inline.h" />
+    <ClInclude Include="ShellLauncher.h" />
     <ClInclude Include="ShootingObject.h" />
     <ClInclude Include="sight_action.h" />
     <ClInclude Include="sight_action_inline.h" />
@@ -1571,13 +1574,13 @@
     <ClInclude Include="visual_memory_params.h" />
     <ClInclude Include="wallmark_manager.h" />
     <ClInclude Include="Weapon.h" />
+    <ClInclude Include="WeaponAddon.h" />
     <ClInclude Include="WeaponAK74.h" />
     <ClInclude Include="WeaponAmmo.h" />
     <ClInclude Include="WeaponAutomaticShotgun.h" />
     <ClInclude Include="WeaponBinoculars.h" />
     <ClInclude Include="WeaponBinocularsVision.h" />
     <ClInclude Include="weaponBM16.h" />
-    <ClInclude Include="WeaponCustomPistolAuto.h" />
     <ClInclude Include="WeaponCustomPistol.h" />
     <ClInclude Include="WeaponFN2000.h" />
     <ClInclude Include="WeaponFORT.h" />
@@ -1585,12 +1588,12 @@
     <ClInclude Include="WeaponHPSA.h" />
     <ClInclude Include="WeaponHUD.h" />
     <ClInclude Include="WeaponKnife.h" />
+    <ClInclude Include="WeaponKnifeHit.h" />
     <ClInclude Include="WeaponLR300.h" />
     <ClInclude Include="WeaponMagazined.h" />
     <ClInclude Include="WeaponMagazinedWGrenade.h" />
     <ClInclude Include="WeaponPistol.h" />
     <ClInclude Include="WeaponPM.h" />
-    <ClInclude Include="WeaponRevolver.h" />
     <ClInclude Include="WeaponRG6.h" />
     <ClInclude Include="WeaponRPG7.h" />
     <ClInclude Include="WeaponShotgun.h" />
@@ -1601,6 +1604,9 @@
     <ClInclude Include="WeaponVal.h" />
     <ClInclude Include="WeaponVintorez.h" />
     <ClInclude Include="WeaponWalther.h" />
+    <ClInclude Include="Weapon_AddonData.h" />
+    <ClInclude Include="Weapon_AmmoCompress.h" />
+    <ClInclude Include="Weapon_Shared.h" />
     <ClInclude Include="Wound.h" />
     <ClInclude Include="wrapper_abstract.h" />
     <ClInclude Include="wrapper_abstract_inline.h" />
@@ -2225,6 +2231,7 @@
     </ClCompile>
     <ClCompile Include="atlas_submit_queue.cpp" />
     <ClCompile Include="attachable_item.cpp" />
+    <ClCompile Include="attachable_visual.cpp" />
     <ClCompile Include="attachment_owner.cpp" />
     <ClCompile Include="autosave_manager.cpp" />
     <ClCompile Include="awards_store.cpp" />
@@ -2321,6 +2328,7 @@
     <ClCompile Include="CustomMonster_VCPU.cpp" />
     <ClCompile Include="CustomOutfit.cpp" />
     <ClCompile Include="CustomRocket.cpp" />
+    <ClCompile Include="CustomShell.cpp" />
     <ClCompile Include="CustomZone.cpp" />
     <ClCompile Include="DamagableItem.cpp" />
     <ClCompile Include="damage_manager.cpp" />
@@ -3075,6 +3083,7 @@
     <ClCompile Include="secure_messaging.cpp" />
     <ClCompile Include="seniority_hierarchy_holder.cpp" />
     <ClCompile Include="server_entity_wrapper.cpp" />
+    <ClCompile Include="ShellLauncher.cpp" />
     <ClCompile Include="ShootingObject.cpp" />
     <ClCompile Include="shootingObject_dump_impl.cpp" />
     <ClCompile Include="sight_action.cpp" />
@@ -3556,20 +3565,33 @@
     <ClCompile Include="visual_memory_params.cpp" />
     <ClCompile Include="wallmark_manager.cpp" />
     <ClCompile Include="Weapon.cpp" />
+    <ClCompile Include="WeaponActions.cpp" />
+    <ClCompile Include="WeaponAddon.cpp" />
     <ClCompile Include="WeaponAK74.cpp" />
     <ClCompile Include="WeaponAmmo.cpp" />
     <ClCompile Include="WeaponAutomaticShotgun.cpp" />
     <ClCompile Include="WeaponBinoculars.cpp" />
     <ClCompile Include="WeaponBinocularsVision.cpp" />
     <ClCompile Include="weaponBM16.cpp" />
-    <ClCompile Include="WeaponCustomPistolAuto.cpp" />
     <ClCompile Include="WeaponCustomPistol.cpp" />
-    <ClCompile Include="WeaponDispersion.cpp" />
-    <ClCompile Include="WeaponFire.cpp" />
     <ClCompile Include="WeaponFN2000.cpp" />
     <ClCompile Include="WeaponGroza.cpp" />
     <ClCompile Include="WeaponHPSA.cpp" />
     <ClCompile Include="WeaponKnife.cpp" />
+    <ClCompile Include="WeaponKnifeHit.cpp" />
+    <ClCompile Include="WeaponLogic_Addons.cpp" />
+    <ClCompile Include="WeaponLogic_Ammo.cpp" />
+    <ClCompile Include="WeaponLogic_Bipods.cpp" />
+    <ClCompile Include="WeaponLogic_Configs.cpp" />
+    <ClCompile Include="WeaponLogic_Dispersion.cpp" />
+    <ClCompile Include="WeaponLogic_Inventory.cpp" />
+    <ClCompile Include="WeaponLogic_Misc.cpp" />
+    <ClCompile Include="WeaponLogic_Motions.cpp" />
+    <ClCompile Include="WeaponLogic_Physics.cpp" />
+    <ClCompile Include="WeaponLogic_Render.cpp" />
+    <ClCompile Include="WeaponLogic_Sounds.cpp" />
+    <ClCompile Include="WeaponLogic_Upgrades.cpp" />
+    <ClCompile Include="WeaponLogic_Zoom.cpp" />
     <ClCompile Include="WeaponLR300.cpp" />
     <ClCompile Include="WeaponMagazined.cpp">
       <PrecompiledHeaderFile>pch_script.h</PrecompiledHeaderFile>
@@ -3578,7 +3600,6 @@
     <ClCompile Include="WeaponMagazinedWGrenade.cpp" />
     <ClCompile Include="WeaponPistol.cpp" />
     <ClCompile Include="WeaponPM.cpp" />
-    <ClCompile Include="WeaponRevolver.cpp" />
     <ClCompile Include="WeaponRG6.cpp" />
     <ClCompile Include="WeaponRPG7.cpp" />
     <ClCompile Include="WeaponScript.cpp">
@@ -3586,13 +3607,29 @@
       <PrecompiledHeaderOutputFile>$(IntDir)$(ProjectName)_script.pch</PrecompiledHeaderOutputFile>
     </ClCompile>
     <ClCompile Include="WeaponShotgun.cpp" />
+    <ClCompile Include="WeaponStatesController.cpp" />
+    <ClCompile Include="WeaponState_Bore.cpp" />
+    <ClCompile Include="WeaponState_Fire.cpp" />
+    <ClCompile Include="WeaponState_Hidden.cpp" />
+    <ClCompile Include="WeaponState_Hiding.cpp" />
+    <ClCompile Include="WeaponState_Idle.cpp" />
+    <ClCompile Include="WeaponState_Kick.cpp" />
+    <ClCompile Include="WeaponState_MagEmpty.cpp" />
+    <ClCompile Include="WeaponState_Misfire.cpp" />
+    <ClCompile Include="WeaponState_Pump.cpp" />
+    <ClCompile Include="WeaponState_Reload.cpp" />
+    <ClCompile Include="WeaponState_ReloadFrAB.cpp" />
+    <ClCompile Include="WeaponState_Showing.cpp" />
+    <ClCompile Include="WeaponState_Switch.cpp" />
+    <ClCompile Include="WeaponState_SwitchMag.cpp" />
     <ClCompile Include="WeaponStatMgun.cpp" />
     <ClCompile Include="WeaponStatMgunFire.cpp" />
     <ClCompile Include="WeaponStatMgunIR.cpp" />
     <ClCompile Include="WeaponSVD.cpp" />
-    <ClCompile Include="WeaponUpgrade.cpp" />
     <ClCompile Include="WeaponVal.cpp" />
     <ClCompile Include="WeaponVintorez.cpp" />
+    <ClCompile Include="Weapon_AddonData.cpp" />
+    <ClCompile Include="Weapon_AmmoCompressr.cpp" />
     <ClCompile Include="weapon_ammo_dump_impl.cpp" />
     <ClCompile Include="weapon_dump_impl.cpp" />
     <ClCompile Include="Wound.cpp" />
