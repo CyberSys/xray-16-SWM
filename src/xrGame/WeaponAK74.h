@@ -8,6 +8,6 @@ private:
     typedef CWeaponMagazinedWGrenade inherited;
 
 public:
-    CWeaponAK74(ESoundTypes eSoundType = SOUND_TYPE_WEAPON_SUBMACHINEGUN);
+    CWeaponAK74();
     virtual ~CWeaponAK74();
 };

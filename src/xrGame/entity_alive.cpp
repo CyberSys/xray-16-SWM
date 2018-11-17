@@ -92,6 +92,10 @@ void CEntityAlive::Load(LPCSTR section)
 
     //биолог. вид к торому принадлежит монстр или персонаж
     monster_community->set(pSettings->r_string(section, "species"));
+
+	// Живые объекты по умолчанию тёплые [live creatures are warm by default] --#SM+#--
+    m_common_values.m_fIRNV_value = m_common_values.m_fIRNV_value_max;
+    m_common_values.m_fIRNV_max_or_min = true;
 }
 
 void CEntityAlive::LoadBloodyWallmarks(LPCSTR section)

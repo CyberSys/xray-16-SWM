@@ -3,9 +3,12 @@
 #include "CustomDetector.h"
 #include "Weapon.h"
 #include "Artefact.h"
-#include "Scope.h"
-#include "Silencer.h"
-#include "GrenadeLauncher.h"
+//--#SM+# Begin--
+//#include "scope.h"
+//#include "silencer.h"
+//#include "grenadelauncher.h"
+#include "WeaponAddon.h"
+//--#SM+# End--
 #include "Inventory.h"
 #include "Level.h"
 #include "xr_level_controller.h"

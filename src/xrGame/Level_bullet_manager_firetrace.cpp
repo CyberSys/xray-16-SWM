@@ -47,6 +47,10 @@ BOOL CBulletManager::test_callback(const collide::ray_defs& rd, IGameObject* obj
         (!bullet->flags.ricochet_was))
         return FALSE;
 
+	CPhysicsShellHolder* pPHHolder = object->cast_physics_shell_holder();
+    if (pPHHolder != NULL && !smart_cast<IPhysicsShellHolder*>(pPHHolder)->IsCollideWithBullets()) //--#SM+#--
+        return FALSE;
+
     BOOL bRes = TRUE;
     CEntity* entity = smart_cast<CEntity*>(object);
     if (entity && entity->g_Alive() && (entity->ID() != bullet->parent_id))

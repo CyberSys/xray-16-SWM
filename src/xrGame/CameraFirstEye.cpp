@@ -75,6 +75,12 @@ void CCameraFirstEye::Update(Fvector& point, Fvector& noise_dangle)
 
 void CCameraFirstEye::Move(int cmd, float val, float factor)
 {
+    if (m_bInputDisabled)
+        return; //--#SM+#--
+
+    float fOldYaw = yaw; //--#SM+#--
+    float fOldPitch = pitch; //--#SM+#--
+
     if (bClampPitch)
     {
         while (pitch < lim_pitch[0])
@@ -89,6 +95,9 @@ void CCameraFirstEye::Move(int cmd, float val, float factor)
     case kLEFT: yaw -= val ? val : (rot_speed.x * Device.fTimeDelta / factor); break;
     case kRIGHT: yaw += val ? val : (rot_speed.x * Device.fTimeDelta / factor); break;
     }
+
+	parent->OnOwnedCameraMove(this, fOldYaw, fOldPitch); //--#SM+#--
+
     if (bClampYaw)
         clamp(yaw, lim_yaw[0], lim_yaw[1]);
     if (bClampPitch)

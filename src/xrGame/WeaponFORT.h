@@ -2,12 +2,8 @@
 
 #include "WeaponPistol.h"
 
-class CWeaponFORT : public CWeaponPistol
+class CWeaponFORT : public CWeaponPistol //--#SM+#--
 {
-private:
-    typedef CWeaponPistol inherited;
-
-protected:
 public:
     CWeaponFORT() {}
     virtual ~CWeaponFORT() {}

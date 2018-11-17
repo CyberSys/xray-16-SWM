@@ -2,10 +2,8 @@
 
 #include "WeaponPistol.h"
 
-class CWeaponUSP45 : public CWeaponPistol
+class CWeaponUSP45 : public CWeaponPistol //--#SM+#--
 {
-    typedef CWeaponPistol inherited;
-
 public:
     CWeaponUSP45() {}
     virtual ~CWeaponUSP45() {}

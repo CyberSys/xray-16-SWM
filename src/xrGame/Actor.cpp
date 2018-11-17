@@ -401,7 +401,13 @@ void CActor::Load(LPCSTR section)
             m_DangerSnd.create(
                 pSettings->r_string(section, "heavy_danger_snd"), st_Effect, SOUND_TYPE_MONSTER_INJURING);
         }
+
+	    if (this == Level().CurrentEntity()) //--#SM+#-- Сбрасываем режим рендеринга в дефолтный
+        {
+            g_pGamePersistent->m_pGShaderConstants->m_blender_mode.set(0.f, 0.f, 0.f, 0.f);
+        }
     }
+
     if (psActorFlags.test(AF_PSP))
         cam_Set(eacLookAt);
     else
@@ -925,10 +931,9 @@ float CActor::currentFOV()
 
     CWeapon* pWeapon = smart_cast<CWeapon*>(inventory().ActiveItem());
 
-    if (eacFirstEye == cam_active && pWeapon && pWeapon->IsZoomed() &&
-        (!pWeapon->ZoomTexture() || (!pWeapon->IsRotatingToZoom() && pWeapon->ZoomTexture())))
+	if (eacFirstEye == cam_active && pWeapon) //--#SM+#--
     {
-        return pWeapon->GetZoomFactor() * (0.75f);
+        return pWeapon->GetFov();
     }
     else
     {
@@ -1030,12 +1035,11 @@ void CActor::UpdateCL()
             psHUD_Flags.set(HUD_DRAW_RT, pWeapon->show_indicators());
             
             // Обновляем двойной рендер от оружия [Update SecondVP with weapon data]
-            //pWeapon->UpdateSecondVP(); //--#SM+#-- +SecondVP+
+            pWeapon->UpdateSecondVP(); //--#SM+#-- +SecondVP+
 
             // Обновляем информацию об оружии в шейдерах
-            //g_pGamePersistent->m_pGShaderConstants->hud_params.x = pWeapon->GetZRotatingFactor(); //--#SM+#--
-            //g_pGamePersistent->m_pGShaderConstants->hud_params.y = pWeapon->GetSecondVP_FovFactor(); //--#SM+#--
-
+            g_pGamePersistent->m_pGShaderConstants->hud_params.x = pWeapon->GetZRotatingFactor(); //--#SM+#--
+            g_pGamePersistent->m_pGShaderConstants->hud_params.y = pWeapon->GetSecondVP_FovFactor(); //--#SM+#--
         }
     }
     else
@@ -1049,7 +1053,7 @@ void CActor::UpdateCL()
             g_pGamePersistent->m_pGShaderConstants->hud_params.set(0.f, 0.f, 0.f, 0.f); //--#SM+#--
 
             // Отключаем второй вьюпорт [Turn off SecondVP]
-            //CWeapon::UpdateSecondVP();
+            // + CWeapon::UpdateSecondVP();
             Device.m_SecondViewport.SetSVPActive(false); //--#SM+#-- +SecondVP+
         }
     }

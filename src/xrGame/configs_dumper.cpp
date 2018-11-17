@@ -102,7 +102,7 @@ static active_objects_t::size_type get_active_objects(active_objects_t& dest)
                 if (dest.capacity() == dest.size())
                     return dest.size();
 
-                IAnticheatDumpable const* tmp_cartridge = &tmp_weapon->m_magazine[0];
+				IAnticheatDumpable const* tmp_cartridge = tmp_weapon->m_magazine[0]; //--#SM+#--
                 if (!tmp_cartridge)
                     continue;
 

@@ -17,7 +17,12 @@ CRocketLauncher::CRocketLauncher()
     //	m_pRocket =  NULL;
 }
 CRocketLauncher::~CRocketLauncher() {}
-void CRocketLauncher::Load(LPCSTR section) { m_fLaunchSpeed = pSettings->r_float(section, "launch_speed"); }
+void CRocketLauncher::Load(LPCSTR section)
+{
+    // SM_TODO: Временное решение --#SM+#--
+    // m_fLaunchSpeed = pSettings->r_float(section, "launch_speed");
+    m_fLaunchSpeed = 40.f;
+}
 void CRocketLauncher::SpawnRocket(const shared_str& rocket_section, CGameObject* parent_rocket_launcher)
 {
     if (OnClient())
@@ -48,6 +53,9 @@ void CRocketLauncher::SpawnRocket(const shared_str& rocket_section, CGameObject*
 void CRocketLauncher::AttachRocket(u16 rocket_id, CGameObject* parent_rocket_launcher)
 {
     CCustomRocket* pRocket = smart_cast<CCustomRocket*>(Level().Objects.net_Find(rocket_id));
+    if (!pRocket)
+        return; //--#SM+#--
+
     pRocket->m_pOwner = smart_cast<CGameObject*>(parent_rocket_launcher->H_Root());
     VERIFY(pRocket->m_pOwner);
     pRocket->H_SetParent(parent_rocket_launcher);

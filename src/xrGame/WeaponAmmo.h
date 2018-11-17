@@ -31,6 +31,10 @@ public:
     float Weight() const;
 
     shared_str m_ammoSect;
+    shared_str m_sHudVisual; //--#SM+#--
+    shared_str m_sWorldVisual; //--#SM+#--
+    shared_str m_sShellVisual; //--#SM+#--
+
     enum
     {
         cfTracer = (1 << 0),
@@ -74,7 +78,7 @@ public:
     virtual float Weight() const;
     virtual u32 Cost() const;
 
-    bool Get(CCartridge& cartridge);
+	bool Get(CCartridge& cartridge, bool bWithoutParams); //--#SM+#--
 
     SCartridgeParam cartridge_param;
 

@@ -43,7 +43,7 @@ public:
 
     virtual BOOL ProcessCam(SCamEffectorInfo& info);
     virtual void SetRndSeed(s32 Seed) { m_Random.seed(Seed); };
-    virtual void Init(CWeaponMagazined* pWeapon);
+    virtual void Init(CWeapon* pWeapon); //--#SM+#--
 
     virtual CEffectorZoomInertion* cast_effector_zoom_inertion() { return this; }
 };

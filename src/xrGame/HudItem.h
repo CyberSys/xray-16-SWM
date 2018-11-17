@@ -1,5 +1,6 @@
 #pragma once
 
+class CShellLauncher; //--#SM+#--
 class CSE_Abstract;
 class CPhysicItem;
 class NET_Packet;
@@ -40,6 +41,7 @@ public:
     IC u32 GetState() const { return m_hud_item_state; }
     IC void SetState(u32 v)
     {
+        OnBeforeStateSwitch(GetState(), v); //--#SM+#--
         m_hud_item_state = v;
         m_dw_curr_state_time = Device.dwTimeGlobal;
         ResetSubStateTime();
@@ -49,6 +51,12 @@ public:
     IC void ResetSubStateTime() { m_dw_curr_substate_time = Device.dwTimeGlobal; }
     virtual void SwitchState(u32 S) = 0;
     virtual void OnStateSwitch(u32 S, u32 oldState) = 0;
+    virtual bool OnBeforeStateSwitch(u32 oldS, u32 newS)
+    {
+        if (oldS == newS)
+            return false;
+        return true;
+    }; //--#SM+#--
 };
 
 class CHudItem : public CHUDState
@@ -127,9 +135,14 @@ public:
 
     virtual void UpdateXForm() = 0;
 
+	virtual bool UpdateCameraFromHUD(IGameObject* pCameraOwner, Fvector noise_dangle) { return false; } //--#SM+#--
+    virtual void UpdateActorTorchLightPosFromHUD(Fvector* pTorchPos) { ; } //--#SM+#--
+
     u32 PlayHUDMotion(const shared_str& M, BOOL bMixIn, CHudItem* W, u32 state);
     u32 PlayHUDMotion_noCB(const shared_str& M, BOOL bMixIn);
     void StopCurrentAnimWithoutCallback();
+
+	virtual bool OnBeforeMotionPlayed(const shared_str& sMotionName); //--#SM+#--
 
     IC void RenderHud(BOOL B) { m_huditem_flags.set(fl_renderhud, B); }
     IC BOOL RenderHud() { return m_huditem_flags.test(fl_renderhud); }
@@ -145,6 +158,10 @@ public:
     virtual void render_item_3d_ui() {}
     virtual bool render_item_3d_ui_query() { return false; }
     virtual bool CheckCompatibility(CHudItem*) { return true; }
+
+	virtual void OnOwnedCameraMove(CCameraBase* pCam, float fOldYaw, float fOldPitch) { ; } //--#SM+#--
+    virtual bool IsMovementEffectorAllowed() { return true; } //--#SM+#--
+
 protected:
     IC void SetPending(BOOL H) { m_huditem_flags.set(fl_pending, H); }
     shared_str hud_sect;
@@ -156,6 +173,12 @@ protected:
     IC void EnableHudInertion(BOOL B) { m_huditem_flags.set(fl_inertion_enable, B); }
     IC void AllowHudInertion(BOOL B) { m_huditem_flags.set(fl_inertion_allow, B); }
     u32 m_animation_slot;
+
+    bool m_bEnableMovAnimAtCrouch; //--#SM+#--
+    float m_fLastAnimStartTime; //--#SM+#--
+
+    float m_fIdleSpeedCrouchFactor; //--#SM+#--
+    float m_fIdleSpeedNoAccelFactor; //--#SM+#--
 
     HUD_SOUND_COLLECTION m_sounds;
 
@@ -182,4 +205,6 @@ public:
     virtual CHudItem* cast_hud_item() { return this; }
     void PlayAnimIdleMovingCrouch(); //AVO: new crouch idle animation
     bool isHUDAnimationExist(pcstr anim_name);
+
+	inline HUD_SOUND_COLLECTION* get_sound_collection() { return &m_sounds; }; //--#SM+#--
 };

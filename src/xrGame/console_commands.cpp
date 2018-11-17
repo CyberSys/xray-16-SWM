@@ -71,7 +71,7 @@ extern u64 g_qwStartGameTime;
 extern u64 g_qwEStartGameTime;
 
 ENGINE_API
-extern float psHUD_FOV;
+extern float psHUD_FOV_def; //--#SM+#-- Команда для смены FOV теперь меняет это [it's now used in hud_fov]
 extern float psSqueezeVelocity;
 extern int psLUA_GCSTEP;
 
@@ -1490,6 +1490,9 @@ struct CCC_DbgBullets : public CCC_Integer
     }
 };
 
+//--#SM+ Begin #--
+#endif
+
 #include "attachable_item.h"
 #include "attachment_owner.h"
 #include "InventoryOwner.h"
@@ -1537,6 +1540,9 @@ public:
             "allows to change bind rotation and position offsets for attached item, <section_name> given as arguments");
     }
 };
+
+#ifdef DEBUG
+//--#SM+ End#--
 
 class CCC_Crash : public IConsole_Command
 {
@@ -1778,6 +1784,46 @@ public:
     }
 };
 
+// SM_TODO: Включать только в дебаге\девелопе, MASTER_GOLD?
+// Отыграть худовую анимацию текущего оружия по её anm_ названию из конфига.
+#include "HudItem.h"
+class CCC_HudPlay : public IConsole_Command //--#SM+#--
+{
+public:
+    CCC_HudPlay(LPCSTR N) : IConsole_Command(N) { bEmptyArgsHandled = FALSE; };
+    virtual void Execute(LPCSTR args)
+    {
+        if (NULL == g_pGameLevel)
+        {
+            Msg("! There are no level(s) started");
+        }
+        else
+        {
+            if (Actor())
+            {
+                CInventoryOwner* iowner = Actor()->cast_inventory_owner();
+                PIItem active_item = iowner->m_inventory->ActiveItem();
+                if (active_item && active_item->cast_hud_item())
+                {
+                    u32 bMixIn = 0;
+                    string128 param1, param2;
+                    VERIFY(xr_strlen(args) < sizeof(string128));
+
+                    _GetItem(args, 0, param1, ' ');
+
+                    if (_GetItemCount(args, ' '))
+                    {
+                        _GetItem(args, 1, param2, ' ');
+                        sscanf(param2, "%u", &bMixIn);
+                    }
+
+                    active_item->cast_hud_item()->PlayHUDMotion(param1, bMixIn, NULL, NULL);
+                }
+            }
+        }
+    }
+};
+
 void CCC_RegisterCommands()
 {
     // options
@@ -1825,7 +1871,7 @@ void CCC_RegisterCommands()
     CMD3(CCC_Mask, "hud_crosshair", &psHUD_Flags, HUD_CROSSHAIR);
     CMD3(CCC_Mask, "hud_crosshair_dist", &psHUD_Flags, HUD_CROSSHAIR_DIST);
 
-    CMD4(CCC_Float, "hud_fov", &psHUD_FOV, 0.1f, 1.0f);
+    CMD4(CCC_Float, "hud_fov", &psHUD_FOV_def, 0.1f, 1.0f);
     CMD4(CCC_Float, "fov", &g_fov, 5.0f, 180.0f);
 
     // Demo
@@ -2219,5 +2265,8 @@ void CCC_RegisterCommands()
     CMD3(CCC_String, "slot_3", g_quick_use_slots[3], 32);
 
     CMD4(CCC_Integer, "keypress_on_start", &g_keypress_on_start, 0, 1);
+
+  	CMD1(CCC_HudPlay, "hud_play_anim"); //--#SM+#--
+
     register_mp_console_commands();
 }

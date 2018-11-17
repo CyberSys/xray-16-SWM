@@ -59,7 +59,7 @@ void CEffectorZoomInertion::Load()
     m_vLastPoint.set(0.f, 0.f, 0.f);
 }
 
-void CEffectorZoomInertion::Init(CWeaponMagazined* pWeapon)
+void CEffectorZoomInertion::Init(CWeapon* pWeapon) //--#SM+#--
 {
     if (!pWeapon)
         return;

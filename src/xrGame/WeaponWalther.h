@@ -1,11 +1,10 @@
 #pragma once
 #include "WeaponPistol.h"
 
-class CWeaponWalther : public CWeaponPistol
+class CWeaponWalther : public CWeaponPistol //--#SM+#--
 {
-    using inherited = CWeaponPistol;
-
 public:
+    //--#SM+#--
     CWeaponWalther() {}
     virtual ~CWeaponWalther() {}
 };

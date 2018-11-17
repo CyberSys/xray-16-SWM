@@ -298,6 +298,8 @@ public:
     virtual void OnHUDDraw(CCustomHUD* hud);
     BOOL HUDview() const;
 
+	virtual void OnOwnedCameraMove(CCameraBase* pCam, float fOldYaw, float fOldPitch); //--#SM+#--
+
     // visiblity
     virtual float ffGetFov() const { return 90.f; }
     virtual float ffGetRange() const { return 500.f; }

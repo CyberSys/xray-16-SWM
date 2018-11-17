@@ -19,6 +19,8 @@
 #include "CustomOutfit.h"
 #include "ActorHelmet.h"
 
+#include "Weapon.h" //--#SM+#--
+
 static const float TORCH_INERTION_CLAMP = PI_DIV_6;
 static const float TORCH_INERTION_SPEED_MAX = 7.5f;
 static const float TORCH_INERTION_SPEED_MIN = 0.5f;
@@ -314,6 +316,13 @@ void CTorch::UpdateCL()
             Fvector dir, right, up;
             dir.setHP(m_prev_hp.x + m_delta_h, m_prev_hp.y);
             Fvector::generate_orthonormal_basis_normalized(dir, up, right);
+
+			if (actor == Level().CurrentViewEntity()) //--#SM+#--
+            {
+                CHudItem* pHUDItem = smart_cast<CHudItem*>(actor->inventory().ActiveItem());
+                if (pHUDItem != NULL)
+                    pHUDItem->UpdateActorTorchLightPosFromHUD(&M.c);
+            }
 
             if (true)
             {

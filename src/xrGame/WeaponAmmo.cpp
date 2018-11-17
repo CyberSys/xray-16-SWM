@@ -19,6 +19,9 @@ CCartridge::CCartridge()
     m_ammoSect = NULL;
     param_s.Init();
     bullet_material_idx = u16(-1);
+    m_sHudVisual = NULL; //--#SM+#--
+    m_sWorldVisual = NULL; //--#SM+#--
+    m_sShellVisual = NULL; //--#SM+#--
 }
 
 void CCartridge::Load(LPCSTR section, u8 LocalAmmoType)
@@ -68,6 +71,10 @@ void CCartridge::Load(LPCSTR section, u8 LocalAmmoType)
     VERIFY(param_s.fWallmarkSize > 0);
 
     m_InvShortName = StringTable().translate(pSettings->r_string(section, "inv_name_short"));
+
+	m_sHudVisual = READ_IF_EXISTS(pSettings, r_string, section, "bullet_hud", NULL); //--#SM+#--
+    m_sWorldVisual = READ_IF_EXISTS(pSettings, r_string, section, "bullet_vis", NULL); //--#SM+#--
+    m_sShellVisual = READ_IF_EXISTS(pSettings, r_string, section, "shell_hud", NULL); //--#SM+#--
 }
 
 float CCartridge::Weight() const
@@ -160,17 +167,20 @@ s32 CWeaponAmmo::Sort(PIItem pIItem)
     else return -1;
 }
 */
-bool CWeaponAmmo::Get(CCartridge& cartridge)
+bool CWeaponAmmo::Get(CCartridge& cartridge, bool bWithoutParams) //--#SM+#--
 {
     if (!m_boxCurr)
         return false;
-    cartridge.m_ammoSect = cNameSect();
 
-    cartridge.param_s = cartridge_param;
+	if (!bWithoutParams)
+    {
+        cartridge.m_ammoSect = cNameSect();
+        cartridge.param_s = cartridge_param;
+        cartridge.m_flags.set(CCartridge::cfTracer, m_tracer);
+        cartridge.bullet_material_idx = GMLib.GetMaterialIdx(WEAPON_MATERIAL_NAME);
+        cartridge.m_InvShortName = NameShort();
+    }
 
-    cartridge.m_flags.set(CCartridge::cfTracer, m_tracer);
-    cartridge.bullet_material_idx = GMLib.GetMaterialIdx(WEAPON_MATERIAL_NAME);
-    cartridge.m_InvShortName = NameShort();
     --m_boxCurr;
     if (m_pInventory)
         m_pInventory->InvalidateState();

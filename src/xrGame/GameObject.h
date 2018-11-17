@@ -38,11 +38,13 @@ class CExplosive;
 class CHolderCustom;
 class CAttachmentOwner;
 class CBaseMonster;
+class CShellLauncher; //--#SM+#--
 class CSpaceRestrictor;
 class CAttachableItem;
 class animation_movement_controller;
 class CBlend;
 class ai_obstacle;
+class attachable_visual; //--#SM+#--
 
 class IKinematics;
 
@@ -99,6 +101,40 @@ protected:
     CScriptBinder scriptBinder;
     bool m_bObjectRemoved;
     CInifile* m_ini_file;
+
+//--#SM+# Begin--
+public:
+    struct common_values
+    {
+        // IRNV Values
+        float m_fIRNV_value; // Текущее значение теплоты [current irnv-heat value]
+        float m_fIRNV_value_max; // Максимальная теплота [max irnv-heat value]
+        float m_fIRNV_value_min; // Минимальная  теплота [min irnv-heat value]
+        float m_fIRNV_cooling_speed; // Скорость изменеия теплоты от max к min [irnv-heat change speed]
+        bool m_fIRNV_max_or_min; // true если двигать к максимуму, false если к минимуму 
+                                 // true - increase heat, false - decrease heat
+    };
+    common_values m_common_values; // Хранит игровые параметры, используемые всеми объектами [store
+                                   // shared values]
+
+    xr_vector<attachable_visual*> m_attached_visuals; // Дополнительные прикреплённые визуалы [extra visuals]
+
+    bool AttachAdditionalVisual(const shared_str& sect_name); // Прикрепить доп визуал [attach visual]
+    bool DetachAdditionalVisual(const shared_str& sect_name); // Открепить доп визуал [detach visual]
+
+    // Найти присоединённый визуал по его секции (не ищет внутри самих визуалов <!>) [search for
+    // attached visual by it's section (not include visuals inside visual)] --#SM+#--
+    attachable_visual* FindAdditionalVisual(
+        const shared_str& sect_name, xr_vector<attachable_visual*>::iterator* it_child = nullptr);
+
+    // Получить список всех визуалов, связанных с нашим объектом [get list of all attached visuals] //--#SM+#--
+    void GetAllInheritedVisuals(
+        xr_vector<IRenderVisual*>& tOutVisList);
+
+    // Каллбэк на смену визуала в одном из присоединённых доп. визуалов [callback for visual change
+    // inside of any attached visuals] --#SM+#--
+    virtual void OnAdditionalVisualModelChange(attachable_visual* pChangedVisual);
+//--#SM+# End --
 
 public:
     CGameObject();
@@ -210,7 +246,7 @@ public:
     virtual CAttachableItem* cast_attachable_item() override { return NULL; }
     virtual CHolderCustom* cast_holder_custom() override { return NULL; }
     virtual CBaseMonster* cast_base_monster() override { return NULL; }
-    CShellLauncher* cast_shell_launcher() override { return nullptr; }
+    CShellLauncher* cast_shell_launcher() override { return nullptr; } //--#SM+#--
     virtual bool feel_touch_on_contact(IGameObject*) override { return TRUE; }
     // Utilities
     // XXX: move out

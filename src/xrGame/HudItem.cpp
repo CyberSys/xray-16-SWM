@@ -3,6 +3,7 @@
 #include "physic_item.h"
 #include "Actor.h"
 #include "ActorEffector.h"
+#include "ActorCondition.h" //--#SM+#--
 #include "Missile.h"
 #include "xrMessages.h"
 #include "Level.h"
@@ -22,6 +23,10 @@ CHudItem::CHudItem()
     m_bStopAtEndAnimIsRunning = false;
     m_current_motion_def = NULL;
     m_started_rnd_anim_idx = u8(-1);
+    m_fLastAnimStartTime = 0.0f; //--#SM+#--
+    m_bEnableMovAnimAtCrouch = false; //--#SM+#--
+    m_fIdleSpeedCrouchFactor = 1.f; //--#SM+#--
+    m_fIdleSpeedNoAccelFactor = 1.f; //--#SM+#--
 }
 
 IFactoryObject* CHudItem::_construct()
@@ -40,6 +45,14 @@ void CHudItem::Load(LPCSTR section)
 {
     hud_sect = pSettings->r_string(section, "hud");
     m_animation_slot = pSettings->r_u32(section, "animation_slot");
+
+	m_bEnableMovAnimAtCrouch =
+        READ_IF_EXISTS(pSettings, r_bool, section, "enable_mov_anim_at_crouch", false); //--#SM+#--
+
+    m_fIdleSpeedCrouchFactor =
+        READ_IF_EXISTS(pSettings, r_float, hud_sect, "idle_speed_crouch_factor", 1.f); //--#SM+#--
+    m_fIdleSpeedNoAccelFactor =
+        READ_IF_EXISTS(pSettings, r_float, hud_sect, "idle_speed_noaccel_factor", 1.f); //--#SM+#--
 
     m_sounds.LoadSound(section, "snd_bore", "sndBore", true);
 }
@@ -258,8 +271,64 @@ void CHudItem::on_a_hud_attach()
     }
 }
 
-u32 CHudItem::PlayHUDMotion(const shared_str& M, BOOL bMixIn, CHudItem* W, u32 state)
+// Вызывается перед проигрыванием любой анимации.
+// Возвращает необходимость проиграть анимацию не с начала, а с первой метки внутри неё.
+// [Called before every hud motion, if return true - motion start from first mark]
+bool CHudItem::OnBeforeMotionPlayed(const shared_str& sMotionName) //--#SM+#--
 {
+    CActor* pActor = smart_cast<CActor*>(object().H_Parent());
+    if (pActor)
+    {
+        u32 actor_state = pActor->MovingState();
+        bool bSprint = !!(actor_state & mcSprint); // Бежим
+
+        if (!bSprint && strstr(sMotionName.c_str(), "anm_idle") != nullptr)
+        { // Мы играем Idle анимацию - выставляем её скорость в зависииости от состояния тела игрока
+            bool bCrouch = !!(actor_state & mcCrouch); // На корточках
+            bool bZooming = pActor->IsZoomAimingMode(); // Целимся
+            bool bNotAccelerated = !isActorAccelerated(actor_state, bZooming); // Зажатый Shift (не ускоряться)
+
+            float fIdleAnimSpeedFactor = 1.0f;
+            if (bNotAccelerated && (bCrouch || !bZooming))
+            {
+                fIdleAnimSpeedFactor *= m_fIdleSpeedNoAccelFactor;
+            }
+            if (bCrouch)
+            {
+                fIdleAnimSpeedFactor *= m_fIdleSpeedCrouchFactor;
+            }
+
+            g_player_hud->SetAnimSpeedMod(fIdleAnimSpeedFactor);
+        }
+    }
+
+    return false;
+}
+
+u32 CHudItem::PlayHUDMotion(const shared_str& M, BOOL bMixIn, CHudItem* W, u32 state) //--#SM+#--
+{
+    m_fLastAnimStartTime = 0.0f;
+
+    bool bTakeTimeFromMark = OnBeforeMotionPlayed(M);
+    if (bTakeTimeFromMark)
+    {
+        PlayHUDMotion_noCB(M, bMixIn); //--> Обновим m_current_motion_def
+        const xr_vector<motion_marks>& marks = m_current_motion_def->marks;
+        if (!marks.empty())
+        {
+            m_fLastAnimStartTime = marks.begin()->time_to_next_mark(0.f);
+            g_player_hud->SetAnimStartTime(m_fLastAnimStartTime); //--> Время считываем с метки из верхней полоски
+        }
+    }
+
+    if (GetHUDmode() == true) // SM_TODO: Консольную команду сделай для включения \ выключения?
+    {
+        // SM_TODO: в PlayHUDMotion_noCB функция motion_length не учитывает анимации из сокет аддонов <?!>
+        // Возможно уже исправлено
+        Msg("PlayAnim [%s] Mixed = [%d] StartTime = [%f] Speed = [%f]", M.c_str(), bMixIn,
+            g_player_hud->GetStartTimeOverridden(), g_player_hud->GetSpeedModOverridden());
+    }
+
     u32 anim_time = PlayHUDMotion_noCB(M, bMixIn);
     if (anim_time > 0)
     {
@@ -339,7 +408,7 @@ bool CHudItem::TryPlayAnimIdle()
             }
             if (pActor->AnyMove())
             {
-                if (!st.bCrouch)
+                if (!st.bCrouch || m_bEnableMovAnimAtCrouch) //--#SM+#--
                 {
                     PlayAnimIdleMoving();
                     return true;
@@ -384,7 +453,8 @@ void CHudItem::OnMovementChanged(ACTOR_DEFS::EMoveCommand cmd)
 {
     if (GetState() == eIdle && !m_bStopAtEndAnimIsRunning)
     {
-        if ((cmd == ACTOR_DEFS::mcSprint) || (cmd == ACTOR_DEFS::mcAnyMove))
+        if ((cmd == ACTOR_DEFS::mcAccel) || (cmd == ACTOR_DEFS::mcSprint) ||
+            (cmd == ACTOR_DEFS::mcAnyMove)) //--#SM+#-- + ActorAnimation.cpp
         {
             PlayAnimIdle();
             ResetSubStateTime();

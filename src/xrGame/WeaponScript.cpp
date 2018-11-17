@@ -33,6 +33,7 @@
 #include "InventoryBox.h"
 #include "xrScriptEngine/ScriptExporter.hpp"
 
+//--#SM+#-- Updated
 using namespace luabind;
 
 SCRIPT_EXPORT(CWeapon, (CGameObject),
@@ -51,11 +52,11 @@ SCRIPT_EXPORT(CWeaponMagazined, (CWeapon),
 SCRIPT_EXPORT(CWeaponMagazinedWGrenade, (CWeaponMagazined),
     { module(luaState)[class_<CWeaponMagazinedWGrenade, CWeaponMagazined>("CWeaponMagazinedWGrenade").def(constructor<>())]; });
 
-SCRIPT_EXPORT(CWeaponBinoculars, (CWeaponMagazined),
-    { module(luaState)[class_<CWeaponBinoculars, CWeaponMagazined>("CWeaponBinoculars").def(constructor<>())]; });
+SCRIPT_EXPORT(CWeaponBinoculars, (CWeapon),
+    { module(luaState)[class_<CWeaponBinoculars, CWeapon>("CWeaponBinoculars").def(constructor<>())]; });
 
-SCRIPT_EXPORT(CWeaponBM16, (CWeaponShotgun),
-    { module(luaState)[class_<CWeaponBM16, CWeaponShotgun>("CWeaponBM16").def(constructor<>())]; });
+SCRIPT_EXPORT(CWeaponBM16, (CWeapon),
+    { module(luaState)[class_<CWeaponBM16, CWeapon>("CWeaponBM16").def(constructor<>())]; });
 
 SCRIPT_EXPORT(CWeaponFN2000, (CWeaponMagazined),
     { module(luaState)[class_<CWeaponFN2000, CWeaponMagazined>("CWeaponFN2000").def(constructor<>())]; });
@@ -108,8 +109,8 @@ SCRIPT_EXPORT(CWeaponAutomaticShotgun, (CWeaponMagazined),
 SCRIPT_EXPORT(CWeaponGroza, (CWeaponMagazinedWGrenade),
     { module(luaState)[class_<CWeaponGroza, CWeaponMagazinedWGrenade>("CWeaponGroza").def(constructor<>())]; });
 
-SCRIPT_EXPORT(CWeaponRG6, (CWeaponShotgun),
-    { module(luaState)[class_<CWeaponRG6, CWeaponShotgun>("CWeaponRG6").def(constructor<>())]; });
+SCRIPT_EXPORT(CWeaponRG6, (CWeaponMagazinedWGrenade),
+    { module(luaState)[class_<CWeaponRG6, CWeaponMagazinedWGrenade>("CWeaponRG6").def(constructor<>())]; });
 
 SCRIPT_EXPORT(CWeaponShotgun, (CWeaponMagazined),
     { module(luaState)[class_<CWeaponShotgun, CWeaponMagazined>("CWeaponShotgun").def(constructor<>())]; });

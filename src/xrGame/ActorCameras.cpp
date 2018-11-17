@@ -25,6 +25,9 @@
 #include "IKLimbsController.h"
 #include "GamePersistent.h"
 
+ENGINE_API extern float psHUD_FOV; //--#SM+#--
+ENGINE_API extern float psHUD_FOV_def; //--#SM+#--
+
 void CActor::cam_Set(EActorCameras style)
 {
     CCameraBase* old_cam = cam_Active();
@@ -288,6 +291,17 @@ void CActor::cam_Update(float dt, float fFOV)
     if (m_holder)
         return;
 
+	// HUD FOV Update --#SM+#--
+    if (this == Level().CurrentControlEntity())
+    {
+        CWeapon* pWeapon = smart_cast<CWeapon*>(this->inventory().ActiveItem());
+        if (eacFirstEye == cam_active && pWeapon)
+            psHUD_FOV = pWeapon->GetHudFov();
+        else
+            psHUD_FOV = psHUD_FOV_def;
+    }
+    //--#SM+#--
+
     if ((mstate_real & mcClimb) && (cam_active != eacFreeLook))
         camUpdateLadder(dt);
     on_weapon_shot_update();
@@ -368,18 +382,22 @@ void CActor::cam_Update(float dt, float fFOV)
         cameras[eacFirstEye]->Update(point, dangle);
         cameras[eacFirstEye]->f_fov = fFOV;
     }
-    if (Level().CurrentEntity() == this)
+
+
+	bool bDisableCamCollision = false; //--#SM+#--
+    if (Level().CurrentViewEntity() == this)
+    {
+        CHudItem* pHUDItem = smart_cast<CHudItem*>(this->inventory().ActiveItem()); //--#SM+#--
+        if (pHUDItem != NULL)
+            bDisableCamCollision = pHUDItem->UpdateCameraFromHUD(this, dangle);
+    }
+
+    if (bDisableCamCollision != true && Level().CurrentEntity() == this) //--#SM+#--
     {
         collide_camera(*cameras[eacFirstEye], _viewport_near, this);
     }
-    if (psActorFlags.test(AF_PSP))
-    {
-        Cameras().UpdateFromCamera(C);
-    }
-    else
-    {
-        Cameras().UpdateFromCamera(cameras[eacFirstEye]);
-    }
+
+    Cameras().UpdateFromCamera(C); // "Fix" for bullets fire position in 2\3 person mode (+ for bipods) --#SM+#--
 
     fCurAVelocity = vPrevCamDir.sub(cameras[eacFirstEye]->vDirection).magnitude() / Device.fTimeDelta;
     vPrevCamDir = cameras[eacFirstEye]->vDirection;

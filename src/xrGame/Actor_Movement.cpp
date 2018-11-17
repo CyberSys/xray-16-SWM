@@ -313,7 +313,12 @@ void CActor::g_cl_CheckControls(u32 mstate_wf, Fvector& vControlAccel, float& Ju
         } //(mstate_real&mcAnyMove)
     } // peOnGround || peAtWall
 
-    if (IsGameTypeSingle() && cam_eff_factor > EPS)
+	CHudItem* pHudItem = smart_cast<CHudItem*>(inventory().GetActiveSlot() != NO_ACTIVE_SLOT ?
+            inventory().ItemFromSlot(inventory().GetActiveSlot()) :
+            NULL); //--#SM+#--
+
+    if (IsGameTypeSingle() && (pHudItem != NULL && pHudItem->IsMovementEffectorAllowed()) &&
+        cam_eff_factor > EPS) //--#SM+#--
     {
         LPCSTR state_anm = NULL;
 

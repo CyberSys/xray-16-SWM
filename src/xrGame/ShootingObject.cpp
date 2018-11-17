@@ -37,6 +37,11 @@ CShootingObject::CShootingObject(void)
     m_bUseAimBullet = false;
     m_fTimeToAim = 0.0f;
 
+	// overheat	--#SM+#--
+    m_overheat = 0.0f;
+    m_overheat_per_shot = 0.0f;
+    m_overheat_cooling = 1.0f;
+
     // particles
     m_sFlameParticlesCurrent = m_sFlameParticles = NULL;
     m_sSmokeParticlesCurrent = m_sSmokeParticles = NULL;
@@ -81,6 +86,14 @@ void CShootingObject::Load(LPCSTR section)
     LoadFlameParticles(section, "");
 
     m_air_resistance_factor = READ_IF_EXISTS(pSettings, r_float, section, "air_resistance_factor", 1.f);
+
+	// overheat	--#SM+#--
+    m_overheat_per_shot = READ_IF_EXISTS(pSettings, r_float, section, "overheat_per_shot", 0.f);
+    m_overheat_cooling = READ_IF_EXISTS(pSettings, r_float, section, "overheat_cooling", 100.f) / 100.f;
+
+    clamp(m_overheat_per_shot, 0.f, 1.f);
+    if (m_overheat_cooling < 0.0f)
+        m_overheat_cooling = 0.f;
 }
 
 void CShootingObject::Light_Create()
@@ -454,6 +467,9 @@ void CShootingObject::FireBullet(const Fvector& pos, const Fvector& shot_dir, fl
     m_vCurrentShootPos = pos;
     m_iCurrentParentID = parent_id;
 
+	m_overheat += m_overheat_per_shot; //--#SM+#--
+    clamp(m_overheat, 0.f, 1.f); //--#SM+#--
+
     bool aim_bullet;
     if (m_bUseAimBullet)
     {
@@ -513,4 +529,16 @@ void CShootingObject::StartShotParticles()
 {
     CParticlesObject* pSmokeParticles = NULL;
     StartParticles(pSmokeParticles, *m_sShotParticles, m_vCurrentShootPos, m_vCurrentShootDir, true);
+}
+
+// SM_TODO: М.б лучше на UpdateCL ?
+// Обновление перегрева ствола --#SM+#--
+void CShootingObject::UpdateOverheat(u32 dT)
+{
+    // При неактивности ствол остывает
+    if (m_overheat > 0.0f && !IsWorking())
+    {
+        m_overheat -= (dT * m_overheat_cooling);
+        clamp(m_overheat, 0.0f, 1.0f);
+    }
 }

@@ -504,8 +504,8 @@ IPHCapture* CPhysicsShellHolder::PHCapture()
 bool CPhysicsShellHolder::IsInventoryItem() { return !!cast_inventory_item(); }
 bool CPhysicsShellHolder::IsActor() { return !!cast_actor(); }
 bool CPhysicsShellHolder::IsStalker() { return !!cast_stalker(); }
-bool CPhysicsShellHolder::IsCollideWithBullets() { return true; }
-bool CPhysicsShellHolder::IsCollideWithActorCamera() { return true; }
+bool CPhysicsShellHolder::IsCollideWithBullets() { return true; } //--#SM+#--
+bool CPhysicsShellHolder::IsCollideWithActorCamera() { return true; }  //--#SM+#--
 
 // void						SetWeaponHideState( u16 State, bool bSet )
 void CPhysicsShellHolder::HideAllWeapons(bool v) {}

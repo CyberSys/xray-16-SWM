@@ -1,23 +1,14 @@
 #pragma once
 
-#include "WeaponShotgun.h"
+#include "WeaponMagazinedWGrenade.h"
 
-class CWeaponBM16 : public CWeaponShotgun
+class CWeaponBM16 : public CWeaponMagazinedWGrenade //--#SM+#--
 {
-    typedef CWeaponShotgun inherited;
+private:
+    typedef CWeaponMagazinedWGrenade inherited;
 
 public:
+    CWeaponBM16();
     virtual ~CWeaponBM16();
     virtual void Load(LPCSTR section);
-
-protected:
-    virtual void PlayAnimShoot();
-    virtual void PlayAnimReload();
-    virtual void PlayReloadSound();
-    virtual void PlayAnimIdle();
-    virtual void PlayAnimIdleMoving();
-    virtual void PlayAnimIdleSprint();
-    virtual void PlayAnimShow();
-    virtual void PlayAnimHide();
-    virtual void PlayAnimBore();
 };

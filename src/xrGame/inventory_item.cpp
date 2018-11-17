@@ -295,6 +295,9 @@ bool CInventoryItem::Detach(const char* item_section_name, bool b_spawn_item)
         D->o_Position = object().Position();
         D->s_flags.assign(M_SPAWN_OBJECT_LOCAL);
         D->RespawnTime = 0;
+
+		OnDetacAddonSpawn(item_section_name, l_tpALifeDynamicObject); //--#SM+#--
+ 
         // Send
         NET_Packet P;
         D->Spawn_Write(P, TRUE);

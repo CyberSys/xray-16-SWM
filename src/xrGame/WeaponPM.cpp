@@ -1,5 +1,6 @@
 #include "StdAfx.h"
 #include "WeaponPM.h"
 
-CWeaponPM::CWeaponPM() : CWeaponPistol() {}
+//--#SM+#--
+CWeaponPM::CWeaponPM() {}
 CWeaponPM::~CWeaponPM() {}

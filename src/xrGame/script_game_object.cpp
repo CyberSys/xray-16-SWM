@@ -417,7 +417,7 @@ u8 CScriptGameObject::GetWeaponSubstate()
     CWeapon* weapon = smart_cast<CWeapon*>(&object());
     if (!weapon) return 255;
 
-    return weapon->m_sub_state;
+    return (u8)weapon->GetReloadState(); //--#SM+#--
 }
 
 //-Alundaio

@@ -1,5 +1,6 @@
 #include "StdAfx.h"
 #include "WeaponHPSA.h"
 
-CWeaponHPSA::CWeaponHPSA() : CWeaponPistol() {}
+//--#SM+#--
+CWeaponHPSA::CWeaponHPSA() {}
 CWeaponHPSA::~CWeaponHPSA() {}

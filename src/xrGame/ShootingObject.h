@@ -13,6 +13,7 @@
 class CCartridge;
 class CParticlesObject;
 class IRender_Sector;
+class CWeaponKnifeHit; //--#SM+#--
 
 extern const Fvector zero_vel;
 
@@ -20,6 +21,9 @@ extern const Fvector zero_vel;
 
 class CShootingObject : public IAnticheatDumpable
 {
+public:
+    friend CWeaponKnifeHit; //--#SM+#-- Разрешаем ему доступ к private и public методам [allow access]
+
 protected:
     CShootingObject();
     virtual ~CShootingObject();
@@ -102,7 +106,15 @@ protected:
 public:
     SilencerKoeffs cur_silencer_koef;
 
+	// Коэфиценты перегрева ствола --#SM+#--
+    float m_overheat; // Степень перегрева ствола (0.0-1.0)
+    float m_overheat_per_shot; // Нагревание ствола при каждом выстреле
+    float m_overheat_cooling; // Остывание ствола после стрельбы
+
 protected:
+    // Обновление перегрева ствола --#SM+#--
+    void UpdateOverheat(u32 dT);
+
     //для сталкеров, чтоб они знали эффективные границы использования
     //оружия
     float m_fMinRadius;

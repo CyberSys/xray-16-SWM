@@ -116,6 +116,8 @@ public:
     virtual bool Detach(const char* item_section_name, bool b_spawn_item);
     virtual bool CanAttach(PIItem pIItem) { return false; }
     virtual bool CanDetach(LPCSTR item_section_name) { return false; }
+    virtual void OnDetacAddonSpawn(const char* item_section_name, CSE_ALifeDynamicObject* E) { ; } //--#SM+#--
+
     virtual EHandDependence HandDependence() const { return hd1Hand; };
     virtual bool IsSingleHanded() const { return true; };
     virtual bool ActivateItem(); // !!! Переопределить. (см. в Inventory.cpp)

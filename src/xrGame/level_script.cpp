@@ -569,6 +569,38 @@ void stop_tutorial()
 LPCSTR translate_string(LPCSTR str) { return *StringTable().translate(str); }
 bool has_active_tutotial() { return (g_tutorial != NULL); }
 
+float set_blender_mode_main(float blender_num = 0.f) //--#SM+#--
+{
+    g_pGamePersistent->m_pGShaderConstants->m_blender_mode.x = blender_num;
+    return g_pGamePersistent->m_pGShaderConstants->m_blender_mode.x;
+}
+
+float get_blender_mode_main() //--#SM+#--
+{
+    return g_pGamePersistent->m_pGShaderConstants->m_blender_mode.x;
+}
+
+float set_blender_mode_second(float blender_num = 0.f) //--#SM+#--
+{
+    g_pGamePersistent->m_pGShaderConstants->m_blender_mode.y = blender_num;
+    return g_pGamePersistent->m_pGShaderConstants->m_blender_mode.y;
+}
+
+float get_blender_mode_second() //--#SM+#--
+{
+    return g_pGamePersistent->m_pGShaderConstants->m_blender_mode.y;
+}
+
+Fmatrix get_shader_params() //--#SM+#--
+{
+    return g_pGamePersistent->m_pGShaderConstants->m_script_params;
+}
+
+void set_shader_params(const Fmatrix& m_params) //--#SM+#--
+{
+    g_pGamePersistent->m_pGShaderConstants->m_script_params = m_params;
+}
+
 //Alundaio: namespace level exports extension
 #ifdef NAMESPACE_LEVEL_EXPORTS
 //ability to update level netpacket
@@ -735,6 +767,14 @@ IC static void CLevel_Export(lua_State* luaState)
         def("vertex_id", &vertex_id),
 
         def("game_id", &GameID),
+
+		//--#SM+# Begin --
+        def("set_blender_mode_main", &set_blender_mode_main), def("get_blender_mode_main", &get_blender_mode_main),
+        def("set_blender_mode_second", &set_blender_mode_second),
+        def("get_blender_mode_second", &get_blender_mode_second), def("set_shader_params", &set_shader_params),
+        def("get_shader_params", &get_shader_params),
+        //--#SM+# End --
+
         def("ray_pick", &ray_pick)],
 
         module(luaState, "actor_stats")[def("add_points", &add_actor_points),
