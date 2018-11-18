@@ -797,9 +797,9 @@ void CWeapon::UpdateWpnVisuals()
         if (hud_item != NULL)
         {
             // Перебираем все активные атачи худа и скрываем\раскрываем кости в зависимости от числа патронов
-            for (u32 i = 0; i < hud_item->m_socket_items.size(); i++)
+            for (u32 i = 0; i < hud_item->m_child_items.size(); i++)
             {
-                attachable_hud_item* item = hud_item->m_socket_items[i];
+                attachable_hud_item* item = hud_item->m_child_items[i];
                 if (item != NULL)
                 {
                     IRenderVisual* pVis = item->m_model->dcast_RenderVisual();

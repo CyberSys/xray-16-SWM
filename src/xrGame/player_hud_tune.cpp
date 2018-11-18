@@ -1,7 +1,10 @@
+/*************************************/
+/***** Хелпер для настройки худа *****/ //--#SM+#--
+/*************************************/
+
 #include "StdAfx.h"
 #include "player_hud.h"
 #include "Level.h"
-#include "debug_renderer.h"
 #include "xrEngine/xr_input.h"
 #include "HUDManager.h"
 #include "HudItem.h"
@@ -9,13 +12,12 @@
 #include "xrEngine/CameraManager.h"
 #include "xrEngine/FDemoRecord.h"
 #include "xrUICore/ui_base.h"
-#include "debug_renderer.h"
 #include "xrEngine/GameFont.h"
 
 u32 hud_adj_mode = 0;
 u32 hud_adj_item_idx = 0;
-u8 socket_idx = u8(-1); //--#SM+#--
-bool bNextSocketAddon = false; //--#SM+#--
+u8 child_idx = u8(-1); //--#SM+#--
+bool bNextChildItem = false; //--#SM+#--
 shared_str cur_hud_name = NULL; //--#SM+#--
 // "press SHIFT+NUM 0-return 1-hud_pos 2-hud_rot 3-itm_pos 4-itm_rot 5-fire_point 6-fire_2_point 7-shell_point";
 
@@ -182,6 +184,7 @@ void attachable_hud_item::tune(Ivector values)
             diff.y = (values.y > 0) ? _delta_pos : -_delta_pos;
         if (values.z)
             diff.z = (values.z > 0) ? _delta_pos : -_delta_pos;
+        diff.z *= 10; //--#SM+#--
 
         if (hud_adj_mode == 5)
         {
@@ -208,40 +211,43 @@ void attachable_hud_item::tune(Ivector values)
 //#endif // #ifndef MASTER_GOLD
 }
 
-void attachable_hud_item::debug_draw_firedeps()
+IRenderVisual* pDbgModelSphere = NULL; //--#SM+#--
+
+void attachable_hud_item::debug_draw_firedeps() //--#SM+#--
 {
-//#ifdef DEBUG	--#SM+#--
-    bool bForce = (hud_adj_mode == 3 || hud_adj_mode == 4);
+    if (pDbgModelSphere == NULL)
+        pDbgModelSphere = GEnv.Render->model_Create("dbg\\dbg_sphere.ogf");
 
-	/* SM_TODO: Отрисовывать модели <!>
-    if (hud_adj_mode == 5 || hud_adj_mode == 6 || hud_adj_mode == 7 || bForce)
+    if (hud_adj_mode == 5 || hud_adj_mode == 6 || hud_adj_mode == 7)
     {
-        CDebugRenderer& render = Level().debug_renderer();
-
         firedeps fd;
         setup_firedeps(fd);
 
-        if (hud_adj_mode == 5 || bForce)
-            render.draw_aabb(fd.vLastFP, 0.005f, 0.005f, 0.005f, color_xrgb(255, 0, 0));
+        Fmatrix m;
+        m.identity();
+
+        if (hud_adj_mode == 5)
+            m.translate(fd.vLastFP);
 
         if (hud_adj_mode == 6)
-            render.draw_aabb(fd.vLastFP2, 0.005f, 0.005f, 0.005f, color_xrgb(0, 0, 255));
+            m.translate(fd.vLastFP2);
 
         if (hud_adj_mode == 7)
-            render.draw_aabb(fd.vLastSP, 0.005f, 0.005f, 0.005f, color_xrgb(0, 255, 0));
+            m.translate(fd.vLastSP);
+
+        GEnv.Render->set_Transform(&m);
+        GEnv.Render->add_Visual(pDbgModelSphere);
     }
-	*/
-//#endif // DEBUG
 }
 
 void player_hud::tune(Ivector _values) //--#SM+#--
 {
 //#ifndef MASTER_GOLD
     //-------------------//
-    if (bNextSocketAddon)
+    if (bNextChildItem)
     {
-        socket_idx++;
-        bNextSocketAddon = false;
+        child_idx++;
+        bNextChildItem = false;
     }
 
     attachable_hud_item* hi = m_attached_items[hud_adj_item_idx];
@@ -250,13 +256,13 @@ void player_hud::tune(Ivector _values) //--#SM+#--
 
     attachable_hud_item* parent_hi = hi;
 
-    if (socket_idx < hi->m_socket_items.size())
+    if (child_idx < hi->m_child_items.size())
     {
-        hi = hi->m_socket_items[socket_idx];
+        hi = hi->m_child_items[child_idx];
     }
     else
     {
-        socket_idx = u8(-1);
+        child_idx = u8(-1);
     }
 
     cur_hud_name = hi->m_sect_name;
@@ -501,7 +507,7 @@ void player_hud::tune(Ivector _values) //--#SM+#--
         Sleep(100);
     }
 
-    if (socket_idx != u8(-1))
+    if (child_idx != u8(-1))
         parent_hi->UpdateHudFromChildren(false);
 //#endif // #ifndef MASTER_GOLD
 }
@@ -541,7 +547,7 @@ void hud_draw_adjust_mode()
 
         if (cur_hud_name != NULL)
         {
-            if (socket_idx != u8(-1))
+            if (child_idx != u8(-1))
                 F->OutNext("for item [%s] idx = %d (%s)", cur_hud_name.c_str(), hud_adj_item_idx,
                     (hud_adj_item_idx) ? "Detector" : "Attachment");
             else
@@ -636,7 +642,7 @@ void hud_adjust_mode_keyb(int dik)
         if (dik == SDL_SCANCODE_KP_1)
             hud_adj_item_idx = 1;
         if (dik == SDL_SCANCODE_KP_2) //--#SM+#--
-            bNextSocketAddon = true;
+            bNextChildItem = true;
         g_player_hud->tune(Ivector().set(0, 0, 0)); //--#SM+#--
     }
 }

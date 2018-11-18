@@ -170,52 +170,47 @@ void CWeapon::OnMotionMark(u32 state, const motion_marks& M)
 
 // Вызывается перед проигрыванием любой анимации.
 // Возвращает необходимость проиграть анимацию не с начала, а с первой метки внутри неё.
-bool CWeapon::OnBeforeMotionPlayed(const shared_str& sMotionName)
+CWeapon::motion_params CWeapon::OnBeforeMotionPlayed(const shared_str& sAnmAlias)
 {
-    // Для MP анимация прятанья и доставания в два раза быстрее (TODO: Ускорение не работает (или частично [?]) с анимациями доставания <?>)
-    if (!IsGameTypeSingle() && (GetState() == eHiding || GetState() == eShowing))
-        g_player_hud->SetAnimSpeedMod(2.f);
+    motion_params params; //--> Параметры по умолчанию
 
-    // Для анимации зума управляем её временем начала и направлением
+    // Для анимации зума управляем её стартовой секундой и направлением движения
     if (m_ZoomAnimState != eZANone)
     {
-        // Время старта анимации зависит от того сколько оружие уже успело повернуться
-        g_player_hud->SetAnimStartTime(GetZRotatingFactor() * -1); // -1 для указания времени старта в процентах от длины анимации
+        //-> Стартовая секунда анимации зависит от того сколько оружие уже успело повернуться
+        params.fStartFromTime = (GetZRotatingFactor() * -1); //--> -1 для указания времени в процентах от всей длины анимации
 
-        if (m_ZoomAnimState == eZAOut) // Мы выходим из зума - пускаем анимацию реверсивно
-            g_player_hud->SetAnimSpeedMod(-1.0f);
+        //--> Если мы выходим из зума - пускаем анимацию реверсивно
+        if (m_ZoomAnimState == eZAOut)
+            params.fSpeed = -1.0f;
+
+        return params;
     }
 
-    // Управляем анимациями смены магазинов для оружия с магазинным питанием
+    // Управляем стартовой секундой анимации смены магазина (для оружия с магазинным питанием)
     if (GetState() == eSwitchMag && m_sub_state == eSubstateMagazFinish)
     {
-        // Обрабатываем осечку
+        //--> При осечке отыгрываем анимацию до конца
         if (IsMisfire())
-        {
-            bMisfire = false;
-            return false; //--> При осечке анимация перезарядки должна отыграться целиком
-        }
+            return params;
 
-        // Определяем время старта анимации
+        //--> Иначе высчитываем время старта анимации из конфига или метки
         if (g_player_hud != NULL)
         {
             SAddonData* pAddonMagaz = GetAddonBySlot(eMagaz);
             if (pAddonMagaz->bActive)
-            {
-                if (pSettings->line_exist(pAddonMagaz->GetName(), "insert_anim_start_time"))
-                {
-                    m_fLastAnimStartTime = pSettings->r_float(pAddonMagaz->GetName(), "insert_anim_start_time");
-                    g_player_hud->SetAnimStartTime(m_fLastAnimStartTime);
-                }
-
-                return READ_IF_EXISTS(pSettings, r_bool, pAddonMagaz->GetName(), "insert_anim_start_time_from_anim", false);
+            { //--> Магазин уже установлен
+                params.fStartFromTime = READ_IF_EXISTS(pSettings, r_float, pAddonMagaz->GetName(), "insert_anim_start_time", params.fStartFromTime);
+                params.bTakeTimeFromMotionMark = READ_IF_EXISTS(pSettings, r_bool, pAddonMagaz->GetName(), "insert_anim_start_time_from_anim", false);
             }
             else
-                return true; //--> Установленного магазина нет, значит мы его только что сняли -> проигрываем анимацию с метки
+                params.bTakeTimeFromMotionMark = true; //--> Магазина нет, значит мы его только что сняли => проигрываем анимацию с метки
         }
+
+        return params;
     }
 
-    return inherited::OnBeforeMotionPlayed(sMotionName);
+    return inherited::OnBeforeMotionPlayed(sAnmAlias);
 }
 
 // Проиграть анимацию со звуком (а также учитывая число патронов в основном магазине)
@@ -286,6 +281,27 @@ bool CWeapon::PlaySoundMotion(const shared_str& M, BOOL bMixIn, LPCSTR alias, bo
     }
 
     return bFound;
+}
+
+// Проиграть худовую анимацию для NPC \ Третьего лица (игрок её не видит)
+// Необходимо т.к из-за аддонов анимаций у игрока много (и они разной длины), а у моделей NPC она всегда одна
+void CWeapon::PlaySoundMotionNoHUD(LPCSTR sAnmAlias_base, LPCSTR sSndAlias, LPCSTR sAnmAliasDef, LPCSTR sSndAliasDef)
+{
+    // Прибавляем к названию анимации номер анимационного слота оружия
+    string256 sAnmAlias;
+    xr_sprintf(sAnmAlias, "%s_%d", sAnmAlias_base, m_animation_slot);
+
+    // Проверяем наличие полученной анимации в худовой секции оружия
+    bool bAnimExist = pSettings->line_exist(hud_sect, sAnmAlias);
+
+    // Проигрываем найденную худовую анимацию, либо анимацию по умолчанию
+    LPCSTR sAnm = (bAnimExist ? sAnmAlias : sAnmAliasDef);
+    PlayHUDMotion(sAnm, FALSE, NULL, GetState());
+
+    // Аналогично проигрываем звук к найденной анимации, а если её нет - звук по умолчанию
+    LPCSTR sSnd = (bAnimExist ? sSndAlias : sSndAliasDef);
+    if (sSnd != NULL && m_sounds.FindSoundItem(sSnd, false))
+        PlaySound(sSnd, get_LastFP());
 }
 
 // Проиграть мировую анимацию оружия
@@ -694,7 +710,18 @@ void CWeapon::PlayAnimReload()
         }
     }
 
-    // Худовая анимация
+    // Худовая анимация (Для NPC \ Третьего лица)
+    if (HudItemData() == NULL)
+    {
+        bool bPlaySnd = (GetState() != eSwitchMag || (IsMisfire() || m_sub_state == eSubstateMagazDetach_Do || m_sub_state == eSubstateMagazSwitch)) ?
+                            true :
+                            false;
+
+        PlaySoundMotionNoHUD("anm_npc_reload", (bPlaySnd ? "sndReloadNPC" : NULL), "anm_reload", (bPlaySnd ? "sndReload" : NULL));
+        return;
+    }
+
+    // Худовая анимация (Первого лица)
     if (m_bIsReloadFromAB)
         return PlayAnimReloadFrAB();
 

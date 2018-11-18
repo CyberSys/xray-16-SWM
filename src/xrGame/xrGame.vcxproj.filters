@@ -2278,6 +2278,9 @@
     <Filter Include="Core\Client\Objects\items &amp; weapons\Weapons\Logics\ZoomParams">
       <UniqueIdentifier>{ac6e550e-5ea5-40d5-a3cd-342a0698aa10}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Core\Client\Objects\items &amp; weapons\HudItem\PlayerHUD">
+      <UniqueIdentifier>{0ce3881c-56c7-46b2-833e-eb6ce7bcf842}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="mt_config.h">
@@ -5310,9 +5313,6 @@
     <ClInclude Include="HudSound.h">
       <Filter>Core\Client\Objects\items &amp; weapons\HudItem</Filter>
     </ClInclude>
-    <ClInclude Include="player_hud.h">
-      <Filter>Core\Client\Objects\items &amp; weapons\HudItem</Filter>
-    </ClInclude>
     <ClInclude Include="ExplosiveItem.h">
       <Filter>Core\Client\Objects\items &amp; weapons\Explosives</Filter>
     </ClInclude>
@@ -6521,6 +6521,21 @@
     <ClInclude Include="ui\UILoadingScreenHardcoded.h" />
     <ClInclude Include="Weapon_ZoomParams.h" />
       <Filter>Core\Client\Objects\items &amp; weapons\Weapons\Logics\ZoomParams</Filter>
+    </ClInclude>
+    <ClInclude Include="player_hud.h">
+      <Filter>Core\Client\Objects\items &amp; weapons\HudItem\PlayerHUD</Filter>
+    </ClInclude>
+    <ClInclude Include="player_hud_motion.h">
+      <Filter>Core\Client\Objects\items &amp; weapons\HudItem\PlayerHUD</Filter>
+    </ClInclude>
+    <ClInclude Include="player_hud_inertion.h">
+      <Filter>Core\Client\Objects\items &amp; weapons\HudItem\PlayerHUD</Filter>
+    </ClInclude>
+    <ClInclude Include="player_hud_item.h">
+      <Filter>Core\Client\Objects\items &amp; weapons\HudItem\PlayerHUD</Filter>
+    </ClInclude>
+    <ClInclude Include="player_hud_item_measures.h">
+      <Filter>Core\Client\Objects\items &amp; weapons\HudItem\PlayerHUD</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -8540,12 +8555,6 @@
     <ClCompile Include="HudSound.cpp">
       <Filter>Core\Client\Objects\items &amp; weapons\HudItem</Filter>
     </ClCompile>
-    <ClCompile Include="player_hud.cpp">
-      <Filter>Core\Client\Objects\items &amp; weapons\HudItem</Filter>
-    </ClCompile>
-    <ClCompile Include="player_hud_tune.cpp">
-      <Filter>Core\Client\Objects\items &amp; weapons\HudItem</Filter>
-    </ClCompile>
     <ClCompile Include="Explosive.cpp">
       <Filter>Core\Client\Objects\items &amp; weapons\Explosives</Filter>
     </ClCompile>
@@ -9954,6 +9963,24 @@
     </ClCompile>
     <ClCompile Include="Weapon_ZoomParams.cpp">
       <Filter>Core\Client\Objects\items &amp; weapons\Weapons\Logics\ZoomParams</Filter>
+    </ClCompile>
+    <ClCompile Include="player_hud.cpp">
+      <Filter>Core\Client\Objects\items &amp; weapons\HudItem\PlayerHUD</Filter>
+    </ClCompile>
+    <ClCompile Include="player_hud_tune.cpp">
+      <Filter>Core\Client\Objects\items &amp; weapons\HudItem\PlayerHUD</Filter>
+    </ClCompile>
+    <ClCompile Include="player_hud_motion.cpp">
+      <Filter>Core\Client\Objects\items &amp; weapons\HudItem\PlayerHUD</Filter>
+    </ClCompile>
+    <ClCompile Include="player_hud_inertion.cpp">
+      <Filter>Core\Client\Objects\items &amp; weapons\HudItem\PlayerHUD</Filter>
+    </ClCompile>
+    <ClCompile Include="player_hud_item.cpp">
+      <Filter>Core\Client\Objects\items &amp; weapons\HudItem\PlayerHUD</Filter>
+    </ClCompile>
+    <ClCompile Include="player_hud_item_measures.cpp">
+      <Filter>Core\Client\Objects\items &amp; weapons\HudItem\PlayerHUD</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

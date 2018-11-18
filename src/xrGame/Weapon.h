@@ -380,9 +380,10 @@ public:
     virtual void OnHiddenItem();
     virtual void SendHiddenItem(); //same as OnHiddenItem but for client... (sends message to a server)...
 
-    virtual bool OnBeforeMotionPlayed(const shared_str& sMotionName);
+    virtual motion_params OnBeforeMotionPlayed(const shared_str& sAnmAlias);
 
     bool PlaySoundMotion(const shared_str& M, BOOL bMixIn, LPCSTR alias, bool bAssert = false, int anim_idx = -1);
+    void PlaySoundMotionNoHUD(LPCSTR sAnmAlias_base, LPCSTR sSndAlias, LPCSTR sAnmAliasDef, LPCSTR sSndAliasDef);
     bool IsWGLAnimRequired();
 
     bool PlayWorldMotion(const shared_str& M, BOOL bMixIn);
@@ -1223,7 +1224,7 @@ protected:
     //скорость вылета патронов, на которые не влияет отдача (сделано из-за Абакана)
     float m_fBaseDispersionedBulletsSpeed;
     //скорость вылета остальных патронов
-    float   m_fOldBulletSpeed;
+    float m_fOldBulletSpeed;
     //флаг того, что мы остановились после того как выстреляли
     //ровно столько патронов, сколько было задано в m_iQueueSize
     bool m_bStopedAfterQueueFired;

@@ -945,6 +945,7 @@
     <ClInclude Include="HairsZone.h" />
     <ClInclude Include="HangingLamp.h" />
     <ClInclude Include="harvest_time.h" />
+    <ClInclude Include="player_hud_item.h" />
     <ClInclude Include="helicopter.h" />
     <ClInclude Include="Hit.h" />
     <ClInclude Include="HitMarker.h" />
@@ -960,6 +961,7 @@
     <ClInclude Include="HUDManager.h" />
     <ClInclude Include="HudSound.h" />
     <ClInclude Include="HUDTarget.h" />
+    <ClInclude Include="player_hud_item_measures.h" />
     <ClInclude Include="hud_item_object.h" />
     <ClInclude Include="id_generator.h" />
     <ClInclude Include="IKFoot.h" />
@@ -1138,6 +1140,8 @@
     <ClInclude Include="physic_item_inline.h" />
     <ClInclude Include="player_account.h" />
     <ClInclude Include="player_hud.h" />
+    <ClInclude Include="player_hud_inertion.h" />
+    <ClInclude Include="player_hud_motion.h" />
     <ClInclude Include="player_name_modifyer.h" />
     <ClInclude Include="player_spot_params.h" />
     <ClInclude Include="player_state_achilles_heel.h" />
@@ -2231,6 +2235,7 @@
       </PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="atlas_submit_queue.cpp" />
+    <ClCompile Include="player_hud_item.cpp" />
     <ClCompile Include="attachable_item.cpp" />
     <ClCompile Include="attachable_visual.cpp" />
     <ClCompile Include="attachment_owner.cpp" />
@@ -2543,6 +2548,7 @@
     <ClCompile Include="HUDManager.cpp" />
     <ClCompile Include="HudSound.cpp" />
     <ClCompile Include="HUDTarget.cpp" />
+    <ClCompile Include="player_hud_item_measures.cpp" />
     <ClCompile Include="hud_item_object.cpp" />
     <ClCompile Include="IKFoot.cpp" />
     <ClCompile Include="IKLimbsController.cpp" />
@@ -2824,6 +2830,8 @@
     <ClCompile Include="physic_item.cpp" />
     <ClCompile Include="player_account.cpp" />
     <ClCompile Include="player_hud.cpp" />
+    <ClCompile Include="player_hud_inertion.cpp" />
+    <ClCompile Include="player_hud_motion.cpp" />
     <ClCompile Include="player_hud_tune.cpp" />
     <ClCompile Include="player_name_modifyer.cpp" />
     <ClCompile Include="player_spot_params.cpp" />

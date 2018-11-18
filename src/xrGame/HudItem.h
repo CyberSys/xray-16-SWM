@@ -88,6 +88,15 @@ protected:
     bool m_bStopAtEndAnimIsRunning;
 
 public:
+    struct motion_params //--#SM+#--
+    {
+        motion_params() : bTakeTimeFromMotionMark(false), fSpeed(1.0f), fStartFromTime(0.0f){};
+
+        bool  bTakeTimeFromMotionMark; // Время старта анимации необходимо взять из времени её первой метки (верхняя строка)
+        float fSpeed;                  // Скорость анимации (может быть отрицательной)
+        float fStartFromTime;          // Стартовая секунда анимации (значение от -0.0f до -1.0f указывает время старта в % от всей длины)
+    };
+
     virtual void Load(LPCSTR section);
     virtual BOOL net_Spawn(CSE_Abstract* DC) { return TRUE; };
     virtual void net_Destroy(){};
@@ -140,11 +149,12 @@ public:
 	virtual bool UpdateCameraFromHUD(IGameObject* pCameraOwner, Fvector noise_dangle) { return false; } //--#SM+#--
     virtual void UpdateActorTorchLightPosFromHUD(Fvector* pTorchPos) { ; } //--#SM+#--
 
-    u32 PlayHUDMotion(const shared_str& M, BOOL bMixIn, CHudItem* W, u32 state);
-    u32 PlayHUDMotion_noCB(const shared_str& M, BOOL bMixIn);
-    void StopCurrentAnimWithoutCallback();
+    virtual motion_params OnBeforeMotionPlayed(const shared_str& sAnmAlias); //--#SM+#--
 
-	virtual bool OnBeforeMotionPlayed(const shared_str& sMotionName); //--#SM+#--
+    u32 PlayHUDMotion(const shared_str& sAnmAlias, bool bMixIn, CHudItem* W, u32 state, motion_params* pParams = NULL); //--#SM+#--
+    u32 PlayHUDMotion_noCB(const shared_str& sAnmAlias, bool bMixIn, motion_params* pParams = NULL);                    //--#SM+#--
+
+    void StopCurrentAnimWithoutCallback();
 
     IC void RenderHud(BOOL B) { m_huditem_flags.set(fl_renderhud, B); }
     IC BOOL RenderHud() { return m_huditem_flags.test(fl_renderhud); }
@@ -208,5 +218,5 @@ public:
     void PlayAnimIdleMovingCrouch(); //AVO: new crouch idle animation
     bool isHUDAnimationExist(pcstr anim_name);
 
-	inline HUD_SOUND_COLLECTION* get_sound_collection() { return &m_sounds; }; //--#SM+#--
+    inline HUD_SOUND_COLLECTION* get_sound_collection() { return &m_sounds; }; //--#SM+#--
 };

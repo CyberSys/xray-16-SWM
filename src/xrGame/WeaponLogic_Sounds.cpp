@@ -114,6 +114,10 @@ void CWeapon::ReloadAllSounds()
 		ReloadSound( "snd_switch_add_cartridge_w_gl",			"sndSwAddCartridgeWGL"			, false,	SOUND_TYPE_WEAPON_RECHARGING	);
 		ReloadSound( "snd_switch_add_cartridge_empty_w_gl",		"sndSwAddCartridgeEmptyWGL"		, false,	SOUND_TYPE_WEAPON_RECHARGING	);
 	}
+
+    // Звуки перезарядки для НПС / Третьего лица
+    ReloadSound("snd_reload_npc", "sndReloadNPC", true, SOUND_TYPE_WEAPON_RECHARGING);
+
     // clang-format on
 
     // Звуки с привязкой к anm_

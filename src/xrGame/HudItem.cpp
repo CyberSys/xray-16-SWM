@@ -272,18 +272,30 @@ void CHudItem::on_a_hud_attach()
 }
 
 // Вызывается перед проигрыванием любой анимации.
-// Возвращает необходимость проиграть анимацию не с начала, а с первой метки внутри неё.
-// [Called before every hud motion, if return true - motion start from first mark]
-bool CHudItem::OnBeforeMotionPlayed(const shared_str& sMotionName) //--#SM+#--
+// Возвращает параметры для текущей анимации (motion_params)
+// [Called before every hud motion, return params (speed, start time, etc...) for it]
+CHudItem::motion_params CHudItem::OnBeforeMotionPlayed(const shared_str& sAnmAlias) //--#SM+#--
 {
+    motion_params params; //--> Параметры по умолчанию
+
+    // Для MP анимация прятанья и доставания предмета в два раза быстрее
+    // SM_TODO: Ускорение не работает (или работает частично) с анимациями доставания
+    if (!IsGameTypeSingle() && (GetState() == eHiding || GetState() == eShowing))
+    {
+        params.fSpeed = 2.f;
+        return params;
+    }
+
+    // Регулируем скорость idle-анимации в зависимости от положения тела игрока
     CActor* pActor = smart_cast<CActor*>(object().H_Parent());
     if (pActor)
     {
         u32 actor_state = pActor->MovingState();
         bool bSprint = !!(actor_state & mcSprint); // Бежим
 
-        if (!bSprint && strstr(sMotionName.c_str(), "anm_idle") != nullptr)
+        if (!bSprint && strstr(sAnmAlias.c_str(), "anm_idle") != nullptr)
         { // Мы играем Idle анимацию - выставляем её скорость в зависииости от состояния тела игрока
+            // SM_TODO: При перезапуске idle-анимации не начинать её с начала, а выставлять время от прошлой
             bool bCrouch = !!(actor_state & mcCrouch); // На корточках
             bool bZooming = pActor->IsZoomAimingMode(); // Целимся
             bool bNotAccelerated = !isActorAccelerated(actor_state, bZooming); // Зажатый Shift (не ускоряться)
@@ -298,38 +310,17 @@ bool CHudItem::OnBeforeMotionPlayed(const shared_str& sMotionName) //--#SM+#--
                 fIdleAnimSpeedFactor *= m_fIdleSpeedCrouchFactor;
             }
 
-            g_player_hud->SetAnimSpeedMod(fIdleAnimSpeedFactor);
+            params.fSpeed = fIdleAnimSpeedFactor;
+            return params;
         }
     }
 
-    return false;
+    return params;
 }
 
-u32 CHudItem::PlayHUDMotion(const shared_str& M, BOOL bMixIn, CHudItem* W, u32 state) //--#SM+#--
+u32 CHudItem::PlayHUDMotion(const shared_str& sAnmAlias, bool bMixIn, CHudItem* W, u32 state, motion_params* pParams) //--#SM+#--
 {
-    m_fLastAnimStartTime = 0.0f;
-
-    bool bTakeTimeFromMark = OnBeforeMotionPlayed(M);
-    if (bTakeTimeFromMark)
-    {
-        PlayHUDMotion_noCB(M, bMixIn); //--> Обновим m_current_motion_def
-        const xr_vector<motion_marks>& marks = m_current_motion_def->marks;
-        if (!marks.empty())
-        {
-            m_fLastAnimStartTime = marks.begin()->time_to_next_mark(0.f);
-            g_player_hud->SetAnimStartTime(m_fLastAnimStartTime); //--> Время считываем с метки из верхней полоски
-        }
-    }
-
-    if (GetHUDmode() == true) // SM_TODO: Консольную команду сделай для включения \ выключения?
-    {
-        // SM_TODO: в PlayHUDMotion_noCB функция motion_length не учитывает анимации из сокет аддонов <?!>
-        // Возможно уже исправлено
-        Msg("PlayAnim [%s] Mixed = [%d] StartTime = [%f] Speed = [%f]", M.c_str(), bMixIn,
-            g_player_hud->GetStartTimeOverridden(), g_player_hud->GetSpeedModOverridden());
-    }
-
-    u32 anim_time = PlayHUDMotion_noCB(M, bMixIn);
+    u32 anim_time = PlayHUDMotion_noCB(sAnmAlias, bMixIn, pParams);
     if (anim_time > 0)
     {
         m_bStopAtEndAnimIsRunning = true;
@@ -344,24 +335,60 @@ u32 CHudItem::PlayHUDMotion(const shared_str& M, BOOL bMixIn, CHudItem* W, u32 s
     return anim_time;
 }
 
-u32 CHudItem::PlayHUDMotion_noCB(const shared_str& motion_name, BOOL bMixIn)
+u32 CHudItem::PlayHUDMotion_noCB(const shared_str& sAnmAlias, bool bMixIn, motion_params* pParams) //--#SM+#--
 {
-    m_current_motion = motion_name;
+    float                fSpeed, fStartFromTime;
+    bool                 bIsHUDPresent = (HudItemData() != NULL);
+    attachable_hud_item* pHudItem      = bIsHUDPresent ? HudItemData() : g_player_hud->create_hud_item(HudSection());
+
+    // Запоминаем алиас текущей анимации
+    m_current_motion = sAnmAlias;
 
     if (bDebug && item().m_pInventory)
     {
-        Msg("-[%s] as[%d] [%d]anim_play [%s][%d]", HudItemData() ? "HUD" : "Simulating",
-            item().m_pInventory->GetActiveSlot(), item().object_id(), motion_name.c_str(), Device.dwFrame);
+        Msg("-[%s] as[%d] [%d]anim_play [%s][%d]",
+            bIsHUDPresent ? "HUD" : "Simulating",
+            item().m_pInventory->GetActiveSlot(),
+            item().object_id(),
+            sAnmAlias.c_str(),
+            Device.dwFrame);
     }
-    if (HudItemData())
+
+    // Ищем анимацию, если у нас нет доступа к HUD игрока (НПС / 3-е лицо), то потомков (анимации от аддонов) не учитываем
+    attachable_hud_item::anim_find_result motion_data = pHudItem->anim_find(sAnmAlias, (bIsHUDPresent == false), m_started_rnd_anim_idx);
+
+    // Получаем CMotionDef анимации
+    m_current_motion_def = g_player_hud->motion_def(motion_data.handsMotionDescr->mid);
+
+    // Получаем и выставляем стартовые параметры анимации
+    motion_params pMotionParams = OnBeforeMotionPlayed(sAnmAlias);
+    if (pParams != NULL)
+        pMotionParams = *pParams;
+
+    fSpeed         = pMotionParams.fSpeed;
+    fStartFromTime = pMotionParams.fStartFromTime;
+
+    // При необходимости выставляем стартовую секунду анимации из метки в ней
+    if (pMotionParams.bTakeTimeFromMotionMark)
     {
-        return HudItemData()->anim_play(motion_name, bMixIn, m_current_motion_def, m_started_rnd_anim_idx);
+        const xr_vector<motion_marks>& marks = m_current_motion_def->marks;
+        if (!marks.empty())
+        {
+            fStartFromTime = marks.begin()->time_to_next_mark(0.f); //--> Время считываем с метки из верхней полоски
+        }
     }
+
+    // Запоминаем стартовую секунду текущей анимации
+    m_fLastAnimStartTime = fStartFromTime;
+
+    // Отыгрываем анимацию или получаем её длину
+    if (bIsHUDPresent) // SM_TODO - закоментировать к релизу или вынести в дебаг-опции
+        Msg("PlayHUDAnim [%s] Mixed = [%d] StartFromTime = [%f] Speed = [%f]", sAnmAlias.c_str(), bMixIn, fSpeed, fSpeed);
+
+    if (bIsHUDPresent)
+        return pHudItem->anim_play_both(motion_data, bMixIn, false, fSpeed, fStartFromTime);
     else
-    {
-        m_started_rnd_anim_idx = 0;
-        return g_player_hud->motion_length(motion_name, HudSection(), m_current_motion_def);
-    }
+        return g_player_hud->motion_length(motion_data.handsMotionDescr->mid, fSpeed, fStartFromTime);
 }
 
 void CHudItem::StopCurrentAnimWithoutCallback()
