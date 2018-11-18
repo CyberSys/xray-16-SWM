@@ -440,11 +440,6 @@ bool CHudItem::TryPlayAnimIdle()
                     PlayAnimIdleMoving();
                     return true;
                 }
-                if (st.bCrouch && isHUDAnimationExist("anm_idle_moving_crouch"))
-                {
-                    PlayAnimIdleMovingCrouch();
-                    return true;
-                }
             }
         }
     }
@@ -452,28 +447,24 @@ bool CHudItem::TryPlayAnimIdle()
 }
 
 //AVO: check if animation exists
-bool CHudItem::isHUDAnimationExist(pcstr anim_name)
+bool CHudItem::isHUDAnimationExist(pcstr anim_name) //--#SM+#--
 {
-    if (HudItemData()) // First person
-    {
-        string256 anim_name_r;
-        bool is_16x9 = UI().is_widescreen();
-        u16 attach_place_idx = pSettings->r_u16(HudItemData()->m_sect_name, "attach_place_idx");
-        xr_sprintf(anim_name_r, "%s%s", anim_name, (attach_place_idx == 1 && is_16x9) ? "_16x9" : "");
-        player_hud_motion* anm = HudItemData()->m_hand_motions.find_motion(anim_name_r);
-        if (anm)
-            return true;
-    }
-    else // Third person
-        if (g_player_hud->motion_length(anim_name, HudSection(), m_current_motion_def) > 100)
-            return true;
+    // SM_TODO: Make more complex check?
+    string256 anim_name_r;
+    bool is_16x9 = UI().is_widescreen();
+    u16 attach_place_idx = pSettings->r_u16(HudItemData()->m_sect_name, "attach_place_idx");
+    xr_sprintf(anim_name_r, "%s%s", anim_name, (attach_place_idx == 1 && is_16x9) ? "_16x9" : "");
+
+    if (pSettings->line_exist(hud_sect, anim_name_r))
+        return true;
+
 #ifdef DEBUG
     Msg("~ [WARNING] ------ Animation [%s] does not exist in [%s]", anim_name, HudSection().c_str());
 #endif
+
     return false;
 }
 
-void CHudItem::PlayAnimIdleMovingCrouch() { PlayHUDMotion("anm_idle_moving_crouch", true, nullptr, GetState()); }
 void CHudItem::PlayAnimIdleMoving() { PlayHUDMotion("anm_idle_moving", true, nullptr, GetState()); }
 void CHudItem::PlayAnimIdleSprint() { PlayHUDMotion("anm_idle_sprint", true, nullptr, GetState()); }
 void CHudItem::OnMovementChanged(ACTOR_DEFS::EMoveCommand cmd)
