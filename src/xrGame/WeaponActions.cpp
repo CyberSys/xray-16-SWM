@@ -38,7 +38,7 @@ void CWeapon::OnEvent(NET_Packet& P, u16 type)
 
         if (OnClient())
             SetAmmoElapsed(int(AmmoElapsed));
-        OnStateSwitch(u32(state));
+        OnStateSwitch(u32(state), GetState());
     }
     break;
 

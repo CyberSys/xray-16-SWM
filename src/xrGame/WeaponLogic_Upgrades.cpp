@@ -129,7 +129,7 @@ bool CWeapon::install_upgrade_disp(LPCSTR section, bool test)
     result |= process_if_exists(section, "misfire_start_prob", &CInifile::r_float, misfireStartProbability, test);
     result |= process_if_exists(section, "misfire_end_prob", &CInifile::r_float, misfireEndProbability, test);
 
-    BOOL value   = m_bZoomEnabled;
+    bool value = m_bZoomEnabled;
     bool result2 = process_if_exists_set(section, "zoom_enabled", &CInifile::r_bool, value, test);
     if (result2 && !test)
     {
@@ -311,6 +311,8 @@ bool CWeapon::install_upgrade_impl(LPCSTR section, bool test)
 {
     //	bool result = inherited::install_upgrade_impl( section, test );
     bool result = CInventoryItemObject::install_upgrade_impl(section, test);
+    if (true)
+        return result; // SM_TODO
 
     result |= install_upgrade_ammo_class(section, test);
     result |= install_upgrade_disp(section, test);

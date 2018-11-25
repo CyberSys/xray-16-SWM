@@ -84,8 +84,8 @@ void CCustomShell::OnRenderHUD(IGameObject* pCurViewEntity)
 
     Visual()->getVisData().obj_data->m_hud_custom_fov = fHUD_FOV;
 
-    GlobalEnv.Render->set_Transform(&XFORM());
-    GlobalEnv.Render->add_Visual(Visual());
+    GEnv.Render->set_Transform(&XFORM());
+    GEnv.Render->add_Visual(Visual());
 
     if (fFactor <= 0.0f)
     {
@@ -99,7 +99,7 @@ void CCustomShell::reinit() // NetSpawn, после reload() тамже
     inherited::reinit();
 
     m_pTrailLight.destroy();
-    m_pTrailLight = GlobalEnv.Render->light_create();
+    m_pTrailLight = GEnv.Render->light_create();
     m_pTrailLight->set_shadow(true);
 
     m_pFlyParticles = NULL;

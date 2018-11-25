@@ -989,8 +989,8 @@ void CUIActorMenu::PropertiesBoxForWeapon(CUICellItem* cell_item, PIItem item, b
     {                                                                            \
         if (DEF_fAttached && pWeapon->CanDetach(DEF_fAddonName.c_str()))         \
         {                                                                        \
-            shared_str str_1 = CStringTable().translate("st_detach_addon");      \
-            shared_str str_2 = CStringTable().translate(DEF_fAddonName);         \
+            shared_str str_1 = StringTable().translate("st_detach_addon");       \
+            shared_str str_2 = StringTable().translate(DEF_fAddonName);          \
             str_1.printf("%s %s", str_1.c_str(), str_2.c_str());                 \
             m_UIPropertiesBox->AddItem(str_1.c_str(), nullptr, DEF_msg);         \
             b_show = true;                                                       \
@@ -1081,8 +1081,8 @@ void CUIActorMenu::PropertiesBoxForWeapon(CUICellItem* cell_item, PIItem item, b
                     CWeaponAmmo* pAmmoBox = smart_cast<CWeaponAmmo*>(pWpnInv->GetAny(sAmmoName.c_str()));
                     if (pAmmoBox != nullptr)
                     {
-                        shared_str str_1 = CStringTable().translate("st_fload_ammo_to_mag");
-                        shared_str str_2 = CStringTable().translate(pAmmoBox->m_name.c_str());
+                        shared_str str_1 = StringTable().translate("st_fload_ammo_to_mag");
+                        shared_str str_2 = StringTable().translate(pAmmoBox->m_name.c_str());
                         str_1.printf("%s %s", str_1.c_str(), str_2.c_str());
 
                         void* pData = nullptr;
@@ -1114,7 +1114,7 @@ void CUIActorMenu::PropertiesBoxForAddon(PIItem item, bool& b_show) //--#SM+#--
 
     if (item_in_slot_2 && item_in_slot_2->CanAttach(item))
     {
-        shared_str str = CStringTable().translate("st_attach_addon_to_item");
+        shared_str str = StringTable().translate("st_attach_addon_to_item");
 
         str.printf("%s %s", str.c_str(), item_in_slot_2->m_name.c_str());
         m_UIPropertiesBox->AddItem(str.c_str(), (void*)item_in_slot_2, INVENTORY_ATTACH_ADDON);
@@ -1122,7 +1122,7 @@ void CUIActorMenu::PropertiesBoxForAddon(PIItem item, bool& b_show) //--#SM+#--
     }
     if (item_in_slot_3 && item_in_slot_3->CanAttach(item))
     {
-        shared_str str = CStringTable().translate("st_attach_addon_to_item");
+        shared_str str = StringTable().translate("st_attach_addon_to_item");
 
         str.printf("%s %s", str.c_str(), item_in_slot_3->m_name.c_str());
         m_UIPropertiesBox->AddItem(str.c_str(), (void*)item_in_slot_3, INVENTORY_ATTACH_ADDON);

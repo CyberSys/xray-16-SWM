@@ -39,10 +39,6 @@ void CWeaponKnifeHit::ReLoad(const shared_str& section)
 
     fWallmarkSize = pSettings->r_float(section, "wm_size"); // Размер волмарка
 
-#ifdef DEBUG
-    m_dbg_data.m_pick_vectors.reserve(m_SplashHitsCount);
-#endif
-
     // Параметры радиуса атаки.
     m_HitSpashDir     = pSettings->r_fvector3(section, "splash_direction");
     m_HitDistance     = pSettings->r_float(section, "spash_dist");
@@ -52,6 +48,10 @@ void CWeaponKnifeHit::ReLoad(const shared_str& section)
     m_SplashPerVictimsHCount = pSettings->r_u32(section, "splash_pervictim_hcount");
 
     m_NextHitDivideFactor = pSettings->r_float(section, "splash_hit_divide_factor");
+
+#ifdef DEBUG
+    m_dbg_data.m_pick_vectors.reserve(m_SplashHitsCount);
+#endif
 
     // Параметры направления сплэша
     hit_basis_vector = pSettings->r_fvector3(section, "hit_basis_vector");
@@ -609,7 +609,7 @@ void CWeaponKnifeHit::OnRender()
             float   sc_r   = i->second;
             Fmatrix sphere = Fmatrix().scale(sc_r, sc_r, sc_r);
             sphere.c       = i->first;
-            renderer.draw_ellipse(sphere, D3DCOLOR_XRGB(100, 255, 0));
+            renderer.draw_ellipse(sphere, color_xrgb(100, 255, 0));
         }
     }
     float hit_power = 1.f;
@@ -619,14 +619,14 @@ void CWeaponKnifeHit::OnRender()
         sphere.c       = *i;
         u8 hit_color   = u8(255 * hit_power);
         hit_power *= m_NextHitDivideFactor;
-        renderer.draw_ellipse(sphere, D3DCOLOR_XRGB(hit_color, 50, 0));
+        renderer.draw_ellipse(sphere, color_xrgb(hit_color, 50, 0));
     }
 
     for (dbg_draw_data::obbes_t::const_iterator i = m_dbg_data.m_target_boxes.begin(), ie = m_dbg_data.m_target_boxes.end(); i != ie; ++i)
     {
         Fmatrix tmp_matrix;
         tmp_matrix.set(i->m_rotate.i, i->m_rotate.j, i->m_rotate.k, i->m_translate);
-        renderer.draw_obb(tmp_matrix, i->m_halfsize, D3DCOLOR_XRGB(0, 255, 0));
+        renderer.draw_obb(tmp_matrix, i->m_halfsize, color_xrgb(0, 255, 0));
     }
 }
 #endif

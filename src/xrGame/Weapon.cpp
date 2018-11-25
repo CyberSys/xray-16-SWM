@@ -10,7 +10,7 @@ BOOL b_toggle_weapon_aim = FALSE;
 // Конструктор
 CWeapon::CWeapon() : CShellLauncher(this)
 {
-    m_flags.set(FUsingCondition, TRUE);
+    m_flags.set(FUsingCondition, true);
 
     SetState(eHidden);
     SetNextState(eHidden);

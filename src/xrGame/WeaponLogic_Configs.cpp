@@ -189,6 +189,9 @@ void CWeapon::Load(LPCSTR section)
     m_bDisableFire             = READ_IF_EXISTS(pSettings, r_bool, section, "shooting_disabled", false);
     m_bDisableFireWhileZooming = READ_IF_EXISTS(pSettings, r_bool, section, "disable_fire_at_zooming", false);
     m_bDisableMovEffAtZoom     = READ_IF_EXISTS(pSettings, r_bool, section, "disable_mov_eff_at_zoom", false);
+  
+    // Added by Axel, to enable optional condition use on any item
+    m_flags.set(FUsingCondition, READ_IF_EXISTS(pSettings, r_bool, section, "use_condition", true));
 }
 
 void CWeapon::PostLoad(LPCSTR section)
@@ -327,7 +330,7 @@ void CWeapon::LoadRecoilParams(LPCSTR section)
     // Скорость возврата камеры
     temp_f                = pSettings->r_float(section, "cam_relax_speed");
     cam_recoil.RelaxSpeed = _abs(deg2rad(temp_f));
-    VERIFY(!fis_zero(cam_recoil.RelaxSpeed));
+
     if (fis_zero(cam_recoil.RelaxSpeed))
         cam_recoil.RelaxSpeed = EPS_L;
 
@@ -336,7 +339,7 @@ void CWeapon::LoadRecoilParams(LPCSTR section)
     {
         temp_f                   = pSettings->r_float(section, "cam_relax_speed_ai");
         cam_recoil.RelaxSpeed_AI = _abs(deg2rad(temp_f));
-        VERIFY(!fis_zero(cam_recoil.RelaxSpeed_AI));
+
         if (fis_zero(cam_recoil.RelaxSpeed_AI))
             cam_recoil.RelaxSpeed_AI = EPS_L;
     }
@@ -367,14 +370,14 @@ void CWeapon::LoadRecoilParams(LPCSTR section)
     if (pSettings->line_exist(section, "zoom_cam_relax_speed"))
     {
         zoom_cam_recoil.RelaxSpeed = _abs(deg2rad(pSettings->r_float(section, "zoom_cam_relax_speed")));
-        VERIFY(!fis_zero(zoom_cam_recoil.RelaxSpeed));
+
         if (fis_zero(zoom_cam_recoil.RelaxSpeed))
             zoom_cam_recoil.RelaxSpeed = EPS_L;
     }
     if (pSettings->line_exist(section, "zoom_cam_relax_speed_ai"))
     {
         zoom_cam_recoil.RelaxSpeed_AI = _abs(deg2rad(pSettings->r_float(section, "zoom_cam_relax_speed_ai")));
-        VERIFY(!fis_zero(zoom_cam_recoil.RelaxSpeed_AI));
+
         if (fis_zero(zoom_cam_recoil.RelaxSpeed_AI))
             zoom_cam_recoil.RelaxSpeed_AI = EPS_L;
     }

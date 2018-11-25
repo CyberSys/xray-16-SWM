@@ -39,14 +39,14 @@ void CWeapon::SwitchState(u32 S)
 }
 
 // Колбек после переключения стэйта
-void CWeapon::OnStateSwitch(u32 S)
+void CWeapon::OnStateSwitch(u32 S, u32 oldState)
 {
     m_BriefInfo_CalcFrame = 0;
 
     R_ASSERT(m_magazine.size() == iAmmoElapsed);
     R_ASSERT(m_magazine2.size() == iAmmoElapsed2);
 
-    inherited::OnStateSwitch(S);
+    inherited::OnStateSwitch(S, oldState);
 
     // clang-format off
 	switch (S)

@@ -1104,9 +1104,9 @@ void CWeapon::PerformSwitchGL()
     m_AmmoCartidges.swap(m_AmmoCartidges2);
     m_magazine.swap(m_magazine2);
 
-    swap(iMagazineSize, iMagazineSize2);
-    swap(iAmmoElapsed, iAmmoElapsed2);
-    swap(m_ammoType, m_ammoType2);
+    std::swap(iMagazineSize, iMagazineSize2);
+    std::swap(iAmmoElapsed, iAmmoElapsed2);
+    std::swap(m_ammoType, m_ammoType2);
 
     iAmmoElapsed                  = (int)m_magazine.size();
     m_set_next_ammoType_on_reload = undefined_ammo_type;

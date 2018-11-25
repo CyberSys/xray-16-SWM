@@ -122,8 +122,8 @@ void CWeapon::ReloadAllSounds()
 
     // Звуки с привязкой к anm_
     CInifile::Sect&   _sect = pSettings->r_section(this->cNameSect());
-    CInifile::SectCIt _b    = _sect.Data.begin();
-    CInifile::SectCIt _e    = _sect.Data.end();
+    auto              _b    = _sect.Data.begin();
+    auto              _e    = _sect.Data.end();
 
     for (; _b != _e; ++_b)
     {

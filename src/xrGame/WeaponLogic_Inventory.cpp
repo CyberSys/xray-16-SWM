@@ -260,14 +260,14 @@ bool CWeapon::GetBriefInfo(II_BriefInfo& info)
     if (m_magazine.size() != 0 && m_set_next_ammoType_on_reload == undefined_ammo_type)
     {
         LPCSTR ammo_type = m_ammoTypes[m_magazine.back()->m_LocalAmmoType].c_str();
-        info.name._set(CStringTable().translate(pSettings->r_string(ammo_type, "inv_name_short")));
+        info.name._set(StringTable().translate(pSettings->r_string(ammo_type, "inv_name_short")));
         info.icon._set(ammo_type);
     }
     else
     {
         LPCSTR ammo_type = ((m_set_next_ammoType_on_reload == undefined_ammo_type) ? m_ammoTypes[m_ammoType].c_str() :
                                                                                      m_ammoTypes[m_set_next_ammoType_on_reload].c_str());
-        info.name._set(CStringTable().translate(pSettings->r_string(ammo_type, "inv_name_short")));
+        info.name._set(StringTable().translate(pSettings->r_string(ammo_type, "inv_name_short")));
         info.icon._set(ammo_type);
     }
 

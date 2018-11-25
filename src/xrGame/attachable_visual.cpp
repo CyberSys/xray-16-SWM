@@ -34,7 +34,7 @@ attachable_visual::~attachable_visual()
     if (m_model != NULL)
     {
         IRenderVisual* v = m_model->dcast_RenderVisual();
-        GlobalEnv.Render->model_Delete(v);
+        GEnv.Render->model_Delete(v);
         m_model = NULL;
     }
 
@@ -80,13 +80,13 @@ void attachable_visual::SetVisual(shared_str vis_name)
     if (m_model != NULL)
     {
         IRenderVisual* v = m_model->dcast_RenderVisual();
-        GlobalEnv.Render->model_Delete(v);
+        GEnv.Render->model_Delete(v);
         m_model = NULL;
     }
 
     // Устанавливаем новую
     if (m_cur_vis_name != NULL)
-        m_model = smart_cast<IKinematics*>(GlobalEnv.Render->model_Create(m_cur_vis_name.c_str()));
+        m_model = smart_cast<IKinematics*>(GEnv.Render->model_Create(m_cur_vis_name.c_str()));
 
     // Сообщеаем о смене модели
     m_parent->OnAdditionalVisualModelChange(this);
@@ -158,8 +158,8 @@ void attachable_visual::Render()
             m_pRenderTransform = &m_render_transform;
         }
 
-        GlobalEnv.Render->set_Transform(m_pRenderTransform);
-        GlobalEnv.Render->add_Visual(m_model->dcast_RenderVisual());
+        GEnv.Render->set_Transform(m_pRenderTransform);
+        GEnv.Render->add_Visual(m_model->dcast_RenderVisual());
     }
 
     // Отрисовываем присоединённые визуалы
