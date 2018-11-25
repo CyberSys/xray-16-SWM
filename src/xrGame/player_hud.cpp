@@ -16,6 +16,7 @@ Fvector     _wpn_root_pos;
 player_hud::player_hud()
 {
     m_model             = NULL;
+    m_model_twin        = NULL; //--#SM+#--
     m_attached_items[0] = NULL;
     m_attached_items[1] = NULL;
     m_transform.identity();
@@ -24,8 +25,15 @@ player_hud::player_hud()
 player_hud::~player_hud()
 {
     IRenderVisual* v = m_model->dcast_RenderVisual();
-    GlobalEnv.Render->model_Delete(v);
+    GEnv.Render->model_Delete(v);
     m_model = NULL;
+
+    if (m_model_twin != NULL) //--#SM+#--
+    {
+        IRenderVisual* v = m_model_twin->dcast_RenderVisual();
+        GEnv.Render->model_Delete(v);
+        m_model_twin = NULL;
+    }
 
     xr_vector<attachable_hud_item*>::iterator it   = m_pool.begin();
     xr_vector<attachable_hud_item*>::iterator it_e = m_pool.end();
@@ -41,21 +49,37 @@ void player_hud::load(const shared_str& player_hud_sect)
 {
     if (player_hud_sect == m_sect_name)
         return;
-    bool b_reload = (m_model != NULL);
+
+    bool b_reload = (m_model != NULL || m_model_twin != NULL); //--#SM+#--
+
     if (m_model)
     {
         IRenderVisual* v = m_model->dcast_RenderVisual();
-        GlobalEnv.Render->model_Delete(v);
+        GEnv.Render->model_Delete(v);
         m_model = NULL;
+    }
+
+    if (m_model_twin) //--#SM+#--
+    {
+        IRenderVisual* v = m_model_twin->dcast_RenderVisual();
+        GEnv.Render->model_Delete(v);
+        m_model_twin = NULL;
     }
 
     m_sect_name                  = player_hud_sect;
     const shared_str& model_name = pSettings->r_string(player_hud_sect, "visual");
-    m_model                      = smart_cast<IKinematicsAnimated*>(GlobalEnv.Render->model_Create(model_name.c_str()));
+    m_model                      = smart_cast<IKinematicsAnimated*>(GEnv.Render->model_Create(model_name.c_str()));
+
+    //--#SM+# Begin--
+    const shared_str& model_extra_name = READ_IF_EXISTS(pSettings, r_string, player_hud_sect, "visual_twin", NULL);
+    if (model_extra_name != NULL)
+        m_model_twin = smart_cast<IKinematicsAnimated*>(GEnv.Render->model_Create(model_extra_name.c_str()));
+    //--#SM+# End--
 
     CInifile::Sect&   _sect = pSettings->r_section(player_hud_sect);
-    CInifile::SectCIt _b    = _sect.Data.begin();
-    CInifile::SectCIt _e    = _sect.Data.end();
+    auto              _b    = _sect.Data.begin();
+    auto              _e    = _sect.Data.end();
+
     for (; _b != _e; ++_b)
     {
         if (strstr(_b->first.c_str(), "ancor_") == _b->first.c_str())
@@ -70,6 +94,8 @@ void player_hud::load(const shared_str& player_hud_sect)
     if (!b_reload)
     {
         m_model->PlayCycle("hand_idle_doun");
+        if (m_model_twin != NULL) //--#SM+#--
+            m_model_twin->PlayCycle("hand_idle_doun");
     }
     else
     {
@@ -84,6 +110,12 @@ void player_hud::load(const shared_str& player_hud_sect)
 
     m_model->dcast_PKinematics()->CalculateBones_Invalidate();
     m_model->dcast_PKinematics()->CalculateBones(TRUE);
+
+    if (m_model_twin != NULL) //--#SM+#--
+    {
+        m_model_twin->dcast_PKinematics()->CalculateBones_Invalidate();
+        m_model_twin->dcast_PKinematics()->CalculateBones(TRUE);
+    }
 }
 
 attachable_hud_item* player_hud::create_hud_item(const shared_str& sect)
@@ -120,6 +152,13 @@ void player_hud::update(const Fmatrix& cam_trans)
     m_model->UpdateTracks();
     m_model->dcast_PKinematics()->CalculateBones_Invalidate();
     m_model->dcast_PKinematics()->CalculateBones(TRUE);
+
+    if (m_model_twin != NULL) //--#SM+#--
+    {
+        m_model_twin->UpdateTracks();
+        m_model_twin->dcast_PKinematics()->CalculateBones_Invalidate();
+        m_model_twin->dcast_PKinematics()->CalculateBones(TRUE);
+    }
 
     if (m_attached_items[0])
         m_attached_items[0]->update(true);
@@ -159,11 +198,27 @@ void player_hud::render_hud() //--#SM+#--
 
     if (!b_r0 && !b_r1)
         return;
-    if (g_actor)
-        m_model->dcast_RenderVisual()->getVisData().obj_data = g_actor->Visual()->getVisData().obj_data;
 
-    GlobalEnv.Render->set_Transform(&m_transform);
-    GlobalEnv.Render->add_Visual(m_model->dcast_RenderVisual());
+    IGameObject* pCurViewEntity = Level().CurrentViewEntity();
+    if (pCurViewEntity != NULL)
+    {
+        IRenderVisual* pCurViewEntityVis = pCurViewEntity->Visual();
+        if (pCurViewEntityVis != NULL)
+        {
+            m_model->dcast_RenderVisual()->getVisData().obj_data = pCurViewEntityVis->getVisData().obj_data;
+            if (m_model_twin != NULL)
+                m_model_twin->dcast_RenderVisual()->getVisData().obj_data = pCurViewEntityVis->getVisData().obj_data;
+        }
+    }
+
+    GEnv.Render->set_Transform(&m_transform);
+    GEnv.Render->add_Visual(m_model->dcast_RenderVisual());
+
+    if (m_model_twin != NULL)
+    {
+        GEnv.Render->set_Transform(&m_transform);
+        GEnv.Render->add_Visual(m_model_twin->dcast_RenderVisual());
+    }
 
     // Информацию для шейдеров от модели ГГ переносим на худовую модель рук
     if (m_attached_items[0])
@@ -232,13 +287,24 @@ u32 player_hud::anim_play(u16 part, const MotionID& sAnmAlias, BOOL bMixIn, floa
     {
         if (pid == 0 || pid == part_id || part_id == u16(-1))
         {
-            CBlend* B = m_model->PlayCycle(pid, sAnmAlias, bMixIn);
-            ModifyBlendParams(B, fSpeed, fStartFromTime); //--#SM+#--
+            CBlend* B;
+
+            B = m_model->PlayCycle(pid, sAnmAlias, bMixIn);
+            ModifyBlendParams(B, fSpeed, fStartFromTime);
+
+            if (m_model_twin)
+            {
+                B = m_model_twin->PlayCycle(pid, sAnmAlias, bMixIn);
+                ModifyBlendParams(B, fSpeed, fStartFromTime);
+            }
         }
     }
-    m_model->dcast_PKinematics()->CalculateBones_Invalidate();
 
-    return motion_length(sAnmAlias, fSpeed, fStartFromTime); //--#SM+#--
+    m_model->dcast_PKinematics()->CalculateBones_Invalidate();
+    if (m_model_twin)
+        m_model_twin->dcast_PKinematics()->CalculateBones_Invalidate();
+
+    return motion_length(sAnmAlias, fSpeed, fStartFromTime);
 }
 
 bool player_hud::allow_activation(CHudItem* item)
@@ -280,29 +346,37 @@ void player_hud::detach_item_idx(u16 idx)
     m_attached_items[idx]->m_parent_hud_item = NULL;
     m_attached_items[idx]                    = NULL;
 
-    if (idx == 1 && attached_item(0))
+    if (idx == 1 && attached_item(0)) //--#SM+#--
     {
-        u16 part_idR = m_model->partitions().part_id("right_hand");
-        u32 bc       = m_model->LL_PartBlendsCount(part_idR);
-        for (u32 bidx = 0; bidx < bc; ++bidx)
+        IKinematicsAnimated* modelsArr[2] = {m_model, m_model_twin};
+        for (int i = 0; i < 2; i++)
         {
-            CBlend* BR = m_model->LL_PartBlend(part_idR, bidx);
-            if (!BR)
-                continue;
-
-            MotionID M = BR->motionID;
-
-            u16 pc = m_model->partitions().count();
-            for (u16 pid = 0; pid < pc; ++pid)
+            IKinematicsAnimated* pModel = modelsArr[i];
+            if (pModel != NULL)
             {
-                if (pid != part_idR)
+                u16 part_idR = pModel->partitions().part_id("right_hand");
+                u32 bc       = pModel->LL_PartBlendsCount(part_idR);
+                for (u32 bidx = 0; bidx < bc; ++bidx)
                 {
-                    CBlend* B = m_model->PlayCycle(pid, M, TRUE); //this can destroy BR calling UpdateTracks !
-                    if (BR->blend_state() != CBlend::eFREE_SLOT)
+                    CBlend* BR = pModel->LL_PartBlend(part_idR, bidx);
+                    if (!BR)
+                        continue;
+
+                    MotionID M = BR->motionID;
+
+                    u16 pc = pModel->partitions().count();
+                    for (u16 pid = 0; pid < pc; ++pid)
                     {
-                        u16 bop         = B->bone_or_part;
-                        *B              = *BR;
-                        B->bone_or_part = bop;
+                        if (pid != part_idR)
+                        {
+                            CBlend* B = pModel->PlayCycle(pid, M, TRUE); //this can destroy BR calling UpdateTracks !
+                            if (BR->blend_state() != CBlend::eFREE_SLOT)
+                            {
+                                u16 bop         = B->bone_or_part;
+                                *B              = *BR;
+                                B->bone_or_part = bop;
+                            }
+                        }
                     }
                 }
             }
@@ -363,6 +437,8 @@ void player_hud::RecalculateBonesOffsets() //
 {
     // Очищаем все текущие смещения
     m_model->LL_ClearAdditionalTransform(BI_NONE);
+    if (m_model_twin != NULL)
+        m_model_twin->LL_ClearAdditionalTransform(BI_NONE);
 
     // Считываем новые
     if (m_attached_items[0])

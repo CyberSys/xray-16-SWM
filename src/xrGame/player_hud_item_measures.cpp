@@ -6,7 +6,7 @@
 #include "player_hud.h"
 #include "player_hud_item_measures.h"
 #include "HudItem.h"
-#include "ui_base.h"
+#include "xrUICore/ui_base.h"
 #include "player_hud_inertion.h"
 
 void hud_item_measures::load(const shared_str& sect_name, IKinematics* K)

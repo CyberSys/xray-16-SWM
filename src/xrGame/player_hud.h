@@ -53,8 +53,9 @@ public:
 
     void OnMovementChanged(ACTOR_DEFS::EMoveCommand cmd);
 
-    // Получаем m_model --#SM+#--
+    // Получаем m_model и m_model_twin --#SM+#--
     inline IKinematicsAnimated* get_model() { return m_model; }
+    inline IKinematicsAnimated* get_model_twin() { return m_model_twin; }
 
     // Получаем attachable_hud_item из нужного слота --#SM+#--
     inline attachable_hud_item* get_attached_item(int IDX)
@@ -78,6 +79,7 @@ private:
     Fmatrix                         m_attach_offset;
     Fmatrix                         m_transform;
     IKinematicsAnimated*            m_model;
+    IKinematicsAnimated*            m_model_twin; //--#SM+#--
     xr_vector<u16>                  m_ancors;
     attachable_hud_item*            m_attached_items[2];
     xr_vector<attachable_hud_item*> m_pool;

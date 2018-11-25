@@ -2,9 +2,9 @@
 /***** Худовая модель оружия *****/ //--#SM+#--
 /*********************************/
 
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "player_hud.h"
-#include "ui_base.h"
+#include "xrUICore/ui_base.h"
 #include "static_cast_checked.hpp"
 #include "HudItem.h"
 #include "Actor.h"
@@ -14,7 +14,7 @@
 attachable_hud_item::~attachable_hud_item() //--#SM+#--
 {
     IRenderVisual* v = m_model->dcast_RenderVisual();
-    GlobalEnv.Render->model_Delete(v);
+    GEnv.Render->model_Delete(v);
     m_model = NULL;
     delete_data(m_child_items);
 }
@@ -100,13 +100,13 @@ void attachable_hud_item::UpdateVisual(shared_str new_visual)
         if (m_model != NULL)
         {
             IRenderVisual* v = m_model->dcast_RenderVisual();
-            GlobalEnv.Render->model_Delete(v);
+            GEnv.Render->model_Delete(v);
             m_model = NULL;
         }
 
         // Устанавливаем новую
         m_cur_vis_name = new_visual;
-        m_model        = smart_cast<IKinematics*>(GlobalEnv.Render->model_Create(m_cur_vis_name.c_str()));
+        m_model        = smart_cast<IKinematics*>(GEnv.Render->model_Create(m_cur_vis_name.c_str()));
 
         // Считываем число костей с привязкой к числу патронов
         CWeapon::ReadMaxBulletBones(m_model);
@@ -117,8 +117,8 @@ bool attachable_hud_item::need_renderable() { return m_parent_hud_item->need_ren
 
 void attachable_hud_item::render() //--#SM+#--
 {
-    GlobalEnv.Render->set_Transform(&m_item_transform);
-    GlobalEnv.Render->add_Visual(m_model->dcast_RenderVisual());
+    GEnv.Render->set_Transform(&m_item_transform);
+    GEnv.Render->add_Visual(m_model->dcast_RenderVisual());
 
     if (!IsChildHudItem())
     {
@@ -258,7 +258,7 @@ attachable_hud_item::anim_find_result attachable_hud_item::anim_find(const share
 
                 // Анимации предметов-потомков - заносим в результат сразу
                 if (pChildItemMotions->m_child_name != "_")
-                    result.child_motions_map.insert(mk_pair(pChildItem, pChildItemMotions->m_child_name));
+                    result.child_motions_map.emplace(pChildItem, pChildItemMotions->m_child_name);
             }
 
             // Следующий потомок
@@ -587,6 +587,8 @@ void attachable_hud_item::ReadBonesOffsetsToHands()
                     offsets.setPosOffset(vPos);
 
                     m_parent->get_model()->LL_AddTransformToBone(offsets);
+                    if (m_parent->get_model_twin() != NULL)
+                        m_parent->get_model_twin()->LL_AddTransformToBone(offsets);
                 }
             }
         }
