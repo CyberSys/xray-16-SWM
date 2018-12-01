@@ -58,6 +58,14 @@ void CWeapon::OnZoomIn(bool bSilent)
 
     m_bIsZoomModeNow = true;
 
+    // Alundaio
+#ifdef EXTENDED_WEAPON_CALLBACKS
+    CGameObject* object = smart_cast<CGameObject*>(H_Parent());
+    if (object)
+        object->callback(GameObject::eOnWeaponZoomIn)(object->lua_game_object(), this->lua_game_object());
+#endif
+    //-Alundaio
+
     if (bSilent == false)
     {
         if (m_bDisableFireWhileZooming)
@@ -145,6 +153,14 @@ void CWeapon::OnZoomOut(bool bSilent)
     }
 
     m_bIsZoomModeNow = false;
+
+    // Alundaio
+#ifdef EXTENDED_WEAPON_CALLBACKS
+    CGameObject* object = smart_cast<CGameObject*>(H_Parent());
+    if (object)
+        object->callback(GameObject::eOnWeaponZoomOut)(object->lua_game_object(), this->lua_game_object());
+#endif
+    //-Alundaio
 
     ResetSubStateTime();
 

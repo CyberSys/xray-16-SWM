@@ -11,6 +11,14 @@ void CWeapon::Need2Misfire() { SwitchState(eMisfire); }
 // Переключение стейта на осечку
 void CWeapon::switch2_Misfire()
 {
+    // Alundaio
+#ifdef EXTENDED_WEAPON_CALLBACKS
+    CGameObject* object = smart_cast<CGameObject*>(H_Parent());
+    if (object)
+        object->callback(GameObject::eOnWeaponJammed)(object->lua_game_object(), this->lua_game_object());
+#endif
+    //-Alundaio
+
     if (smart_cast<CActor*>(this->H_Parent()) && (Level().CurrentViewEntity() == H_Parent()))
         CurrentGameUI()->AddCustomStatic("gun_jammed", true);
 
