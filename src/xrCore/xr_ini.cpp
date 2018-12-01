@@ -482,7 +482,7 @@ void CInifile::Load(IReader* F, pcstr path, allow_include_func_t allow_include_f
             pcstr inherited_names = strstr(str, "]:");
             if (nullptr != inherited_names)
             {
-                VERIFY2(m_flags.test(eReadOnly), "Allow for readonly mode only.");
+//              VERIFY2(m_flags.test(eReadOnly), "Allow for readonly mode only."); //--#SM+#--
                 inherited_names += 2;
                 u32 cnt = _GetItemCount(inherited_names);
                 u32 total_count = 0;
