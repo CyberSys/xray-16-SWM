@@ -449,7 +449,6 @@ void CSE_ALifeItemTorch::FillProps(LPCSTR pref, PropItemVec& values) { inherited
 ////////////////////////////////////////////////////////////////////////////
 CSE_ALifeItemWeapon::CSE_ALifeItemWeapon(LPCSTR caSection) : CSE_ALifeItem(caSection)
 {
-    a_current = 90;
     a_elapsed = 0;
     ammo_type = 0;
     a_elapsed_2 = 0;
@@ -461,14 +460,15 @@ CSE_ALifeItemWeapon::CSE_ALifeItemWeapon(LPCSTR caSection) : CSE_ALifeItem(caSec
     m_u8CurFireMode = 0;
     m_bGrenadeMode = 0;
 
-    m_AmmoIDs.clear();
-
     m_fHitPower = pSettings->r_float(caSection, "hit_power");
     m_tHitType = ALife::g_tfString2HitType(pSettings->r_string(caSection, "hit_type"));
+
     m_caAmmoSections = pSettings->r_string(caSection, "ammo_class");
 
     if (pSettings->section_exist(caSection) && pSettings->line_exist(caSection, "visual"))
         set_visual(pSettings->r_string(caSection, "visual"));
+
+    m_addon_flags_sdk.zero();
 
     m_scope_idx = u8(-1);
     m_muzzle_idx = u8(-1);
@@ -765,43 +765,56 @@ void CSE_ALifeItemWeapon::UPDATE_Read(NET_Packet& tNetPacket)
 {
     inherited::UPDATE_Read(tNetPacket);
 
-    tNetPacket.r_float_q8(m_fCondition, 0.0f, 1.0f);
-    tNetPacket.r_u8(wpn_flags);
-
-    m_bGrenadeMode = !!tNetPacket.r_u8();
-
-    tNetPacket.r_u16(a_elapsed);
-    //	tNetPacket.r_u8				(m_addon_flags.flags);
-    tNetPacket.r_u8(ammo_type);
-    tNetPacket.r_u16(a_elapsed_2);
-    tNetPacket.r_u8(ammo_type_2);
-    tNetPacket.r_u8(wpn_state);
-    tNetPacket.r_u8(m_bZoom);
-    tNetPacket.r_u8(m_u8CurFireMode);
-
-    // SM_TODO: Учитывать версию спавна если нужно, совместимость с оригиналом
-
-    // SM_TODO: Версию поменяй - xrServer_Objects.h (делал)
-    // SM_TODO: Сюда ещё кондишн нужно будет писать ?
-    tNetPacket.r_u8(m_scope_idx);
-    tNetPacket.r_u8(m_muzzle_idx);
-    tNetPacket.r_u8(m_launcher_idx);
-    tNetPacket.r_u8(m_magaz_idx);
-    tNetPacket.r_u8(m_spec_1_idx);
-    tNetPacket.r_u8(m_spec_2_idx);
-    tNetPacket.r_u8(m_spec_3_idx);
-    tNetPacket.r_u8(m_spec_4_idx);
-
-    /* -> Вылетает на обычных пушках (считывает не то), а без него вылетают дробаши
-          Это из CSE_ALifeItemWeaponShotGun, либо сразу правь дробаши либо
-          временно верни им это
-    m_AmmoIDs.clear();
-    u8 AmmoCount = tNetPacket.r_u8();
-    for (u8 i=0; i<AmmoCount; i++)
+    if (m_wVersion < 129)
     {
-        m_AmmoIDs.push_back(tNetPacket.r_u8());
+        //========== Read vanila all.spawn \ save file ==========//
+        tNetPacket.r_float_q8(m_fCondition, 0.0f, 1.0f);
+        tNetPacket.r_u8(wpn_flags);
+        tNetPacket.r_u16(a_elapsed);
+        tNetPacket.r_u8(m_addon_flags_sdk.flags);
+        tNetPacket.r_u8(ammo_type);
+        tNetPacket.r_u8(wpn_state);
+        tNetPacket.r_u8(m_bZoom);
     }
-    */
+    else
+    {
+        //========== Read new all.spawn \ save file ==========//
+        tNetPacket.r_float_q8(m_fCondition, 0.0f, 1.0f);
+
+        tNetPacket.r_u8(wpn_flags);
+
+        m_bGrenadeMode = !!tNetPacket.r_u8();
+
+        tNetPacket.r_u16(a_elapsed);
+        tNetPacket.r_u8(ammo_type);
+        tNetPacket.r_u16(a_elapsed_2);
+        tNetPacket.r_u8(ammo_type_2);
+
+        tNetPacket.r_u8(wpn_state);
+        tNetPacket.r_u8(m_bZoom);
+        tNetPacket.r_u8(m_u8CurFireMode);
+
+        tNetPacket.r_u8(m_scope_idx);
+        tNetPacket.r_u8(m_muzzle_idx);
+        tNetPacket.r_u8(m_launcher_idx);
+        tNetPacket.r_u8(m_magaz_idx);
+        tNetPacket.r_u8(m_spec_1_idx);
+        tNetPacket.r_u8(m_spec_2_idx);
+        tNetPacket.r_u8(m_spec_3_idx);
+        tNetPacket.r_u8(m_spec_4_idx);
+    }
+
+    // Override addons with data from SDK
+    if (m_addon_flags_sdk.test(CSE_ALifeItemWeapon::eWeaponAddonScope))
+        m_scope_idx = 0;
+
+    if (m_addon_flags_sdk.test(CSE_ALifeItemWeapon::eWeaponAddonGrenadeLauncher))
+        m_launcher_idx = 0;
+
+    if (m_addon_flags_sdk.test(CSE_ALifeItemWeapon::eWeaponAddonSilencer))
+        m_muzzle_idx = 0;
+
+    m_addon_flags_sdk.zero();
 }
 
 void CSE_ALifeItemWeapon::UPDATE_Write(NET_Packet& tNetPacket)
@@ -814,7 +827,6 @@ void CSE_ALifeItemWeapon::UPDATE_Write(NET_Packet& tNetPacket)
     tNetPacket.w_u8(m_bGrenadeMode ? 1 : 0);
 
     tNetPacket.w_u16(a_elapsed);
-    //	tNetPacket.w_u8				(m_addon_flags.get());
     tNetPacket.w_u8(ammo_type);
     tNetPacket.w_u16(a_elapsed_2);
     tNetPacket.w_u8(ammo_type_2);
@@ -823,7 +835,6 @@ void CSE_ALifeItemWeapon::UPDATE_Write(NET_Packet& tNetPacket)
     tNetPacket.w_u8(m_bZoom);
     tNetPacket.w_u8(m_u8CurFireMode);
 
-    // SM_TODO: Версию поменяй
     tNetPacket.w_u8(m_scope_idx);
     tNetPacket.w_u8(m_muzzle_idx);
     tNetPacket.w_u8(m_launcher_idx);
@@ -832,62 +843,80 @@ void CSE_ALifeItemWeapon::UPDATE_Write(NET_Packet& tNetPacket)
     tNetPacket.w_u8(m_spec_2_idx);
     tNetPacket.w_u8(m_spec_3_idx);
     tNetPacket.w_u8(m_spec_4_idx);
-
-    /*
-    tNetPacket.w_u8(u8(m_AmmoIDs.size()));
-    for (u32 i=0; i<m_AmmoIDs.size(); i++)
-    {
-        tNetPacket.w_u8			(u8(m_AmmoIDs[i]));
-    }
-    */
 }
 
 void CSE_ALifeItemWeapon::STATE_Read(NET_Packet& tNetPacket, u16 size)
 {
     inherited::STATE_Read(tNetPacket, size);
-    tNetPacket.r_u16(a_current);
-    tNetPacket.r_u16(a_elapsed);
-    tNetPacket.r_u8(wpn_state);
 
-    // if (m_wVersion > 40)
-    //	tNetPacket.r_u8			(m_addon_flags.flags);
+    if (m_wVersion < 129)
+    {
+        //========== Read vanila all.spawn \ save file ==========//
+        u16 a_current_outdated;
+        tNetPacket.r_u16(a_current_outdated);
 
-    if (m_wVersion > 46)
+        tNetPacket.r_u16(a_elapsed);
+        tNetPacket.r_u8(wpn_state);
+
+        if (m_wVersion > 40)
+            tNetPacket.r_u8(m_addon_flags_sdk.flags);
+
+        if (m_wVersion > 46)
+            tNetPacket.r_u8(ammo_type);
+
+        if (m_wVersion > 122)
+            u8 a_elapsed_grenades_outdated = tNetPacket.r_u8();
+    }
+    else
+    {
+        //========== Read new all.spawn \ save file ==========//
+        tNetPacket.r_u8(wpn_state);
+      
+        tNetPacket.r_u16(a_elapsed);
         tNetPacket.r_u8(ammo_type);
+        tNetPacket.r_u16(a_elapsed_2);
+        tNetPacket.r_u8(ammo_type_2);
 
-    // if (m_wVersion > 122)
-    //	a_elapsed_grenades.unpack_from_byte(tNetPacket.r_u8());
+        tNetPacket.r_u8(m_addon_flags_sdk.flags);
 
-    tNetPacket.r_u16(a_elapsed_2);
-    tNetPacket.r_u8(ammo_type_2);
+        tNetPacket.r_stringZ(m_scope_section);
+        tNetPacket.r_stringZ(m_muzzle_section);
+        tNetPacket.r_stringZ(m_launcher_section);
+        tNetPacket.r_stringZ(m_magaz_section);
+        tNetPacket.r_stringZ(m_spec_1_section);
+        tNetPacket.r_stringZ(m_spec_2_section);
+        tNetPacket.r_stringZ(m_spec_3_section);
+        tNetPacket.r_stringZ(m_spec_4_section);
 
-    // SM_TODO: Версию поменяй
-    tNetPacket.r_stringZ(m_scope_section);
-    tNetPacket.r_stringZ(m_muzzle_section);
-    tNetPacket.r_stringZ(m_launcher_section);
-    tNetPacket.r_stringZ(m_magaz_section);
-    tNetPacket.r_stringZ(m_spec_1_section);
-    tNetPacket.r_stringZ(m_spec_2_section);
-    tNetPacket.r_stringZ(m_spec_3_section);
-    tNetPacket.r_stringZ(m_spec_4_section);
+        AddonsLoad();
+    }
 
-    AddonsLoad();
+    // Override addons with data from SDK
+    if (m_addon_flags_sdk.test(CSE_ALifeItemWeapon::eWeaponAddonScope))
+        m_scope_idx = 0;
+
+    if (m_addon_flags_sdk.test(CSE_ALifeItemWeapon::eWeaponAddonGrenadeLauncher))
+        m_launcher_idx = 0;
+
+    if (m_addon_flags_sdk.test(CSE_ALifeItemWeapon::eWeaponAddonSilencer))
+        m_muzzle_idx = 0;
+
+    m_addon_flags_sdk.zero();
 }
 
 void CSE_ALifeItemWeapon::STATE_Write(NET_Packet& tNetPacket)
 {
     inherited::STATE_Write(tNetPacket);
-    tNetPacket.w_u16(a_current);
-    tNetPacket.w_u16(a_elapsed);
-    tNetPacket.w_u8(wpn_state);
-    // tNetPacket.w_u8				(m_addon_flags.get());
-    tNetPacket.w_u8(ammo_type);
-    // tNetPacket.w_u8				(a_elapsed_grenades.pack_to_byte());
 
+    tNetPacket.w_u8(wpn_state);
+
+    tNetPacket.w_u16(a_elapsed);
+    tNetPacket.w_u8(ammo_type);
     tNetPacket.w_u16(a_elapsed_2);
     tNetPacket.w_u8(ammo_type_2);
 
-    // SM_TODO: Версию поменяй
+    tNetPacket.w_u8(m_addon_flags_sdk.get());
+
     AddonsUpdate();
 
     tNetPacket.w_stringZ(m_scope_section);
@@ -921,7 +950,6 @@ void CSE_ALifeItemWeapon::OnEvent(NET_Packet& tNetPacket, u16 type, u32 time, Cl
 
 u8 CSE_ALifeItemWeapon::get_slot() { return ((u8)pSettings->r_u8(s_name, "slot")); }
 u16 CSE_ALifeItemWeapon::get_ammo_limit() { return (u16)pSettings->r_u16(s_name, "ammo_limit"); }
-u16 CSE_ALifeItemWeapon::get_ammo_total() { return ((u16)a_current); }
 u16 CSE_ALifeItemWeapon::get_ammo_elapsed() { return ((u16)a_elapsed); }
 u16 CSE_ALifeItemWeapon::get_ammo_magsize()
 {
@@ -943,42 +971,47 @@ BOOL CSE_ALifeItemWeapon::Net_Relevant()
 void CSE_ALifeItemWeapon::FillProps(LPCSTR pref, PropItemVec& items)
 {
     inherited::FillProps(pref, items);
+
     PHelper().CreateU8(items, PrepareKey(pref, *s_name, "Ammo type:"), &ammo_type, 0, 255, 1);
     PHelper().CreateU16(items, PrepareKey(pref, *s_name, "Ammo: in magazine"), &a_elapsed, 0, 30, 1);
 
-	// SM_TODO: Другие аддоны, это для SDK
-    // m_addon_flags уже не существует
-    /*
     if (m_scope_status == ALife::eAddonAttachable)
-        PHelper().CreateFlag8(items, PrepareKey(pref, *s_name, "Addons" DELIMITER "Scope"), &m_addon_flags, eWeaponAddonScope);
+        PHelper().CreateFlag8(items, PrepareKey(pref, *s_name, "Addons" DELIMITER "Scope"), &m_addon_flags_sdk,
+    eWeaponAddonScope);
 
     if (m_silencer_status == ALife::eAddonAttachable)
-        PHelper().CreateFlag8(
-            items, PrepareKey(pref, *s_name, "Addons" DELIMITER "Silencer"), &m_addon_flags, eWeaponAddonSilencer);
+        PHelper().CreateFlag8(items, PrepareKey(pref, *s_name, "Addons" DELIMITER "Silencer"), &m_addon_flags_sdk,
+    eWeaponAddonSilencer);
 
     if (m_grenade_launcher_status == ALife::eAddonAttachable)
-        PHelper().CreateFlag8(
-            items, PrepareKey(pref, *s_name, "Addons" DELIMITER "Podstvolnik"), &m_addon_flags, eWeaponAddonGrenadeLauncher);
-    */
+        PHelper().CreateFlag8(items, PrepareKey(pref, *s_name, "Addons" DELIMITER "Podstvolnik"), &m_addon_flags_sdk,
+    eWeaponAddonGrenadeLauncher);
 }
 #endif // #ifndef XRGAME_EXPORTS
 
 ////////////////////////////////////////////////////////////////////////////
 // CSE_ALifeItemWeaponShotGun //--#SM+#--
 ////////////////////////////////////////////////////////////////////////////
-CSE_ALifeItemWeaponShotGun::CSE_ALifeItemWeaponShotGun(LPCSTR caSection) : CSE_ALifeItemWeaponMagazined(caSection)
-{
-}
+CSE_ALifeItemWeaponShotGun::CSE_ALifeItemWeaponShotGun(LPCSTR caSection) : CSE_ALifeItemWeaponMagazined(caSection) {}
 
 CSE_ALifeItemWeaponShotGun::~CSE_ALifeItemWeaponShotGun() {}
-void CSE_ALifeItemWeaponShotGun::UPDATE_Read(NET_Packet& P)
-{
+void CSE_ALifeItemWeaponShotGun::UPDATE_Read(NET_Packet& P) {
     inherited::UPDATE_Read(P);
+
+    if (m_wVersion < 129)
+    {
+        //========== Read vanila all.spawn \ save file ==========//
+        xr_vector<u8> m_AmmoIDs;
+        m_AmmoIDs.clear();
+
+        u8 AmmoCount = P.r_u8();
+        for (u8 i = 0; i < AmmoCount; i++)
+        {
+            m_AmmoIDs.push_back(P.r_u8()); // Not used, for backward compatibility only
+        }
+    }
 }
-void CSE_ALifeItemWeaponShotGun::UPDATE_Write(NET_Packet& P)
-{
-    inherited::UPDATE_Write(P);
-}
+void CSE_ALifeItemWeaponShotGun::UPDATE_Write(NET_Packet& P) { inherited::UPDATE_Write(P); }
 void CSE_ALifeItemWeaponShotGun::STATE_Read(NET_Packet& P, u16 size) { inherited::STATE_Read(P, size); }
 void CSE_ALifeItemWeaponShotGun::STATE_Write(NET_Packet& P) { inherited::STATE_Write(P); }
 #ifndef XRGAME_EXPORTS
@@ -1010,6 +1043,12 @@ CSE_ALifeItemWeaponMagazined::~CSE_ALifeItemWeaponMagazined() {}
 void CSE_ALifeItemWeaponMagazined::UPDATE_Read(NET_Packet& P)
 {
     inherited::UPDATE_Read(P);
+
+    if (m_wVersion < 129)
+    {
+        //========== Read vanila all.spawn \ save file ==========//
+        m_u8CurFireMode = P.r_u8();
+    }
 }
 void CSE_ALifeItemWeaponMagazined::UPDATE_Write(NET_Packet& P)
 {
@@ -1032,6 +1071,12 @@ CSE_ALifeItemWeaponMagazinedWGL::CSE_ALifeItemWeaponMagazinedWGL(LPCSTR caSectio
 CSE_ALifeItemWeaponMagazinedWGL::~CSE_ALifeItemWeaponMagazinedWGL() {}
 void CSE_ALifeItemWeaponMagazinedWGL::UPDATE_Read(NET_Packet& P)
 {
+    if (m_wVersion < 129)
+    {
+        //========== Read vanila all.spawn \ save file ==========//
+        m_bGrenadeMode = !!P.r_u8();
+    }
+
     inherited::UPDATE_Read(P);
 }
 void CSE_ALifeItemWeaponMagazinedWGL::UPDATE_Write(NET_Packet& P)

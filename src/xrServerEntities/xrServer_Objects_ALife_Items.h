@@ -166,6 +166,7 @@ class CSE_ALifeItemWeapon : public CSE_ALifeItem //--#SM+#--
     using inherited = CSE_ALifeItem;
 
 public:
+    // Addons
     typedef ALife::EWeaponAddonStatus EWeaponAddonStatus;
 
 	DEFINE_VECTOR(shared_str, ADDONS_VECTOR, ADDONS_VECTOR_IT);
@@ -183,8 +184,6 @@ public:
 
     void AddonsUpdate();
     void AddonsLoad();
-
-    //текущее состояние аддонов
 
     enum EWeaponAddonState //--#SM+#--
     {
@@ -207,30 +206,6 @@ public:
     EWeaponAddonStatus m_spec_3_status;
     EWeaponAddonStatus m_spec_4_status;
 
-    // Только для установки первых аддонов в списке
-    u8 GetAddonsState() const;
-    void SetAddonsState(u8 m_flagsAddOnState);
-
-    u32 timestamp;
-    u8 wpn_flags;
-    u8 wpn_state;
-    u8 ammo_type; // SM_TODO: --> Снести
-    u16 a_current; // SM_TODO: --> Снести скорее всего, разберись что это
-    u16 a_elapsed;
-    u8 ammo_type_2;
-    u16 a_elapsed_2;
-    float m_fHitPower;
-    ALife::EHitType m_tHitType;
-    LPCSTR m_caAmmoSections;
-    u32 m_dwAmmoAvailable;
-    u8 m_bZoom;
-    u32 m_ef_main_weapon_type;
-    u32 m_ef_weapon_type;
-    u8 m_u8CurFireMode;
-    bool m_bGrenadeMode;
-
-    xr_vector<u8> m_AmmoIDs;
-
     u8 m_scope_idx;
     u8 m_muzzle_idx;
     u8 m_launcher_idx;
@@ -239,6 +214,8 @@ public:
     u8 m_spec_2_idx;
     u8 m_spec_3_idx;
     u8 m_spec_4_idx;
+
+    Flags8 m_addon_flags_sdk; // Backward compatibility with SDK
 
     shared_str m_scope_section;
     shared_str m_muzzle_section;
@@ -249,17 +226,48 @@ public:
     shared_str m_spec_3_section;
     shared_str m_spec_4_section;
 
+    // For MP Buy menu, install addon with idx = 0
+    u8 GetAddonsState() const;
+    void SetAddonsState(u8 m_flagsAddOnState);
+
+    void clone_addons(CSE_ALifeItemWeapon* parent);
+
+    // Weapon data
+    u32 timestamp;
+    
+    u8 wpn_flags;
+    u8 wpn_state;
+
+    u8 ammo_type;
+    u16 a_elapsed;
+    u8 ammo_type_2;
+    u16 a_elapsed_2;
+   
+    LPCSTR m_caAmmoSections;
+
+    float m_fHitPower;
+    ALife::EHitType m_tHitType;
+
+    u32 m_ef_main_weapon_type;
+    u32 m_ef_weapon_type;
+
+    u8 m_u8CurFireMode;
+
+    bool m_bGrenadeMode;
+    u8 m_bZoom;
+
     CSE_ALifeItemWeapon(LPCSTR caSection);
     virtual ~CSE_ALifeItemWeapon();
     virtual void OnEvent(NET_Packet& P, u16 type, u32 time, ClientID sender);
     virtual u32 ef_main_weapon_type() const;
     virtual u32 ef_weapon_type() const;
+
     u8 get_slot();
+
     u16 get_ammo_limit();
     u16 get_ammo_total();
     u16 get_ammo_elapsed();
     u16 get_ammo_magsize();
-    void clone_addons(CSE_ALifeItemWeapon* parent);
 
     void refill_with_ammo(bool bForce = false); //--#SM+#--
 
