@@ -6519,7 +6519,7 @@
       <Filter>Core\Client\Objects\items &amp; weapons\Weapons\Shooters</Filter>
     </ClInclude>
     <ClInclude Include="ui\UILoadingScreenHardcoded.h" />
-    <ClInclude Include="Weapon_ZoomParams.h" />
+    <ClInclude Include="Weapon_ZoomParams.h">
       <Filter>Core\Client\Objects\items &amp; weapons\Weapons\Logics\ZoomParams</Filter>
     </ClInclude>
     <ClInclude Include="player_hud.h">
