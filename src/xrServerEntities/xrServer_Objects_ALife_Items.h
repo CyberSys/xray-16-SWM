@@ -17,6 +17,8 @@
 #include "character_info_defs.h"
 #include "InfoPortionDefs.h"
 
+#include "xrGame/Weapon_AmmoCompress.h" //--#SM+#--
+
 #pragma warning(push)
 #pragma warning(disable : 4005)
 
@@ -185,7 +187,7 @@ public:
     void AddonsUpdate();
     void AddonsLoad();
 
-    enum EWeaponAddonState //--#SM+#--
+    enum EWeaponAddonState
     {
         eWeaponAddonScope = 0x01,
         eWeaponAddonGrenadeLauncher = 0x02,
@@ -237,14 +239,12 @@ public:
     
     u8 wpn_flags;
     u8 wpn_state;
-
-    u8 ammo_type;
-    u16 a_elapsed;
-    u8 ammo_type_2;
-    u16 a_elapsed_2;
    
+    CAmmoCompressUtil::AMMO_VECTOR m_pAmmoMain;
+    CAmmoCompressUtil::AMMO_VECTOR m_pAmmoGL;
     LPCSTR m_caAmmoSections;
-
+    u16 m_ammo_elapsed_sdk;
+    u8 m_ammo_type_sdk;
     float m_fHitPower;
     ALife::EHitType m_tHitType;
 
@@ -269,7 +269,9 @@ public:
     u16 get_ammo_elapsed();
     u16 get_ammo_magsize();
 
-    void refill_with_ammo(bool bForce = false); //--#SM+#--
+    void refill_with_ammo(bool bForce = false);
+    void add_ammo(u16 iAmmoCnt, u8 iAmmoTypeIdx, bool bForGL = false, bool bClearFirst = false);
+    void clear_ammo(bool bForGL = false);
 
     virtual BOOL Net_Relevant();
 

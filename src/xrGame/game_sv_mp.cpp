@@ -750,11 +750,11 @@ isSilencer)
         SpawnWeapon4Actor(actorId, N, addon_flags);
 }*/
 void game_sv_mp::ChargeAmmo(CSE_ALifeItemWeapon* weapon, LPCSTR ammo_string,
-    game_PlayerState::PLAYER_ITEMS_LIST& playerItems, ammo_diff_t& ammo_diff)
+    game_PlayerState::PLAYER_ITEMS_LIST& playerItems, ammo_diff_t& ammo_diff) //--#SM+#--
 {
     int ammoc_count = _GetItemCount(ammo_string);
     u16 ammo_magsize = weapon->get_ammo_magsize();
-    weapon->a_elapsed = 0;
+    weapon->clear_ammo();
 
     string512 temp_ammo_class;
     for (int i = 0; i < ammoc_count; ++i)
@@ -770,32 +770,40 @@ void game_sv_mp::ChargeAmmo(CSE_ALifeItemWeapon* weapon, LPCSTR ammo_string,
 
         while (temp_iter != playerItems.end())
         {
-            weapon->ammo_type = static_cast<u8>(i);
+            u8 ammo_type = static_cast<u8>(i);
+            u16 ammo_cnt = weapon->get_ammo_elapsed();
+
             playerItems.erase(temp_iter);
-            if ((ammo_magsize - weapon->a_elapsed) <= box_size)
+            if ((ammo_magsize - ammo_cnt) <= box_size)
             {
                 ammo_diff.first = shared_str(temp_ammo_class);
-                ammo_diff.second = box_size - (ammo_magsize - weapon->a_elapsed);
-                weapon->a_elapsed = ammo_magsize;
+                ammo_diff.second = box_size - (ammo_magsize - ammo_cnt);
+                ammo_cnt = ammo_magsize;
                 break;
             }
             else
             {
-                weapon->a_elapsed = weapon->a_elapsed + box_size;
+                ammo_cnt = ammo_cnt + box_size;
             }
             temp_iter = std::find(playerItems.begin(), playerItems.end(), ammo_id);
+
+            weapon->add_ammo(ammo_cnt, ammo_type, false, true);
         }
-        if (weapon->a_elapsed)
+        if (weapon->get_ammo_elapsed())
             break;
     }
-    if (!weapon->a_elapsed)
+    if (!weapon->get_ammo_elapsed())
     {
         _GetItem(ammo_string, 0, temp_ammo_class);
-        weapon->ammo_type = 0;
+        u8 ammo_type = 0;
+        u16 ammo_cnt = 0;
+
         if (CanChargeFreeAmmo(temp_ammo_class))
         {
-            weapon->a_elapsed = ammo_magsize;
+            ammo_cnt = ammo_magsize;
         }
+
+        weapon->add_ammo(ammo_cnt, ammo_type, false, true);
     }
 }
 
@@ -806,7 +814,7 @@ void game_sv_mp::ChargeGrenades(
     R_ASSERT2(grenades_count <= 4,
         make_string("weapon [%s] has greater than 4 types of grenade [%s]", weapon->s_name.c_str(), grenade_string)
             .c_str());
-    weapon->a_elapsed_2 = 0; //--#SM+#--
+    weapon->clear_ammo(true); //--#SM+#--
     string512 temp_ammo_class;
     for (int i = 0; i < grenades_count; ++i)
     {
@@ -815,11 +823,10 @@ void game_sv_mp::ChargeGrenades(
 
         game_PlayerState::PLAYER_ITEMS_LIST::iterator temp_iter =
             std::find(playerItems.begin(), playerItems.end(), ammo_id);
-        if (temp_iter != playerItems.end())
+        if (temp_iter != playerItems.end()) //--#SM+#--
         {
             playerItems.erase(temp_iter);
-            weapon->a_elapsed_2 = 1; //--#SM+#--
-            weapon->ammo_type_2 = u8(i); //--#SM+#--
+            weapon->add_ammo(1, u8(i), true, true);
             break;
         }
     }
@@ -840,7 +847,7 @@ void game_sv_mp::SetAmmoForWeapon(
 #ifdef DEBUG
         Msg("! WARNING: not found ammo_class for [%s]", weapon->s_name.c_str());
 #endif
-        weapon->a_elapsed = 0;
+        weapon->clear_ammo(); //--#SM+#--
     }
     else
     {
@@ -858,7 +865,7 @@ void game_sv_mp::SetAmmoForWeapon(
 #ifdef DEBUG
             Msg("! WARNING: not found grenade_class for [%s]", weapon->s_name.c_str());
 #endif
-            weapon->a_elapsed_2 = 0; //--#SM+#--
+            weapon->clear_ammo(true); //--#SM+#--
             return;
         }
         else

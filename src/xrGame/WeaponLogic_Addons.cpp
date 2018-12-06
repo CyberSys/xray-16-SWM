@@ -284,15 +284,17 @@ void CWeapon::OnDetachAddonSpawn(const char* item_section_name, CSE_ALifeDynamic
     if (m_bUseMagazines == false)
         return;
 
-    CSE_ALifeItemWeapon* const EW = smart_cast<CSE_ALifeItemWeapon*>(E);
+    CSE_ALifeItemWeapon* const EW = smart_cast<CSE_ALifeItemWeapon*>(E); // Addon item
     if (EW == NULL)
         return;
 
     if (GetAddonSlot(item_section_name) != eMagaz)
         return;
 
-    EW->a_elapsed = GetMainAmmoElapsed();
-    EW->ammo_type = GetMainAmmoType();
+    // Копируем патроны из текущего оружия в его отсоединённый магазин
+    CAmmoCompressUtil::AMMO_VECTOR pVAmmoMain;
+    CAmmoCompressUtil::CompressMagazine(pVAmmoMain, this, false);
+    EW->m_pAmmoMain = pVAmmoMain;
 }
 
 // Обновить состояние оружия в соответствии с текущей конфигурацией аддонов

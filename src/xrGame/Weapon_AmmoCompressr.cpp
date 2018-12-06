@@ -3,8 +3,43 @@
 /*********************************************************/
 
 #include "stdafx.h"
-#include "Weapon_Shared.h"
+#include "Weapon_AmmoCompress.h"
 
+#ifdef XRGAME_EXPORTS
+    #include "Weapon_Shared.h"
+#endif
+
+// Добавить патронов соответствующего типа в переданный ammo_pair
+void CAmmoCompressUtil::AddAmmo(AMMO_VECTOR& pVIn, u16 iAmmoCnt, u8 iAmmoTypeIdx, bool bClearFirst)
+{
+    if (bClearFirst)
+        pVIn.clear();
+
+    ammo_pair data;
+    data.first = iAmmoTypeIdx; // Type
+    data.second = iAmmoCnt; // Cnt
+    pVIn.push_back(data);
+}
+
+// Посчитать число всех патронов в ammo_pair, при указании iAmmoTypeIdx - только конкретно этого типа
+u32 CAmmoCompressUtil::GetAmmoTotal(AMMO_VECTOR& pVIn, u8 iAmmoTypeIdx)
+{
+    u32 iAmmoTotal = 0;
+
+    for (u32 i = 0; i < pVIn.size(); i++) 
+    {
+        ammo_pair* data = &pVIn[i];
+        u8 ammoType = data->first;
+        u32 ammoCnt = data->second;
+
+        if (iAmmoTypeIdx == u8(-1) || ammoType == iAmmoTypeIdx)
+            iAmmoTotal += ammoCnt;
+    }
+
+    return iAmmoTotal;
+}
+
+#ifdef XRGAME_EXPORTS
 // Упаковать магазин в формат ammo_pair
 void CAmmoCompressUtil::CompressMagazine(AMMO_VECTOR& pVOut, CWeapon* pWeapon, bool bForGL)
 {
@@ -53,22 +88,13 @@ void CAmmoCompressUtil::CompressMagazine(AMMO_VECTOR& pVOut, CWeapon* pWeapon, b
 // Распаковать магазин в указанное оружие
 void CAmmoCompressUtil::DecompressMagazine(AMMO_VECTOR& pVIn, CWeapon* pWeapon, bool bForGL)
 {
-    //ВНИМАНИЕ: При распаковке магазина в другое оружие важно чтобы они обладали идиентичными m_ammoTypes, иначе
-    //типы патронов будут нарушены -> вылет (USE ONLY WITH TransferAmmo)
-
-    //Так, ну и в итоге зачем ты это делал.
-    //Достаточно ведь просто через for перебрать все патроны в этом стволе, и вставить через push их в другой, используя
-    //m_localType от картриджа. Вообщем подумай + если что убери тады friend
-
-    /*
-	CAmmoCompressUtil::AMMO_VECTOR vMagazData;
-	CAmmoCompressUtil::CompressMagazine		(vMagazData, this,	  bForGL);
-	CAmmoCompressUtil::DecompressMagazine	(vMagazData, pTarget, bForGL);
-	*/
+    // ВНИМАНИЕ: При распаковке магазина в другое оружие важно чтобы они обладали идиентичными m_ammoTypes, иначе
+    // типы патронов будут нарушены -> вылет
+    // (Unpack only to a weapon with the same ammo types, located by the same order)
 
     // Получаем нужный магазин, куда будет произведена распаковка
-    xr_vector<CCartridge*>* pVMagaz;
-    xr_vector<CCartridge>*  pVCartr;
+    xr_vector<CCartridge*>* pVMagaz; // Целевой магазин оружия
+    xr_vector<CCartridge>*  pVCartr; // Образцы типов патронов оружия
     int*                    pAmmoElapsed;
     u8*                     pAmmoType;
 
@@ -91,9 +117,9 @@ void CAmmoCompressUtil::DecompressMagazine(AMMO_VECTOR& pVIn, CWeapon* pWeapon, 
     pVMagaz->clear();                     //--> Очищаем магазин от старых данных
     for (u32 i = 0; i < pVIn.size(); i++) //--> Заполняем новыми
     {
-        ammo_pair data     = pVIn[i];
-        u8        ammoType = data.first;
-        u32       ammoCnt  = data.second;
+        ammo_pair* data    = &pVIn[i];
+        u8        ammoType = data->first;
+        u32       ammoCnt  = data->second;
 
         for (u32 idx = 0; idx < ammoCnt; idx++)
             pVMagaz->push_back(&(pVCartr->at(ammoType)));
@@ -106,6 +132,7 @@ void CAmmoCompressUtil::DecompressMagazine(AMMO_VECTOR& pVIn, CWeapon* pWeapon, 
     else
         *pAmmoType = 0;
 }
+#endif
 
 // Запаковать AMMO_VECTOR в Net Packet
 void CAmmoCompressUtil::PackAmmoInPacket(AMMO_VECTOR& pVAmmoIn, NET_Packet& tNetPacket)
@@ -120,7 +147,7 @@ void CAmmoCompressUtil::PackAmmoInPacket(AMMO_VECTOR& pVAmmoIn, NET_Packet& tNet
     }
 }
 
-// Распаковать AMMO_VECTOR их Net Packet
+// Распаковать AMMO_VECTOR из Net Packet
 void CAmmoCompressUtil::UnpackAmmoFromPacket(AMMO_VECTOR& pVAmmoOut, NET_Packet& tNetPacket)
 {
     u32 size = 0;

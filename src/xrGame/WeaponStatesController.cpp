@@ -4,6 +4,7 @@
 
 #include "stdafx.h"
 #include "Weapon_Shared.h"
+#include "Weapon_AmmoCompress.h"
 
 // "Правильное" переключение стэйта с посылом сигнала по сети
 void CWeapon::SwitchState(u32 S)
@@ -29,8 +30,11 @@ void CWeapon::SwitchState(u32 S)
         CHudItem::object().u_EventGen(P, GE_WPN_STATE_CHANGE, CHudItem::object().ID());
         P.w_u8(u8(S));
         P.w_u8(u8(m_sub_state));
-        P.w_u8(m_ammoType);
-        P.w_u8(u8(iAmmoElapsed & 0xff));
+
+        CAmmoCompressUtil::AMMO_VECTOR pVAmmo;
+        CAmmoCompressUtil::CompressMagazine(pVAmmo, this, m_bGrenadeMode);
+        CAmmoCompressUtil::PackAmmoInPacket(pVAmmo, P);
+
         P.w_u8(m_set_next_ammoType_on_reload);
         P.w_u8(m_set_next_magaz_on_reload);
         P.w_u16(m_set_next_magaz_by_id);

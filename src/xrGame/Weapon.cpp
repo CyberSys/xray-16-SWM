@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "Weapon_Shared.h"
+#include "Weapon_AmmoCompress.h"
 
 /**********************************/
 /***** Ядро оружейного класса *****/ //--#SM+#--
@@ -199,13 +200,11 @@ BOOL CWeapon::net_Spawn(CSE_Abstract* DC)
     SetPending(FALSE);
 
     // Патроны - Основной ствол
-    SetAmmoElapsedFor(E->a_elapsed, false);
-    SetAmmoTypeSafeFor(E->ammo_type, false);
+    CAmmoCompressUtil::DecompressMagazine(E->m_pAmmoMain, this, false);
     VERIFY((u32)iAmmoElapsed == m_magazine.size());
 
     // Патроны - Подствол
-    SetAmmoElapsedFor(E->a_elapsed_2, true);
-    SetAmmoTypeSafeFor(E->ammo_type_2, true);
+    CAmmoCompressUtil::DecompressMagazine(E->m_pAmmoGL, this, true);
     VERIFY((u32)iAmmoElapsed2 == m_magazine2.size());
 
     return inherited::net_Spawn(DC);
@@ -249,20 +248,13 @@ void CWeapon::net_Export(NET_Packet& P)
     P.w_u8(m_bGrenadeMode ? 1 : 0);
 
     // Патроны в основном стволе и подстволе
-    if (!m_bGrenadeMode)
-    {
-        P.w_u16(u16(iAmmoElapsed));
-        P.w_u8(m_ammoType);
-        P.w_u16(u16(iAmmoElapsed2));
-        P.w_u8(m_ammoType2);
-    }
-    else
-    {
-        P.w_u16(u16(iAmmoElapsed2));
-        P.w_u8(m_ammoType2);
-        P.w_u16(u16(iAmmoElapsed));
-        P.w_u8(m_ammoType);
-    }
+    CAmmoCompressUtil::AMMO_VECTOR pVAmmoMain;
+    CAmmoCompressUtil::CompressMagazine(pVAmmoMain, this, false);
+    CAmmoCompressUtil::PackAmmoInPacket(pVAmmoMain, P);
+
+    CAmmoCompressUtil::AMMO_VECTOR pVAmmoGL;
+    CAmmoCompressUtil::CompressMagazine(pVAmmoGL, this, true);
+    CAmmoCompressUtil::PackAmmoInPacket(pVAmmoGL, P);
 
     // Стэйт и зум
     P.w_u8((u8)GetState());
@@ -303,13 +295,13 @@ void CWeapon::net_Import(NET_Packet& P)
     NewMode      = !!P.r_u8();
 
     // Патроны в основном стволе и подстволе
-    u16 ammo_elapsed, ammo_elapsed2 = 0;
-    u8  ammoType, ammoType2;
+    CAmmoCompressUtil::AMMO_VECTOR pVAmmoMain;
+    CAmmoCompressUtil::UnpackAmmoFromPacket(pVAmmoMain, P);
+    CAmmoCompressUtil::DecompressMagazine(pVAmmoMain, this, false);
 
-    P.r_u16(ammo_elapsed);
-    P.r_u8(ammoType);
-    P.r_u16(ammo_elapsed2);
-    P.r_u8(ammoType2);
+    CAmmoCompressUtil::AMMO_VECTOR pVAmmoGL;
+    CAmmoCompressUtil::UnpackAmmoFromPacket(pVAmmoGL, P);
+    CAmmoCompressUtil::DecompressMagazine(pVAmmoGL, this, true);
 
     // Стэйт и зум (1)
     u8 wstate;
@@ -352,23 +344,6 @@ void CWeapon::net_Import(NET_Packet& P)
         else
             OnZoomOut();
     };
-    switch (wstate)
-    {
-    case eFire:
-    case eFire2:
-    case eSwitch:
-    case eReload: {
-    }
-    break;
-    default:
-    {
-        SetAmmoElapsedFor(ammo_elapsed, false);
-        SetAmmoTypeSafeFor(ammoType, false);
-        SetAmmoElapsedFor(ammo_elapsed2, true);
-        SetAmmoTypeSafeFor(ammoType2, true);
-    }
-    break;
-    }
 
     // Переключаем подствольник
     if (NewMode != m_bGrenadeMode)

@@ -101,6 +101,7 @@
     <ClInclude Include="..\..\Include\xrRender\DrawUtils.h" />
     <ClInclude Include="..\..\xrCore\fastdelegate.h" />
     <ClInclude Include="..\..\xrEngine\WaveForm.h" />
+    <ClInclude Include="..\..\xrGame\Weapon_AmmoCompress.h" />
     <ClInclude Include="..\..\xrServerEntities\ai_sounds.h" />
     <ClInclude Include="..\..\xrServerEntities\alife_human_brain.h" />
     <ClInclude Include="..\..\xrServerEntities\alife_human_brain_inline.h" />
@@ -178,6 +179,7 @@
     <ClInclude Include="xrUIXmlParser.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\xrGame\Weapon_AmmoCompressr.cpp" />
     <ClCompile Include="..\..\xrServerEntities\alife_human_brain.cpp" />
     <ClCompile Include="..\..\xrServerEntities\alife_monster_brain.cpp" />
     <ClCompile Include="..\..\xrServerEntities\alife_space.cpp" />

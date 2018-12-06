@@ -402,6 +402,9 @@
     <ClInclude Include="..\..\xrEngine\WaveForm.h">
       <Filter>ServerStuff\ServerEntities\editor_properties</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\xrGame\Weapon_AmmoCompress.h">
+      <Filter>ServerStuff\ServerEntities</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\xrServerEntities\pch_script.cpp">
@@ -566,5 +569,11 @@
     <ClCompile Include="..\..\xrServerEntities\xrServer_Objects_Alife_Smartcovers_script.cpp">
       <Filter>ServerStuff\ServerEntities\objects_alife_smartcover</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\xrGame\Weapon_AmmoCompressr.cpp">
+      <Filter>ServerStuff\ServerEntities</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="..\..\TypeHelper.natvis" />
   </ItemGroup>
 </Project>

@@ -1,7 +1,8 @@
 #include "stdafx.h"
+#include "Torch.h"
 #include "Weapon_Shared.h"
 #include "WeaponBinocularsVision.h"
-#include "Torch.h"
+#include "Weapon_AmmoCompress.h"
 
 /**********************************************/
 /***** Различные колбэки, экшены и эвенты *****/ //--#SM+#--
@@ -29,15 +30,17 @@ void CWeapon::OnEvent(NET_Packet& P, u16 type)
         u8 state;
         P.r_u8(state);
         P.r_u8(m_sub_state);
-        //			u8 NewAmmoType =
-        P.r_u8();
-        u8 AmmoElapsed = P.r_u8();
+
+        CAmmoCompressUtil::AMMO_VECTOR pVAmmo;
+        CAmmoCompressUtil::UnpackAmmoFromPacket(pVAmmo, P);
+
         P.r_u8(m_set_next_ammoType_on_reload);
         P.r_u8(m_set_next_magaz_on_reload);
         P.r_u16(m_set_next_magaz_by_id);
 
         if (OnClient())
-            SetAmmoElapsed(int(AmmoElapsed));
+            CAmmoCompressUtil::DecompressMagazine(pVAmmo, this, m_bGrenadeMode);
+
         OnStateSwitch(u32(state), GetState());
     }
     break;

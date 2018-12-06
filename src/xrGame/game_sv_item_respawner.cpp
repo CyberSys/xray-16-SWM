@@ -116,12 +116,11 @@ CSE_Abstract* item_respawn_manager::make_respawn_entity(shared_str const& sectio
     temp_entity->RespawnTime = 0; // no-respawn
     CSE_ALifeItemWeapon* pWeapon = smart_cast<CSE_ALifeItemWeapon*>(temp_entity);
 
-    if (pWeapon)
+    if (pWeapon) //--#SM+#--
     {
-        pWeapon->a_elapsed = pWeapon->get_ammo_magsize();
-
-        if (count_of_ammo < pWeapon->a_elapsed)
-            pWeapon->a_elapsed = count_of_ammo;
+        u16 iAmmoMagSize = pWeapon->get_ammo_magsize();
+        u16 iAmmoCntToSet = count_of_ammo < iAmmoMagSize ? count_of_ammo : iAmmoMagSize;
+        pWeapon->add_ammo(iAmmoCntToSet, 0, false, true);
 
 		pWeapon->SetAddonsState(addons); //--#SM+#--
     };
