@@ -312,9 +312,12 @@ void CWeapon::OnH_B_Chield()
     inherited::OnH_B_Chield();
 
     m_dwWeaponIndependencyTime    = 0;
+
     m_set_next_ammoType_on_reload = undefined_ammo_type;
     m_set_next_magaz_on_reload    = empty_addon_idx;
     m_set_next_magaz_by_id        = u16(-1);
+
+    m_sub_state = eSubstateReloadBegin;
 
     m_nearwall_last_hud_fov = psHUD_FOV_def;
 }
@@ -352,6 +355,7 @@ void CWeapon::OnActiveItem()
 }
 
 // Колбек на процесс прятанья оружия
+// UPD: Судя по коду - он никогда не вызывается ... SM_TODO
 void CWeapon::OnHiddenItem()
 {
     inherited::OnHiddenItem();
@@ -376,6 +380,12 @@ void CWeapon::signal_HideComplete()
     if (H_Parent())
         setVisible(FALSE);
     SetPending(FALSE);
+
+    m_set_next_ammoType_on_reload = undefined_ammo_type;
+    m_set_next_magaz_on_reload = empty_addon_idx;
+    m_set_next_magaz_by_id = u16(-1);
+
+    m_sub_state = eSubstateReloadBegin;
 }
 
 // Колбэк на хит по оружию
