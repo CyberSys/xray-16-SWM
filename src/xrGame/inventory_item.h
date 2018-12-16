@@ -304,7 +304,7 @@ public:
 
     bool verify_upgrade(LPCSTR section);
     bool install_upgrade(LPCSTR section);
-    void pre_install_upgrade();
+    virtual void pre_install_upgrade(); //--#SM+#--
 
 #ifdef DEBUG
     void log_upgrades();

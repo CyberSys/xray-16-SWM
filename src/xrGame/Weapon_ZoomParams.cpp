@@ -75,7 +75,7 @@ void SZoomParams::Initialize(LPCSTR section, LPCSTR prefix, bool bOverrideMode)
 void SZoomParams::UpdateUIScope()
 {
     // Создаём глобальный UI прицелов
-    if (!pWpnScopeXml)
+    if (pWpnScopeXml == nullptr)
     {
         pWpnScopeXml = new CUIXml();
         pWpnScopeXml->Load(CONFIG_PATH, UI_PATH, "scopes.xml");
@@ -86,6 +86,7 @@ void SZoomParams::UpdateUIScope()
     {
         if (m_sUseScopeTexture != NULL && !m_sUseScopeTexture.equal("none"))
         {
+            xr_delete(m_UIScope);
             m_UIScope = new CUIWindow();
             CUIXmlInit::InitWindow(*pWpnScopeXml, m_sUseScopeTexture.c_str(), 0, m_UIScope);
         }

@@ -2,10 +2,8 @@
 /***** Апгрейды механиков для оружия *****/ //--#SM+#--
 /*****************************************/
 
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "Weapon_Shared.h"
-
-// --#SM_TODO+#-- Переделать под новую систему + добавить процентные значения
 
 static bool process_if_exists_deg2rad(LPCSTR section, LPCSTR name, float& value, bool test)
 {
@@ -26,52 +24,138 @@ static bool process_if_exists_deg2rad(LPCSTR section, LPCSTR name, float& value,
     return true;
 }
 
-/* --#SM+#--
-bool CWeapon::install_upgrade_impl( LPCSTR section, bool test )
+void CWeapon::net_Spawn_install_upgrades(Upgrades_type saved_upgrades)
 {
-	//inherited::install_upgrade( section );
-	bool result = CInventoryItemObject::install_upgrade_impl( section, test );
-	
-	result |= install_upgrade_ammo_class( section, test );
-	result |= install_upgrade_disp      ( section, test );
-	result |= install_upgrade_hit       ( section, test );
-	result |= install_upgrade_addon     ( section, test );
-	return result;
+    // do not delete this
+    // this is intended behaviour
+    // CWeapon::net_Spawn()
 }
-*/
 
-/* --#SM+#--
-bool CWeapon::install_upgrade_ammo_class( LPCSTR section, bool test )
+// Вызывается перед установкой апгрейда
+void CWeapon::pre_install_upgrade()
 {
-	LPCSTR str;
+    inherited::pre_install_upgrade();
 
-	bool result = process_if_exists( section, "ammo_mag_size", &CInifile::r_s32, iMagazineSize, test );
+    //=== Разряжаем оружие ===//
+    if (m_bUseMagazines == false)
+        UnloadMagazineMain();
+    UnloadMagazineGL();
 
-	//	ammo_class = ammo_5.45x39_fmj, ammo_5.45x39_ap  // name of the ltx-section of used ammo
-	bool result2 = process_if_exists_set( section, "ammo_class", &CInifile::r_string, str, test );
-	if ( result2 && !test )
-	{
-		m_ammoTypes.clear();
-		string128 ammoItem;
-		int count = _GetItemCount( str );
-		for ( int i = 0; i < count; ++i )
-		{
-			_GetItem( str, i, ammoItem );
-			m_ammoTypes.push_back( ammoItem );
-		}
-		m_ammoType = 0;
-	}
-	result |= result2;
-
-	return result;
+    //=== Снимаем все аддоны ===//
+    if (ScopeAttachable() && IsScopeAttached())
+    {
+        Detach(GetScopeName().c_str(), true);
+    }
+    if (SilencerAttachable() && IsSilencerAttached())
+    {
+        Detach(GetSilencerName().c_str(), true);
+    }
+    if (GrenadeLauncherAttachable() && IsGrenadeLauncherAttached())
+    {
+        Detach(GetGrenadeLauncherName().c_str(), true);
+    }
+    if (MagazineAttachable() && IsMagazineAttached())
+    {
+        Detach(GetMagazineName().c_str(), true);
+    }
+    if (Special_1_Attachable() && IsSpecial_1_Attached())
+    {
+        Detach(GetSpecial_1_Name().c_str(), true);
+    }
+    if (Special_2_Attachable() && IsSpecial_2_Attached())
+    {
+        Detach(GetSpecial_2_Name().c_str(), true);
+    }
+    if (Special_3_Attachable() && IsSpecial_3_Attached())
+    {
+        Detach(GetSpecial_3_Name().c_str(), true);
+    }
+    if (Special_4_Attachable() && IsSpecial_4_Attached())
+    {
+        Detach(GetSpecial_4_Name().c_str(), true);
+    }
 }
-*/
 
+// Вызывается при установке \ тестировании апгрейда
+bool CWeapon::install_upgrade_impl(LPCSTR section, bool test)
+{
+    bool result = CInventoryItemObject::install_upgrade_impl(section, test);
+
+    result |= install_upgrade_generic(section, test);
+    result |= install_upgrade_ammo_class(section, test);
+    result |= install_upgrade_addon(section, test);
+    result |= install_upgrade_disp(section, test);
+    result |= install_upgrade_hit(section, test);
+    result |= install_upgrade_sounds(section, test);
+
+    return result;
+}
+
+// Апгрейды общего характера
+bool CWeapon::install_upgrade_generic(LPCSTR section, bool test)
+{
+    pcstr str;
+    bool result = false, result2 = false;
+
+    //=== Режимы стрельбы (fire_modes = 1, 2, -1) ===//
+    result2 = process_if_exists_set(section, "fire_modes", &CInifile::r_string, str, test);
+    if (result2 && !test)
+    {
+        int ModesCount = _GetItemCount(str);
+        m_aFireModes.clear();
+        for (int i = 0; i < ModesCount; ++i)
+        {
+            string16 sItem;
+            _GetItem(str, i, sItem);
+            m_aFireModes.push_back((s8)atoi(sItem));
+        }
+        m_iCurFireMode = ModesCount - 1;
+    }
+    result |= result2;
+
+    //=== Износ оружия ===/
+    result |= process_if_exists(section, "condition_shot_dec", &CInifile::r_float, conditionDecreasePerShot, test);
+    result |= process_if_exists(section, "condition_queue_shot_dec", &CInifile::r_float, conditionDecreasePerQueueShot, test);
+    result |= process_if_exists(section, "misfire_start_condition", &CInifile::r_float, misfireStartCondition, test);
+    result |= process_if_exists(section, "misfire_end_condition", &CInifile::r_float, misfireEndCondition, test);
+    result |= process_if_exists(section, "misfire_start_prob", &CInifile::r_float, misfireStartProbability, test);
+    result |= process_if_exists(section, "misfire_end_prob", &CInifile::r_float, misfireEndProbability, test);
+
+    return result;
+}
+
+// Апгрейды аммуниции
+bool CWeapon::install_upgrade_ammo_class(LPCSTR section, bool test)
+{
+    pcstr str;
+    bool result = false, result2 = false;
+
+    //=== Типы патронов, размер магазина ===//
+    result |= LoadMainAmmoParams(section, false, true, (test ? EFuncUpgrMode::eUpgrTest : EFuncUpgrMode::eUpgrInstall));
+
+    return result;
+}
+
+// Апгрейды разброса и отдачи оружия
 bool CWeapon::install_upgrade_disp(LPCSTR section, bool test)
 {
-    bool result = process_if_exists(section, "fire_dispersion_condition_factor", &CInifile::r_float, fireDispersionConditionFactor, test);
-    result |= process_if_exists(section, "fire_distance", &CInifile::r_float, fireDistance, test);
+    pcstr str;
+    bool result = false, result2 = false;
 
+    //=== Фактор влияния износа на разброс ===/
+    result |= process_if_exists(
+        section, "fire_dispersion_condition_factor", &CInifile::r_float, fireDispersionConditionFactor, test);
+
+    //=== Разброс пуль ===/
+    result |= process_if_exists_deg2rad(section, "fire_dispersion_base", fireDispersionBase, test);
+
+    result |= process_if_exists(section, "PDM_disp_base", &CInifile::r_float, m_pdm.m_fPDM_disp_base, test);
+    result |= process_if_exists(section, "PDM_disp_vel_factor", &CInifile::r_float, m_pdm.m_fPDM_disp_vel_factor, test);
+    result |= process_if_exists(section, "PDM_disp_accel_factor", &CInifile::r_float, m_pdm.m_fPDM_disp_accel_factor, test);
+    result |= process_if_exists(section, "PDM_disp_crouch", &CInifile::r_float, m_pdm.m_fPDM_disp_crouch, test);
+    result |= process_if_exists(section, "PDM_disp_crouch_no_acc", &CInifile::r_float, m_pdm.m_fPDM_disp_crouch_no_acc, test);
+
+    //=== Параметры возврата камеры после отдачи ===/
     u8 rm = (cam_recoil.ReturnMode) ? 1 : 0;
     result |= process_if_exists_set(section, "cam_return", &CInifile::r_u8, rm, test);
     cam_recoil.ReturnMode = (rm == 1);
@@ -80,14 +164,13 @@ bool CWeapon::install_upgrade_disp(LPCSTR section, bool test)
     result |= process_if_exists_set(section, "cam_return_stop", &CInifile::r_u8, rm, test);
     cam_recoil.StopReturn = (rm == 1);
 
-    result |= process_if_exists_deg2rad(section, "fire_dispersion_base", fireDispersionBase, test);
+    //=== Отдача камеры от бедра ===/
+    result |= process_if_exists(section, "cam_dispersion_frac", &CInifile::r_float, cam_recoil.DispersionFrac, test);
 
     result |= process_if_exists_deg2rad(section, "cam_relax_speed", cam_recoil.RelaxSpeed, test);
     result |= process_if_exists_deg2rad(section, "cam_relax_speed_ai", cam_recoil.RelaxSpeed_AI, test);
     result |= process_if_exists_deg2rad(section, "cam_dispersion", cam_recoil.Dispersion, test);
     result |= process_if_exists_deg2rad(section, "cam_dispersion_inc", cam_recoil.DispersionInc, test);
-
-    result |= process_if_exists(section, "cam_dispersion_frac", &CInifile::r_float, cam_recoil.DispersionFrac, test);
 
     result |= process_if_exists_deg2rad(section, "cam_max_angle", cam_recoil.MaxAngleVert, test);
     result |= process_if_exists_deg2rad(section, "cam_max_angle_horz", cam_recoil.MaxAngleHorz, test);
@@ -98,12 +181,14 @@ bool CWeapon::install_upgrade_disp(LPCSTR section, bool test)
     VERIFY(!fis_zero(cam_recoil.MaxAngleVert));
     VERIFY(!fis_zero(cam_recoil.MaxAngleHorz));
 
+    //=== Отдача камеры при прицеливании ===/
+    result |= process_if_exists(
+        section, "zoom_cam_dispersion_frac", &CInifile::r_float, zoom_cam_recoil.DispersionFrac, test);
+
     result |= process_if_exists_deg2rad(section, "zoom_cam_relax_speed", zoom_cam_recoil.RelaxSpeed, test); // zoom_ ...
     result |= process_if_exists_deg2rad(section, "zoom_cam_relax_speed_ai", zoom_cam_recoil.RelaxSpeed_AI, test);
     result |= process_if_exists_deg2rad(section, "zoom_cam_dispersion", zoom_cam_recoil.Dispersion, test);
     result |= process_if_exists_deg2rad(section, "zoom_cam_dispersion_inc", zoom_cam_recoil.DispersionInc, test);
-
-    result |= process_if_exists(section, "zoom_cam_dispersion_frac", &CInifile::r_float, zoom_cam_recoil.DispersionFrac, test);
 
     result |= process_if_exists_deg2rad(section, "zoom_cam_max_angle", zoom_cam_recoil.MaxAngleVert, test);
     result |= process_if_exists_deg2rad(section, "zoom_cam_max_angle_horz", zoom_cam_recoil.MaxAngleHorz, test);
@@ -114,38 +199,18 @@ bool CWeapon::install_upgrade_disp(LPCSTR section, bool test)
     VERIFY(!fis_zero(zoom_cam_recoil.MaxAngleVert));
     VERIFY(!fis_zero(zoom_cam_recoil.MaxAngleHorz));
 
-    result |= process_if_exists(section, "PDM_disp_base", &CInifile::r_float, m_pdm.m_fPDM_disp_base, test);
-    result |= process_if_exists(section, "PDM_disp_vel_factor", &CInifile::r_float, m_pdm.m_fPDM_disp_vel_factor, test);
-    result |= process_if_exists(section, "PDM_disp_accel_factor", &CInifile::r_float, m_pdm.m_fPDM_disp_accel_factor, test);
-    result |= process_if_exists(section, "PDM_disp_crouch", &CInifile::r_float, m_pdm.m_fPDM_disp_crouch, test);
-    result |= process_if_exists(section, "PDM_disp_crouch_no_acc", &CInifile::r_float, m_pdm.m_fPDM_disp_crouch_no_acc, test);
-
-    //	result |= process_if_exists( section, "misfire_probability", &CInifile::r_float, misfireProbability,       test );
-    //	result |= process_if_exists( section, "misfire_condition_k", &CInifile::r_float, misfireConditionK,        test );
-    result |= process_if_exists(section, "condition_shot_dec", &CInifile::r_float, conditionDecreasePerShot, test);
-    result |= process_if_exists(section, "condition_queue_shot_dec", &CInifile::r_float, conditionDecreasePerQueueShot, test);
-    result |= process_if_exists(section, "misfire_start_condition", &CInifile::r_float, misfireStartCondition, test);
-    result |= process_if_exists(section, "misfire_end_condition", &CInifile::r_float, misfireEndCondition, test);
-    result |= process_if_exists(section, "misfire_start_prob", &CInifile::r_float, misfireStartProbability, test);
-    result |= process_if_exists(section, "misfire_end_prob", &CInifile::r_float, misfireEndProbability, test);
-
-    bool value = m_bZoomEnabled;
-    bool result2 = process_if_exists_set(section, "zoom_enabled", &CInifile::r_bool, value, test);
-    if (result2 && !test)
-    {
-        m_bZoomEnabled = !!value;
-    }
-    result |= result2;
-
     return result;
 }
 
+// Апгрейды боевой мощи оружия
 bool CWeapon::install_upgrade_hit(LPCSTR section, bool test)
 {
-    bool result = false;
-
+    pcstr str;
+    bool result = false, result2 = false;
     shared_str s_sHitPower;
-    bool       result2 = process_if_exists_set(section, "hit_power", &CInifile::r_string_wb, s_sHitPower, test);
+
+    //=== Урон оружия ===/
+    result2 = process_if_exists_set(section, "hit_power", &CInifile::r_string_wb, s_sHitPower, test);
     if (result2 && !test)
     {
         string32 buffer;
@@ -168,13 +233,15 @@ bool CWeapon::install_upgrade_hit(LPCSTR section, bool test)
     }
     result |= result2;
 
+    //=== Урон оружия (критический) ===/
     shared_str s_sHitPowerCritical;
     result2 = process_if_exists_set(section, "hit_power_critical", &CInifile::r_string_wb, s_sHitPower, test);
     if (result2 && !test)
     {
         string32 buffer;
         fvHitPowerCritical[egdMaster] = (float)atof(_GetItem(*s_sHitPowerCritical, 0, buffer));
-        fvHitPowerCritical[egdNovice] = fvHitPowerCritical[egdStalker] = fvHitPowerCritical[egdVeteran] = fvHitPowerCritical[egdMaster];
+        fvHitPowerCritical[egdNovice] = fvHitPowerCritical[egdStalker] = fvHitPowerCritical[egdVeteran] =
+            fvHitPowerCritical[egdMaster];
 
         int num_game_diff_param = _GetItemCount(*s_sHitPowerCritical);
         if (num_game_diff_param > 1)
@@ -192,25 +259,22 @@ bool CWeapon::install_upgrade_hit(LPCSTR section, bool test)
     }
     result |= result2;
 
+    //=== Импульс пули оружия ===/
     result |= process_if_exists(section, "hit_impulse", &CInifile::r_float, fHitImpulse, test);
-    result |= process_if_exists(section, "bullet_speed", &CInifile::r_float, m_fStartBulletSpeed, test);
 
-    /*	
-	silencer_hit_power           = 0.55, 0.55, 0.55, 0.55
-	silencer_hit_impulse         = 120
-	silencer_fire_distance       = 600
-	silencer_bullet_speed        = 310
-	*/
-
+    //=== Наличие усиленного первого выстрела (игнорирует броню?) ===/
     result |= process_if_exists_set(section, "use_aim_bullet", &CInifile::r_bool, m_bUseAimBullet, test);
     if (m_bUseAimBullet) // first super bullet
     {
         result |= process_if_exists(section, "time_to_aim", &CInifile::r_float, m_fTimeToAim, test);
     }
 
-    //	LPCSTR weapon_section = cNameSect().c_str();
-    float rpm = 60.0f / fOneShotTime; //pSettings->r_float( weapon_section, "rpm" ); // fOneShotTime * 60.0f;
-    result2   = process_if_exists(section, "rpm", &CInifile::r_float, rpm, test);
+    //=== Скорость полёта пули ===/
+    result |= process_if_exists(section, "bullet_speed", &CInifile::r_float, m_fStartBulletSpeed, test);
+
+    //=== Скорострельность ===/
+    float rpm = 60.0f / fOneShotTime;
+    result2 = process_if_exists(section, "rpm", &CInifile::r_float, rpm, test);
     if (result2 && !test)
     {
         VERIFY(rpm > 0.0f);
@@ -218,290 +282,105 @@ bool CWeapon::install_upgrade_hit(LPCSTR section, bool test)
     }
     result |= result2;
 
-    return result;
-}
+    //=== Макс. дальность полёта пули ===/
+    result |= process_if_exists(section, "fire_distance", &CInifile::r_float, fireDistance, test);
 
-bool CWeapon::install_upgrade_addon(LPCSTR section, bool test)
-{
-    bool result = false;
+    //=== Динамическая скорость полёта первых пуль (Абакан) ===/
+    result |= process_if_exists_set(
+        section, "base_dispersioned_bullets_count", &CInifile::r_s32, m_iBaseDispersionedBulletsCount, test);
+    result |= process_if_exists_set(
+        section, "base_dispersioned_bullets_speed", &CInifile::r_float, m_fBaseDispersionedBulletsSpeed, test);
 
-    //SM_TODO: Расскоменти и доделай --#SM+#--
-    /*
-	//LPCSTR weapon_section = cNameSect().c_str(); 
-
-	// 0 - no addon // 1 - permanent // 2 - attachable
-	int temp_int = (int)m_eScopeStatus;
-	bool result2 = process_if_exists_set( section, "scope_status", &CInifile::r_s32, temp_int, test );
-	if ( result2 && !test )
-	{
-		m_eScopeStatus = (ALife::EWeaponAddonStatus)temp_int;
-		if ( m_eScopeStatus == ALife::eAddonAttachable || m_eScopeStatus == ALife::eAddonPermanent )
-		{
-			result |= process_if_exists( section, "holder_range_modifier", &CInifile::r_float, m_addon_holder_range_modifier, test );
-			result |= process_if_exists( section, "holder_fov_modifier",   &CInifile::r_float, m_addon_holder_fov_modifier,   test );
-
-			if ( m_eScopeStatus == ALife::eAddonAttachable )
-			{
-				if(pSettings->line_exist(section, "scopes_sect"))		
-				{
-					LPCSTR str = pSettings->r_string(section, "scopes_sect");
-					for(int i = 0, count = _GetItemCount(str); i < count; ++i )	
-					{
-						string128						scope_section;
-						_GetItem						(str, i, scope_section);
-						m_scopes.push_back				(scope_section);
-					}
-				}
-				else
-				{
-					m_scopes.push_back(section);
-				}
-			}
-			else
-			{
-				m_scopes.push_back(section);
-				if(m_eScopeStatus==ALife::eAddonPermanent)
-					InitAddons();
-			}
-		}
-	}
-	result |= process_if_exists_set( section, "scope_dynamic_zoom", &CInifile::r_bool, m_zoom_params.m_bUseDynamicZoom, test );
-	result |= process_if_exists_set( section, "scope_nightvision", &CInifile::r_string_wb, m_zoom_params.m_sUseZoomPostprocess, test );
-	result |= process_if_exists_set( section, "scope_alive_detector", &CInifile::r_string_wb, m_zoom_params.m_sUseBinocularVision, test );
-
-	result |= result2;
-
-	temp_int = (int)m_eSilencerStatus;
-	result2 = process_if_exists_set( section, "silencer_status", &CInifile::r_s32, temp_int, test );
-	if ( result2 && !test )
-	{
-		m_eSilencerStatus = (ALife::EWeaponAddonStatus)temp_int;
-		if ( m_eSilencerStatus == ALife::eAddonAttachable || m_eSilencerStatus == ALife::eAddonPermanent )
-		{
-			m_sSilencerName	= pSettings->r_string( section, "silencer_name" );
-			m_iSilencerX	= pSettings->r_s32( section, "silencer_x" );
-			m_iSilencerY	= pSettings->r_s32( section, "silencer_y" );
-			if(m_eSilencerStatus==ALife::eAddonPermanent)
-				InitAddons();
-		}
-	}
-	result |= result2;
-
-	temp_int = (int)m_eGrenadeLauncherStatus;
-	result2 = process_if_exists_set( section, "grenade_launcher_status", &CInifile::r_s32, temp_int, test );
-	if ( result2 && !test )
-	{
-		m_eGrenadeLauncherStatus = (ALife::EWeaponAddonStatus)temp_int;
-		if ( m_eGrenadeLauncherStatus == ALife::eAddonAttachable || m_eGrenadeLauncherStatus == ALife::eAddonPermanent )
-		{
-			m_sGrenadeLauncherName	= pSettings->r_string( section, "grenade_launcher_name" );
-			m_iGrenadeLauncherX		= pSettings->r_s32( section, "grenade_launcher_x" );
-			m_iGrenadeLauncherY		= pSettings->r_s32( section, "grenade_launcher_y" );
-			if(m_eGrenadeLauncherStatus==ALife::eAddonPermanent)
-				InitAddons();
-		}
-	}
-	result |= result2;
-
-	*/
-    return result;
-}
-
-bool CWeapon::install_upgrade_impl(LPCSTR section, bool test)
-{
-    //	bool result = inherited::install_upgrade_impl( section, test );
-    bool result = CInventoryItemObject::install_upgrade_impl(section, test);
-    if (true)
-        return result; // SM_TODO
-
-    result |= install_upgrade_ammo_class(section, test);
-    result |= install_upgrade_disp(section, test);
-    result |= install_upgrade_hit(section, test);
-    result |= install_upgrade_addon(section, test);
-
-    // CWeaponMagazined
-    LPCSTR str;
-    // fire_modes = 1, 2, -1
-    bool result2 = process_if_exists_set(section, "fire_modes", &CInifile::r_string, str, test);
-    if (result2 && !test)
-    {
-        int ModesCount = _GetItemCount(str);
-        m_aFireModes.clear();
-        for (int i = 0; i < ModesCount; ++i)
-        {
-            string16 sItem;
-            _GetItem(str, i, sItem);
-            m_aFireModes.push_back((s8)atoi(sItem));
-        }
-        m_iCurFireMode = ModesCount - 1;
-    }
-    result |= result2;
-
-    result |= process_if_exists_set(section, "base_dispersioned_bullets_count", &CInifile::r_s32, m_iBaseDispersionedBulletsCount, test);
-    result |= process_if_exists_set(section, "base_dispersioned_bullets_speed", &CInifile::r_float, m_fBaseDispersionedBulletsSpeed, test);
-
-    //--#SM+#--
-    //TODO: ReloadAllSounds()
-
-    // sounds (name of the sound, volume (0.0 - 1.0), delay (sec))
-    result2 = process_if_exists_set(section, "snd_draw", &CInifile::r_string, str, test);
-    if (result2 && !test)
-    {
-        m_sounds.LoadSound(section, "snd_draw", "sndShow", false, SOUND_TYPE_ITEM_TAKING);
-    }
-    result |= result2;
-
-    result2 = process_if_exists_set(section, "snd_holster", &CInifile::r_string, str, test);
-    if (result2 && !test)
-    {
-        m_sounds.LoadSound(section, "snd_holster", "sndHide", false, SOUND_TYPE_ITEM_HIDING);
-    }
-    result |= result2;
-
-    result2 = process_if_exists_set(section, "snd_shoot", &CInifile::r_string, str, test);
-    if (result2 && !test)
-    {
-        m_sounds.LoadSound(section, "snd_shoot", "sndShot", false, SOUND_TYPE_WEAPON_SHOOTING);
-    }
-    result |= result2;
-
-    result2 = process_if_exists_set(section, "snd_empty", &CInifile::r_string, str, test);
-    if (result2 && !test)
-    {
-        m_sounds.LoadSound(section, "snd_empty", "sndEmptyClick", false, SOUND_TYPE_WEAPON_EMPTY_CLICKING);
-    }
-    result |= result2;
-
-    result2 = process_if_exists_set(section, "snd_reload", &CInifile::r_string, str, test);
-    if (result2 && !test)
-    {
-        m_sounds.LoadSound(section, "snd_reload", "sndReload", true, SOUND_TYPE_WEAPON_RECHARGING);
-    }
-    result |= result2;
-
-    result2 = process_if_exists_set(section, "snd_reload_empty", &CInifile::r_string, str, test); //--#SM+#--
-    if (result2 && !test)
-    {
-        m_sounds.LoadSound(section, "snd_reload_empty", "sndReloadEmpty", true, SOUND_TYPE_WEAPON_RECHARGING);
-    }
-    result |= result2;
-
-    //snd_shoot1     = weapons\ak74u_shot_1 ??
-    //snd_shoot2     = weapons\ak74u_shot_2 ??
-    //snd_shoot3     = weapons\ak74u_shot_3 ??
-
-    if (IsSilencerAttached())
-    {
-        result |= process_if_exists_set(section, "silencer_flame_particles", &CInifile::r_string, m_sSilencerFlameParticles, test);
-        result |= process_if_exists_set(section, "silencer_smoke_particles", &CInifile::r_string, m_sSilencerSmokeParticles, test);
-
-        result2 = process_if_exists_set(section, "snd_silncer_shot", &CInifile::r_string, str, test);
-        if (result2 && !test)
-        {
-            m_sounds.LoadSound(section, "snd_silncer_shot", "sndSilencerShot", false, SOUND_TYPE_WEAPON_SHOOTING);
-        }
-        result |= result2;
-    }
-
-    //--#SM+#-- SM_TODO - Переделать
-    /*
-    // fov for zoom mode
-    result |= process_if_exists(section, "ironsight_zoom_factor", &CInifile::r_float, m_zoom_params.m_fIronSightZoomFactor, test);
-
-    if (IsScopeAttached())
-    {
-        //if ( m_eScopeStatus == ALife::eAddonAttachable )
-        {
-            result |= process_if_exists(section, "scope_zoom_factor", &CInifile::r_float, m_zoom_params.m_fScopeZoomFactor, test);
-            //TODO: Сюды дописать fov zoom, и м.б ниже	//--#SM+#--
-        }
-    }
-    else
-    {
-        if (IsZoomEnabled())
-        {
-            result |= process_if_exists(section, "scope_zoom_factor", &CInifile::r_float, m_zoom_params.m_fIronSightZoomFactor, test);
-        }
-    }
-    */
-
-    // WGL
-    //return result;
-
-    //	grenade_class = ammo_vog-25, ammo_vog-25p          // name of the ltx-section of used grenades
-    bool result3 = process_if_exists_set(section, "grenade_class", &CInifile::r_string, str, test);
-    if (result3 && !test)
-    {
-        xr_vector<shared_str>& ammo_types = !m_bGrenadeMode ? m_ammoTypes2 : m_ammoTypes;
-        ammo_types.clear();
-        for (int i = 0, count = _GetItemCount(str); i < count; ++i)
-        {
-            string128 ammo_item;
-            _GetItem(str, i, ammo_item);
-            ammo_types.push_back(ammo_item);
-        }
-
-        m_ammoType  = 0;
-        m_ammoType2 = 0;
-    }
-    result |= result3;
-
+    //=== Скорость полёта гранаты ===//
     result |= process_if_exists(section, "launch_speed", &CInifile::r_float, m_fLaunchSpeed, test);
 
-    result3 = process_if_exists_set(section, "snd_shoot_grenade", &CInifile::r_string, str, test);
-    if (result3 && !test)
-    {
-        m_sounds.LoadSound(section, "snd_shoot_grenade", "sndShotG", false, SOUND_TYPE_WEAPON_SHOOTING);
-    }
-    result |= result3;
+    return result;
+}
 
-    result3 = process_if_exists_set(section, "snd_reload_grenade", &CInifile::r_string, str, test);
-    if (result3 && !test)
-    {
-        m_sounds.LoadSound(section, "snd_reload_grenade", "sndReloadG", true, SOUND_TYPE_WEAPON_RECHARGING);
-    }
-    result |= result3;
+// Апгрейды на возможность установки аддонов на оружие
+bool CWeapon::install_upgrade_addon(LPCSTR section, bool test)
+{
+    pcstr str;
+    bool result = false, result2 = false;
 
-    result3 = process_if_exists_set(section, "snd_switch", &CInifile::r_string, str, test);
-    if (result3 && !test)
+    //=== Перегружаем аддоны (эксперементальный функционал <!>) ===//
+    // Добавляет новые аддоны к уже существующим, не очищает те что уже есть
+    result2 = LoadAddons(section, (test ? EFuncUpgrMode::eUpgrTest : EFuncUpgrMode::eUpgrInstall));
+    if (result2 && !test)
     {
-        m_sounds.LoadSound(section, "snd_switch", "sndSwitch", true, SOUND_TYPE_WEAPON_RECHARGING);
+        bool bNeed2UpdateZoomTexture = false;
+
+        // Устанавливаем аддоны, если они перманентны
+        if (GetAddonBySlot(eScope)->m_attach_status == ALife::eAddonPermanent)
+        {
+            InstallAddon(eScope, first_addon_idx, true);
+            bNeed2UpdateZoomTexture = true;
+        }
+        if (GetAddonBySlot(eMuzzle)->m_attach_status == ALife::eAddonPermanent)
+            InstallAddon(eMuzzle, first_addon_idx, true);
+        if (GetAddonBySlot(eLauncher)->m_attach_status == ALife::eAddonPermanent)
+        {
+            InstallAddon(eLauncher, first_addon_idx, true);
+            bNeed2UpdateZoomTexture = true;
+        }
+        if (GetAddonBySlot(eMagaz)->m_attach_status == ALife::eAddonPermanent)
+            InstallAddon(eMagaz, first_addon_idx, true);
+        if (GetAddonBySlot(eSpec_1)->m_attach_status == ALife::eAddonPermanent)
+            InstallAddon(eSpec_1, first_addon_idx, true);
+        if (GetAddonBySlot(eSpec_2)->m_attach_status == ALife::eAddonPermanent)
+            InstallAddon(eSpec_2, first_addon_idx, true);
+        if (GetAddonBySlot(eSpec_3)->m_attach_status == ALife::eAddonPermanent)
+            InstallAddon(eSpec_3, first_addon_idx, true);
+        if (GetAddonBySlot(eSpec_4)->m_attach_status == ALife::eAddonPermanent)
+            InstallAddon(eSpec_4, first_addon_idx, true);
+
+        // Обновляем состояние аддонов на оружии
+        UpdateAddons();
+
+        // Обновляем 2D-Текстуру прицельных сеток
+        if (bNeed2UpdateZoomTexture)
+        {
+            for (int i = 0; i < eZoomTypesCnt; i++)
+                GetZoomParams((EZoomTypes)i).UpdateUIScope();
+        }
     }
-    result |= result3;
+    result != result2;
+
+    //=== Наличие режима прицеливания ===/
+    result |= process_if_exists_set(section, "zoom_enabled", &CInifile::r_bool, m_bZoomEnabled, test);
+
+    //=== Спец-эффекты при прицеливании ===/
+    //--> Зум с динамической краткостью
+    result |= process_if_exists_set(
+        section, "scope_dynamic_zoom", &CInifile::r_bool, GetZoomParams(eZoomMain).m_bUseDynamicZoom, test);
+
+    //--> Пост-эффект прицеливания
+    result2 = process_if_exists_set(
+        section, "scope_nightvision", &CInifile::r_string_wb, m_sUseZoomPostprocessUpgr, test);
+    if (result2)
+        xr_delete(GetZoomParams(eZoomMain).m_pNight_vision);
+    result != result2;
+
+    //--> Подсветка целей рамками (как у бинокля)
+    result2 = process_if_exists_set(
+        section, "scope_alive_detector", &CInifile::r_string_wb, m_sUseBinocularVisionUpgr, test);
+    if (result2)
+        xr_delete(GetZoomParams(eZoomMain).m_pVision);
+    result != result2;
+
+    //=== Модификатор зума прицела ===/
+    result |= process_if_exists(section, "scope_zoom_factor", &CInifile::r_float, m_fZoomFovFactorUpgr, test);
 
     return result;
 }
 
-bool CWeapon::install_upgrade_ammo_class(LPCSTR section, bool test)
+// Апгрейды звуков оружия
+bool CWeapon::install_upgrade_sounds(LPCSTR section, bool test)
 {
-    LPCSTR str;
+    // <!> Также вызывается при любых операциях с аддонами [called on addon attach \ detach too]
 
-    bool result   = process_if_exists(section, "ammo_mag_size", &CInifile::r_s32, iMagazineSize2, test);
-    iMagazineSize = m_bGrenadeMode ? 1 : iMagazineSize2;
+    if (!test)
+        ReloadAllSounds(section);
 
-    //	ammo_class = ammo_5.45x39_fmj, ammo_5.45x39_ap  // name of the ltx-section of used ammo
-    bool result2 = process_if_exists_set(section, "ammo_class", &CInifile::r_string, str, test);
-    if (result2 && !test)
-    {
-        xr_vector<shared_str>& ammo_types = m_bGrenadeMode ? m_ammoTypes2 : m_ammoTypes;
-        ammo_types.clear();
-        for (int i = 0, count = _GetItemCount(str); i < count; ++i)
-        {
-            string128 ammo_item;
-            _GetItem(str, i, ammo_item);
-            ammo_types.push_back(ammo_item);
-        }
-
-        m_ammoType  = 0;
-        m_ammoType2 = 0;
-    }
-    result |= result2;
-
-    return result2;
-}
-
-void CWeapon::net_Spawn_install_upgrades(Upgrades_type saved_upgrades)
-{
-    // do not delete this
-    // this is intended behaviour
+    return false;
 }

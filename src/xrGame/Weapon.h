@@ -694,6 +694,9 @@ protected:
     float      m_bUseOldZoomFactor;    // Использовать старый механизм увеличения (FOV прицеливания = m_fCurrentZoomFactor * 0.75f)
     float      m_fZoomFovFactorUpgr;   // Добавляется к текущему FOV зума (для апгрейдов)
 
+    shared_str m_sUseZoomPostprocessUpgr; // Пост-эффект прицела (переопределённый апгрейдами)
+    shared_str m_sUseBinocularVisionUpgr; // Эффект выделения в прицеле живых существ (переопределённый апгрейдами)
+
 private:
     bool m_bIdleFromZoomOut;
 
@@ -1111,13 +1114,18 @@ public:
     virtual BOOL ParentIsActor();
 
 private:
-    virtual bool install_upgrade_ammo_class(LPCSTR section, bool test);
+    bool         install_upgrade_ammo_class(LPCSTR section, bool test);
     bool         install_upgrade_disp(LPCSTR section, bool test);
     bool         install_upgrade_hit(LPCSTR section, bool test);
     bool         install_upgrade_addon(LPCSTR section, bool test);
+    bool         install_upgrade_generic(LPCSTR section, bool test);
+    bool         install_upgrade_sounds(LPCSTR section, bool test);
 
 protected:
     virtual bool install_upgrade_impl(LPCSTR section, bool test);
+
+public:
+    virtual void pre_install_upgrade();
 
 private:
     float m_hit_probability[egdCount];

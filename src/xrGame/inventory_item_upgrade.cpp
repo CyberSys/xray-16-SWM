@@ -195,39 +195,7 @@ bool CInventoryItem::install_upgrade_impl(LPCSTR section, bool test)
     return result;
 }
 
-void CInventoryItem::pre_install_upgrade()
+void CInventoryItem::pre_install_upgrade() //--#SM+#--
 {
-    CWeaponMagazined* wm = smart_cast<CWeaponMagazined*>(this);
-    if (wm)
-    {
-        wm->UnloadMagazine();
 
-        CWeaponMagazinedWGrenade* wg = smart_cast<CWeaponMagazinedWGrenade*>(this);
-        if (wg)
-        {
-            if (wg->IsGrenadeLauncherAttached())
-            {
-                wg->PerformSwitchGL();
-                wg->UnloadMagazine();
-                wg->PerformSwitchGL(); // restore state
-            }
-        }
-    }
-
-    CWeapon* weapon = smart_cast<CWeapon*>(this);
-    if (weapon)
-    {
-        if (weapon->ScopeAttachable() && weapon->IsScopeAttached())
-        {
-            weapon->Detach(weapon->GetScopeName().c_str(), true);
-        }
-        if (weapon->SilencerAttachable() && weapon->IsSilencerAttached())
-        {
-            weapon->Detach(weapon->GetSilencerName().c_str(), true);
-        }
-        if (weapon->GrenadeLauncherAttachable() && weapon->IsGrenadeLauncherAttached())
-        {
-            weapon->Detach(weapon->GetGrenadeLauncherName().c_str(), true);
-        }
-    }
 }

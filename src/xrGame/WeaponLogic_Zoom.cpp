@@ -96,10 +96,16 @@ void CWeapon::OnZoomIn(bool bSilent)
         GamePersistent().SetPickableEffectorDOF(true);
 
     // Использовать рамки от бинокля?
+    if (m_sUseBinocularVisionUpgr.size()) //--> Переопределение из апгрейдов (только главный прицел)
+        GetZoomParams(eZoomMain).m_sUseBinocularVision = m_sUseBinocularVisionUpgr;
+
     if (GetZoomParams().m_sUseBinocularVision.size() && IsScopeAttached() && NULL == GetZoomParams().m_pVision)
         GetZoomParams().m_pVision = new CBinocularsVision(GetZoomParams().m_sUseBinocularVision);
 
     // Использовать постэффект для зума
+    if (m_sUseZoomPostprocessUpgr.size()) //--> Переопределение из апгрейдов (только главный прицел)
+        GetZoomParams(eZoomMain).m_sUseZoomPostprocess = m_sUseZoomPostprocessUpgr;
+
     if (GetZoomParams().m_sUseZoomPostprocess.size() && IsScopeAttached())
     {
         CActor* pA = smart_cast<CActor*>(H_Parent());
