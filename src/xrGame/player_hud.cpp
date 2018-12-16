@@ -35,14 +35,7 @@ player_hud::~player_hud()
         m_model_twin = NULL;
     }
 
-    xr_vector<attachable_hud_item*>::iterator it   = m_pool.begin();
-    xr_vector<attachable_hud_item*>::iterator it_e = m_pool.end();
-    for (; it != it_e; ++it)
-    {
-        attachable_hud_item* a = *it;
-        xr_delete(a);
-    }
-    m_pool.clear();
+    destroy_all_attached_items(); //--#SM+#--
 }
 
 void player_hud::load(const shared_str& player_hud_sect)
@@ -134,6 +127,19 @@ attachable_hud_item* player_hud::create_hud_item(const shared_str& sect)
     m_pool.push_back(res);
 
     return res;
+}
+
+// Удалить все созданные attachable_hud_item [delete all attachable_hud_item's] //--#SM+#--
+void player_hud::destroy_all_attached_items()
+{
+    xr_vector<attachable_hud_item*>::iterator it = m_pool.begin();
+    xr_vector<attachable_hud_item*>::iterator it_e = m_pool.end();
+    for (; it != it_e; ++it)
+    {
+        attachable_hud_item* a = *it;
+        xr_delete(a);
+    }
+    m_pool.clear();
 }
 
 void player_hud::update(const Fmatrix& cam_trans)

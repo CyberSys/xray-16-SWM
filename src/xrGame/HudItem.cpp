@@ -27,6 +27,7 @@ CHudItem::CHudItem()
     m_bEnableMovAnimAtCrouch = false; //--#SM+#--
     m_fIdleSpeedCrouchFactor = 1.f; //--#SM+#--
     m_fIdleSpeedNoAccelFactor = 1.f; //--#SM+#--
+    bIsHUDPresent_prev = false; //--#SM+#--
 }
 
 IFactoryObject* CHudItem::_construct()
@@ -340,6 +341,11 @@ u32 CHudItem::PlayHUDMotion_noCB(const shared_str& sAnmAlias, bool bMixIn, motio
     float                fSpeed, fStartFromTime;
     bool                 bIsHUDPresent = (HudItemData() != NULL);
     attachable_hud_item* pHudItem      = bIsHUDPresent ? HudItemData() : g_player_hud->create_hud_item(HudSection());
+
+    // Если это первая анимация после показа данного худа оружия - перезагружаем визуалы его аддонов
+    if (bIsHUDPresent && bIsHUDPresent_prev == false)
+        OnFirstAnimationPlayed(sAnmAlias);
+    bIsHUDPresent_prev = bIsHUDPresent;
 
     // Запоминаем алиас текущей анимации
     m_current_motion = sAnmAlias;

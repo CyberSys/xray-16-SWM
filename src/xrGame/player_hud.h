@@ -40,6 +40,8 @@ public:
         m_attached_items[1] = NULL;
     };
 
+    void destroy_all_attached_items(); //--#SM+#--
+
     void tune(Ivector values);
     void calc_transform(u16 attach_slot_idx, const Fmatrix& offset, Fmatrix& result);
     void RecalculateBonesOffsets(); //--#SM+#--

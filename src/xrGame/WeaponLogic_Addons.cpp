@@ -571,14 +571,14 @@ bool CWeapon::Special_3_Attachable() const { return (ALife::eAddonAttachable == 
 bool CWeapon::Special_4_Attachable() const { return (ALife::eAddonAttachable == get_Special_4_Status()); }
 
 // Обновляем визуальное состояние всех аддонов данного типа на худе
-void CWeapon::_UpdateHUDAddonVisibility(SAddonData* m_pAddon)
+void CWeapon::_UpdateHUDAddonVisibility(SAddonData* m_pAddon, bool bForceReset)
 {
     // Если аддон данного типа присоединён, то его кости\аттачи имеют приоритет над другими
     xr_vector<shared_str> hide_bones_attached; // Кости,  которые будут скрыты
     xr_vector<shared_str> show_bones_attached; // Кости,  которые будут показаны
     xr_vector<shared_str> hud_vis_attached;    // Аттачи, которые будут одеты
 
-    bool bIsAddonActive = m_pAddon->bActive;
+    bool bIsAddonActive = (bForceReset ? false: m_pAddon->bActive);
 
     u8 start_idx = 0;
     if (bIsAddonActive)
@@ -689,19 +689,19 @@ void CWeapon::_UpdateHUDAddonVisibility(SAddonData* m_pAddon)
     hud_vis_attached.clear();
 }
 
-void CWeapon::UpdateHUDAddonsVisibility()
+void CWeapon::UpdateHUDAddonsVisibility(bool bForceReset)
 {
-    if (!GetHUDmode())
-        return; // Только для игрока
+    if (!ParentIsActor() || HudItemData() == nullptr)
+        return;
 
-    _UpdateHUDAddonVisibility(GetAddonBySlot(eScope));
-    _UpdateHUDAddonVisibility(GetAddonBySlot(eMuzzle));
-    _UpdateHUDAddonVisibility(GetAddonBySlot(eLauncher));
-    _UpdateHUDAddonVisibility(GetAddonBySlot(eMagaz));
-    _UpdateHUDAddonVisibility(GetAddonBySlot(eSpec_1));
-    _UpdateHUDAddonVisibility(GetAddonBySlot(eSpec_2));
-    _UpdateHUDAddonVisibility(GetAddonBySlot(eSpec_3));
-    _UpdateHUDAddonVisibility(GetAddonBySlot(eSpec_4));
+    _UpdateHUDAddonVisibility(GetAddonBySlot(eScope), bForceReset);
+    _UpdateHUDAddonVisibility(GetAddonBySlot(eMuzzle), bForceReset);
+    _UpdateHUDAddonVisibility(GetAddonBySlot(eLauncher), bForceReset);
+    _UpdateHUDAddonVisibility(GetAddonBySlot(eMagaz), bForceReset);
+    _UpdateHUDAddonVisibility(GetAddonBySlot(eSpec_1), bForceReset);
+    _UpdateHUDAddonVisibility(GetAddonBySlot(eSpec_2), bForceReset);
+    _UpdateHUDAddonVisibility(GetAddonBySlot(eSpec_3), bForceReset);
+    _UpdateHUDAddonVisibility(GetAddonBySlot(eSpec_4), bForceReset);
 }
 
 // Обновляем отображение косточки гранаты на худе
@@ -869,7 +869,7 @@ void CWeapon::_UpdateAddonsVisibility(SAddonData* m_pAddon)
     ext_vis_attached.clear();
 }
 
-void CWeapon::UpdateAddonsVisibility()
+void CWeapon::UpdateAddonsVisibility(bool bDontUpdateHUD)
 {
     _UpdateAddonsVisibility(GetAddonBySlot(eScope));
     _UpdateAddonsVisibility(GetAddonBySlot(eMuzzle));
@@ -887,7 +887,8 @@ void CWeapon::UpdateAddonsVisibility()
     pWeaponVisual->CalculateBones(TRUE);
 
     // Пробуем обновить худ
-    UpdateHUDAddonsVisibility();
+    if (!bDontUpdateHUD)
+        UpdateHUDAddonsVisibility();
 }
 
 //****** Проверки на возможность присоединения аддонов ******//

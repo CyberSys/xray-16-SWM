@@ -174,6 +174,8 @@ public:
 	virtual void OnOwnedCameraMove(CCameraBase* pCam, float fOldYaw, float fOldPitch) { ; } //--#SM+#--
     virtual bool IsMovementEffectorAllowed() { return true; } //--#SM+#--
 
+    virtual void OnFirstAnimationPlayed(const shared_str& sAnmAlias){}; //--#SM+#--
+
 protected:
     IC void SetPending(BOOL H) { m_huditem_flags.set(fl_pending, H); }
     shared_str hud_sect;
@@ -197,6 +199,7 @@ protected:
 private:
     CPhysicItem* m_object;
     CInventoryItem* m_item;
+    bool bIsHUDPresent_prev; //--#SM+#--
 
 public:
     const shared_str& HudSection() const { return hud_sect; }

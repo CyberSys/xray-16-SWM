@@ -213,6 +213,14 @@ CWeapon::motion_params CWeapon::OnBeforeMotionPlayed(const shared_str& sAnmAlias
     return inherited::OnBeforeMotionPlayed(sAnmAlias);
 }
 
+// Вызывается при проигрывании первой анимации после каждого появления худа
+void CWeapon::OnFirstAnimationPlayed(const shared_str& sAnmAlias)
+{
+    UpdateHUDAddonsVisibility();
+
+    inherited::OnFirstAnimationPlayed(sAnmAlias);
+}
+
 // Проиграть анимацию со звуком (а также учитывая число патронов в основном магазине)
 bool CWeapon::PlaySoundMotion(const shared_str& M, BOOL bMixIn, LPCSTR alias, bool bAssert, int anim_idx)
 {

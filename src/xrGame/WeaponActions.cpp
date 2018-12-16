@@ -273,7 +273,7 @@ bool CWeapon::Action(u16 cmd, u32 flags)
     return false;
 }
 
-// Колбэк ПЕРЕД детачем объекта от родителя (выкидывание оружия из инвенторя)
+// Колбэк ПЕРЕД детачем объекта от родителя (выкидывание оружия из инвентаря)
 void CWeapon::OnH_B_Independent(bool just_before_destroy)
 {
     inherited::OnH_B_Independent(just_before_destroy);
@@ -282,6 +282,8 @@ void CWeapon::OnH_B_Independent(bool just_before_destroy)
 
     StopAllEffects();
     Need2Stop_Fire();
+
+    UpdateHUDAddonsVisibility(true); //<--- Сбрасываем все аддоны \ кости худовой модели
 
     SetPending(FALSE);
     SwitchState(eHidden);
@@ -344,6 +346,7 @@ void CWeapon::OnH_A_Chield()
 };
 
 // Колбек на активацию оружия (взяли в руки)
+// Может вызываться два раза подряд
 void CWeapon::OnActiveItem()
 {
     inherited::OnActiveItem();
@@ -386,6 +389,8 @@ void CWeapon::signal_HideComplete()
     m_set_next_magaz_by_id = u16(-1);
 
     m_sub_state = eSubstateReloadBegin;
+
+    UpdateHUDAddonsVisibility(true); //<--- Сбрасываем все аддоны \ кости худовой модели
 }
 
 // Колбэк на хит по оружию
@@ -404,9 +409,9 @@ void CWeapon::shedule_Update(u32 dT)
     inherited::shedule_Update(dT);
 
     // Раз в пол секунды (без учёта частоты вызовов функции) обновляем визуалы установленных аддонов
-    if ((Device.dwTimeGlobal - m_dwAddons_last_upd_time) >= 500)
+    if (!IsHidden() && (Device.dwTimeGlobal - m_dwAddons_last_upd_time) >= 500)
     {
-        UpdateAddonsVisibility();
+        UpdateAddonsVisibility(GetHUDmode() == false);
     }
 
     // Обновляем видимость гранаты

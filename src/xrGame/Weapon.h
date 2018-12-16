@@ -312,6 +312,8 @@ public:
     virtual bool UpdateCameraFromBipods(IGameObject* pCameraOwner, Fvector noise_dangle);
     virtual void UpdateActorTorchLightPosFromBipods(Fvector* pTorchPos);
 
+    virtual void OnFirstAnimationPlayed(const shared_str& sAnmAlias);
+
     virtual void Try2DeployBipods();
     virtual void Need2UndeployBipods(bool bInstantly = true);
     virtual bool IsBipodsDeployed();
@@ -524,10 +526,10 @@ public:
     void UpdateAddonsAnim();
 
     //обновление видимости для косточек аддонов
-    void UpdateAddonsVisibility();
+    void UpdateAddonsVisibility(bool bDontUpdateHUD = false);
     void _UpdateAddonsVisibility(SAddonData* m_pAddon); //--#SM+#--
-    void UpdateHUDAddonsVisibility();
-    void _UpdateHUDAddonVisibility(SAddonData* m_pAddon); //--#SM+#--
+    void UpdateHUDAddonsVisibility(bool bForceReset = false);
+    void _UpdateHUDAddonVisibility(SAddonData* m_pAddon, bool bForceReset = false); //--#SM+#--
     u32  m_dwAddons_last_upd_time;                        //--#SM+#-- Когда последний раз вызывали апдейт аддонов()
 
     //инициализация свойств присоединенных аддонов
