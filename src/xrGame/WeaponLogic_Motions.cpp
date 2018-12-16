@@ -624,6 +624,12 @@ void CWeapon::PlayAnimShow()
 {
     int iAmmo = GetMainAmmoElapsed();
 
+    // Фикс отсутствия анимации доставания если у игрока два оружия с одинаковым худом
+    // [fix for a missing weapon show animation, when player both main weapons have the
+    // same HUD section] (by Sin!)
+    if (g_player_hud)
+        g_player_hud->attach_item(this);
+
     if (def_IsGL_Mode)
     {
         if (iAmmo == 0)
