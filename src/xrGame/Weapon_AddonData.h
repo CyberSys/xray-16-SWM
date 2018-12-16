@@ -4,7 +4,8 @@
 
 enum
 {
-    empty_addon_idx = u8(-1)
+    empty_addon_idx = u8(-1),
+    first_addon_idx = u8(0)
 };
 DEFINE_VECTOR(shared_str, ADDONS_VECTOR, ADDONS_VECTOR_IT); //--#SM+#-- moved
 

@@ -64,31 +64,40 @@ u8 CWeapon::GetAddonsState() const
 void CWeapon::SetAddonsState(u8 m_flagsAddOnState)
 {
     if (m_flagsAddOnState & CSE_ALifeItemWeapon::eWeaponAddonGrenadeLauncher)
-        InstallAddon(eLauncher, 0, true);
+        InstallAddon(eLauncher, first_addon_idx, true);
 
     if (m_flagsAddOnState & CSE_ALifeItemWeapon::eWeaponAddonScope)
-        InstallAddon(eScope, 0, true);
+        InstallAddon(eScope, first_addon_idx, true);
 
     if (m_flagsAddOnState & CSE_ALifeItemWeapon::eWeaponAddonSilencer)
-        InstallAddon(eMuzzle, 0, true);
+        InstallAddon(eMuzzle, first_addon_idx, true);
 
     if (m_flagsAddOnState & CSE_ALifeItemWeapon::eWeaponAddonMagazine)
-        InstallAddon(eMagaz, 0, true);
+        InstallAddon(eMagaz, first_addon_idx, true);
 
     if (m_flagsAddOnState & CSE_ALifeItemWeapon::eWeaponAddonSpecial_1)
-        InstallAddon(eSpec_1, 0, true);
+        InstallAddon(eSpec_1, first_addon_idx, true);
 
     if (m_flagsAddOnState & CSE_ALifeItemWeapon::eWeaponAddonSpecial_2)
-        InstallAddon(eSpec_2, 0, true);
+        InstallAddon(eSpec_2, first_addon_idx, true);
 
     if (m_flagsAddOnState & CSE_ALifeItemWeapon::eWeaponAddonSpecial_3)
-        InstallAddon(eSpec_3, 0, true);
+        InstallAddon(eSpec_3, first_addon_idx, true);
 
     if (m_flagsAddOnState & CSE_ALifeItemWeapon::eWeaponAddonSpecial_4)
-        InstallAddon(eSpec_4, 0, true);
+        InstallAddon(eSpec_4, first_addon_idx, true);
 
     UpdateAddons();
     UpdateAddonsAnim();
+}
+
+// Установить аддон по его set-секции в оружии (не требует предмета)
+SAddonData* CWeapon::InstallAddon(EAddons iSlot, const shared_str& sAddonSetSect, bool bNoUpdate)
+{
+    u8 addon_idx = empty_addon_idx;
+    GetAddonSlotBySetSect(sAddonSetSect.c_str(), &addon_idx, iSlot);
+
+    return InstallAddon(iSlot, addon_idx, bNoUpdate);
 }
 
 // Установить аддон (не требует предмета)
@@ -315,7 +324,7 @@ void CWeapon::UpdateAddonsAnim()
 }
 
 // Загрузить параметры аддонов оружия из конфига
-void CWeapon::LoadAddons(LPCSTR section)
+bool CWeapon::LoadAddons(LPCSTR section, EFuncUpgrMode upgrMode)
 {
     //******** Обратная совместимость с оригинальной системой аддонов ********//
 
@@ -374,15 +383,32 @@ void CWeapon::LoadAddons(LPCSTR section)
     }
 
     //******** Инициализируем массив аддонов оружия ********//
+    bool bAddonsInitialized = (upgrMode == eUpgrNone ? true : false);
 
-    m_addons[eScope].Initialize(this->cNameSect().c_str(), "scopes_sect", "scope_name", "scope_status", "wpn_scope");
-    m_addons[eMuzzle].Initialize(this->cNameSect().c_str(), "muzzles_sect", "muzzle_name", "silencer_status", "wpn_silencer");
-    m_addons[eLauncher].Initialize(this->cNameSect().c_str(), "launchers_sect", "launcher_name", "grenade_launcher_status", "wpn_launcher");
-    m_addons[eMagaz].Initialize(this->cNameSect().c_str(), "magazines_sect", "magazine_name", "magazine_status", "wpn_a_magazine");
-    m_addons[eSpec_1].Initialize(this->cNameSect().c_str(), "specials_1_sect", "special_name", "special_1_status", "wpn_a_special_1");
-    m_addons[eSpec_2].Initialize(this->cNameSect().c_str(), "specials_2_sect", "special_name", "special_2_status", "wpn_a_special_2");
-    m_addons[eSpec_3].Initialize(this->cNameSect().c_str(), "specials_3_sect", "special_name", "special_3_status", "wpn_a_special_3");
-    m_addons[eSpec_4].Initialize(this->cNameSect().c_str(), "specials_4_sect", "special_name", "special_4_status", "wpn_a_special_4");
+    /////////////////////
+    // clang-format off
+#define DEF_InitAddonSlot(DEF_slot, DEF_sects, DEF_name, DEF_status, DEF_bone)                      \
+    {                                                                                               \
+        if (upgrMode == eUpgrNone || pSettings->line_exist(section, DEF_status)                     \
+                                  || pSettings->line_exist(section, DEF_sects))                     \
+        {                                                                                           \
+            if (upgrMode != eUpgrTest)                                                              \
+                m_addons[DEF_slot].Initialize(section, DEF_sects, DEF_name, DEF_status, DEF_bone);  \
+            bAddonsInitialized = true;                                                              \
+        }                                                                                           \
+    }                                                                                           
+
+    DEF_InitAddonSlot(eScope,    "scopes_sect",     "scope_name",    "scope_status",            "wpn_scope");
+    DEF_InitAddonSlot(eMuzzle,   "muzzles_sect",    "muzzle_name",   "silencer_status",         "wpn_silencer");
+    DEF_InitAddonSlot(eLauncher, "launchers_sect",  "launcher_name", "grenade_launcher_status", "wpn_launcher");
+    DEF_InitAddonSlot(eMagaz,    "magazines_sect",  "magazine_name", "magazine_status",         "wpn_a_magazine");
+    DEF_InitAddonSlot(eSpec_1,   "specials_1_sect", "special_name",  "special_1_status",        "wpn_a_special_1");
+    DEF_InitAddonSlot(eSpec_2,   "specials_2_sect", "special_name",  "special_2_status",        "wpn_a_special_2");
+    DEF_InitAddonSlot(eSpec_3,   "specials_3_sect", "special_name",  "special_3_status",        "wpn_a_special_3");
+    DEF_InitAddonSlot(eSpec_4,   "specials_4_sect", "special_name",  "special_4_status",        "wpn_a_special_4");
+    // clang-format on
+
+    return bAddonsInitialized;
 }
 
 //****** Инициализируем текущие аддоны на оружии ******//
@@ -410,7 +436,7 @@ void CWeapon::InitAddons()
         //--> Разрешён-ли альтернативный зум
         m_bAltZoomEnabled = READ_ADDON_DATA(r_bool, "zoom_alt_enabled", GetScopeSetSect(), GetScopeName(), false);
 
-        //--> Считываем основну из главной секции
+        //--> Считываем основу из главной секции
         GetZoomParams(eZoomMain).Initialize(section, NULL, false);
         if (IsAltZoomEnabled())
             GetZoomParams(eZoomAlt).Initialize(section, "_alt", false);
@@ -508,16 +534,16 @@ void CWeapon::InitAddons()
     UpdateBipodsParams();
 
     //******** Перезагружаем все звуки оружия ********//
-    ReloadAllSounds();
+    ReloadAllSoundsWithUpgrades();
 }
 
 //****** Получить слот аддона из предмета ******//
 
-// По объекту (idx - индекс аддона в массиве)
+// По предмету аддона (idx - вернёт туда индекс аддона в массиве)
 CWeapon::EAddons CWeapon::GetAddonSlot(IGameObject* pObj, u8* idx) { return GetAddonSlot(pObj->cNameSect().c_str(), idx); }
 
-// По секции (idx - индекс аддона в массиве)
-CWeapon::EAddons CWeapon::GetAddonSlot(LPCSTR section, u8* idx)
+// По СЕКЦИИ ПРЕДМЕТА аддона (idx - вернёт туда индекс аддона в массиве)
+CWeapon::EAddons CWeapon::GetAddonSlot(LPCSTR section, u8* idx, EAddons slotID2Search)
 {
 #define DEF_GetAddonSlot(DEF_slot)                                                    \
     {                                                                                 \
@@ -534,14 +560,57 @@ CWeapon::EAddons CWeapon::GetAddonSlot(LPCSTR section, u8* idx)
         }                                                                             \
     }
 
-    DEF_GetAddonSlot(eScope);
-    DEF_GetAddonSlot(eMuzzle);
-    DEF_GetAddonSlot(eLauncher);
-    DEF_GetAddonSlot(eMagaz);
-    DEF_GetAddonSlot(eSpec_1);
-    DEF_GetAddonSlot(eSpec_2);
-    DEF_GetAddonSlot(eSpec_3);
-    DEF_GetAddonSlot(eSpec_4);
+
+    if (slotID2Search == eNotExist)
+    {
+        DEF_GetAddonSlot(eScope);
+        DEF_GetAddonSlot(eMuzzle);
+        DEF_GetAddonSlot(eLauncher);
+        DEF_GetAddonSlot(eMagaz);
+        DEF_GetAddonSlot(eSpec_1);
+        DEF_GetAddonSlot(eSpec_2);
+        DEF_GetAddonSlot(eSpec_3);
+        DEF_GetAddonSlot(eSpec_4);
+    }
+    else
+        DEF_GetAddonSlot(slotID2Search);
+
+#undef DEF_GetAddonSlot
+
+    return eNotExist;
+}
+
+// По SET-СЕКЦИИ АДДОНА в оружии (idx - вернёт туда индекс аддона в массиве)
+CWeapon::EAddons CWeapon::GetAddonSlotBySetSect(LPCSTR section, u8* idx, EAddons slotID2Search)
+{
+#define DEF_GetAddonSlot(DEF_slot)                                                    \
+    {                                                                                 \
+        SAddonData* pAddon = GetAddonBySlot(DEF_slot);                                \
+        ADDONS_VECTOR_IT it = pAddon->m_addons_list.begin();                          \
+        for (; it != pAddon->m_addons_list.end(); it++)                               \
+        {                                                                             \
+            if ((*it).equal(section))                                                 \
+            {                                                                         \
+                if (idx != NULL)                                                      \
+                    *idx = u8(it - pAddon->m_addons_list.begin());                    \
+                return DEF_slot;                                                      \
+            }                                                                         \
+        }                                                                             \
+    }
+
+    if (slotID2Search == eNotExist)
+    {
+        DEF_GetAddonSlot(eScope);
+        DEF_GetAddonSlot(eMuzzle);
+        DEF_GetAddonSlot(eLauncher);
+        DEF_GetAddonSlot(eMagaz);
+        DEF_GetAddonSlot(eSpec_1);
+        DEF_GetAddonSlot(eSpec_2);
+        DEF_GetAddonSlot(eSpec_3);
+        DEF_GetAddonSlot(eSpec_4);
+    }
+    else
+        DEF_GetAddonSlot(slotID2Search);
 
 #undef DEF_GetAddonSlot
 
@@ -945,7 +1014,7 @@ bool CWeapon::CanAttach(PIItem pIItem)
 }
 
 // Присоединить аддон
-bool CWeapon::Attach(PIItem pIItem, bool b_send_event)
+bool CWeapon::Attach(PIItem pIItem, bool b_send_event, bool b_from_actor_menu)
 {
     if (CanAttach(pIItem) == false)
         return false; //--> Дублирующая проверка
@@ -959,24 +1028,9 @@ bool CWeapon::Attach(PIItem pIItem, bool b_send_event)
     {
         // Если это магазинное питание, то соединяем аддон по другому
         if (m_bUseMagazines == true && iSlot == eMagaz)
-        {
-            if (GetState() == eSwitchMag)
-                return false;
+            return AttachMagazine(pIItem->cast_weapon(), true, b_from_actor_menu);
 
-            m_set_next_magaz_on_reload = addon_idx;
-            m_set_next_magaz_by_id     = pIItem->object_id();
-
-            result = Try2SwitchMag();
-            if (result == false)
-            {
-                m_set_next_magaz_on_reload = empty_addon_idx;
-                m_set_next_magaz_by_id     = u16(-1);
-            }
-
-            return result;
-        }
-
-        // "Устанавливаем"
+        // "Устанавливаем" всё остальное здесь
         InstallAddon(iSlot, addon_idx, true);
         result = true;
     }
@@ -998,6 +1052,56 @@ bool CWeapon::Attach(PIItem pIItem, bool b_send_event)
         return inherited::Attach(pIItem, b_send_event);
 }
 
+// Корректно присоединить аддон "Магазин"
+// (в том числе для оружия с магазинным питанием)
+bool CWeapon::AttachMagazine(CWeapon* pMagazineItem, bool b_send_event, bool b_with_anim)
+{
+    u8 addon_idx = eNotExist;
+    EAddons iSlot = GetAddonSlot(pMagazineItem, &addon_idx);
+
+    // Проверяем что предмет - магазин
+    if (iSlot != eMagaz)
+        return false;
+
+    // Если не используется магазинное питание - ставим по общей схеме
+    if (m_bUseMagazines == false)
+        return Attach((PIItem)pMagazineItem, b_send_event, false);
+
+    // Если уже стоит магазин - пробуем его снять
+    if (!b_with_anim && GetAddonBySlot(eMagaz)->bActive == true)
+        Detach(pMagazineItem->cNameSect_str(), MagazineAttachable(), false);
+
+    //>>> Код установки магазина для оружия с магазинным питанием находится здесь <<<//
+    if (b_with_anim && !IsHidden() && ParentIsActor())
+    { //--> Вызываем анимацию, которая по окончанию установит магазин
+        if (GetState() == eSwitchMag)
+            return false;
+
+        m_set_next_magaz_on_reload = addon_idx;
+        m_set_next_magaz_by_id = pMagazineItem->object_id();
+
+        bool result = Try2SwitchMag();
+        if (result == false)
+        {
+            m_set_next_magaz_on_reload = empty_addon_idx;
+            m_set_next_magaz_by_id = u16(-1);
+        }
+
+        return result;
+    }
+    else
+    { //--> Устанавливаем магазин без анимации
+        InstallAddon(iSlot, addon_idx);
+        pMagazineItem->TransferAmmo(this);
+
+        if (b_send_event && OnServer())
+            pMagazineItem->DestroyObject(); //--> Уничтожить подсоединённую вещь из инвентаря
+    }
+
+    return true;
+}
+
+
 // Можем-ли мы отсоединить аддон
 bool CWeapon::CanDetach(const char* item_section_name)
 {
@@ -1015,10 +1119,8 @@ bool CWeapon::CanDetach(const char* item_section_name)
     return inherited::CanDetach(item_section_name);
 }
 
-float g_condition_override = -1.0f;
-
 // Отсоединить аддон
-bool CWeapon::Detach(const char* item_section_name, bool b_spawn_item)
+bool CWeapon::Detach(const char* item_section_name, bool b_spawn_item, bool b_from_actor_menu)
 {
     if (CanDetach(item_section_name) == false)
         return false; //--> Дублирующая проверка
@@ -1032,24 +1134,10 @@ bool CWeapon::Detach(const char* item_section_name, bool b_spawn_item)
     {
         // Если это магазинное питание, то отсоединяем аддон по другому
         if (m_bUseMagazines == true && iSlot == eMagaz)
-        {
-            if (GetState() == eSwitchMag)
-                return false;
-            m_set_next_magaz_on_reload = empty_addon_idx;
-            m_sub_state                = eSubstateMagazDetach;
-
-            if (Try2SwitchMag() == false)
-            {
-                m_sub_state = eSubstateReloadBegin;
-                return false;
-            }
-            return true;
-        }
+            return DetachMagazine(item_section_name, b_spawn_item, b_from_actor_menu);
 
         // Снимаем аддон
         SAddonData* pAddon = UnistallAddon(iSlot, true);
-
-        g_condition_override = pAddon->m_condition;
 
         detached = true;
     }
@@ -1062,6 +1150,49 @@ bool CWeapon::Detach(const char* item_section_name, bool b_spawn_item)
     }
 
     return inherited::Detach(item_section_name, b_spawn_item);
+}
+
+// Корректно (с сохранением патронов и разрядкой) отсоединить аддон "Магазин"
+// (в том числе для оружия с магазинным питанием)
+bool CWeapon::DetachMagazine(const char* item_section_name, bool b_spawn_item, bool b_with_anim)
+{
+    // Проверяем что слот магазина пуст
+    if (GetAddonBySlot(eMagaz)->bActive == false)
+        return false;
+
+    // Если не используется магазинное питание - снимаем магазин по общей схеме
+    if (m_bUseMagazines == false)
+        return Detach(item_section_name, b_spawn_item);
+
+    //>>> Код снятия магазина для оружия с магазинным питанием находится здесь <<<//
+    if (b_with_anim && !IsHidden() && ParentIsActor())
+    { //--> Вызываем анимацию, которая по окончанию снимет магазин (не учитывает флаг b_spawn_item)
+        if (GetState() == eSwitchMag)
+            return false;
+
+        m_set_next_magaz_on_reload = empty_addon_idx;
+        m_sub_state = eSubstateMagazDetach;
+
+        if (Try2SwitchMag() == false)
+        {
+            m_sub_state = eSubstateReloadBegin;
+            return false;
+        }
+    }
+    else 
+    { //--> Снимаем магазин без анимации
+        // Спавним магазин со всеми патронами
+        if (b_spawn_item)
+            CInventoryItemObject::Detach(item_section_name, true);
+
+        // Разряжаем сам ствол
+        UnloadMagazineMain(false);
+
+        // Снимаем аддон
+        UnistallAddon(eMagaz);
+    }
+
+    return true;
 }
 
 //******** Различные функции для глушителя ********//

@@ -261,7 +261,7 @@ void CInventoryItem::OnEvent(NET_Packet& P, u16 type)
 //процесс отсоединения вещи заключается в спауне новой вещи
 //в инвентаре и установке соответствующих флагов в родительском
 //объекте, поэтому функция должна быть переопределена
-bool CInventoryItem::Detach(const char* item_section_name, bool b_spawn_item)
+bool CInventoryItem::Detach(const char* item_section_name, bool b_spawn_item, bool b_from_actor_menu) //--#SM+#--
 {
     if (OnClient())
         return true;

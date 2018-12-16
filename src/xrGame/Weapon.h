@@ -62,7 +62,7 @@ public:
 
     virtual CShellLauncher* cast_shell_launcher() { return (CShellLauncher*)this; } //--#SM+#--
 
-    void LoadAddons(LPCSTR section); // Виртуалку?
+    bool LoadAddons(LPCSTR section, EFuncUpgrMode upgrMode = EFuncUpgrMode::eUpgrNone);
 
     void StopAllEffects();
 
@@ -102,7 +102,8 @@ public:
     SAddonData m_addons[EAddons::eAddonsSize];
 
     EAddons GetAddonSlot(IGameObject* pObj, u8* idx = NULL);
-    EAddons GetAddonSlot(LPCSTR section, u8* idx = NULL);
+    EAddons GetAddonSlot(LPCSTR section, u8* idx = NULL, EAddons slotID2Search = eNotExist);
+    EAddons GetAddonSlotBySetSect(LPCSTR section, u8* idx = NULL, EAddons slotID2Search = eNotExist);
 
     SAddonData* GetAddonBySlot(EAddons slotID)
     {
@@ -390,12 +391,17 @@ public:
 
     bool PlayWorldMotion(const shared_str& M, BOOL bMixIn);
 
-    virtual void ReloadAllSounds(); // --#SM+#-- Перезагрузить все звуки оружия, с учётом текущих аддонов
+    virtual void ReloadAllSounds(); // --#SM+#--
+    virtual void ReloadAllSounds(LPCSTR sFromSect); // --#SM+#-- Перезагрузить все звуки оружия, с учётом текущих аддонов
+    virtual void ReloadAllSoundsWithUpgrades(); // --#SM+#-- 
     void         ReloadSound(       // --#SM+#-- Перезагрузить конкретный звук, с учётом текущих аддонов
                 shared_str const& strName,
                 shared_str const& strAlias,
                 bool              exclusive = false,
                 int               type      = sg_SourceType);
+
+protected:
+    LPCSTR sReloadSndSectOverride;
 
 public:
     virtual bool                  can_kill() const;
@@ -628,6 +634,7 @@ public:
     void SetAddonsState(u8 m_flagsAddOnState);
 
     // Не производит удаление или возврат предмета <!>
+    SAddonData* InstallAddon(EAddons iSlot, const shared_str& sAddonSetSect, bool bNoUpdate = false);
     SAddonData* InstallAddon(EAddons iSlot, u8 addon_idx, bool bNoUpdate = false);
     SAddonData* UnistallAddon(EAddons iSlot, bool bNoUpdate = false);
 
@@ -685,6 +692,7 @@ protected:
     float      m_fZoomRotationFactor;  // Степень разворота ствола от бедра к прицеливанию [0.f - 1.f]
     float      m_fZoomRotateTime;      // Скорость прицеливания
     float      m_bUseOldZoomFactor;    // Использовать старый механизм увеличения (FOV прицеливания = m_fCurrentZoomFactor * 0.75f)
+    float      m_fZoomFovFactorUpgr;   // Добавляется к текущему FOV зума (для апгрейдов)
 
 private:
     bool m_bIdleFromZoomOut;
@@ -702,7 +710,7 @@ public:
     virtual void  SwitchZoomType(EZoomTypes iType);
     virtual void  SwitchZoomType(EZoomTypes iCurType, EZoomTypes iPrevType);
 
-    IC float GetAimZoomFactor() const { return GetZoomParams().m_fZoomFovFactor; }
+    IC float GetAimZoomFactor() const { return GetZoomParams().m_fZoomFovFactor + m_fZoomFovFactorUpgr; }
     IC float GetSecondVPZoomFactor() const { return GetZoomParams().m_fSecondVPFovFactor; }
     IC float IsSecondVPZoomPresent() const { return GetSecondVPZoomFactor() > 0.000f; }
 
@@ -1191,8 +1199,11 @@ protected:
 public:
     void LoadSilencerKoeffs();
 
-    virtual bool Attach(PIItem pIItem, bool b_send_event);
-    virtual bool Detach(const char* item_section_name, bool b_spawn_item);
+    virtual bool Attach(PIItem pIItem, bool b_send_event, bool b_from_actor_menu = false);
+    virtual bool AttachMagazine(CWeapon* pMagazineItem, bool b_send_event, bool b_with_anim = false);
+
+    virtual bool Detach(const char* item_section_name, bool b_spawn_item, bool b_from_actor_menu = false);
+    virtual bool DetachMagazine(const char* item_section_name, bool b_spawn_item, bool b_with_anim = false);
     //		bool	DetachScope		(const char* item_section_name, bool b_spawn_item);	//--#SM+#--
 
     virtual bool CanAttach(PIItem pIItem);
@@ -1337,7 +1348,7 @@ public:
     bool     SwitchMagazineType();
     CWeapon* GetBestMagazine(LPCSTR section = NULL);
 
-    virtual void LoadMainAmmoParams(LPCSTR section, bool bFromLoad = false, bool bDontUnload = false);
+    virtual bool LoadMainAmmoParams(LPCSTR section, bool bFromLoad = false, bool bDontUnload = false, EFuncUpgrMode upgrMode = EFuncUpgrMode::eUpgrNone);
     virtual void LoadMagazinesParams(LPCSTR section);
 
     bool       m_bUseAmmoBeltMode; // Пусть при одевании аддона устанавливается у клиента

@@ -25,6 +25,13 @@ enum EHandDependence
     hd2Hand = 2
 };
 
+enum EFuncUpgrMode //--#SM+#--
+{
+    eUpgrNone = 0, // Обычный режим работы функции
+    eUpgrTest, // Режим тестирования апгрейда (проверяет, но не устанавливает)
+    eUpgrInstall, // Режим установки апгрейда
+};
+
 class CSE_Abstract;
 class CGameObject;
 class CFoodItem;
@@ -110,10 +117,10 @@ public:
 
     virtual bool Useful() const; // !!! Переопределить. (см. в Inventory.cpp)
     virtual bool IsUsingCondition() const { return m_flags.test(FUsingCondition); }
-    virtual bool Attach(PIItem pIItem, bool b_send_event) { return false; }
+    virtual bool Attach(PIItem pIItem, bool b_send_event, bool b_from_actor_menu = false) { return false; } //--#SM+#--
     virtual bool Detach(PIItem pIItem) { return false; }
     //при детаче спаунится новая вещь при заданно названии секции
-    virtual bool Detach(const char* item_section_name, bool b_spawn_item);
+    virtual bool Detach(const char* item_section_name, bool b_spawn_item, bool b_from_actor_menu = false); //--#SM+#--
     virtual bool CanAttach(PIItem pIItem) { return false; }
     virtual bool CanDetach(LPCSTR item_section_name) { return false; }
     virtual void OnDetachAddonSpawn(const char* item_section_name, CSE_ALifeDynamicObject* E) { ; } //--#SM+#--

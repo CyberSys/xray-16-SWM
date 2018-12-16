@@ -6,6 +6,17 @@
 #include "Weapon_Shared.h"
 
 // Перезагрузка всех звуков, с учётом текущих аддонов
+// Если передана секция - то будут загружены только звуки, присутствующие в ней (для апгрейдов)
+void CWeapon::ReloadAllSounds(LPCSTR sFromSect)
+{
+    sReloadSndSectOverride = (sFromSect ? sFromSect : nullptr);
+
+    ReloadAllSounds();
+
+    sReloadSndSectOverride = nullptr;
+}
+
+// Перезагрузка всех звуков, с учётом текущих аддонов
 void CWeapon::ReloadAllSounds()
 {
     // clang-format off
@@ -134,6 +145,25 @@ void CWeapon::ReloadAllSounds()
     }
 }
 
+// Перезагрузить все звуки с учётом установленных апгрейдов
+void CWeapon::ReloadAllSoundsWithUpgrades()
+{
+    // Грузим оригинальные звуки
+    ReloadAllSounds();
+
+    // Перебираем все установленные апгрейды и грузим звуки с них
+    CInifile::Sect& _sect = pSettings->r_section(this->cNameSect());
+    auto _b = m_upgrades.begin();
+    auto _e = m_upgrades.end();
+
+    for (; _b != _e; ++_b)
+    {
+        LPCSTR sUpgrSect = READ_IF_EXISTS(pSettings, r_string, _b->c_str(), "section", nullptr);
+        if (sUpgrSect != nullptr)
+            install_upgrade_sounds(sUpgrSect, false);
+    }
+}
+
 // Перезагрузить конкретный звук, с учётом текущих аддонов
 void CWeapon::ReloadSound(shared_str const& strName, shared_str const& strAlias, bool exclusive, int type)
 {
@@ -228,7 +258,14 @@ label_ReloadSound_reload:
     if (bOrigSndType == true)
         type = sg_SourceType;
 
-    m_sounds.ReLoadSound(strSection.c_str(), strName.c_str(), strAlias.c_str(), exclusive, type);
+    if (sReloadSndSectOverride != nullptr)
+    {
+        // Если передана внешняя секция - пробуем взять звуки от туда
+        if (pSettings->line_exist(sReloadSndSectOverride, strName.c_str()))
+            m_sounds.ReLoadSound(sReloadSndSectOverride, strName.c_str(), strAlias.c_str(), exclusive, type);
+    }
+    else
+        m_sounds.ReLoadSound(strSection.c_str(), strName.c_str(), strAlias.c_str(), exclusive, type);
 }
 
 // Обновление позиции звуков

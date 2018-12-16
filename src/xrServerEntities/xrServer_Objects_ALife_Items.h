@@ -173,20 +173,19 @@ public:
 
 	DEFINE_VECTOR(shared_str, ADDONS_VECTOR, ADDONS_VECTOR_IT);
 
-    void load_addon_data(LPCSTR sAddonsList, ADDONS_VECTOR& m_addons_list);
+    void load_def_addons_list(LPCSTR sAddonsList, ADDONS_VECTOR& m_addons_list);
 
-    ADDONS_VECTOR m_scope_list;
-    ADDONS_VECTOR m_muzzle_list;
-    ADDONS_VECTOR m_launcher_list;
-    ADDONS_VECTOR m_magaz_list;
-    ADDONS_VECTOR m_spec_1_list;
-    ADDONS_VECTOR m_spec_2_list;
-    ADDONS_VECTOR m_spec_3_list;
-    ADDONS_VECTOR m_spec_4_list;
+private:
+    ADDONS_VECTOR m_def_scope_list;
+    ADDONS_VECTOR m_def_muzzle_list;
+    ADDONS_VECTOR m_def_launcher_list;
+    ADDONS_VECTOR m_def_magaz_list;
+    ADDONS_VECTOR m_def_spec_1_list;
+    ADDONS_VECTOR m_def_spec_2_list;
+    ADDONS_VECTOR m_def_spec_3_list;
+    ADDONS_VECTOR m_def_spec_4_list;
 
-    void AddonsUpdate();
-    void AddonsLoad();
-
+public:
     enum EWeaponAddonState
     {
         eWeaponAddonScope = 0x01,
@@ -208,15 +207,6 @@ public:
     EWeaponAddonStatus m_spec_3_status;
     EWeaponAddonStatus m_spec_4_status;
 
-    u8 m_scope_idx;
-    u8 m_muzzle_idx;
-    u8 m_launcher_idx;
-    u8 m_magaz_idx;
-    u8 m_spec_1_idx;
-    u8 m_spec_2_idx;
-    u8 m_spec_3_idx;
-    u8 m_spec_4_idx;
-
     Flags8 m_addon_flags_sdk; // Backward compatibility with SDK
 
     shared_str m_scope_section;
@@ -230,7 +220,7 @@ public:
 
     // For MP Buy menu, install addon with idx = 0
     u8 GetAddonsState() const;
-    void SetAddonsState(u8 m_flagsAddOnState);
+    void SetAddonsState(u8 m_flagsAddOnState, bool bAddMode = false);
 
     void clone_addons(CSE_ALifeItemWeapon* parent);
 

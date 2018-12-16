@@ -203,8 +203,10 @@ void CWeapon::PostLoad(LPCSTR section)
 }
 
 // Загрузить параметры патронов основного магазина
-void CWeapon::LoadMainAmmoParams(LPCSTR section, bool bFromLoad, bool bDontUnload)
+bool CWeapon::LoadMainAmmoParams(LPCSTR section, bool bFromLoad, bool bDontUnload, EFuncUpgrMode upgrMode)
 {
+    bool bResult = false;
+
     bool bGMode = m_bGrenadeMode;
     if (bGMode)
         PerformSwitchGL();
@@ -213,38 +215,61 @@ void CWeapon::LoadMainAmmoParams(LPCSTR section, bool bFromLoad, bool bDontUnloa
         UnloadMagazine(); //--> Разряжаем магазин (если он не был пуст)
 
     // Грузим параметры из конфига
-    m_ammoTypes.clear();
-    m_AmmoCartidges.clear();
+    if (upgrMode == eUpgrNone || pSettings->line_exist(section, "ammo_class"))
     {
-        LPCSTR S = pSettings->r_string(section, "ammo_class");
-        if (S && S[0])
+        if (upgrMode != eUpgrTest)
         {
-            string128 _ammoItem;
-            int       count = _GetItemCount(S);
-            for (int it = 0; it < count; ++it)
-            {
-                _GetItem(S, it, _ammoItem);
-                m_ammoTypes.push_back(_ammoItem);
+            m_ammoType = 0;
+            m_set_next_ammoType_on_reload = undefined_ammo_type;
 
-                CCartridge cartridge;
-                cartridge.Load(_ammoItem, it);
-                m_AmmoCartidges.push_back(cartridge);
+            m_ammoTypes.clear();
+            m_AmmoCartidges.clear();
+            {
+                LPCSTR S = pSettings->r_string(section, "ammo_class");
+                if (S && S[0])
+                {
+                    string128 _ammoItem;
+                    int       count = _GetItemCount(S);
+                    for (int it = 0; it < count; ++it)
+                    {
+                        _GetItem(S, it, _ammoItem);
+                        m_ammoTypes.push_back(_ammoItem);
+
+                        CCartridge cartridge;
+                        cartridge.Load(_ammoItem, it);
+                        m_AmmoCartidges.push_back(cartridge);
+                    }
+                }
             }
         }
+
+        bResult = true;
     }
 
-    iMagazineSize                 = pSettings->r_s32(section, "ammo_mag_size");
-    m_ammoType                    = 0;
-    m_set_next_ammoType_on_reload = undefined_ammo_type;
-
-    //SM_TODO: Используется-ли вообще?
-    if (bFromLoad)
+    if (upgrMode == eUpgrNone)
     {
-        iAmmoElapsed = pSettings->r_s32(section, "ammo_elapsed");
+        // В обычном режиме - считывем прямое значение размера магазина из конфига
+        iMagazineSize = pSettings->r_s32(section, "ammo_mag_size");
+        bResult = true;
     }
+    else
+    {
+        if (pSettings->line_exist(section, "ammo_mag_size"))
+        {
+            if (upgrMode == eUpgrInstall)
+            {
+                // В режиме апгрейда - добавляем значение к существующему
+                iMagazineSize += pSettings->r_s32(section, "ammo_mag_size");
+            }
 
+            bResult = true;
+        }
+    }
+ 
     if (bGMode)
         PerformSwitchGL();
+
+    return bResult;
 }
 
 // Загружаем параметры магазинного питания

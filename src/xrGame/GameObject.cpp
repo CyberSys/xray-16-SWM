@@ -789,24 +789,26 @@ void CGameObject::spawn_supplies()
                     if (W)
                     { //--#SM+#--
                       // SM_TODO: Возможность указывать конкретную секцию аддона в xml-е
-                        if (W->m_scope_status == ALife::eAddonAttachable && bScope)
-                            W->m_scope_idx = 0;
-                        if (W->m_silencer_status == ALife::eAddonAttachable && bSilencer)
-                            W->m_muzzle_idx = 0;
-                        if (W->m_grenade_launcher_status == ALife::eAddonAttachable && bLauncher)
-                            W->m_launcher_idx = 0;
-                        if (W->m_magazine_status == ALife::eAddonAttachable && bMagaz)
-                            W->m_magaz_idx = 0;
-                        if (W->m_spec_1_status == ALife::eAddonAttachable && bSpec_1)
-                            W->m_spec_1_idx = 0;
-                        if (W->m_spec_2_status == ALife::eAddonAttachable && bSpec_2)
-                            W->m_spec_2_idx = 0;
-                        if (W->m_spec_3_status == ALife::eAddonAttachable && bSpec_3)
-                            W->m_spec_3_idx = 0;
-                        if (W->m_spec_4_status == ALife::eAddonAttachable && bSpec_4)
-                            W->m_spec_4_idx = 0;
+                        Flags8 addon_flags;
 
-                        W->AddonsUpdate();
+                        if (W->m_scope_status == ALife::eAddonAttachable && bScope)
+                            addon_flags.set(CSE_ALifeItemWeapon::eWeaponAddonScope, bScope);
+                        if (W->m_silencer_status == ALife::eAddonAttachable && bSilencer)
+                            addon_flags.set(CSE_ALifeItemWeapon::eWeaponAddonSilencer, bSilencer);
+                        if (W->m_grenade_launcher_status == ALife::eAddonAttachable && bLauncher)
+                            addon_flags.set(CSE_ALifeItemWeapon::eWeaponAddonGrenadeLauncher, bLauncher);
+                        if (W->m_magazine_status == ALife::eAddonAttachable && bMagaz)
+                            addon_flags.set(CSE_ALifeItemWeapon::eWeaponAddonMagazine, bMagaz);
+                        if (W->m_spec_1_status == ALife::eAddonAttachable && bSpec_1)
+                            addon_flags.set(CSE_ALifeItemWeapon::eWeaponAddonSpecial_1, bSpec_1);
+                        if (W->m_spec_2_status == ALife::eAddonAttachable && bSpec_2)
+                            addon_flags.set(CSE_ALifeItemWeapon::eWeaponAddonSpecial_2, bSpec_2);
+                        if (W->m_spec_3_status == ALife::eAddonAttachable && bSpec_3)
+                            addon_flags.set(CSE_ALifeItemWeapon::eWeaponAddonSpecial_3, bSpec_3);
+                        if (W->m_spec_4_status == ALife::eAddonAttachable && bSpec_4)
+                            addon_flags.set(CSE_ALifeItemWeapon::eWeaponAddonSpecial_4, bSpec_4);
+
+                        W->SetAddonsState(addon_flags.get(), true);
                     }
 
                     NET_Packet P;

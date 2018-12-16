@@ -23,8 +23,6 @@ bool CWeapon::Try2SwitchMag(bool bCheckOnlyMode, bool bFromDetach)
         return false;
     if (m_bGrenadeMode == true)
         return false;
-    if (IsHidden() || H_Parent() == NULL)
-        return false;
 
     // Если мы не меняем тип магазина\фиксим осечку, то проводим доп. проверки
     if (m_sub_state != eSubstateMagazMisfire &&          //--> Осечка
@@ -139,11 +137,7 @@ void CWeapon::switch2_SwitchMag()
 
         // Снимаем старый
         if (pAddonMagaz->bActive)
-        {
-            CInventoryItemObject::Detach(pAddonMagaz->GetAddonName().c_str(), true);
-            UnloadMagazineMain(false);
-            UnistallAddon(eMagaz);
-        }
+            DetachMagazine(pAddonMagaz->GetAddonName().c_str(), true, false);
 
         if (m_sub_state == eSubstateMagazDetach_Do || pNewMagaz == NULL)
         {
@@ -156,11 +150,7 @@ void CWeapon::switch2_SwitchMag()
         EAddons iSlot     = GetAddonSlot(pNewMagaz->cNameSect_str(), &addon_idx);
         if (iSlot == eMagaz)
         {
-            InstallAddon(iSlot, addon_idx);
-            pNewMagaz->TransferAmmo(this);
-
-            if (OnServer())
-                pNewMagaz->DestroyObject(); //--> Уничтожить подсоединённую вещь из инвентаря
+            AttachMagazine(pNewMagaz, true, false);
         }
         else
             goto label_SwitchMag_End;

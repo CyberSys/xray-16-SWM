@@ -363,7 +363,7 @@ void CUIActorMenu::AttachAddon(PIItem item_to_upgrade)
         CGameObject::u_EventSend(P);
     };
 
-    item_to_upgrade->Attach(CurrentIItem(), true);
+    item_to_upgrade->Attach(CurrentIItem(), true, true);
 
     SetCurrentItem(NULL);
 }
@@ -384,9 +384,9 @@ void CUIActorMenu::DetachAddon(LPCSTR addon_name, PIItem itm)
         return;
     }
     if (itm == NULL)
-        CurrentIItem()->Detach(addon_name, true);
+        CurrentIItem()->Detach(addon_name, true, true); //--#SM+#--
     else
-        itm->Detach(addon_name, true);
+        itm->Detach(addon_name, true, true); //--#SM+#--
 }
 
 void CUIActorMenu::InitCellForSlot(u16 slot_idx)

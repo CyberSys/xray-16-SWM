@@ -52,6 +52,7 @@ CWeapon::CWeapon() : CShellLauncher(this)
     eHandDependence = hdNone;
 
     m_fZoomRotationFactor = 0.f;
+    m_fZoomFovFactorUpgr  = 0.f;
     m_bIdleFromZoomOut    = false;
     m_bIsZoomModeNow      = false;
     m_bUseOldZoomFactor   = false;
@@ -153,6 +154,8 @@ CWeapon::CWeapon() : CShellLauncher(this)
 
     m_sHolographBone           = NULL;
     m_fHolographRotationFactor = 1.f;
+
+    sReloadSndSectOverride = nullptr;
 }
 
 // Деструктор
@@ -179,14 +182,14 @@ BOOL CWeapon::net_Spawn(CSE_Abstract* DC)
     }
 
     // Аддоны
-    InstallAddon(eScope, E->m_scope_idx, true);
-    InstallAddon(eMuzzle, E->m_muzzle_idx, true);
-    InstallAddon(eLauncher, E->m_launcher_idx, true);
-    InstallAddon(eMagaz, E->m_magaz_idx, true);
-    InstallAddon(eSpec_1, E->m_spec_1_idx, true);
-    InstallAddon(eSpec_2, E->m_spec_2_idx, true);
-    InstallAddon(eSpec_3, E->m_spec_3_idx, true);
-    InstallAddon(eSpec_4, E->m_spec_4_idx, true);
+    InstallAddon(eScope, E->m_scope_section, true);
+    InstallAddon(eMuzzle, E->m_muzzle_section, true);
+    InstallAddon(eLauncher, E->m_launcher_section, true);
+    InstallAddon(eMagaz, E->m_magaz_section, true);
+    InstallAddon(eSpec_1, E->m_spec_1_section, true);
+    InstallAddon(eSpec_2, E->m_spec_2_section, true);
+    InstallAddon(eSpec_3, E->m_spec_3_section, true);
+    InstallAddon(eSpec_4, E->m_spec_4_section, true);
     UpdateAddons(); // <-- Данные из конфигов аддонов незагружены до этого момента <!>
 
     // Разное
@@ -265,14 +268,14 @@ void CWeapon::net_Export(NET_Packet& P)
 
     // clang-format off
 	// Аддоны
-	P.w_u8 (m_addons[eScope].addon_idx);
-	P.w_u8 (m_addons[eMuzzle].addon_idx);
-	P.w_u8 (m_addons[eLauncher].addon_idx);
-	P.w_u8 (m_addons[eMagaz].addon_idx);
-	P.w_u8 (m_addons[eSpec_1].addon_idx);
-	P.w_u8 (m_addons[eSpec_2].addon_idx);
-	P.w_u8 (m_addons[eSpec_3].addon_idx);
-	P.w_u8 (m_addons[eSpec_4].addon_idx);
+	P.w_stringZ (( IsScopeAttached() ? GetAddonBySlot(eScope)->GetName() : nullptr ));
+	P.w_stringZ (( IsSilencerAttached() ? GetAddonBySlot(eMuzzle)->GetName() : nullptr ));
+	P.w_stringZ (( IsGrenadeLauncherAttached() ? GetAddonBySlot(eLauncher)->GetName() : nullptr ));
+	P.w_stringZ (( IsMagazineAttached() ? GetAddonBySlot(eMagaz)->GetName() : nullptr ));
+	P.w_stringZ (( IsSpecial_1_Attached() ? GetAddonBySlot(eSpec_1)->GetName() : nullptr ));
+	P.w_stringZ (( IsSpecial_2_Attached() ? GetAddonBySlot(eSpec_2)->GetName() : nullptr ));
+	P.w_stringZ (( IsSpecial_3_Attached() ? GetAddonBySlot(eSpec_3)->GetName() : nullptr ));
+	P.w_stringZ (( IsSpecial_4_Attached() ? GetAddonBySlot(eSpec_4)->GetName() : nullptr ));
     // clang-format on
 }
 
@@ -316,23 +319,31 @@ void CWeapon::net_Import(NET_Packet& P)
         m_iCurFireMode = 0;
 
     // Аддоны
-    u8 idx = empty_addon_idx;
+    shared_str sAddonSetSect = nullptr;
 
-#define DEF_ImportAddon(DEF_slot)                       \
-    {                                                   \
-        P.r_u8(idx);                                    \
-        if (GetAddonBySlot(DEF_slot)->addon_idx != idx) \
-            InstallAddon(eScope, idx, true);            \
-    }
+    P.r_stringZ(sAddonSetSect);
+    InstallAddon(eScope, sAddonSetSect, true);
 
-    DEF_ImportAddon(eScope);
-    DEF_ImportAddon(eMuzzle);
-    DEF_ImportAddon(eLauncher);
-    DEF_ImportAddon(eMagaz);
-    DEF_ImportAddon(eSpec_1);
-    DEF_ImportAddon(eSpec_2);
-    DEF_ImportAddon(eSpec_3);
-    DEF_ImportAddon(eSpec_4);
+    P.r_stringZ(sAddonSetSect);
+    InstallAddon(eMuzzle, sAddonSetSect, true);
+
+    P.r_stringZ(sAddonSetSect);
+    InstallAddon(eLauncher, sAddonSetSect, true);
+
+    P.r_stringZ(sAddonSetSect);
+    InstallAddon(eMagaz, sAddonSetSect, true);
+
+    P.r_stringZ(sAddonSetSect);
+    InstallAddon(eSpec_1, sAddonSetSect, true);
+
+    P.r_stringZ(sAddonSetSect);
+    InstallAddon(eSpec_2, sAddonSetSect, true);
+
+    P.r_stringZ(sAddonSetSect);
+    InstallAddon(eSpec_3, sAddonSetSect, true);
+
+    P.r_stringZ(sAddonSetSect);
+    InstallAddon(eSpec_4, sAddonSetSect, true);
 
     UpdateAddons();
 
