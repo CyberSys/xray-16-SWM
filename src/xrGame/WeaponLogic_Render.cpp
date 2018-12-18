@@ -21,8 +21,14 @@ bool CWeapon::show_crosshair()
     if (hud_adj_mode)
         return true;
 
+    if (!IsZoomed() && m_bHideCrosshair)
+        return false;
+
     if (GetState() == eKick)
         return true;
+
+    if (IsMagazine())
+        return false;
 
     return !IsPending() && (!IsZoomed() || !ZoomHideCrosshair());
 }

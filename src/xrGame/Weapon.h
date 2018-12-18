@@ -733,6 +733,8 @@ public:
     CUIWindow* ZoomTexture();
     bool       ZoomHideCrosshair() { return m_bHideCrosshairInZoom || ZoomTexture(); }
 
+    bool m_bHideCrosshair;
+
     virtual u8 GetCurrentHudOffsetIdx();
 
     float m_HudFovAddition;

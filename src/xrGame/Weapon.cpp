@@ -159,6 +159,8 @@ CWeapon::CWeapon() : CShellLauncher(this)
     m_fHolographRotationFactor = 1.f;
 
     sReloadSndSectOverride = nullptr;
+
+    m_bHideCrosshair = false;
 }
 
 // Деструктор

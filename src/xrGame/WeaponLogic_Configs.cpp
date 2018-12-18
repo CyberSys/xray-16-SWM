@@ -442,7 +442,10 @@ void CWeapon::LoadZoomParams(LPCSTR section)
     // Скорость зуминга
     m_fZoomRotateTime = pSettings->r_float(section, "zoom_rotate_time");
 
-    // Скрыть прицел при зуме
+    // Скрыть прицел (от бедра)
+    m_bHideCrosshair = READ_IF_EXISTS(pSettings, r_bool, hud_sect, "hide_crosshair", false);
+
+    // Скрыть прицел (в зуме)
     m_bHideCrosshairInZoom = READ_IF_EXISTS(pSettings, r_bool, hud_sect, "zoom_hide_crosshair", true);
 
     // Модификатор для всего прицеливания ("совместимость" с конфигами оригинальной игры)
