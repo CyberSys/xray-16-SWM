@@ -24,6 +24,9 @@ bool CWeapon::Try2Fire(bool bCheckOnlyMode)
     if (IsAmmoBeltReloadNow())
         return false;
 
+    if (IsMagazine())
+        return false;
+
     if (!IsMisfire())
     {
         // Оружие может стрелять
