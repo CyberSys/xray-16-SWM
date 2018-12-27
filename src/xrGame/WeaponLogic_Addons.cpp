@@ -119,8 +119,6 @@ SAddonData* CWeapon::InstallAddon(EAddons iSlot, u8 addon_idx, bool bNoUpdate)
     if (pAddon->AddonsCount() > 0 && addon_idx < pAddon->AddonsCount())
     {
         pAddon->addon_idx   = addon_idx;
-        pAddon->m_condition = 1.f; // SM_TODO: Condition()
-        pAddon->m_battery   = 1.f;
         pAddon->bActive     = true;
 
         OnAddonInstall(iSlot, pAddon->GetName());
@@ -149,8 +147,6 @@ SAddonData* CWeapon::UnistallAddon(EAddons iSlot, bool bNoUpdate)
     OnAddonUnistall(iSlot, pAddon->GetName());
 
     pAddon->addon_idx   = empty_addon_idx;
-    pAddon->m_condition = 0.f; // SM_TODO: Condition()
-    pAddon->m_battery   = 0.f;
     pAddon->bActive     = false;
 
     if (!bNoUpdate)
