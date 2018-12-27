@@ -280,7 +280,6 @@ CHudItem::motion_params CHudItem::OnBeforeMotionPlayed(const shared_str& sAnmAli
     motion_params params; //--> Параметры по умолчанию
 
     // Для MP анимация прятанья и доставания предмета в два раза быстрее
-    // SM_TODO: Ускорение не работает (или работает частично) с анимациями доставания
     if (!IsGameTypeSingle() && (GetState() == eHiding || GetState() == eShowing))
     {
         params.fSpeed = 2.f;
