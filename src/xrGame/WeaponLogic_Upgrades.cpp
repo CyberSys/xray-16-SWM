@@ -344,7 +344,7 @@ bool CWeapon::install_upgrade_addon(LPCSTR section, bool test)
                 GetZoomParams((EZoomTypes)i).UpdateUIScope();
         }
     }
-    result != result2;
+    result |= result2;
 
     //=== Наличие режима прицеливания ===/
     result |= process_if_exists_set(section, "zoom_enabled", &CInifile::r_bool, m_bZoomEnabled, test);
@@ -359,14 +359,14 @@ bool CWeapon::install_upgrade_addon(LPCSTR section, bool test)
         section, "scope_nightvision", &CInifile::r_string_wb, m_sUseZoomPostprocessUpgr, test);
     if (result2)
         xr_delete(GetZoomParams(eZoomMain).m_pNight_vision);
-    result != result2;
+    result |= result2;
 
     //--> Подсветка целей рамками (как у бинокля)
     result2 = process_if_exists_set(
         section, "scope_alive_detector", &CInifile::r_string_wb, m_sUseBinocularVisionUpgr, test);
     if (result2)
         xr_delete(GetZoomParams(eZoomMain).m_pVision);
-    result != result2;
+    result |= result2;
 
     //=== Модификатор зума прицела ===/
     result |= process_if_exists(section, "scope_zoom_factor", &CInifile::r_float, m_fZoomFovFactorUpgr, test);
