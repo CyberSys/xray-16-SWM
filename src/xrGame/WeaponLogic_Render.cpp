@@ -42,7 +42,7 @@ float CWeapon::GetConditionToShow() const
     return (GetCondition()); //powf(GetCondition(),4.0f));
 }
 
-// Получить индекс текущих координат худа
+// Получить индекс для текущих координат худа (от бедра, от прицела, ...)
 u8 CWeapon::GetCurrentHudOffsetIdx()
 {
     CActor* pActor = smart_cast<CActor*>(H_Parent());
@@ -200,7 +200,7 @@ void CWeapon::UpdateHudAdditonal(Fmatrix& trans)
 }
 
 // Получить FOV от текущего оружия игрока
-float CWeapon::GetFov()
+float CWeapon::GetFov() const
 {
     if (IsBipodsDeployed() && !ZoomTexture())
     { // FOV при сошках
@@ -232,7 +232,7 @@ float CWeapon::GetFov()
 }
 
 // Получить FOV от текущего оружия игрока для второго рендера
-float CWeapon::GetSecondVPFov()
+float CWeapon::GetSecondVPFov() const
 {
     if (GetZoomParams().m_bUseDynamicZoom && IsSecondVPZoomPresent())
         return (GetZoomParams().m_fRTZoomFactor / 100.f) * g_fov;
@@ -286,7 +286,7 @@ float CWeapon::GetHudFov()
     }
 }
 
-// Получить фактор силы инерции
+// Получить фактор силы инерции (насколько далеко и быстро влияет на оружие)
 float CWeapon::GetInertionPowerFactor()
 {
     if (IsBipodsDeployed())
@@ -567,7 +567,7 @@ void CWeapon::LoadLights(LPCSTR section, LPCSTR prefix)
     }
 }
 
-// Проверить текущие партиклы пламя на их присутствие в конфигах
+// Проверить партиклы пламя\дыма на их присутствие в конфигах, иначе отключить их
 void CWeapon::CheckFlameParticles(LPCSTR section, LPCSTR prefix)
 {
     // Если одет глушитель, то возможно нам нужно отключить партиклы стрельбы
@@ -620,7 +620,7 @@ void CWeapon::StopShotEffector()
 }
 
 // Разрешено ли нам играть эффекты камеры игрока при движении (Actor_Movement.cpp)
-bool CWeapon::IsMovementEffectorAllowed()
+bool CWeapon::IsMovementEffectorAllowed() const
 {
     if (m_bDisableMovEffAtZoom)
         return !IsZoomed();
@@ -646,7 +646,7 @@ void CWeapon::UpdateAmmoBelt()
             ////////////////////////////////////////////////////////////////////////////
             int iAmmoIdx = idx;
             if (IsTriStateReload() && m_bGrenadeMode && GetState() == eReload && GetReloadState() == eSubstateReloadInProcess)
-                if (m_dwHideBulletVisual <= Device.dwTimeGlobal) // "fix" for blinking bullets
+                if (m_dwABHideBulletVisual <= Device.dwTimeGlobal) // "fix" for blinking bullets
                     iAmmoIdx--;
 
             bool         bVisible = iAmmoIdx < iAmmoCnt;
@@ -744,12 +744,12 @@ void CWeapon::UpdateAmmoBelt()
     }
 }
 
-// Патрон, который сейчас заряжаем
-void CWeapon::UpdateBulletVisual()
+// Обновить визуал текущего патрона в руках, который сейчас заряжаем
+void CWeapon::UpdateBulletHUDVisual()
 {
     if (!GetHUDmode())
         return;
-    if (m_sBulletVisual == NULL)
+    if (m_sBulletHUDVisual == NULL)
         return;
 
     attachable_hud_item* hud_item = HudItemData();
@@ -758,10 +758,10 @@ void CWeapon::UpdateBulletVisual()
         bool bVisible = true;
 
         // Отображаем\скрываем патрон
-        hud_item->UpdateChildrenList(m_sBulletVisual, bVisible);
+        hud_item->UpdateChildrenList(m_sBulletHUDVisual, bVisible);
 
         // Обновляем его визуал
-        attachable_hud_item* bullet_item = hud_item->FindChildren(m_sBulletVisual);
+        attachable_hud_item* bullet_item = hud_item->FindChildren(m_sBulletHUDVisual);
         if (bullet_item != NULL)
         {
             u8 iType = (m_set_next_ammoType_on_reload == undefined_ammo_type ? m_ammoType : m_set_next_ammoType_on_reload);
@@ -771,31 +771,31 @@ void CWeapon::UpdateBulletVisual()
     }
 }
 
-// Гильза после выстрела
-void CWeapon::UpdateShellVisual()
+// Обновить анимированную худовую (нет физики) гильзу после выстрела
+void CWeapon::UpdateAnimatedShellVisual()
 {
     if (!GetHUDmode())
         return;
-    if (m_sShellVisual == NULL)
+    if (m_sAnimatedShellVisData == NULL)
         return;
 
     attachable_hud_item* hud_item = HudItemData();
     if (hud_item != NULL)
     {
-        bool bVisible = (m_dwShowShellVisual >= Device.dwTimeGlobal && GetState() != eReload);
+        bool bVisible = (m_dwShowAnimatedShellVisual >= Device.dwTimeGlobal && GetState() != eReload);
 
         // Отображаем\скрываем гильзу
-        hud_item->UpdateChildrenList(m_sShellVisual, bVisible);
+        hud_item->UpdateChildrenList(m_sAnimatedShellVisData, bVisible);
 
         // Обновляем её визуал
-        attachable_hud_item* shell_item = hud_item->FindChildren(m_sShellVisual);
+        attachable_hud_item* shell_item = hud_item->FindChildren(m_sAnimatedShellVisData);
         if (shell_item != NULL)
-            shell_item->UpdateVisual(m_sCurrentShellModel);
+            shell_item->UpdateVisual(m_sCurrentAnimatedShellModel);
     }
 }
 
-// Обновляем все связанные с текущим оружием визуалы
-void CWeapon::UpdateWpnVisuals()
+// Обновляем все связанные с текущим оружием доп. визуалы (не связаны напрямую с аддонами)
+void CWeapon::UpdateWpnExtraVisuals()
 {
     if (GetHUDmode() == true)
     { // Обновляем визуалы худа

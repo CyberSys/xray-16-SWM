@@ -163,7 +163,7 @@ public:
     virtual void on_b_hud_detach();
     IC BOOL HudInertionEnabled() const { return m_huditem_flags.test(fl_inertion_enable); }
     IC BOOL HudInertionAllowed() const { return m_huditem_flags.test(fl_inertion_allow); }
-    virtual float GetInertionFactor() { return 1.f; }; //--#SM+#--
+    virtual float GetInertionAimFactor() { return 1.f; }; //--#SM+#--
     virtual float GetInertionPowerFactor() { return 1.f; }; //--#SM+#--
     virtual void render_hud_mode(){};
     virtual bool need_renderable() { return true; };
@@ -172,7 +172,7 @@ public:
     virtual bool CheckCompatibility(CHudItem*) { return true; }
 
 	virtual void OnOwnedCameraMove(CCameraBase* pCam, float fOldYaw, float fOldPitch) { ; } //--#SM+#--
-    virtual bool IsMovementEffectorAllowed() { return true; } //--#SM+#--
+    virtual bool IsMovementEffectorAllowed() const { return true; } //--#SM+#--
 
     virtual void OnFirstAnimationPlayed(const shared_str& sAnmAlias){}; //--#SM+#--
 

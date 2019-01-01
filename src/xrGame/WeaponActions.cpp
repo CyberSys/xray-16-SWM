@@ -21,7 +21,7 @@ void CWeapon::OnEvent(NET_Packet& P, u16 type)
         P.r_u8(m_flagsAddOnState);
         SetAddonsState(m_flagsAddOnState);
         UpdateAddons();
-        UpdateAddonsAnim();
+        ResetIdleAnim();
     }
     break;
 
@@ -409,7 +409,7 @@ void CWeapon::shedule_Update(u32 dT)
     inherited::shedule_Update(dT);
 
     // Раз в пол секунды (без учёта частоты вызовов функции) обновляем визуалы установленных аддонов
-    if (!IsHidden() && (Device.dwTimeGlobal - m_dwAddons_last_upd_time) >= 500)
+    if (!IsHidden() && (Device.dwTimeGlobal - m_dwLastAddonsVisUpdTime) >= WEAPON_ADDONS_VIS_UPD_INTERVAL)
     {
         UpdateAddonsVisibility(GetHUDmode() == false);
     }
@@ -490,13 +490,13 @@ void CWeapon::UpdateCL()
     UpdateAmmoBelt();
 
     // Обновляем патрон во время перезарядки
-    UpdateBulletVisual();
+    UpdateBulletHUDVisual();
 
     // Обновляем отрисовку гильзы
-    UpdateShellVisual();
+    UpdateAnimatedShellVisual();
 
     // Обновляем активные визуалы
-    UpdateWpnVisuals();
+    UpdateWpnExtraVisuals();
 
     // Обновляем сошки
     UpdateBipods();

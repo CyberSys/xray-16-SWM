@@ -34,7 +34,7 @@ void CWeapon::Load(LPCSTR section)
     conditionDecreasePerShot      = pSettings->r_float(section, "condition_shot_dec");
     conditionDecreasePerQueueShot = READ_IF_EXISTS(pSettings, r_float, section, "condition_queue_shot_dec", conditionDecreasePerShot);
 
-    // Контроллер первого выстрела
+    // Контроллер первого выстрела (повышенная точность и скорость пули)
     m_first_bullet_controller.load(section);
     m_iBaseDispersionedBulletsCount = READ_IF_EXISTS(pSettings, r_u8, section, "base_dispersioned_bullets_count", 0);
     m_fBaseDispersionedBulletsSpeed = READ_IF_EXISTS(pSettings, r_float, section, "base_dispersioned_bullets_speed", m_fStartBulletSpeed);
@@ -129,8 +129,8 @@ void CWeapon::Load(LPCSTR section)
     LoadMagazinesParams(section);
 
     // Визуализация патрона во время перезарядки и гильзы после выстрела
-    m_sBulletVisual = READ_IF_EXISTS(pSettings, r_string, section, "hud_bullet_visual", NULL);
-    m_sShellVisual  = READ_IF_EXISTS(pSettings, r_string, section, "hud_shell_visual", NULL);
+    m_sBulletHUDVisual = READ_IF_EXISTS(pSettings, r_string, section, "hud_bullet_visual", NULL);
+    m_sAnimatedShellVisData = READ_IF_EXISTS(pSettings, r_string, section, "hud_shell_visual", NULL);
 
     // Аддоны
     LoadAddons(section);
@@ -148,7 +148,7 @@ void CWeapon::Load(LPCSTR section)
     if (pSettings->line_exist(section, "single_handed"))
         m_bIsSingleHanded = !!pSettings->r_bool(section, "single_handed");
 
-    // Инерция оружия
+    // Инерция перекрестия (скорость изменения его размеров в зависимости от отдачи)
     m_crosshair_inertion = READ_IF_EXISTS(pSettings, r_float, section, "crosshair_inertion", 5.91f);
 
     // Партикл альтернативного выстрела от 3-го лица
@@ -164,7 +164,7 @@ void CWeapon::Load(LPCSTR section)
     m_sSndShotCurrent = "sndShot";
 
     // Параметры подствольника
-    UpdateGLParams();
+    LoadGLParams();
 
     // Параметры ракетницы
     m_sOverridedRocketSection = READ_IF_EXISTS(pSettings, r_string, section, "rocket_class", NULL);

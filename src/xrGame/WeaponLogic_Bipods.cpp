@@ -40,32 +40,34 @@
 22) Обнулять у дирекции X, чтобы slide не инвертировал <!>
 */
 
-void CWeapon::bipods_data::OnBipodsAttach(EAddons iSlot, const shared_str& sAddonDataName)
+void CWeapon::OnBipodsAttach(EAddons iSlot, const shared_str& sAddonDataName)
 {
-    m_translation_factor = 0.f;
-    m_vBipodInitPos      = {0, 0, 0};
-    m_vBipodInitDir      = {0, 0, 0};
-    m_vBipodInitNormal   = {0, 0, 0};
-    m_BipodsSlot         = iSlot;
-    m_bInstalled         = true;
+    m_BipodsSlot = iSlot;
+
+    m_bipods.m_translation_factor = 0.f;
+    m_bipods.m_vBipodInitPos = {0, 0, 0};
+    m_bipods.m_vBipodInitDir = {0, 0, 0};
+    m_bipods.m_vBipodInitNormal = {0, 0, 0};
+    m_bipods.m_bInstalled = true;
 }
 
-void CWeapon::bipods_data::OnBipodsDetach(const shared_str& sAddonDataName)
+void CWeapon::OnBipodsDetach(const shared_str& sAddonDataName)
 {
-    m_sBipod_hud = NULL;
-    m_sBipod_vis = NULL;
     m_BipodsSlot = eNotExist;
-    m_bInstalled = false;
+
+    m_bipods.m_sBipod_hud = NULL;
+    m_bipods.m_sBipod_vis = NULL;
+    m_bipods.m_bInstalled = false;
 }
 
-void CWeapon::UpdateBipodsParams()
+void CWeapon::LoadBipodsParams()
 {
     if (!IsBipodsAttached())
         return;
 
     m_bipods.m_translation_factor = 0.f;
 
-    SAddonData* pAddonBipods = GetAddonBySlot(m_bipods.m_BipodsSlot);
+    SAddonData* pAddonBipods = GetAddonBySlot(m_BipodsSlot);
 
     m_bipods.m_sBipod_hud = pAddonBipods->GetVisuals("visuals_hud", true);
     m_bipods.m_sBipod_vis = pAddonBipods->GetVisuals("visuals_world", true);
@@ -264,12 +266,6 @@ void CWeapon::UndeployBipods(bool bInstantly)
 }
 
 void CWeapon::Need2UndeployBipods(bool bInstantly) {}
-
-bool CWeapon::IsBipodsDeployed()
-{
-    return m_bipods.m_bInstalled &&
-           (m_bipods.m_iBipodState == bipods_data::eBS_SwitchedON || m_bipods.m_iBipodState == bipods_data::eBS_TranslateInto);
-}
 
 void CWeapon::BipodsZoom(u32 flags)
 {

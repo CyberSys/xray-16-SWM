@@ -25,7 +25,7 @@ void CWeapon::ZoomInc(bool bForceLimit) { ZoomDynamicMod(true, bForceLimit); }
 // Уменьшение динамического зума
 void CWeapon::ZoomDec(bool bForceLimit) { ZoomDynamicMod(false, bForceLimit); }
 
-// Меняем динамический зум в обе стороны
+// Изменить динамический зум (в обе стороны)
 void CWeapon::ZoomDynamicMod(bool bIncrement, bool bForceLimit)
 {
     if (!GetZoomParams().m_bUseDynamicZoom)
@@ -86,7 +86,7 @@ void CWeapon::OnZoomIn(bool bSilent)
     if (GetZoomParams().m_bUseDynamicZoom && GetZoomParams().m_fRTZoomFactor < 0.0f)
         ZoomDec(true); //--> По умолчанию динамический зум на минимуме
 
-    // Отключаем инерцию (Заменено GetInertionFactor())
+    // Отключаем инерцию (Заменено GetInertionAimFactor())
     // EnableHudInertion	(FALSE);
 
     //if(GetZoomParams().m_bZoomDofEnabled && !IsScopeAttached()) ! Проверять на текстуру 2D-прицела
@@ -213,16 +213,16 @@ void CWeapon::EnableActorNVisnAfterZoom()
 }
 
 // Получить текущию UI-текстуру прицела для зума
-CUIWindow* CWeapon::ZoomTexture()
+CUIWindow* CWeapon::ZoomTexture() const
 {
-    if (UseScopeTexture())
+    if (CanUseScopeTexture())
         return GetZoomParams().m_UIScope;
     else
-        return NULL;
+        return nullptr;
 }
 
 // Можно-ли использовать текстурный прицел при зуме?
-bool CWeapon::UseScopeTexture()
+bool CWeapon::CanUseScopeTexture() const
 {
     if (IsBipodsDeployed() && !m_bipods.m_bUseZoomFov)
         return false;

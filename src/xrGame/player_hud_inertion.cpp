@@ -77,7 +77,7 @@ void player_hud::update_inertion(Fmatrix& trans)
         float _tendto_speed, _origin_offset;
         if (pMainHud != NULL && pMainHud->m_parent_hud_item->GetCurrentHudOffsetIdx() > 0)
         { // Худ в режиме "Прицеливание"
-            float factor   = pMainHud->m_parent_hud_item->GetInertionFactor();
+            float factor   = pMainHud->m_parent_hud_item->GetInertionAimFactor();
             _tendto_speed  = inertion_data.m_tendto_speed_aim - (inertion_data.m_tendto_speed_aim - inertion_data.m_tendto_speed) * factor;
             _origin_offset = inertion_data.m_origin_offset_aim - (inertion_data.m_origin_offset_aim - inertion_data.m_origin_offset) * factor;
         }
@@ -102,7 +102,7 @@ void player_hud::update_inertion(Fmatrix& trans)
         float pitch = angle_normalize_signed(xform.k.getP());
 
         if (pMainHud != NULL)
-            pitch *= pMainHud->m_parent_hud_item->GetInertionFactor();
+            pitch *= pMainHud->m_parent_hud_item->GetInertionAimFactor();
 
         // Отдаление\приближение
         origin.mad(xform.k, -pitch * inertion_data.m_pitch_offset_d);

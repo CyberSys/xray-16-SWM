@@ -42,7 +42,7 @@ void CWeapon::switch2_Switch()
         return;
     }
 
-    if (!SwitchMode())
+    if (!SwitchGunMode())
     {
         Need2Idle();
         return;
@@ -61,8 +61,8 @@ void CWeapon::state_Switch(float dt) {}
 // ************************************************************** //
 ////////////////////////////////////////////////////////////////////
 
-// Переключение на подствол и обратно
-bool CWeapon::SwitchMode()
+// Переключение на подствол и обратно (анимированное)
+bool CWeapon::SwitchGunMode()
 {
     if (GetState() == eSwitch || Try2Switch(true))
     {

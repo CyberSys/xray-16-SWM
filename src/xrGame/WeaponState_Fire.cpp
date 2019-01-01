@@ -33,7 +33,7 @@ bool CWeapon::Try2Fire(bool bCheckOnlyMode)
         if (iAmmoElapsed > 0)
         {
             // Есть патроны
-            if (!IsWorking() || AllowFireWhileWorking())
+            if (!IsWorking())
             {
                 if (GetState() == eReload)
                     return false;
@@ -163,8 +163,8 @@ void CWeapon::switchFrom_Fire(u32 newS)
     }
 
     m_iShotNum = 0;
-    if (m_fOldBulletSpeed != 0.f)
-        SetBulletSpeed(m_fOldBulletSpeed);
+    if (m_fInitialBaseBulletSpeed != 0.f)
+        SetBulletSpeed(m_fInitialBaseBulletSpeed);
 }
 
 // Обновление оружия в состоянии "Стрельба"
@@ -333,10 +333,10 @@ void random_dir(Fvector& tgt_dir, const Fvector& src_dir, float dispersion)
     tgt_dir.add(src_dir, T).normalize();
 }
 
-// Переопределяем метод из CShootingObject
+// Переопределяем метод из CShootingObject (Начать стрельбу)
 void CWeapon::FireStart() { Try2Fire(); }
 
-// Переопределяем метод из CShootingObject
+// Переопределяем метод из CShootingObject (Остановить стрельбу)
 void CWeapon::FireEnd() { Need2Stop_Fire(); }
 
 // Калбэк на попытку выстрела при пустом или заклинившем магазине
@@ -389,7 +389,7 @@ void CWeapon::OnShot(bool bIsRocket, bool bIsBaseDispersionedBullet)
     {
         // 2D-Гильзы
         if (!m_bUsePumpMode)
-            DropShell(&vel);
+            LaunchShell2D(&vel);
 
         // 3D-Гильзы
         if (ParentIsActor())
@@ -427,9 +427,6 @@ void CWeapon::OnPrevFireMode()
 
 // Установить размер очереди
 void CWeapon::SetQueueSize(int size) { m_iQueueSize = size; };
-
-// Получить базовый износ оружия за каждый выстрел
-float CWeapon::GetWeaponDeterioration() { return (m_iShotNum == 1) ? conditionDecreasePerShot : conditionDecreasePerQueueShot; };
 
 // Выстрелить первой гранатой из очереди (вызывается на апдейте)
 void CWeapon::LaunchGrenade()
@@ -577,7 +574,7 @@ void CWeapon::FireTrace(const Fvector& P, const Fvector& D)
     bool SendHit = SendHitAllowed(H_Parent()); //--> Требуется-ли регистрировать попадание по сети
 
     // Выстерлить пулю (с учетом возможной стрельбы дробью)
-    m_sCurrentShellModel = l_cartridge->m_sShellVisual;
+    m_sCurrentAnimatedShellModel = l_cartridge->m_sShellVisual;
     for (int i = 0; i < l_cartridge->param_s.buckShot; ++i)
     {
         FireBullet(P, D, fire_disp, *l_cartridge, H_Parent()->ID(), ID(), SendHit);
@@ -609,25 +606,25 @@ void CWeapon::FireBullet(
         { // "Сверхточные пули"
             if (m_iShotNum == 1)
             { //--> При первом выстреле запоминаем текущую скорость
-                m_fOldBulletSpeed = GetBulletSpeed();
+                m_fInitialBaseBulletSpeed = GetBulletSpeed();
                 SetBulletSpeed(m_fBaseDispersionedBulletsSpeed);
             }
             else
             { //--> Линейно интерполируем скорость пули с каждым следующим выстрелом
-                float fSpeedStep = (m_fBaseDispersionedBulletsSpeed - m_fOldBulletSpeed) / (float)m_iBaseDispersionedBulletsCount;
+                float fSpeedStep = (m_fBaseDispersionedBulletsSpeed - m_fInitialBaseBulletSpeed) / (float)m_iBaseDispersionedBulletsCount;
                 SetBulletSpeed(GetBulletSpeed() - fSpeedStep);
             }
         }
         else
         { // Обычные пули
-            SetBulletSpeed(m_fOldBulletSpeed);
+            SetBulletSpeed(m_fInitialBaseBulletSpeed);
         }
     }
     CShootingObject::FireBullet(pos, shot_dir, fire_disp, cartridge, parent_id, weapon_id, send_hit);
 }
 
 // Выпустить 2D-гильзу
-void CWeapon::DropShell(Fvector* pVel)
+void CWeapon::LaunchShell2D(Fvector* pVel)
 {
     Fvector vel;
     if (pVel != NULL)
@@ -638,7 +635,8 @@ void CWeapon::DropShell(Fvector* pVel)
     OnShellDrop(get_LastSP(), vel);
 }
 
-bool CWeapon::IsShootingAllowed()
+// Можно-ли стрелять из оружия
+bool CWeapon::IsShootingAllowed() const
 {
     if (m_bDisableFire)
         return false;

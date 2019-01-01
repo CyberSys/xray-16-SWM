@@ -1610,6 +1610,7 @@
     <ClInclude Include="WeaponWalther.h" />
     <ClInclude Include="Weapon_AddonData.h" />
     <ClInclude Include="Weapon_AmmoCompress.h" />
+    <ClInclude Include="Weapon_BipodsParams.h" />
     <ClInclude Include="Weapon_Shared.h" />
     <ClInclude Include="Weapon_ZoomParams.h" />
     <ClInclude Include="Wound.h" />

@@ -265,7 +265,7 @@ void CWeapon::switchFrom_Reload(u32 newS)
 }
 
 // Обновление оружия в состоянии "Перезарядка"
-void CWeapon::state_Reload(float dt) { m_dwShowShellVisual = 0; }
+void CWeapon::state_Reload(float dt) { m_dwShowAnimatedShellVisual = 0; }
 
 ////////////////////////////////////////////////////////////////////
 // ************************************************************** //
@@ -315,7 +315,7 @@ bool CWeapon::IsTriStateReload() const
     if (m_bUseMagazines && !m_bGrenadeMode)
         return false; //--> При использовании магазинов запрещаем перезарядку в три стадии
 
-    if (C_THIS->IsAmmoBeltReloadNow())
+    if (C_THIS_WPN->IsAmmoBeltReloadNow())
         return m_bTriStateReload_ab;
 
     if (m_bIsReloadFromAB)

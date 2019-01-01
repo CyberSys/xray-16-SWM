@@ -8,7 +8,7 @@
 extern float g_defScopeZoomFactor;
 
 // Проверяет одинаковы-ли аддоны двух CWeapon
-bool CWeapon::IsAddonsEqual(CWeapon* pWpn2Cmp)
+bool CWeapon::IsAddonsEqual(CWeapon* pWpn2Cmp) const
 {
     // Сперва проверяем типы аддонов
     for (int i = 0; i < EAddons::eAddonsSize; i++)
@@ -88,10 +88,11 @@ void CWeapon::SetAddonsState(u8 m_flagsAddOnState)
         InstallAddon(eSpec_4, first_addon_idx, true);
 
     UpdateAddons();
-    UpdateAddonsAnim();
+    ResetIdleAnim();
 }
 
 // Установить аддон по его set-секции в оружии (не требует предмета)
+// Не производит удаление или возврат предмета (для этого есть Attach \ Detach) <!>
 SAddonData* CWeapon::InstallAddon(EAddons iSlot, const shared_str& sAddonSetSect, bool bNoUpdate)
 {
     u8 addon_idx = empty_addon_idx;
@@ -101,6 +102,7 @@ SAddonData* CWeapon::InstallAddon(EAddons iSlot, const shared_str& sAddonSetSect
 }
 
 // Установить аддон (не требует предмета)
+// Не производит удаление или возврат предмета (для этого есть Attach \ Detach) <!>
 SAddonData* CWeapon::InstallAddon(EAddons iSlot, u8 addon_idx, bool bNoUpdate)
 {
     SAddonData* pAddon = GetAddonBySlot(iSlot);
@@ -126,7 +128,7 @@ SAddonData* CWeapon::InstallAddon(EAddons iSlot, u8 addon_idx, bool bNoUpdate)
         if (!bNoUpdate)
         {
             UpdateAddons();
-            UpdateAddonsAnim();
+            ResetIdleAnim();
         }
     }
 
@@ -134,6 +136,7 @@ SAddonData* CWeapon::InstallAddon(EAddons iSlot, u8 addon_idx, bool bNoUpdate)
 }
 
 // Отсоединить аддон (не возвращает предмет в инвентарь)
+// Не производит удаление или возврат предмета (для этого есть Attach \ Detach) <!>
 SAddonData* CWeapon::UnistallAddon(EAddons iSlot, bool bNoUpdate)
 {
     SAddonData* pAddon = GetAddonBySlot(iSlot);
@@ -152,7 +155,7 @@ SAddonData* CWeapon::UnistallAddon(EAddons iSlot, bool bNoUpdate)
     if (!bNoUpdate)
     {
         UpdateAddons();
-        UpdateAddonsAnim();
+        ResetIdleAnim();
     }
 
     return pAddon;
@@ -199,8 +202,8 @@ void CWeapon::OnAddonInstall(EAddons iSlot, const shared_str& sAddonDataName)
         R_ASSERT4(IsBipodsAttached() == false,
             "Bipods already installed <!>",
             sAddonDataName.c_str(),
-            GetAddonBySlot(m_bipods.m_BipodsSlot)->GetName().c_str());
-        m_bipods.OnBipodsAttach(iSlot, sAddonDataName);
+            GetAddonBySlot(m_BipodsSlot)->GetName().c_str());
+        OnBipodsAttach(iSlot, sAddonDataName);
     }
 
     // Установка штык-ножа
@@ -270,9 +273,9 @@ void CWeapon::OnAddonUnistall(EAddons iSlot, const shared_str& sAddonDataName)
         LoadMainAmmoParams(cNameSect_str(), false, m_bUseMagazines);
 
     // Снятие сошек
-    bool bIsBipods = (IsBipodsAttached() && iSlot == m_bipods.m_BipodsSlot);
+    bool bIsBipods = (IsBipodsAttached() && iSlot == m_BipodsSlot);
     if (bIsBipods)
-        m_bipods.OnBipodsDetach(sAddonDataName);
+        OnBipodsDetach(sAddonDataName);
 
     // Снятие штык-ножа
     bool bIsBayonet = (IsBayonetAttached() && iSlot == m_BayonetSlot);
@@ -308,18 +311,19 @@ void CWeapon::UpdateAddons()
     InitAddons();
     UpdateAddonsVisibility();
     UpdateGrenadeVisibility(); //--> Ракета РПГ
-
-    m_dwAddons_last_upd_time = Device.dwTimeGlobal;
 }
 
-// Сбросить Idle анимацию у оружия
-void CWeapon::UpdateAddonsAnim()
+// Принудительно попытаться обновить текущую Idle-анимацию (при установке аддонов)
+void CWeapon::ResetIdleAnim()
 {
     if (IsPending() == FALSE)
         PlayAnimIdle();
 }
 
-// Загрузить параметры аддонов оружия из конфига
+/* Загрузить параметры аддонов оружия из конфига
+   section - секция откуда грузить данные (секция оружия или апгрейда);
+   *upgrMode - режим работы при загрузке данных из секции апгрейда (отсутствует, тест, установка);
+*/
 bool CWeapon::LoadAddons(LPCSTR section, EFuncUpgrMode upgrMode)
 {
     //******** Обратная совместимость с оригинальной системой аддонов ********//
@@ -502,8 +506,8 @@ void CWeapon::InitAddons()
     if (IsMagazineAttached())
     {
         m_bMagaz3pHideWhileReload = READ_ADDON_DATA(r_bool, "hide_magaz3p_while_reload", GetMagazineSetSect(), GetMagazineName(), false);
-        m_iMagaz3pHideStartTime   = READ_ADDON_DATA(r_u16, "hide_magaz3p_start_time", GetMagazineSetSect(), GetMagazineName(), 300);
-        m_iMagaz3pHideEndTime     = READ_ADDON_DATA(r_u16, "hide_magaz3p_end_time", GetMagazineSetSect(), GetMagazineName(), 1700);
+        m_iMagaz3pHideStartTime   = READ_ADDON_DATA(r_u16, "hide_magaz3p_start_time", GetMagazineSetSect(), GetMagazineName(), WEAPON_MAGAZ_3P_HIDE_START_TIME);
+        m_iMagaz3pHideEndTime     = READ_ADDON_DATA(r_u16, "hide_magaz3p_end_time", GetMagazineSetSect(), GetMagazineName(), WEAPON_MAGAZ_3P_HIDE_END_TIME);
 
         R_ASSERT3(m_iMagaz3pHideStartTime < m_iMagaz3pHideEndTime,
             "hide_magaz3p_start_time can't be > hide_magaz3p_end_time",
@@ -518,16 +522,16 @@ void CWeapon::InitAddons()
     UpdateMagazine3p(true);
 
     //******** Инициализируем параметры удара прикладом ********//
-    UpdateBayonetParams();
+    LoadBayonetParams();
 
     //******** Инициализируем параметры патронташа ********//
-    UpdateAmmoBeltParams();
+    LoadAmmoBeltParams();
 
     //******** Инициализируем параметры подствольника ********//
-    UpdateGLParams();
+    LoadGLParams();
 
     //******** Инициализируем параметры сошек ********//
-    UpdateBipodsParams();
+    LoadBipodsParams();
 
     //******** Перезагружаем все звуки оружия ********//
     ReloadAllSoundsWithUpgrades();
@@ -536,10 +540,10 @@ void CWeapon::InitAddons()
 //****** Получить слот аддона из предмета ******//
 
 // По предмету аддона (idx - вернёт туда индекс аддона в массиве)
-CWeapon::EAddons CWeapon::GetAddonSlot(IGameObject* pObj, u8* idx) { return GetAddonSlot(pObj->cNameSect().c_str(), idx); }
+CWeapon::EAddons CWeapon::GetAddonSlot(IGameObject* pObj, u8* idx) const { return GetAddonSlot(pObj->cNameSect().c_str(), idx); }
 
 // По СЕКЦИИ ПРЕДМЕТА аддона (idx - вернёт туда индекс аддона в массиве)
-CWeapon::EAddons CWeapon::GetAddonSlot(LPCSTR section, u8* idx, EAddons slotID2Search)
+CWeapon::EAddons CWeapon::GetAddonSlot(LPCSTR section, u8* idx, EAddons slotID2Search) const
 {
 #define DEF_GetAddonSlot(DEF_slot)                                                    \
     {                                                                                 \
@@ -577,7 +581,7 @@ CWeapon::EAddons CWeapon::GetAddonSlot(LPCSTR section, u8* idx, EAddons slotID2S
 }
 
 // По SET-СЕКЦИИ АДДОНА в оружии (idx - вернёт туда индекс аддона в массиве)
-CWeapon::EAddons CWeapon::GetAddonSlotBySetSect(LPCSTR section, u8* idx, EAddons slotID2Search)
+CWeapon::EAddons CWeapon::GetAddonSlotBySetSect(LPCSTR section, u8* idx, EAddons slotID2Search) const
 {
 #define DEF_GetAddonSlot(DEF_slot)                                                    \
     {                                                                                 \
@@ -936,6 +940,8 @@ void CWeapon::_UpdateAddonsVisibility(SAddonData* m_pAddon)
 
 void CWeapon::UpdateAddonsVisibility(bool bDontUpdateHUD)
 {
+    m_dwLastAddonsVisUpdTime = Device.dwTimeGlobal;
+
     _UpdateAddonsVisibility(GetAddonBySlot(eScope));
     _UpdateAddonsVisibility(GetAddonBySlot(eMuzzle));
     _UpdateAddonsVisibility(GetAddonBySlot(eLauncher));
@@ -1040,7 +1046,7 @@ bool CWeapon::Attach(PIItem pIItem, bool b_send_event, bool b_from_actor_menu)
         };
 
         UpdateAddons(); //--> Обновить состояние оружия
-        UpdateAddonsAnim();
+        ResetIdleAnim();
 
         return true;
     }
@@ -1141,7 +1147,7 @@ bool CWeapon::Detach(const char* item_section_name, bool b_spawn_item, bool b_fr
     if (detached == true)
     {
         UpdateAddons();
-        UpdateAddonsAnim();
+        ResetIdleAnim();
         return CInventoryItemObject::Detach(item_section_name, b_spawn_item);
     }
 
@@ -1244,7 +1250,7 @@ void CWeapon::PerformSwitchGL()
 }
 
 // Обновляем данные текущего патронташа
-void CWeapon::UpdateAmmoBeltParams()
+void CWeapon::LoadAmmoBeltParams()
 {
     if (!m_bUseAmmoBeltMode)
         return;
@@ -1309,7 +1315,7 @@ void CWeapon::UpdateAmmoBeltParams()
 }
 
 // Обновляем данные текущего подствольного гранатомёта
-void CWeapon::UpdateGLParams()
+void CWeapon::LoadGLParams()
 {
     // В режиме патронташа не обрабатываем
     if (m_bUseAmmoBeltMode)
@@ -1395,7 +1401,7 @@ void CWeapon::UpdateGLParams()
 //******** Прочие вспомогательные функции ********//
 
 // Обновляем данные для удара прикладом/штык-ножа
-void CWeapon::UpdateBayonetParams()
+void CWeapon::LoadBayonetParams()
 {
     const shared_str sBayoneteSetSect = IsBayonetAttached() ? GetAddonBySlot(m_BayonetSlot)->GetName() : cNameSect();
     const shared_str sBayoneteName    = IsBayonetAttached() ? GetAddonBySlot(m_BayonetSlot)->GetAddonName() : cNameSect();

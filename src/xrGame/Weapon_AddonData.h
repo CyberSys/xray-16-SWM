@@ -11,6 +11,15 @@ enum
     first_addon_idx = u8(0) //--> Индекс первого аддона
 };
 
+// clang-format off
+// Прочитать данные сперва из секции аддона внутри оружия, потом самого аддона, и если там тоже нету - из секции оружия.
+#define READ_ADDON_DATA(DEF_method,DEF_Name,DEF_fnc_1,DEF_fnc_2,DEF_def_val) \
+			READ_IF_EXISTS(pSettings, DEF_method, DEF_fnc_1,	DEF_Name,	 \
+			READ_IF_EXISTS(pSettings, DEF_method, DEF_fnc_2,	DEF_Name,	 \
+			READ_IF_EXISTS(pSettings, DEF_method, cNameSect(),	DEF_Name,	 \
+		DEF_def_val)));
+// clang-format on
+
 // Вектор, хранящий в себе все set-секции аддонов данного типа у оружия
 DEFINE_VECTOR(shared_str, ADDONS_VECTOR, ADDONS_VECTOR_IT);
 

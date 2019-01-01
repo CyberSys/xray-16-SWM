@@ -15,10 +15,10 @@ bool CWeapon::IsMagazineCanBeUnload(bool bForGL)
 }
 
 // Являются-ли текущие патроны гранатой или ракетой
-bool CWeapon::IsGrenadeBullet() { return pSettings->line_exist(m_ammoTypes[m_ammoType].c_str(), "fake_grenade_name"); }
+bool CWeapon::IsGrenadeBullet() const { return pSettings->line_exist(m_ammoTypes[m_ammoType].c_str(), "fake_grenade_name"); }
 
 // Есть-ли в инвентаре любые подходящие патроны.
-bool CWeapon::IsAmmoAvailable()
+bool CWeapon::IsAmmoAvailable() const
 {
     if (smart_cast<CWeaponAmmo*>(m_pInventory->GetAny(m_ammoTypes[m_ammoType].c_str())))
         return (true);
@@ -126,7 +126,7 @@ bool CWeapon::unlimited_ammo()
     return ((GameID() == eGameIDDeathmatch) && m_AmmoCartidges[m_ammoType].m_flags.test(CCartridge::cfCanBeUnlimited));
 };
 
-// Попытаться сменить текущий тип патронов
+// Попытаться сменить текущий тип патронов (анимированное переключение)
 bool CWeapon::SwitchAmmoType()
 {
     if (OnClient())
@@ -249,7 +249,7 @@ void CWeapon::SetAmmoTypeSafeFor(u8 ammoType, bool bForGL)
     }
 }
 
-// Ресайзит содержимое вектора с патронами
+// Изменить кол-во патронов в обойме (не пересчитывает счётчики)
 void CWeapon::ResizeMagazine(int ammo_count, xr_vector<CCartridge*>& Magazine, CCartridge* pCartridge)
 {
     u32 uAmmo = u32(ammo_count);
@@ -430,7 +430,7 @@ void CWeapon::UnloadMagazine(bool spawn_ammo)
 
     VERIFY((u32)iAmmoElapsed == m_magazine.size());
 
-    UpdateAddonsAnim();
+    ResetIdleAnim();
 
     if (!spawn_ammo)
         return;

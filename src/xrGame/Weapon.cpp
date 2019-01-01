@@ -84,8 +84,9 @@ CWeapon::CWeapon() : CShellLauncher(this)
     m_bUIShowAmmo               = true;
     m_bDisableFire              = false;
 
-    m_bKickAtRun          = false;
-    m_dw_last_kick_at_run = 0;
+    m_bKickAtRunActivated          = false;
+    m_dw_last_kick_at_run_upd_time = 0;
+
     m_kicker_main         = NULL;
     m_kicker_alt          = NULL;
 
@@ -93,9 +94,7 @@ CWeapon::CWeapon() : CShellLauncher(this)
     m_first_attack  = NULL;
     m_second_attack = NULL;
 
-    m_dwAddons_last_upd_time = 0;
-
-    m_sounds_enabled = true;
+    m_dwLastAddonsVisUpdTime = 0;
 
     m_sSndShotCurrent         = NULL;
     m_sSilencerFlameParticles = m_sSilencerSmokeParticles = NULL;
@@ -104,9 +103,10 @@ CWeapon::CWeapon() : CShellLauncher(this)
 
     m_bFireSingleShot = false;
     m_iShotNum        = 0;
-    m_fOldBulletSpeed = 0;
     m_iQueueSize      = WEAPON_DEFAULT_QUEUE;
     m_bLockType       = false;
+
+    m_fInitialBaseBulletSpeed = 0;
 
     m_bUsePumpMode = false;
     m_bNeed2Pump   = false;
@@ -131,16 +131,16 @@ CWeapon::CWeapon() : CShellLauncher(this)
 
     m_ForendSlot = eNotExist;
 
-    m_sBulletVisual      = NULL;
-    m_sShellVisual       = NULL;
-    m_sCurrentShellModel = NULL;
+    m_sBulletHUDVisual           = NULL;
+    m_sAnimatedShellVisData      = NULL;
+    m_sCurrentAnimatedShellModel = NULL;
 
     m_bNeed2StopTriStateReload = false;
     m_bIsReloadFromAB          = false;
     m_bSwitchAddAnimation      = false;
 
-    m_dwHideBulletVisual = 0;
-    m_dwShowShellVisual  = 0;
+    m_dwABHideBulletVisual = 0;
+    m_dwShowAnimatedShellVisual  = 0;
 
     m_fLR_MovingFactor = 0.f;
 
@@ -363,7 +363,7 @@ void CWeapon::net_Import(NET_Packet& P)
 
     // Переключаем подствольник
     if (NewMode != m_bGrenadeMode)
-        SwitchMode();
+        SwitchGunMode();
 
     // Текущий режим стрельбы (2)
     SetQueueSize(GetCurrentFireMode());

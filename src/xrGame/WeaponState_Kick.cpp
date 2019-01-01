@@ -54,7 +54,7 @@ void CWeapon::switch2_Kick()
             pActor->g_State(st);
             if (st.bSprint)
             {
-                m_bKickAtRun = true;
+                m_bKickAtRunActivated = true;
                 PlayAnimKickAlt();
                 SetPending(TRUE);
                 return;
@@ -67,7 +67,7 @@ void CWeapon::switch2_Kick()
     {
         PlaySound("sndKick", get_LastFP());
 
-        m_bKickAtRun = false;
+        m_bKickAtRunActivated = false;
         PlayAnimKick();
         SetPending(TRUE);
         return;
@@ -78,17 +78,17 @@ void CWeapon::switch2_Kick()
 }
 
 // Переключение на другой стэйт из стэйта "Удар прикладом"
-void CWeapon::switchFrom_Kick(u32 newS) { m_bKickAtRun = false; }
+void CWeapon::switchFrom_Kick(u32 newS) { m_bKickAtRunActivated = false; }
 
 // Обновление оружия в состоянии "Удар прикладом"
 void CWeapon::state_Kick(float dt)
 {
     // Атака на бегу
-    if (m_bKickAtRun == true)
+    if (m_bKickAtRunActivated == true)
     {
-        if (Device.dwTimeGlobal - m_dw_last_kick_at_run <= 150)
+        if (Device.dwTimeGlobal - m_dw_last_kick_at_run_upd_time <= WEAPON_ADDONS_VIS_UPD_INTERVAL)
             return;
-        m_dw_last_kick_at_run = Device.dwTimeGlobal;
+        m_dw_last_kick_at_run_upd_time = Device.dwTimeGlobal;
 
         // Проверяем, поддерживает-ли наше оружие такую атаку
         if (m_kicker_alt == NULL)
@@ -146,7 +146,7 @@ void CWeapon::KickHit(bool bAltMode)
         }
 
         // Запускаем анимацию выхода из удара
-        m_bKickAtRun  = false;
+        m_bKickAtRunActivated  = false;
         bool bIsExist = false;
 
         if (bAltMode)

@@ -8,11 +8,13 @@
 // Переключение стэйта на "Доставание"
 void CWeapon::switch2_Showing()
 {
+    bool bSoundsEnabled = true;
+
     CInventoryOwner* owner = smart_cast<CInventoryOwner*>(this->H_Parent());
     if (owner)
-        m_sounds_enabled = owner->CanPlayShHdRldSounds();
+        bSoundsEnabled = owner->CanPlayShHdRldSounds();
 
-    if (m_sounds_enabled)
+    if (bSoundsEnabled)
         PlaySound("sndShow", get_LastFP());
 
     SetPending(TRUE);

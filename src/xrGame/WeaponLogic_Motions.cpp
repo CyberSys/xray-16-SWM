@@ -137,7 +137,7 @@ void CWeapon::OnMotionMark(u32 state, const motion_marks& M)
     // Перезарядка помпы (вылет гильзы)
     case ePump:
         m_bNeed2Pump = false;
-        DropShell();
+        LaunchShell2D();
         break;
     // Удар прикладом (момент удара)
     case eKick:
@@ -325,7 +325,7 @@ bool CWeapon::PlayWorldMotion(const shared_str& M, BOOL bMixIn)
 }
 
 // Возвращает необходимость проиграть анимацию с префиксом _wgl
-bool CWeapon::IsWGLAnimRequired() { return IsGrenadeLauncherAttached() || IsForegripAttached(); }
+bool CWeapon::IsWGLAnimRequired() const { return IsGrenadeLauncherAttached() || IsForegripAttached(); }
 
 ////////////////////////////////////////////////////////////////////
 // ************************************************************** //

@@ -275,12 +275,12 @@ bool CWeapon::GetBriefInfo(II_BriefInfo& info)
 }
 
 // Разрешена-ли мгновенная перезарядка из инвентаря
-bool CWeapon::InventoryFastReloadAllowed(bool bForGL)
+bool CWeapon::InventoryFastReloadAllowed(bool bForGL) const
 {
     if (bForGL == true)
         return false;
 
-    return IsMagazine() && ParentIsActor() && (GetMainAmmoElapsed() < GetMainMagSize());
+    return IsMagazine() && C_THIS_WPN->ParentIsActor() && (GetMainAmmoElapsed() < GetMainMagSize());
 }
 
 // Мгновенная перезарядка из инвентаря

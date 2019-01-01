@@ -2281,6 +2281,9 @@
     <Filter Include="Core\Client\Objects\items &amp; weapons\HudItem\PlayerHUD">
       <UniqueIdentifier>{0ce3881c-56c7-46b2-833e-eb6ce7bcf842}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Core\Client\Objects\items &amp; weapons\Weapons\Logics\BipodsParams">
+      <UniqueIdentifier>{516b8421-4c60-4e97-9a38-8826035037b3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="mt_config.h">
@@ -6536,6 +6539,9 @@
     </ClInclude>
     <ClInclude Include="player_hud_item_measures.h">
       <Filter>Core\Client\Objects\items &amp; weapons\HudItem\PlayerHUD</Filter>
+    </ClInclude>
+    <ClInclude Include="Weapon_BipodsParams.h">
+      <Filter>Core\Client\Objects\items &amp; weapons\Weapons\Logics\BipodsParams</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

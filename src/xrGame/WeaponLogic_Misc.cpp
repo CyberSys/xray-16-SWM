@@ -41,7 +41,7 @@ void CWeapon::SetActivationSpeedOverride(Fvector const& speed)
     m_activation_speed_is_overriden = true;
 }
 
-// Получить установленный вектор полёта и (при необходимости) сбросить его в дефолт
+// Получить вектор полёта при выкидывании предмета и (при необходимости) сбросить его в дефолт
 bool CWeapon::ActivationSpeedOverriden(Fvector& dest, bool clear_override)
 {
     if (m_activation_speed_is_overriden)
@@ -151,7 +151,7 @@ BOOL CWeapon::ParentIsActor()
     return EA->cast_actor() != 0;
 }
 
-// Может-ли владелец оружия стрелять "супер"-пулей.
+// Может-ли владелец оружия стрелять "супер"-пулей (пробивает броню ?)
 BOOL CWeapon::ParentMayHaveAimBullet()
 {
     IGameObject*  O  = H_Parent();
@@ -174,7 +174,7 @@ BOOL CWeapon::IsUpdating()
 }
 
 // Проверка можем-ли мы достать детектор в данный момент
-bool CWeapon::DetectorCheckCompability(bool bAllowAim)
+bool CWeapon::DetectorCheckCompability(bool bAllowAim) const
 {
     u32  state     = GetState();
     bool bAimCheck = bAllowAim ? true : !IsZoomed();
@@ -183,7 +183,7 @@ bool CWeapon::DetectorCheckCompability(bool bAllowAim)
 }
 
 // Проверяет нужно-ли скрыть детектор в данный момент
-bool CWeapon::DetectorHideCondition(bool bAllowAim)
+bool CWeapon::DetectorHideCondition(bool bAllowAim) const
 {
     u32  state     = GetState();
     bool bAimCheck = bAllowAim ? false : IsZoomed();
