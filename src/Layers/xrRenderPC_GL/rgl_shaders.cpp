@@ -15,6 +15,7 @@ static inline bool match_shader_id(
 
 /////////
 
+// TODO: OGL: make ignore commented includes
 static inline void load_includes(LPCSTR pSrcData, UINT SrcDataLen, xr_vector<char*>& source, xr_vector<char*>& includes)
 {
     // Copy source file data into a null-terminated buffer
@@ -83,13 +84,12 @@ HRESULT CRender::shader_compile(LPCSTR name, IReader* fs, LPCSTR pFunctionName,
     u32 len = 0;
     // options
     {
-        xr_sprintf(c_smapsize, "%04d", u32(o.smapsize));
+        xr_sprintf(c_smapsize, "%d.0", u32(o.smapsize));
         defines[def_it].Name = "SMAP_size";
         defines[def_it].Definition = c_smapsize;
         def_it++;
-        VERIFY(xr_strlen(c_smapsize) == 4);
-        xr_strcat(sh_name, c_smapsize);
-        len += 4;
+        xr_sprintf(sh_name, "%d", u32(o.smapsize));
+        len += u32(xr_strlen(sh_name));
     }
 
     if (o.fp16_filter)
@@ -566,9 +566,9 @@ HRESULT CRender::shader_compile(LPCSTR name, IReader* fs, LPCSTR pFunctionName,
     xr_sprintf(name_comment, "// %s\n", name);
     const char** sources = xr_alloc<const char*>(sources_len);
 #ifdef DEBUG
-    sources[0] = "#version 450\n#pragma optimize (off)\n";
+    sources[0] = "#version 410\n#pragma optimize (off)\n";
 #else
-    sources[0] = "#version 450\n";
+    sources[0] = "#version 410\n";
 #endif
     sources[1] = name_comment;
     memcpy(sources + 2, defines, def_len * sizeof(char*));

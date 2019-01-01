@@ -6476,6 +6476,7 @@
     <ClInclude Include="AnselManager.h">
       <Filter>Core\Client\Ansel</Filter>
     </ClInclude>
+<<<<<<< HEAD
     <ClInclude Include="attachable_visual.h">
       <Filter>Core\Client\Objects\visuals</Filter>
     </ClInclude>
@@ -6542,6 +6543,10 @@
     </ClInclude>
     <ClInclude Include="Weapon_BipodsParams.h">
       <Filter>Core\Client\Objects\items &amp; weapons\Weapons\Logics\BipodsParams</Filter>
+=======
+    <ClInclude Include="ui\UILoadingScreenHardcoded.h">
+      <Filter>UI\Common\LoadingScreen</Filter>
+>>>>>>> a5cdae92d46f1e09aa75555bfd8afb498f4e84f7
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -9834,9 +9839,6 @@
     </ClCompile>
     <ClCompile Include="WeaponScript.cpp">
       <Filter>Core\Client\Objects\items &amp; weapons\Weapons\WeaponScript</Filter>
-    </ClCompile>
-    <ClCompile Include="ui\UILoadingScreenHardcoded.h">
-      <Filter>UI\Common\LoadingScreen</Filter>
     </ClCompile>
     <ClCompile Include="ui\UISleepStatic.cpp">
       <Filter>UI\UIWindows\Static</Filter>

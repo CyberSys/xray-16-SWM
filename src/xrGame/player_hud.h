@@ -73,9 +73,6 @@ private:
     void update_additional(Fmatrix& trans);
     bool inertion_allowed();
 
-    const Fvector& attach_rot() const;
-    const Fvector& attach_pos() const;
-
     shared_str m_sect_name;
 
     Fmatrix                         m_attach_offset;

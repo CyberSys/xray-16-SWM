@@ -75,10 +75,6 @@ void CHW::CreateDevice(SDL_Window* hWnd)
     Msg("* GPU OpenGL version: %s", glGetString(GL_VERSION));
     Msg("* GPU OpenGL shading language version: %s", glGetString(GL_SHADING_LANGUAGE_VERSION));
 
-    // Clip control ensures compatibility with D3D device coordinates.
-    // TODO: OGL: Fix these differences in the blenders/shaders.
-    CHK_GL(glClipControl(GL_UPPER_LEFT, GL_ZERO_TO_ONE));
-
     //	Create render target and depth-stencil views here
     UpdateViews();
 }
@@ -103,7 +99,6 @@ void CHW::Reset()
 {
     CHK_GL(glDeleteProgramPipelines(1, &pPP));
     CHK_GL(glDeleteFramebuffers(1, &pFB));
-    CHK_GL(glDeleteFramebuffers(1, &pCFB));
 
     CHK_GL(glDeleteTextures(1, &pBaseRT));
     CHK_GL(glDeleteTextures(1, &pBaseZB));
@@ -141,11 +136,9 @@ void CHW::ClearRenderTargetView(GLuint pRenderTargetView, const FLOAT ColorRGBA[
     CHK_GL(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, pRenderTargetView, 0));
 
     // Clear the color buffer without affecting the global state
-    glPushAttrib(GL_COLOR_BUFFER_BIT);
     glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
     glClearColor(ColorRGBA[0], ColorRGBA[1], ColorRGBA[2], ColorRGBA[3]);
     CHK_GL(glClear(GL_COLOR_BUFFER_BIT));
-    glPopAttrib();
 }
 
 void CHW::ClearDepthStencilView(GLuint pDepthStencilView, UINT ClearFlags, FLOAT Depth, UINT8 Stencil)
@@ -162,7 +155,6 @@ void CHW::ClearDepthStencilView(GLuint pDepthStencilView, UINT ClearFlags, FLOAT
     if (ClearFlags & D3D_CLEAR_STENCIL)
         mask |= (u32)GL_STENCIL_BUFFER_BIT;
 
-    glPushAttrib(mask);
     if (ClearFlags & D3D_CLEAR_DEPTH)
     {
         glDepthMask(GL_TRUE);
@@ -174,7 +166,6 @@ void CHW::ClearDepthStencilView(GLuint pDepthStencilView, UINT ClearFlags, FLOAT
         glClearStencil(Stencil);
     }
     CHK_GL(glClear(mask));
-    glPopAttrib();
 }
 
 HRESULT CHW::Present(UINT /*SyncInterval*/, UINT /*Flags*/)

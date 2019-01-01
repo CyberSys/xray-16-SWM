@@ -69,6 +69,9 @@ IC float Area(Fvector& v0, Fvector& v1, Fvector& v2)
 
 void CHOM::Load()
 {
+    if (strstr(Core.Params, "-no_hom") )
+        return;
+
     // Find and open file
     string_path fName;
     FS.update_path(fName, "$level$", "level.hom");
@@ -98,9 +101,7 @@ void CHOM::Load()
     // Create RASTER-triangles
     m_pTris = xr_alloc<occTri>(u32(CL.getTS()));
 
-    tbb::parallel_for(tbb::blocked_range<u32>(0, CL.getTS()), [&](const auto& range)
-    {
-        for (u32 it = range.begin(); it != range.end(); ++it)
+    FOR_START(u32, 0, CL.getTS(), it)
         {
             CDB::TRI& clT = CL.getT()[it];
             occTri& rT = m_pTris[it];
@@ -120,7 +121,7 @@ void CHOM::Load()
             rT.skip = 0;
             rT.center.add(v0, v1).add(v2).div(3.f);
         }
-    });
+    FOR_END
 
     // Create AABB-tree
     m_pModel = new CDB::MODEL();
@@ -163,10 +164,17 @@ void CHOM::Render_DB(CFrustum& base)
 {
     // Update projection matrices on every frame to ensure valid HOM culling
     float view_dim = occ_dim_0;
+#ifndef USE_OGL
+    Fmatrix m_viewport = {view_dim / 2.f, 0.0f, 0.0f, 0.0f, 0.0f, view_dim / 2.f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+        view_dim / 2.f + 0 + 0, view_dim / 2.f + 0 + 0, 0.0f, 1.0f};
+    Fmatrix m_viewport_01 = {1.f / 2.f, 0.0f, 0.0f, 0.0f, 0.0f, 1.f / 2.f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+        1.f / 2.f + 0 + 0, 1.f / 2.f + 0 + 0, 0.0f, 1.0f};
+#else
     Fmatrix m_viewport = {view_dim / 2.f, 0.0f, 0.0f, 0.0f, 0.0f, -view_dim / 2.f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f,
         view_dim / 2.f + 0 + 0, view_dim / 2.f + 0 + 0, 0.0f, 1.0f};
     Fmatrix m_viewport_01 = {1.f / 2.f, 0.0f, 0.0f, 0.0f, 0.0f, -1.f / 2.f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f,
         1.f / 2.f + 0 + 0, 1.f / 2.f + 0 + 0, 0.0f, 1.0f};
+#endif // !USE_OGL
     m_xform.mul(m_viewport, Device.mFullTransform);
     m_xform_01.mul(m_viewport_01, Device.mFullTransform);
 

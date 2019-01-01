@@ -1688,34 +1688,51 @@ public:
 
 class CCC_GSCheckForUpdates : public IConsole_Command
 {
-public:
-    CCC_GSCheckForUpdates(LPCSTR N) : IConsole_Command(N) { bEmptyArgsHandled = true; };
-    virtual void Execute(LPCSTR arguments)
+private:
+    CGameSpy_Patching::PatchCheckCallback m_resultCallbackBinded;
+    std::atomic<bool> m_checkInProgress = false;
+    bool m_informNoPatch = true;
+
+    void xr_stdcall ResultCallback(bool success, pcstr VersionName, pcstr URL)
     {
-        if (!MainMenu())
-            return;
-        /*
-        CGameSpy_Available GSA;
-        shared_str result_string;
-        if (!GSA.CheckAvailableServices(result_string))
+        auto mm = MainMenu();
+        if ((success || m_informNoPatch) && mm != nullptr)
         {
-            Msg(*result_string);
-//			return;
-        };
-        CGameSpy_Patching GameSpyPatching;
-        */
-        bool InformOfNoPatch = true;
-        if (arguments && *arguments)
+            mm->OnPatchCheck(success, VersionName, URL);
+        }
+        m_checkInProgress.store(false);
+    }
+
+    void SetupCallParams(pcstr args)
+    {
+        m_informNoPatch = true;
+        if (args && *args)
         {
             int bInfo = 1;
-            sscanf(arguments, "%d", &bInfo);
-            InformOfNoPatch = (bInfo != 0);
+            sscanf(args, "%d", &bInfo);
+            m_informNoPatch = (bInfo != 0);
         }
+    }
+
+public:
+    CCC_GSCheckForUpdates(LPCSTR N) : IConsole_Command(N)
+    {
+        m_resultCallbackBinded.bind(this, &CCC_GSCheckForUpdates::ResultCallback);
+        bEmptyArgsHandled = true;
+    };
+
+    virtual void Execute(LPCSTR arguments)
+    {
+        auto mm = MainMenu();
+        if (mm == nullptr)
+            return;
+
 #ifdef WINDOWS
-        //		GameSpyPatching.CheckForPatch(InformOfNoPatch);
-        CGameSpy_Patching::PatchCheckCallback cb;
-        cb.bind(MainMenu(), &CMainMenu::OnPatchCheck);
-        MainMenu()->GetGS()->GetGameSpyPatching()->CheckForPatch(InformOfNoPatch, cb);
+        if (!m_checkInProgress.exchange(true))
+        {
+            SetupCallParams(arguments);
+            mm->GetGS()->GetGameSpyPatching()->CheckForPatch(true, m_resultCallbackBinded);
+        }
 #endif
     }
 };

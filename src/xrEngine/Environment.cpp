@@ -104,8 +104,6 @@ CEnvironment::CEnvironment() : CurrentEnv(0), m_ambients_config(0)
     CInifile* config =
         new CInifile(FS.update_path(file_name, "$game_config$", "environment" DELIMITER "environment.ltx"), TRUE, TRUE, FALSE);
 
-    useDynamicSunDir = READ_IF_EXISTS(pSettings, r_bool, OPENXRAY_INI_SECTION, "dynamic_sun_dir", true);
-
     // params
     p_var_alt = deg2rad(config->r_float("environment", "altitude"));
     p_var_long = deg2rad(config->r_float("environment", "delta_longitude"));
@@ -118,6 +116,12 @@ CEnvironment::CEnvironment() : CurrentEnv(0), m_ambients_config(0)
     p_fog_color = config->r_float("environment", "fog_color");
 
     xr_delete(config);
+
+    // OpenXRay environment configuration
+    useDynamicSunDir = READ_IF_EXISTS(pSettingsOpenXRay, r_bool, "environment", "dynamic_sun_dir", true);
+    sunDirAzimuth = READ_IF_EXISTS(pSettingsOpenXRay, r_float, "environment", "sun_dir_azimuth", 0.0f);
+    clamp(sunDirAzimuth, 0.0f, 360.0f);
+    sunDirAzimuth *= (PI / 180.0f);
 }
 
 CEnvironment::~CEnvironment()
@@ -552,7 +556,7 @@ void CEnvironment::calculate_dynamic_sun_dir()
         cosAZ = (_sin(deg2rad(D)) - _sin(LatitudeR) * _cos(SZA)) / sin_SZA_X_cos_Latitude;
 
     clamp(cosAZ, -1.0f, 1.0f);
-    float AZ = acosf(cosAZ);
+    float AZ = acosf(cosAZ) + sunDirAzimuth;
 
     const Fvector2 minAngle = Fvector2().set(deg2rad(1.0f), deg2rad(3.0f));
 

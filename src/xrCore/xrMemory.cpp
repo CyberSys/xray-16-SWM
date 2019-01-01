@@ -96,7 +96,9 @@ void xrMemory::mem_compact()
     которые требуют большие свободные области памяти.
     Но всё-же чистку tbb, возможно, стоит оставить. Но и это под большим вопросом.
     */
-    scalable_allocation_command(TBBMALLOC_CLEAN_ALL_BUFFERS, NULL);
+#ifndef NO_TBB_MALLOC
+    scalable_allocation_command(TBBMALLOC_CLEAN_ALL_BUFFERS, nullptr);
+#endif
     //HeapCompact(GetProcessHeap(), 0);
     if (g_pStringContainer)
         g_pStringContainer->clean();
@@ -110,7 +112,7 @@ void xrMemory::mem_compact()
 }
 
 // xr_strdup
-pstr xr_strdup(pcstr string)
+XRCORE_API pstr xr_strdup(pcstr string)
 {
     VERIFY(string);
     size_t len = xr_strlen(string) + 1;

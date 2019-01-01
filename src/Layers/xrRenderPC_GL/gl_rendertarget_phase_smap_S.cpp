@@ -2,11 +2,10 @@
 
 void CRenderTarget::phase_smap_spot_clear()
 {
-    /*
-    if (RImplementation.b_HW_smap)		u_setrt	(rt_smap_surf, NULL, NULL, rt_smap_d_depth->pRT);
-    else								u_setrt	(rt_smap_surf, NULL, NULL, rt_smap_d_ZB);
-    CHK_DX								(HW.pDevice->Clear( 0L, NULL, D3DCLEAR_ZBUFFER,	0xffffffff,	1.0f, 0L));
-    */
+    if (RImplementation.o.HW_smap)
+        u_setrt(rt_smap_surf, NULL, NULL, rt_smap_depth->pZRT);
+    else
+        VERIFY(!"Use HW SMap only for DX10!");
 
     HW.pDevice->ClearDepthStencilView(rt_smap_depth->pZRT, D3D_CLEAR_DEPTH, 1.0f, 0L);
 }
@@ -66,13 +65,13 @@ void CRenderTarget::phase_smap_spot_tsh(light* L)
         p1.set((_w + .5f) / _w, (_h + .5f) / _h);
 
         FVF::TL* pv = (FVF::TL*)RCache.Vertex.Lock(4, g_combine->vb_stride, Offset);
-        pv->set(EPS, float(_h + EPS), d_Z, d_W, C, p0.x, p1.y);
-        pv++;
         pv->set(EPS, EPS, d_Z, d_W, C, p0.x, p0.y);
         pv++;
-        pv->set(float(_w + EPS), float(_h + EPS), d_Z, d_W, C, p1.x, p1.y);
+        pv->set(EPS, float(_h + EPS), d_Z, d_W, C, p0.x, p1.y);
         pv++;
         pv->set(float(_w + EPS), EPS, d_Z, d_W, C, p1.x, p0.y);
+        pv++;
+        pv->set(float(_w + EPS), float(_h + EPS), d_Z, d_W, C, p1.x, p1.y);
         pv++;
         RCache.Vertex.Unlock(4, g_combine->vb_stride);
         RCache.set_Geometry(g_combine);

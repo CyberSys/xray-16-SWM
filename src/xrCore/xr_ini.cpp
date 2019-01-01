@@ -5,6 +5,7 @@
 
 XRCORE_API CInifile      * pSettings = nullptr; //--#SM+#-- Убираем const - разрешаем запись в system.ltx [allow system.ltx realtime edit from code]
 XRCORE_API CInifile const* pSettingsAuth = nullptr;
+XRCORE_API CInifile const* pSettingsOpenXRay = nullptr;
 
 #if defined(LINUX)
 #include <stdint.h>

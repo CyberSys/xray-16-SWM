@@ -148,10 +148,25 @@ void player_hud::update(const Fmatrix& cam_trans)
     update_inertion(trans);
     update_additional(trans);
 
-    Fvector ypr = attach_rot();
+    Fvector ypr;
+    if (m_attached_items[0])
+        ypr = m_attached_items[0]->hands_attach_rot();
+    else if (m_attached_items[1])
+        ypr = m_attached_items[1]->hands_attach_rot();
+    else
+        ypr = Fvector().set(0, 0, 0);
     ypr.mul(PI / 180.f);
+
+    Fvector pos;
+    if (m_attached_items[0])
+        pos = m_attached_items[0]->hands_attach_pos();
+    else if (m_attached_items[1])
+        pos = m_attached_items[1]->hands_attach_pos();
+    else
+        pos = Fvector().set(0, 0, 0);
+
     m_attach_offset.setHPB(ypr.x, ypr.y, ypr.z);
-    m_attach_offset.translate_over(attach_pos());
+    m_attach_offset.translate_over(pos);
     m_transform.mul(trans, m_attach_offset);
     // insert inertion here
 

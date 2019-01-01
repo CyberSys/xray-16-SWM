@@ -193,26 +193,6 @@ Fvector& attachable_hud_item::hands_offset_rot()
     return m_measures.m_hands_offset[1][idx];
 }
 
-const Fvector& player_hud::attach_rot() const
-{
-    if (m_attached_items[0])
-        return m_attached_items[0]->hands_attach_rot();
-    else if (m_attached_items[1])
-        return m_attached_items[1]->hands_attach_rot();
-    else
-        return Fvector().set(0, 0, 0);
-}
-
-const Fvector& player_hud::attach_pos() const
-{
-    if (m_attached_items[0])
-        return m_attached_items[0]->hands_attach_pos();
-    else if (m_attached_items[1])
-        return m_attached_items[1]->hands_attach_pos();
-    else
-        return Fvector().set(0, 0, 0);
-}
-
 void attachable_hud_item::setup_firedeps(firedeps& fd)
 {
     update(false);
