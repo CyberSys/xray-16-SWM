@@ -638,6 +638,8 @@ void CWeapon::PlayAnimShow()
     if (g_player_hud)
         g_player_hud->attach_item(this);
 
+    UpdateAddonsVisibility();
+
     if (def_IsGL_Mode)
     {
         if (iAmmo == 0)
