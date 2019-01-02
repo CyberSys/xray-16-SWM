@@ -358,7 +358,7 @@ void CWeapon::OnActiveItem()
 }
 
 // Колбек на процесс прятанья оружия
-// UPD: Судя по коду - он никогда не вызывается ... SM_TODO
+// UPD: Судя по коду - он никогда не вызывается ... SM_TODO:M
 void CWeapon::OnHiddenItem()
 {
     inherited::OnHiddenItem();

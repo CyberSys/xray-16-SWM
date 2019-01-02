@@ -531,7 +531,6 @@ void CShootingObject::StartShotParticles()
     StartParticles(pSmokeParticles, *m_sShotParticles, m_vCurrentShootPos, m_vCurrentShootDir, true);
 }
 
-// SM_TODO: М.б лучше на UpdateCL ?
 // Обновление перегрева ствола --#SM+#--
 void CShootingObject::UpdateOverheat(u32 dT)
 {

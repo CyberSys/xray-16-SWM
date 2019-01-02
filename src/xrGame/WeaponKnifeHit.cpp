@@ -19,7 +19,7 @@
 extern BOOL g_bDrawBulletHit;
 #endif //#ifdef DEBUG
 
-#define DEF_KNIFE_MATERIAL_NAME "objects\\knife"
+#define DEF_KNIFE_MATERIAL_NAME "objects" DELIMITER "knife"
 
 // Конструктор
 CWeaponKnifeHit::CWeaponKnifeHit(const shared_str& section, CWeapon* _owner)
@@ -139,7 +139,6 @@ bool CWeaponKnifeHit::KnifeStrike(const Fvector& pos, const Fvector& dir)
     return (bool)Level().ObjectSpace.RayPick(pos, dir, fFireDist, collide::rqtStatic, l_rq, NULL);
 }
 
-// SM_TODO: Причесать код, удалить лишнее
 /////////////////////////////////////////////////////
 
 void CWeaponKnifeHit::MakeShot(Fvector const& pos, Fvector const& dir, float const k_hit)

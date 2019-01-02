@@ -31,7 +31,7 @@ void R_hemi::set_material(float x, float y, float z, float w)
         RCache.set_c(c_material, x, y, z, w);
 }
 
-// Обновляем значения в шейдерных константах //--#SM+#-- //SM_TODO Переместить
+// Обновляем значения в шейдерных константах //--#SM+#-- //SM_TODO:M Переместить
 void R_hemi::c_update(IRenderVisual* pVisual)
 {
     vis_object_data* _data = pVisual->getVisData().obj_data;

@@ -733,7 +733,7 @@ void CWeapon::UpdateAmmoBelt()
                                     sBulletVis = pCartridge->m_sWorldVisual;
                             }
 
-                            //bullet_item->SetVisual(sBulletVis); // SM_TODO: Это рабочий код?
+                            bullet_item->SetVisual(sBulletVis);
                         }
                     }
                     //*************************************************//

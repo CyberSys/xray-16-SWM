@@ -189,6 +189,7 @@ protected:
     u32 m_animation_slot;
 
     bool m_bEnableMovAnimAtCrouch; //--#SM+#--
+    bool m_bEnableIdleAnimRandomST; //--#SM+#--
     float m_fLastAnimStartTime; //--#SM+#--
 
     float m_fIdleSpeedCrouchFactor; //--#SM+#--

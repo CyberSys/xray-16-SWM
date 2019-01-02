@@ -16,13 +16,13 @@ CRocketLauncher::CRocketLauncher()
 {
     //	m_pRocket =  NULL;
 }
+
 CRocketLauncher::~CRocketLauncher() {}
 void CRocketLauncher::Load(LPCSTR section)
 {
-    // SM_TODO: Временное решение --#SM+#--
-    // m_fLaunchSpeed = pSettings->r_float(section, "launch_speed");
-    m_fLaunchSpeed = 40.f;
+    m_fLaunchSpeed = READ_IF_EXISTS(pSettings, r_float, section, "launch_speed", WEAPON_DEFAULT_LAUNCH_SPEED);
 }
+
 void CRocketLauncher::SpawnRocket(const shared_str& rocket_section, CGameObject* parent_rocket_launcher)
 {
     if (OnClient())

@@ -395,7 +395,7 @@ void CWeapon::OnShot(bool bIsRocket, bool bIsBaseDispersionedBullet)
         if (ParentIsActor())
         {
             for (int _idx = 1; _idx <= GetLPCount(); _idx++)
-                CShellLauncher::LaunchShell(_idx, NULL); //SWM_GILZA SM_TODO
+                CShellLauncher::LaunchShell(_idx, NULL); //SM_TODO:M
         }
     }
 }

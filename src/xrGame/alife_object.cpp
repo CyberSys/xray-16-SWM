@@ -100,7 +100,7 @@ void CSE_ALifeObject::spawn_supplies(LPCSTR ini_string)
                     CSE_ALifeItemWeapon* W = smart_cast<CSE_ALifeItemWeapon*>(E);
                     if (W)
                     {
-                        // SM_TODO: Возможность указывать конкретную секцию аддона в xml-е
+                        // SM_TODO:L Возможность указывать конкретную секцию аддона в xml-е
                         Flags8 addon_flags;
 
                         if (W->m_scope_status == ALife::eAddonAttachable && bScope)
@@ -204,7 +204,7 @@ void CSE_ALifeObject::spawn_supplies(LPCSTR ini_string)
                         CSE_ALifeItemWeapon* W = smart_cast<CSE_ALifeItemWeapon*>(E);
                         if (W) //--#SM+#--
                         {
-                            // SM_TODO: Возможность указывать конкретную секцию аддона в xml-е
+                            // SM_TODO:L Возможность указывать конкретную секцию аддона в xml-е
                             Flags8 addon_flags;
 
                             if (W->m_scope_status == ALife::eAddonAttachable && bScope)

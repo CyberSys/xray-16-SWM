@@ -356,7 +356,7 @@ public:
         Pold  = Device.mProject;
         FTold = Device.mFullTransform;
 
-        // SM_TODO --#SM+#--
+        // SM_TODO:M --#SM+#--
         // XXX: Xottab_DUTY: custom FOV. Implement it someday
         // It should be something like this:
         // float customFOV;

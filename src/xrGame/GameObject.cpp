@@ -788,7 +788,7 @@ void CGameObject::spawn_supplies()
                     CSE_ALifeItemWeapon* W = smart_cast<CSE_ALifeItemWeapon*>(A);
                     if (W)
                     { //--#SM+#--
-                      // SM_TODO: Возможность указывать конкретную секцию аддона в xml-е
+                      // SM_TODO:L Возможность указывать конкретную секцию аддона в xml-е
                         Flags8 addon_flags;
 
                         if (W->m_scope_status == ALife::eAddonAttachable && bScope)
@@ -1169,7 +1169,7 @@ void CGameObject::add_visual_callback(visual_callback callback)
     CALLBACK_VECTOR_IT I = std::find(visual_callbacks().begin(), visual_callbacks().end(), callback);
     if (I != visual_callbacks().end())
         return; //--#SM+#-- Код ниже не подразумевает наличие нескольких каллбэков у объекта 
-                // SM_TODO: Разобраться вообще с этими колбеками, зачем тут вектор, если колбек у скелета может быть лишь один (?)
+                // SM_TODO:L Разобраться вообще с этими колбеками, зачем тут вектор, если колбек у скелета может быть лишь один (?)
 
     if (m_visual_callback.empty())
         SetKinematicsCallback(true);

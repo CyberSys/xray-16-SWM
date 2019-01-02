@@ -189,7 +189,7 @@ void attachable_hud_item::set_bone_visible(const shared_str& bone_names, BOOL bV
             m_model->LL_SetBoneVisible(bone_id, bVisibility, TRUE);
         }
 
-        /* --#SM+#-- SM_TODO
+        /* --#SM+#-- SM_TODO:L
         Если к кости привязана геометрия с разными текстурами (surface), то при раскрытии кости
         иногда лишь часть геометрии (с одной текстурой) становится видимой, а другая нет.
         Стабильно это можно увидеть на М4A3 (из SWM 3.0), если одеть прицел и снять, то ручка для

@@ -356,7 +356,7 @@ static class cl_screen_res : public R_constant_setup
     }
 } binder_screen_res;
 
-// SM_TODO: RCache.hemi заменить на более "логичное" место
+// SM_TODO:M RCache.hemi заменить на более "логичное" место
 static class cl_hud_params : public R_constant_setup //--#SM+#--
 {
     virtual void setup(R_constant* C) { RCache.set_c(C, g_pGamePersistent->m_pGShaderConstants->hud_params); }

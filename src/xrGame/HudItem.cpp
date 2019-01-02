@@ -15,6 +15,8 @@
 
 #include "xrUICore/ui_base.h"
 
+extern BOOL g_LogHUDAnims; //--#SM+#--
+
 CHudItem::CHudItem()
 {
     RenderHud(TRUE);
@@ -25,6 +27,7 @@ CHudItem::CHudItem()
     m_started_rnd_anim_idx = u8(-1);
     m_fLastAnimStartTime = 0.0f; //--#SM+#--
     m_bEnableMovAnimAtCrouch = false; //--#SM+#--
+    m_bEnableIdleAnimRandomST = false; //--#SM+#--
     m_fIdleSpeedCrouchFactor = 1.f; //--#SM+#--
     m_fIdleSpeedNoAccelFactor = 1.f; //--#SM+#--
     bIsHUDPresent_prev = false; //--#SM+#--
@@ -49,6 +52,9 @@ void CHudItem::Load(LPCSTR section)
 
 	m_bEnableMovAnimAtCrouch =
         READ_IF_EXISTS(pSettings, r_bool, section, "enable_mov_anim_at_crouch", false); //--#SM+#--
+
+    m_bEnableIdleAnimRandomST =
+        READ_IF_EXISTS(pSettings, r_bool, hud_sect, "enable_idle_anim_random_start_time", false); //--#SM+#--
 
     m_fIdleSpeedCrouchFactor =
         READ_IF_EXISTS(pSettings, r_float, hud_sect, "idle_speed_crouch_factor", 1.f); //--#SM+#--
@@ -295,7 +301,6 @@ CHudItem::motion_params CHudItem::OnBeforeMotionPlayed(const shared_str& sAnmAli
 
         if (!bSprint && strstr(sAnmAlias.c_str(), "anm_idle") != nullptr)
         { // Мы играем Idle анимацию - выставляем её скорость в зависииости от состояния тела игрока
-            // SM_TODO: При перезапуске idle-анимации не начинать её с начала, а выставлять время от прошлой
             bool bCrouch = !!(actor_state & mcCrouch); // На корточках
             bool bZooming = pActor->IsZoomAimingMode(); // Целимся
             bool bNotAccelerated = !isActorAccelerated(actor_state, bZooming); // Зажатый Shift (не ускоряться)
@@ -309,6 +314,9 @@ CHudItem::motion_params CHudItem::OnBeforeMotionPlayed(const shared_str& sAnmAli
             {
                 fIdleAnimSpeedFactor *= m_fIdleSpeedCrouchFactor;
             }
+
+            if (m_bEnableIdleAnimRandomST) // Idle-анимацию играем со случайной позиции (иначе при изменении позиции тела игрок увидит повторения)
+                params.fStartFromTime = Random.randF(0.0f, 1.0f) * -1;
 
             params.fSpeed = fIdleAnimSpeedFactor;
             return params;
@@ -387,8 +395,8 @@ u32 CHudItem::PlayHUDMotion_noCB(const shared_str& sAnmAlias, bool bMixIn, motio
     m_fLastAnimStartTime = fStartFromTime;
 
     // Отыгрываем анимацию или получаем её длину
-    if (bIsHUDPresent) // SM_TODO - закоментировать к релизу или вынести в дебаг-опции
-        Msg("PlayHUDAnim [%s] Mixed = [%d] StartFromTime = [%f] Speed = [%f]", sAnmAlias.c_str(), bMixIn, fSpeed, fSpeed);
+    if (g_LogHUDAnims && bIsHUDPresent)
+        Msg("PlayHUDAnim [%s] Mixed = [%d] StartFromTime = [%f] Speed = [%f]", sAnmAlias.c_str(), bMixIn, fStartFromTime, fSpeed);
 
     if (bIsHUDPresent)
         return pHudItem->anim_play_both(motion_data, bMixIn, false, fSpeed, fStartFromTime);
@@ -454,7 +462,7 @@ bool CHudItem::TryPlayAnimIdle()
 //AVO: check if animation exists
 bool CHudItem::isHUDAnimationExist(pcstr anim_name) //--#SM+#--
 {
-    // SM_TODO: Make more complex check?
+    // SM_TODO:L Make more complex check?
     string256 anim_name_r;
     bool is_16x9 = UI().is_widescreen();
     u16 attach_place_idx = pSettings->r_u16(HudItemData()->m_sect_name, "attach_place_idx");
@@ -479,7 +487,25 @@ void CHudItem::OnMovementChanged(ACTOR_DEFS::EMoveCommand cmd)
         if ((cmd == ACTOR_DEFS::mcAccel) || (cmd == ACTOR_DEFS::mcSprint) ||
             (cmd == ACTOR_DEFS::mcAnyMove)) //--#SM+#-- + ActorAnimation.cpp
         {
-            PlayAnimIdle();
+            bool bCanPlayIdleAnim = true;
+
+            // Если игрок стоит на месте и жмёт Shift - не запускаем анимацию
+            if (cmd == ACTOR_DEFS::mcAccel)
+            {
+                CActor* pActor = smart_cast<CActor*>(object().H_Parent());
+                if (pActor)
+                {
+                    CEntity::SEntityState st;
+                    pActor->g_State(st);
+
+                    if (st.fVelocity < 0.05f)
+                        bCanPlayIdleAnim = false; //--> Скорее всего игрок стоит на месте
+                }
+            }
+
+            if (bCanPlayIdleAnim)
+                PlayAnimIdle();
+
             ResetSubStateTime();
         }
     }

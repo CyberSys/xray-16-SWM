@@ -46,6 +46,7 @@ class CWeaponMagazinedWGrenade;
 #define WEAPON_MAGAZ_3P_HIDE_END_TIME 1700  // Время (в м\сек) по умолчанию, когда показывается магазин (от 3-го лица) после начала перезерадяки
 #define WEAPON_ADDONS_VIS_UPD_INTERVAL 500  // Интервал (в м\сек), через который обновляем визуалы аддонов на оружии
 #define WEAPON_ADDONS_KAR_UPD_INTERVAL 150  // Интервал (в м\сек), через который проверяем что штыковая атака попала в цель
+#define WEAPON_DEFAULT_LAUNCH_SPEED 40.f    // Скорость по умолчанию для запуска ракеты (если не указана в конфигах)
 
 #define C_THIS_WPN const_cast<CWeapon*>(this)
 

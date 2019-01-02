@@ -109,6 +109,8 @@ extern BOOL g_ai_die_in_anomaly;
 int g_inv_highlight_equipped = 0;
 //-Alundaio
 
+BOOL g_LogHUDAnims = 0; //--#SM+#--
+
 void register_mp_console_commands();
 //-----------------------------------------------------------
 
@@ -1801,7 +1803,6 @@ public:
     }
 };
 
-// SM_TODO: Включать только в дебаге\девелопе, MASTER_GOLD?
 // Отыграть худовую анимацию текущего оружия по её anm_ названию из конфига.
 #include "HudItem.h"
 class CCC_HudPlay : public IConsole_Command //--#SM+#--
@@ -1834,11 +1835,14 @@ public:
                         sscanf(param2, "%u", &bMixIn);
                     }
 
-                    active_item->cast_hud_item()->PlayHUDMotion(param1, bMixIn, NULL, NULL);
+                    if (active_item->cast_hud_item()->isHUDAnimationExist(param1))
+                        active_item->cast_hud_item()->PlayHUDMotion(param1, bMixIn, NULL, NULL);
                 }
             }
         }
     }
+
+    virtual void Info(TInfo& I) { xr_strcpy(I, "anm_xxx, [MixIn 0/1] "); }
 };
 
 void CCC_RegisterCommands()
@@ -2283,7 +2287,8 @@ void CCC_RegisterCommands()
 
     CMD4(CCC_Integer, "keypress_on_start", &g_keypress_on_start, 0, 1);
 
-  	CMD1(CCC_HudPlay, "hud_play_anim"); //--#SM+#--
+    CMD1(CCC_HudPlay, "swm_dbg_play_hud_anim"); //--#SM+#--
+    CMD4(CCC_Integer, "swm_dbg_log_hud_anims", &g_LogHUDAnims, 0, 1); //--#SM+#--
 
     register_mp_console_commands();
 }
