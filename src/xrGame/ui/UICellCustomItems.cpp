@@ -685,32 +685,15 @@ bool CUIWeaponCellItem::EqualTo(CUICellItem* itm) //--#SM+#--
     return true;
 }
 
-
+// Индикатор кол-ва одинаковых предметов, что выводится у иконок в инвентаре
 void CUIWeaponCellItem::UpdateItemText() //--#SM+#--
 {
-    // SM_TODO: Разобраться
-    /*
-    CWeapon* pWpn = object()->cast_weapon();
-    if (pWpn && pWpn->IsMagazine())
-    {
-        m_text->Show( false );
-        if ( !m_custom_draw )
-        {
-            string32			str;
-            xr_sprintf			(str, " [%d]", pWpn->GetMainAmmoElapsed());
-            m_text->TextItemControl()->SetText(str);
-            m_text->Show		(true);
-        }
-        return;
-    }
-    */
     inherited::UpdateItemText();
 }
 
 bool CUIWeaponCellItem::GetUtilityBarValue(float& fRetVal) //--#SM+#--
 {
-    // return inherited::GetUtilityBarValue(fRetVal);
-
+    // Для оружейных магазинов рисуем полоску кол-ва оставшихся патронов
     CWeapon* pWpn = object()->cast_weapon();
     if (pWpn && pWpn->IsMagazine())
     {

@@ -211,6 +211,7 @@ void CUICellItem::SetOwnerList(CUIDragDropListEx* p)
 void CUICellItem::UpdateConditionProgressBar()
 {
     // Отрисовка полоски состояния предмета
+    bool bShowConditionBarUI = false; //--#SM+#--
     if (m_pParentList && m_pParentList->GetConditionProgBarVisibility())
     {
         PIItem itm = static_cast<PIItem>(m_pData);
@@ -252,17 +253,17 @@ void CUICellItem::UpdateConditionProgressBar()
 
             m_pConditionState->SetWndPos(Fvector2().set(x, y));
             m_pConditionState->SetProgressPos(iCeil(cond * 13.0f) / 13.0f);
-            m_pConditionState->Show(true);
-            return;
+            bShowConditionBarUI = true; //--#SM+#--
+            // return; //--#SM+#--
         }
     }
-    m_pConditionState->Show(false);
+    m_pConditionState->Show(bShowConditionBarUI); //--#SM+#--
 
 	//--#SM+#-- Begin //
     // Отрисовка полоски с доп информацией
     float fValue = 0.f;
     bool bNeed2ShowUtilityBar = GetUtilityBarValue(fValue);
-
+    bool bShowUtilityBarUI  = false;
     if (m_pParentList && bNeed2ShowUtilityBar == true && m_pParentList->GetConditionProgBarVisibility())
     {
         float x = 1.f;
@@ -285,10 +286,9 @@ void CUICellItem::UpdateConditionProgressBar()
 
         m_pUtilityBar->SetWndPos(Fvector2().set(x, y));
         m_pUtilityBar->SetProgressPos(iCeil(fValue * 13.0f) / 13.0f);
-        m_pUtilityBar->Show(true);
-        return;
+        bShowUtilityBarUI = true;
     }
-    m_pUtilityBar->Show(false);
+    m_pUtilityBar->Show(bShowUtilityBarUI);
     //--#SM+#-- End //
 }
 
