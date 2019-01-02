@@ -98,7 +98,7 @@ void CUIDragDropListEx::OnScrollV(CUIWindow* w, void* pData)
 void CUIDragDropListEx::CreateDragItem(CUICellItem* itm)
 {
     R_ASSERT(!m_drag_item);
-    m_drag_item = itm->CreateDragItem();
+    m_drag_item = itm->CreateDragItem(GetVerticalPlacement()); //--#SM+#--
 
     if (m_drag_item)
     {

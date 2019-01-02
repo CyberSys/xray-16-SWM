@@ -217,15 +217,15 @@
         custom_placement="0" a="0" virtual_cells="1" vc_vert_align="c"
         vc_horiz_align="c"/>
         
-	<dragdrop_pistol x="384" y="14" width="74" height="305"
-		cell_width="33" cell_height="41" rows_num="6" cols_num="2"
+	<dragdrop_pistol x="384" y="14" width="90" height="305"
+		cell_width="41" cell_height="41" rows_num="6" cols_num="2"
 		custom_placement="0" vertical_placement="1" a="0"
-		virtual_cells="1" vc_vert_align="c" vc_horiz_align="c"/>
+		virtual_cells="1" vc_vert_align="c" vc_horiz_align="c"/> <!--#SM+#-->
 
-	<dragdrop_automatic x="563" y="14" width="74" height="305"
-		cell_width="33" cell_height="41" rows_num="6" cols_num="2"
+	<dragdrop_automatic x="563" y="14" width="90" height="305"
+		cell_width="41" cell_height="41" rows_num="6" cols_num="2"
 		custom_placement="0" vertical_placement="1" a="0"
-		virtual_cells="1" vc_vert_align="c" vc_horiz_align="c" />
+		virtual_cells="1" vc_vert_align="c" vc_horiz_align="c" /> <!--#SM+#-->
 
 	<dragdrop_actor_trade x="662" y="114" width="250" height="164"
 		cell_width="33" cell_height="41" rows_num="4" cols_num="7"

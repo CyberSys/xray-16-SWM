@@ -62,7 +62,7 @@ public:
     IC const Ivector2& GetGridSize() { return m_grid_size; }; // size in grid
     IC void SetAccelerator(int dik) { m_accelerator = dik; };
     IC int GetAccelerator() const { return m_accelerator; };
-    virtual CUIDragItem* CreateDragItem();
+    virtual CUIDragItem* CreateDragItem(bool bRotate = false); //--#SM+#--
 
     CUIDragDropListEx* OwnerList() { return m_pParentList; }
     void SetOwnerList(CUIDragDropListEx* p);
