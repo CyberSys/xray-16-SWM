@@ -2,8 +2,8 @@
 /***** Состояние "Доставание оружия" *****/ //--#SM+#--
 /*****************************************/
 
-#include "stdafx.h"
-#include "Weapon_Shared.h"
+#include "StdAfx.h"
+#include "Weapon.h"
 
 // Переключение стэйта на "Доставание"
 void CWeapon::switch2_Showing()

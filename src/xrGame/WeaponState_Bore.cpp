@@ -2,8 +2,8 @@
 /***** Состояние "Скука" *****/ //--#SM+#--
 /*****************************/
 
-#include "stdafx.h"
-#include "Weapon_Shared.h"
+#include "StdAfx.h"
+#include "Weapon.h"
 
 // Пробуем начать скуку на клиенте
 bool CWeapon::Try2Bore(bool bCheckOnlyMode)

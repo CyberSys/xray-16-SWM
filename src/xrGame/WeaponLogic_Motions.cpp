@@ -2,8 +2,9 @@
 /***** Анимации и звуки оружия *****/ //--#SM+#--
 /***********************************/
 
-#include "stdafx.h"
-#include "Weapon_Shared.h"
+#include "StdAfx.h"
+#include "Weapon.h"
+#include "player_hud.h"
 
 // Колбэк на конец анимации
 void CWeapon::OnAnimationEnd(u32 state)

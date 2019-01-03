@@ -2,11 +2,8 @@
 /***** Разброс при стрельбе *****/ //--#SM+#--
 /********************************/
 
-#include "stdafx.h"
-#include "Weapon_Shared.h"
-
-#include "effectorshot.h"
-#include "EffectorShotX.h"
+#include "StdAfx.h"
+#include "Weapon.h"
 
 // Возвращает 1, если оружие в отличном состоянии и >1 если повреждено
 float CWeapon::GetConditionDispersionFactor() const { return (1.f + fireDispersionConditionFactor * (1.f - GetCondition())); }

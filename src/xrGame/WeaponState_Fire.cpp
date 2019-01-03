@@ -2,14 +2,17 @@
 /***** Состояние "Стрельба" *****/ //--#SM+#--
 /********************************/
 
-#include "stdafx.h"
-#include "Weapon_Shared.h"
+#include "StdAfx.h"
+#include "Weapon.h"
 
-#include "effectorshot.h"
-#include "level_bullet_manager.h"
-#include "game_cl_mp.h"
 #include "reward_event_generator.h"
 #include "HUDManager.h"
+#include "ExplosiveRocket.h"
+#include "MPPlayersBag.h"
+
+#ifdef DEBUG
+#include "object_handler_planner.h"
+#endif
 
 // Пробуем начать стрельбу на клиенте
 bool CWeapon::Try2Fire(bool bCheckOnlyMode)

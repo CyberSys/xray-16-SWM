@@ -2,8 +2,8 @@
 /***** Состояние "Оружие спрятано" *****/ //--#SM+#--
 /***************************************/
 
-#include "stdafx.h"
-#include "Weapon_Shared.h"
+#include "StdAfx.h"
+#include "Weapon.h"
 #include "Weapon_AmmoCompress.h"
 
 // Переключение стэйта на "Спрятано"

@@ -1,5 +1,5 @@
-#include "stdafx.h"
-#include "Weapon_Shared.h"
+#include "StdAfx.h"
+#include "Weapon.h"
 
 /**************************************/
 /***** Код для работы с патронами *****/ //--#SM+#--

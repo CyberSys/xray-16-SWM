@@ -50,6 +50,13 @@ class CWeaponMagazinedWGrenade;
 
 #define C_THIS_WPN const_cast<CWeapon*>(this)
 
+extern BOOL b_toggle_weapon_aim;
+extern CUIXml* pWpnScopeXml;
+extern u32 hud_adj_mode;
+
+ENGINE_API extern float psHUD_FOV;
+ENGINE_API extern float psHUD_FOV_def;
+
 class CWeapon : public CHudItemObject, //--> Имеет худ
                 public CShootingObject, //--> Может стрелять пулями
                 public CRocketLauncher, //--> Может стрелять ракетами

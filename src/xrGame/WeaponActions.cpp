@@ -1,8 +1,9 @@
-#include "stdafx.h"
-#include "Torch.h"
-#include "Weapon_Shared.h"
+#include "StdAfx.h"
+#include "Weapon.h"
 #include "WeaponBinocularsVision.h"
 #include "Weapon_AmmoCompress.h"
+#include "player_hud.h"
+#include "Torch.h"
 
 /**********************************************/
 /***** Различные колбэки, экшены и эвенты *****/ //--#SM+#--

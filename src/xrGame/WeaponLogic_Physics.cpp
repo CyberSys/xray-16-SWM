@@ -2,8 +2,8 @@
 /***** Физика оружия, и всё что с ней связано *****/ //--#SM+#--
 /**************************************************/
 
-#include "stdafx.h"
-#include "Weapon_Shared.h"
+#include "StdAfx.h"
+#include "Weapon.h"
 
 // Создать физическую оболочку
 void CWeapon::create_physic_shell() { CPhysicsShellHolder::create_physic_shell(); }

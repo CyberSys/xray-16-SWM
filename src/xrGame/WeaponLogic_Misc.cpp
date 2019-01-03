@@ -2,8 +2,8 @@
 /***** Модуль с различными функциями *****/ //--#SM+#--
 /*****************************************/
 
-#include "stdafx.h"
-#include "Weapon_Shared.h"
+#include "StdAfx.h"
+#include "Weapon.h"
 
 // Проверка требуется ли удалить объект (например бесхозный)
 int  g_iWeaponRemove = 1;

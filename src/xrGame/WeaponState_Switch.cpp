@@ -2,8 +2,8 @@
 /***** Состояние "Переключение шутера\режима стрельбы" *****/ //--#SM+#--
 /***********************************************************/
 
-#include "stdafx.h"
-#include "Weapon_Shared.h"
+#include "StdAfx.h"
+#include "Weapon.h"
 
 // Пробуем начать смену режима на клиенте
 bool CWeapon::Try2Switch(bool bCheckOnlyMode)

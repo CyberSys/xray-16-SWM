@@ -2,13 +2,13 @@
 /***** Сошки для оружия *****/ //--#SM+#--
 /*******************************/
 
-#include "stdafx.h"
-#include "Weapon_Shared.h"
+#include "StdAfx.h"
+#include "Weapon.h"
 
-#include "attachable_visual.h"
-#include "CameraFirstEye.h"
 #include "HUDManager.h"
+#include "player_hud.h"
 #include "xrPhysics/ActorCameraCollision.h"
+
 
 //#define DEBUG_DISABLE_COLLIDE_CHECK		// Отключить проверку на коллизию камеры
 //#define DEBUG_DISABLE_MODEL_ANIMATED		// Отключить анимированное движение сошек

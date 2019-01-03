@@ -3,7 +3,7 @@
 /*****************************************/
 
 #include "StdAfx.h"
-#include "Weapon_Shared.h"
+#include "Weapon.h"
 
 static bool process_if_exists_deg2rad(LPCSTR section, LPCSTR name, float& value, bool test)
 {

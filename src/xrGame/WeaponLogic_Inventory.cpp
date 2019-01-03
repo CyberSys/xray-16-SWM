@@ -2,8 +2,8 @@
 /***** Различные функции для инвентаря *****/ //--#SM+#--
 /*******************************************/
 
-#include "stdafx.h"
-#include "Weapon_Shared.h"
+#include "StdAfx.h"
+#include "Weapon.h"
 
 // Получить текущий вес оружия
 float CWeapon::Weight() const

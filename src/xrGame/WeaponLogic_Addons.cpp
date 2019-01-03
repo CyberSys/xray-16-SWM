@@ -1,5 +1,6 @@
-#include "stdafx.h"
-#include "Weapon_Shared.h"
+#include "StdAfx.h"
+#include "Weapon.h"
+#include "player_hud.h"
 
 /*************************/
 /***** Аддоны оружия *****/ //--#SM+#--

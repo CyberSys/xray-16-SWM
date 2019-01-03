@@ -2,11 +2,17 @@
 /***** Код для рендеринга оружия *****/ //--#SM+#--
 /*************************************************/
 
-#include "stdafx.h"
-#include "Weapon_Shared.h"
+#include "StdAfx.h"
+#include "Weapon.h"
 #include "WeaponBinocularsVision.h"
+
 #include "attachable_visual.h"
 #include "HUDManager.h"
+#include "player_hud.h"
+
+#ifdef DEBUG
+#include "debug_renderer.h"
+#endif
 
 #define BULLET_BONE_NAME "wpn_bullet" // Имя кости, вариации которой будут показаны\скрыты в зависимости от числа патронов в оружии
 

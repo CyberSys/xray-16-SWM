@@ -2,11 +2,11 @@
 /***** Упаковщик для сохранения и загрузки патронов  *****/ //--#SM+#--
 /*********************************************************/
 
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "Weapon_AmmoCompress.h"
 
 #ifdef XRGAME_EXPORTS
-    #include "Weapon_Shared.h"
+    #include "Weapon.h"
 #endif
 
 // Добавить патронов соответствующего типа в переданный ammo_pair

@@ -2,10 +2,14 @@
 /***** Логика зума и прицеливания *****/ //--#SM+#--
 /**************************************/
 
-#include "stdafx.h"
-#include "Weapon_Shared.h"
+#include "StdAfx.h"
+#include "Weapon.h"
 #include "WeaponBinocularsVision.h"
+
 #include "Torch.h"
+#include "ActorEffector.h"
+#include "EffectorZoomInertion.h"
+#include "GamePersistent.h"
 
 // Получить необходимые параметры для динамического зума
 void GetZoomData(const float scope_factor, float& delta, float& min_zoom_factor, bool bOldMode = true)

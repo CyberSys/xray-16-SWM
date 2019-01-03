@@ -2,8 +2,8 @@
 /***** Состояние "Осечки" *****/ //--#SM+#--
 /******************************/
 
-#include "stdafx.h"
-#include "Weapon_Shared.h"
+#include "StdAfx.h"
+#include "Weapon.h"
 
 // Требуется перейти в состояние осечки
 void CWeapon::Need2Misfire() { SwitchState(eMisfire); }
