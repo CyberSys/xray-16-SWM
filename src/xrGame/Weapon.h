@@ -121,6 +121,8 @@ public:
     virtual float Weight() const;
     virtual u32 Cost() const;
 
+    virtual bool InventoryEqualTo(CWeapon* pWpnRef) const;
+
 //======================= Апгрейды =======================//
 private:
     virtual void net_Spawn_install_upgrades(Upgrades_type saved_upgrades);
@@ -720,6 +722,8 @@ public:
     IC void SetMainAmmoType(u8 type) { SetAmmoTypeSafeFor(type, false); }
     IC void SetGLAmmoType(u8 type) { SetAmmoTypeSafeFor(type, true); }
     bool SwitchAmmoType();
+
+    CartridgesInfoMap CWeapon::GetAmmoInfo(bool bForGL) const;
 
     int GetAmmoCount(u8 ammo_type) const;
     int GetAmmoCount2(u8 ammo2_type) const;

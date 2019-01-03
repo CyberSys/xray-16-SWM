@@ -29,6 +29,37 @@ bool CWeapon::IsAmmoAvailable() const
     return (false);
 }
 
+// Получить информацию об используемых типах патронов, и об их кол-ве
+CartridgesInfoMap CWeapon::GetAmmoInfo(bool bForGL) const
+{
+    CartridgesInfoMap result;
+    result.clear();
+
+    // Находим нужный магазин
+    xr_vector<CCartridge*>* pVMagaz;
+    if (bForGL)
+        pVMagaz = (m_bGrenadeMode ? &C_THIS_WPN->m_magazine : &C_THIS_WPN->m_magazine2);
+    else
+        pVMagaz = (m_bGrenadeMode ? &C_THIS_WPN->m_magazine2 : &C_THIS_WPN->m_magazine);
+
+    // Собираем инфу о его патронах
+    if (pVMagaz->size() > 0)
+    {
+        for (u32 i = 0; i < pVMagaz->size(); i++)
+        {
+            CCartridge* pBullet = pVMagaz->at(i);
+            u8 iAmmoType = pBullet->m_LocalAmmoType;
+
+            if (result.count(iAmmoType) <= 0)
+                result[iAmmoType] = cartridge_info(pBullet, iAmmoType, 0);
+
+            result[iAmmoType].ammo_cnt++;
+        }
+    }
+
+    return result;
+}
+
 // Подсчитать кол-во доступных патронов всех типов для данного оружия (основной ствол)
 int CWeapon::GetSuitableAmmoTotal(bool use_item_to_spawn) const
 {

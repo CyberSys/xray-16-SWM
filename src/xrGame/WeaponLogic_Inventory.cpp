@@ -130,6 +130,40 @@ bool CWeapon::IsNecessaryItem(const shared_str& item_sect)
             std::find(m_ammoTypes2.begin(), m_ammoTypes2.end(), item_sect) != m_ammoTypes2.end());
 }
 
+// Сравнение двух CWeapon (для склеивания ячеек в инвентаре)
+bool CWeapon::InventoryEqualTo(CWeapon* pWpnRef) const
+{
+    // Сравнение двух магазинов
+    if (this->IsMagazine() && pWpnRef->IsMagazine())
+    {
+        // Сверяем макс. размер магазина
+        bool bIsMainMagSizeEqual = this->GetMainMagSize() == pWpnRef->GetMainMagSize();
+        if (!bIsMainMagSizeEqual)
+            return false;
+
+        // Сверяем текущее кол-во патронов
+        bool bIsAmmoCntEqual = this->GetMainAmmoElapsed() == pWpnRef->GetMainAmmoElapsed();
+        if (!bIsAmmoCntEqual)
+            return false;
+
+        // Сверяем текущий тип патронов
+        bool bIsAmmoTypeEqual = this->GetMainAmmoType() == pWpnRef->GetMainAmmoType();
+        if (!bIsAmmoTypeEqual)
+            return false;
+
+        // Сверяем типы патронов в основном магазине
+        CartridgesInfoMap AmmoDataRef = pWpnRef->GetAmmoInfo(false);
+        if (AmmoDataRef.size() > 1)
+            return false; //--> Магазин со смешанным типом патронов внутри никогда не склеиваем
+    }
+
+    // Сравнение аддонов
+    if (this->IsAddonsEqual(pWpnRef) == false)
+        return false;
+
+    return true;
+}
+
 // Получить необходимую информацию о предмете для UI
 bool CWeapon::GetBriefInfo(II_BriefInfo& info)
 {

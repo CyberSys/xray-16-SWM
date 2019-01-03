@@ -2,6 +2,21 @@
 #include "inventory_item_object.h"
 #include "anticheat_dumpable_object.h"
 
+struct cartridge_info //--#SM+#--
+{
+    CCartridge* pBullet;
+    u8 type_idx; //--> Индекс патрона в ammo_type для текущего CWeapon
+    u32 ammo_cnt; //--> Число патронов данного типа для текущего CWeapon
+
+    cartridge_info() {};
+    cartridge_info(CCartridge* _pBullet, u8 _type_idx, u32 _ammo_cnt):
+        pBullet(_pBullet),
+        type_idx(_type_idx),
+        ammo_cnt(_ammo_cnt)
+    {}
+};
+using CartridgesInfoMap = xr_map<u8, cartridge_info>; //--> ammo_type, cartridge_info
+
 struct SCartridgeParam
 {
     float kDist, kDisp, kHit /*, kCritical*/, kImpulse, kAP, kAirRes;

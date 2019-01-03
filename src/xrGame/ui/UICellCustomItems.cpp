@@ -680,14 +680,8 @@ bool CUIWeaponCellItem::EqualTo(CUICellItem* itm) //--#SM+#--
 	CWeapon* pWpn = object()->cast_weapon();
     CWeapon* pWpn2 = ci->object()->cast_weapon();
 
-    if (pWpn != NULL && pWpn2 != NULL && pWpn->IsMagazine() && pWpn2->IsMagazine())
-    {
-        return (pWpn->GetMainMagSize() == pWpn2->GetMainMagSize()) &&
-            (pWpn->GetMainAmmoElapsed() == pWpn2->GetMainAmmoElapsed());
-    }
-
-    if (!object()->IsAddonsEqual(ci->object()))
-        return false;
+    if (pWpn != nullptr && pWpn2 != nullptr)
+        return pWpn->InventoryEqualTo(pWpn2);
 
     return true;
 }
