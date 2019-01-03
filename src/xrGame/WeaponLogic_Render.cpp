@@ -4,6 +4,7 @@
 
 #include "StdAfx.h"
 #include "Weapon.h"
+#include "WeaponKnifeHit.h"
 #include "WeaponBinocularsVision.h"
 
 #include "attachable_visual.h"

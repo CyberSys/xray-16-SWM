@@ -1,5 +1,6 @@
 #include "StdAfx.h"
 #include "Weapon.h"
+#include "WeaponKnifeHit.h"
 
 /************************************/
 /***** Загрузка конфигов оружия *****/ //--#SM+#--

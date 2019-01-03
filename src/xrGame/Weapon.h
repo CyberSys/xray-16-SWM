@@ -4,26 +4,20 @@
 /***** Класс универсального оружия *****/ //--#SM+#--
 /******************************************/
 
-#include "Include/xrRender/KinematicsAnimated.h"
-#include "xrPhysics/PhysicsShell.h"
-#include "PHShellCreator.h"
-#include "ai_sounds.h"
 #include "hud_item_object.h"
-#include "Actor_Flags.h"
 #include "ShootingObject.h"
 #include "RocketLauncher.h"
 #include "ShellLauncher.h"
-#include "WeaponKnifeHit.h"
-#include "WeaponAmmo.h"
-#include "CameraRecoil.h"
-#include "firedeps.h"
-#include "first_bullet_controller.h"
-#include "Common/object_broker.h"
-#include "game_cl_single.h"
-#include "Weapon_AmmoCompress.h"
+
 #include "Weapon_AddonData.h"
 #include "Weapon_ZoomParams.h"
 #include "Weapon_BipodsParams.h"
+
+#include "firedeps.h"
+#include "first_bullet_controller.h"
+#include "CameraRecoil.h"
+
+#include "game_cl_single.h"
 
 class CEntity;
 class ENGINE_API CMotionDef;

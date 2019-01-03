@@ -4,6 +4,7 @@
 
 #include "StdAfx.h"
 #include "Weapon.h"
+#include "WeaponKnifeHit.h"
 
 // Пробуем начать приклад на клиенте
 bool CWeapon::Try2Kick(bool bCheckOnlyMode)

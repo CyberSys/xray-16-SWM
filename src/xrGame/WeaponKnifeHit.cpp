@@ -2,7 +2,9 @@
 /***** Удар ножом (урон по сфере)  ********/ //--#SM+#--
 /*********************************************/
 
-#include "stdafx.h"
+#include "StdAfx.h"
+#include "WeaponKnife.h"
+#include "WeaponKnifeHit.h"
 
 #include "xrEngine/gamemtllib.h"
 #include "xrCore/Animation/SkeletonMotions.hpp"
@@ -12,7 +14,6 @@
 #include "Actor.h"
 #include "Entity.h"
 #include "ActorEffector.h"
-#include "WeaponKnife.h"
 
 #ifdef DEBUG
 #include "debug_renderer.h"

@@ -4,6 +4,7 @@
 
 #include "StdAfx.h"
 #include "Weapon.h"
+#include "WeaponKnifeHit.h"
 #include "player_hud.h"
 
 // Колбэк на конец анимации
