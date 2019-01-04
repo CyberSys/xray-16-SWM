@@ -285,7 +285,7 @@ void CUIWeaponCellItem::Update()
     bool b = Heading();
     inherited::Update();
 
-    bool bForceReInitAddons = (b != Heading());
+    bool bForceReInitAddons = (b != Heading()) || object()->Need2UpdateIcon(); //--#SM+#--
 
     if (object()->SilencerAttachable())
     {
@@ -431,6 +431,8 @@ void CUIWeaponCellItem::Update()
                 DestroyIcon(eSpecial_4);
         }
     }
+
+    object()->SetUpdateIcon(false); //--#SM+#--
 }
 
 void CUIWeaponCellItem::SetTextureColor(u32 color)

@@ -63,6 +63,8 @@ private:
     typedef CHudItemObject inherited;
 
 protected:
+    bool m_bNeed2UpdateIcon; //--> True если необходимо перерисовать иконку оружия в инвентаре (аддоны)
+
     // Время удаления бесхозного оружия
     ALife::_TIME_ID m_dwWeaponRemoveTime;
     ALife::_TIME_ID m_dwWeaponIndependencyTime;
@@ -121,7 +123,10 @@ public:
     virtual float Weight() const;
     virtual u32 Cost() const;
 
+    // Инвентарные проверки
     virtual bool InventoryEqualTo(CWeapon* pWpnRef) const;
+    IC bool Need2UpdateIcon() const { return m_bNeed2UpdateIcon; }
+    IC void SetUpdateIcon(bool bValue) { m_bNeed2UpdateIcon = bValue; }
 
 //======================= Апгрейды =======================//
 private:

@@ -86,63 +86,67 @@ bool CUIActorMenu::OnItemDrop(CUICellItem* itm)
         Msg("incorrect action [%d]->[%d]", t_old, t_new);
         return true;
     }
-    switch (t_new)
-    {
-    case iTrashSlot:
-    {
-        if (CurrentIItem()->IsQuestItem())
-            return true;
 
-        if (t_old == iQuickSlot)
+    bool bCustomAction = OnItemDropped(CurrentIItem(), new_owner, old_owner); //--#SM+#--
+    if (bCustomAction == false)
+    {
+        switch (t_new)
         {
-            old_owner->RemoveItem(itm, false);
-            return true;
+        case iTrashSlot:
+        {
+            if (CurrentIItem()->IsQuestItem())
+                return true;
+
+            if (t_old == iQuickSlot)
+            {
+                old_owner->RemoveItem(itm, false);
+                return true;
+            }
+            SendEvent_Item_Drop(CurrentIItem(), m_pActorInvOwner->object_id());
+            SetCurrentItem(NULL);
         }
-        SendEvent_Item_Drop(CurrentIItem(), m_pActorInvOwner->object_id());
-        SetCurrentItem(NULL);
+        break;
+        case iActorSlot:
+        {
+            //.			if(GetSlotList(CurrentIItem()->GetSlot())==new_owner)
+            u16 slot_to_place;
+            if (CanSetItemToList(CurrentIItem(), new_owner, slot_to_place))
+                ToSlot(itm, true, slot_to_place);
+        }
+        break;
+        case iActorBag: { ToBag(itm, true);
+        }
+        break;
+        case iActorBelt: { ToBelt(itm, true);
+        }
+        break;
+        case iActorTrade: { ToActorTrade(itm, true);
+        }
+        break;
+        case iPartnerTrade:
+        {
+            if (t_old != iPartnerTradeBag)
+                return false;
+            ToPartnerTrade(itm, true);
+        }
+        break;
+        case iPartnerTradeBag:
+        {
+            if (t_old != iPartnerTrade)
+                return false;
+            ToPartnerTradeBag(itm, true);
+        }
+        break;
+        case iDeadBodyBag: { ToDeadBodyBag(itm, true);
+        }
+        break;
+        case iQuickSlot: { ToQuickSlot(itm);
+        }
+        break;
+        };
     }
-    break;
-    case iActorSlot:
-    {
-        //.			if(GetSlotList(CurrentIItem()->GetSlot())==new_owner)
-        u16 slot_to_place;
-        if (CanSetItemToList(CurrentIItem(), new_owner, slot_to_place))
-            ToSlot(itm, true, slot_to_place);
-    }
-    break;
-    case iActorBag: { ToBag(itm, true);
-    }
-    break;
-    case iActorBelt: { ToBelt(itm, true);
-    }
-    break;
-    case iActorTrade: { ToActorTrade(itm, true);
-    }
-    break;
-    case iPartnerTrade:
-    {
-        if (t_old != iPartnerTradeBag)
-            return false;
-        ToPartnerTrade(itm, true);
-    }
-    break;
-    case iPartnerTradeBag:
-    {
-        if (t_old != iPartnerTrade)
-            return false;
-        ToPartnerTradeBag(itm, true);
-    }
-    break;
-    case iDeadBodyBag: { ToDeadBodyBag(itm, true);
-    }
-    break;
-    case iQuickSlot: { ToQuickSlot(itm);
-    }
-    break;
-    };
 
-    OnItemDropped(CurrentIItem(), new_owner, old_owner);
-
+    //--#SM+#--
     UpdateConditionProgressBars();
     UpdateItemsPlace();
 

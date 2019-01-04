@@ -1023,6 +1023,8 @@ bool CWeapon::Attach(PIItem pIItem, bool b_send_event, bool b_from_actor_menu)
     if (CanAttach(pIItem) == false)
         return false; //--> Дублирующая проверка
 
+    SetUpdateIcon(true); //--> Форсируем обновление иконки
+
     bool result = false;
 
     // Проверяем есть-ли у предмета слот в этом оружии
@@ -1131,6 +1133,8 @@ bool CWeapon::Detach(const char* item_section_name, bool b_spawn_item, bool b_fr
 {
     if (CanDetach(item_section_name) == false)
         return false; //--> Дублирующая проверка
+
+    SetUpdateIcon(true); //--> Форсируем обновление иконки
 
     bool detached = false;
 
