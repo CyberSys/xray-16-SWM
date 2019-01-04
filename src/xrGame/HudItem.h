@@ -34,6 +34,7 @@ private:
 
 protected:
     u32 m_dw_curr_substate_time;
+    u32 m_dw_last_movement_changed_time; //--#SM+#--
 
 public:
     CHUDState() { m_hud_item_state = eHidden; m_dw_curr_state_time = Device.dwTimeGlobal; SetState(m_hud_item_state); } //--#SM+#--

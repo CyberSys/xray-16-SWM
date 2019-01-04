@@ -31,6 +31,7 @@ CHudItem::CHudItem()
     m_fIdleSpeedCrouchFactor = 1.f; //--#SM+#--
     m_fIdleSpeedNoAccelFactor = 1.f; //--#SM+#--
     bIsHUDPresent_prev = false; //--#SM+#--
+    m_dw_last_movement_changed_time = 0; //--#SM+#--
 }
 
 IFactoryObject* CHudItem::_construct()
@@ -54,7 +55,7 @@ void CHudItem::Load(LPCSTR section)
         READ_IF_EXISTS(pSettings, r_bool, section, "enable_mov_anim_at_crouch", false); //--#SM+#--
 
     m_bEnableIdleAnimRandomST =
-        READ_IF_EXISTS(pSettings, r_bool, hud_sect, "enable_idle_anim_random_start_time", false); //--#SM+#--
+        READ_IF_EXISTS(pSettings, r_bool, hud_sect, "enable_idle_anim_random_start_time", true); //--#SM+#--
 
     m_fIdleSpeedCrouchFactor =
         READ_IF_EXISTS(pSettings, r_float, hud_sect, "idle_speed_crouch_factor", 1.f); //--#SM+#--
@@ -315,7 +316,9 @@ CHudItem::motion_params CHudItem::OnBeforeMotionPlayed(const shared_str& sAnmAli
                 fIdleAnimSpeedFactor *= m_fIdleSpeedCrouchFactor;
             }
 
-            if (m_bEnableIdleAnimRandomST) // Idle-анимацию играем со случайной позиции (иначе при изменении позиции тела игрок увидит повторения)
+            // Idle-анимацию играем со случайной позиции (иначе при изменении позиции тела игрок увидит повторения)
+            // m_dw_last_movement_changed_time нужен, чтобы idle-анимации без stop_at_end "не колошматило" при перезапуске
+            if (m_bEnableIdleAnimRandomST && (Device.dwTimeGlobal - m_dw_last_movement_changed_time <= 100))
                 params.fStartFromTime = Random.randF(0.0f, 1.0f) * -1;
 
             params.fSpeed = fIdleAnimSpeedFactor;
@@ -482,6 +485,8 @@ void CHudItem::PlayAnimIdleMoving() { PlayHUDMotion("anm_idle_moving", true, nul
 void CHudItem::PlayAnimIdleSprint() { PlayHUDMotion("anm_idle_sprint", true, nullptr, GetState()); }
 void CHudItem::OnMovementChanged(ACTOR_DEFS::EMoveCommand cmd)
 {
+    m_dw_last_movement_changed_time = Device.dwTimeGlobal; //--#SM+#--
+
     if (GetState() == eIdle && !m_bStopAtEndAnimIsRunning)
     {
         if ((cmd == ACTOR_DEFS::mcAccel) || (cmd == ACTOR_DEFS::mcSprint) ||
@@ -489,17 +494,17 @@ void CHudItem::OnMovementChanged(ACTOR_DEFS::EMoveCommand cmd)
         {
             bool bCanPlayIdleAnim = true;
 
-            // Если игрок стоит на месте и жмёт Shift - не запускаем анимацию
+            // Если игрок стоит во весь рост на месте и жмёт Shift - не перезапускаем анимацию
             if (cmd == ACTOR_DEFS::mcAccel)
             {
                 CActor* pActor = smart_cast<CActor*>(object().H_Parent());
-                if (pActor)
+                if (pActor && pActor->AnyMove() == false)
                 {
                     CEntity::SEntityState st;
                     pActor->g_State(st);
 
-                    if (st.fVelocity < 0.05f)
-                        bCanPlayIdleAnim = false; //--> Скорее всего игрок стоит на месте
+                    if (st.bCrouch == false && st.fVelocity <= 0.002f)
+                        bCanPlayIdleAnim = false; //--> Игрок стоит на месте во весь рост
                 }
             }
 
