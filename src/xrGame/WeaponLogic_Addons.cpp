@@ -1071,12 +1071,15 @@ bool CWeapon::AttachMagazine(CWeapon* pMagazineItem, bool b_send_event, bool b_w
     if (m_bUseMagazines == false)
         return Attach((PIItem)pMagazineItem, b_send_event, false);
 
+    // Проверяем на возможность проигрывания анимации
+    bool bCanPlayAnim = b_with_anim && !IsHidden();
+
     // Если уже стоит магазин - пробуем его снять
-    if (!b_with_anim && GetAddonBySlot(eMagaz)->bActive == true)
-        Detach(pMagazineItem->cNameSect_str(), MagazineAttachable(), false);
+    if (!bCanPlayAnim && GetAddonBySlot(eMagaz)->bActive == true)
+        Detach(GetAddonBySlot(eMagaz)->GetAddonName().c_str(), MagazineAttachable(), false);
 
     //>>> Код установки магазина для оружия с магазинным питанием находится здесь <<<//
-    if (b_with_anim && !IsHidden() && ParentIsActor())
+    if (bCanPlayAnim && ParentIsActor())
     { //--> Вызываем анимацию, которая по окончанию установит магазин
         if (GetState() == eSwitchMag)
             return false;
@@ -1168,8 +1171,11 @@ bool CWeapon::DetachMagazine(const char* item_section_name, bool b_spawn_item, b
     if (m_bUseMagazines == false)
         return Detach(item_section_name, b_spawn_item);
 
+    // Проверяем на возможность проигрывания анимации
+    bool bCanPlayAnim = b_with_anim && !IsHidden();
+
     //>>> Код снятия магазина для оружия с магазинным питанием находится здесь <<<//
-    if (b_with_anim && !IsHidden() && ParentIsActor())
+    if (bCanPlayAnim && ParentIsActor())
     { //--> Вызываем анимацию, которая по окончанию снимет магазин (не учитывает флаг b_spawn_item)
         if (GetState() == eSwitchMag)
             return false;
