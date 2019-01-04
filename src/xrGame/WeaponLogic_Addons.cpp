@@ -975,6 +975,11 @@ bool CWeapon::CanAttach(PIItem pIItem)
     {
         SAddonData* pAddon      = GetAddonBySlot(iSlot);
         bool        bIsSlotFree = pAddon->bActive == false;
+        bool        bAttachable = pAddon->m_attach_status == ALife::EWeaponAddonStatus::eAddonAttachable;
+
+        // Проверяем на возможность замены аддона
+        if (bAttachable == false)
+            return false;
 
         // Магазин
         if (m_bUseMagazines == true && iSlot == eMagaz)
@@ -984,34 +989,34 @@ bool CWeapon::CanAttach(PIItem pIItem)
         }
 
         // Подствольник
-        if (iSlot == eLauncher && bIsSlotFree)
+        if (iSlot == eLauncher)
         {
             return m_bUseAmmoBeltMode == false && IsForegripAttached() == false;
         }
 
         // Патронташ
         bool bIsAmmoBelt = READ_IF_EXISTS(pSettings, r_bool, pAddon->GetNameByIdx(addonIdx), "is_ammo_belt", false);
-        if (bIsAmmoBelt && bIsSlotFree)
+        if (bIsAmmoBelt)
         {
             return m_bUseAmmoBeltMode == true && IsAmmoBeltAttached() == false;
         }
 
         // Подствольная рукоятка
         bool bIsForegrip = READ_IF_EXISTS(pSettings, r_bool, pAddon->GetNameByIdx(addonIdx), "is_foregrip", false);
-        if (bIsForegrip && bIsSlotFree)
+        if (bIsForegrip)
         {
             return IsGrenadeLauncherAttached() == false && IsForegripAttached() == false;
         }
 
         // Сошки
         bool bIsBipods = READ_IF_EXISTS(pSettings, r_bool, pAddon->GetNameByIdx(addonIdx), "is_bipods", false);
-        if (bIsBipods && bIsSlotFree)
+        if (bIsBipods)
         {
             return IsBipodsDeployed() == false && IsBipodsAttached() == false;
         }
 
         // Всё остальное
-        return bIsSlotFree;
+        return true;
     }
 
     return inherited::CanAttach(pIItem);
@@ -1035,6 +1040,13 @@ bool CWeapon::Attach(PIItem pIItem, bool b_send_event, bool b_from_actor_menu)
         // Если это магазинное питание, то соединяем аддон по другому
         if (m_bUseMagazines == true && iSlot == eMagaz)
             return AttachMagazine(pIItem->cast_weapon(), true, b_from_actor_menu);
+
+        // При установке из инвентаря - снимаем текущий аддон в этом слоте
+        if (b_from_actor_menu)
+        {
+            if (GetAddonBySlot(iSlot)->bActive == true)
+                Detach(GetAddonBySlot(iSlot)->GetAddonName().c_str(), true, false);
+        }
 
         // "Устанавливаем" всё остальное здесь
         InstallAddon(iSlot, addon_idx, true);
