@@ -37,8 +37,9 @@ protected:
     CUITextWnd m_textAmmoUsedType;
     CUITextWnd m_textAmmoCount;
     CUITextWnd m_textAmmoCount2;
-    CUIStatic m_stAmmoType1;
-    CUIStatic m_stAmmoType2;
+
+    xr_vector<CUIStatic*> m_vecStAmmoTypes; //--#SM+#--
+
     CUIStatic m_Prop_line;
 };
 

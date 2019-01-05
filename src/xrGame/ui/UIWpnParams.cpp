@@ -65,11 +65,15 @@ CUIWpnParams::CUIWpnParams()
     AttachChild(&m_textAmmoCount2);
     AttachChild(&m_textAmmoTypes);
     AttachChild(&m_textAmmoUsedType);
-    AttachChild(&m_stAmmoType1);
-    AttachChild(&m_stAmmoType2);
+    // AttachChild(&m_stAmmoType1); //--#SM+#--
+    // AttachChild(&m_stAmmoType2); //--#SM+#--
 }
 
-CUIWpnParams::~CUIWpnParams() {}
+CUIWpnParams::~CUIWpnParams()
+{
+    delete_data(m_vecStAmmoTypes); //--#SM+#--
+}
+
 void CUIWpnParams::InitFromXml(CUIXml& xml_doc)
 {
     if (!xml_doc.NavigateToNode("wpn_params", 0))
@@ -99,8 +103,28 @@ void CUIWpnParams::InitFromXml(CUIXml& xml_doc)
         CUIXmlInit::InitTextWnd(xml_doc, "wpn_params:cap_ammo_count2", 0, &m_textAmmoCount2);
         CUIXmlInit::InitTextWnd(xml_doc, "wpn_params:cap_ammo_types", 0, &m_textAmmoTypes);
         CUIXmlInit::InitTextWnd(xml_doc, "wpn_params:cap_ammo_used_type", 0, &m_textAmmoUsedType);
-        CUIXmlInit::InitStatic(xml_doc, "wpn_params:static_ammo_type1", 0, &m_stAmmoType1);
-        CUIXmlInit::InitStatic(xml_doc, "wpn_params:static_ammo_type2", 0, &m_stAmmoType2);
+        //CUIXmlInit::InitStatic(xml_doc, "wpn_params:static_ammo_type1", 0, &m_stAmmoType1);  //--#SM+#--
+        //CUIXmlInit::InitStatic(xml_doc, "wpn_params:static_ammo_type2", 0, &m_stAmmoType2);  //--#SM+#--
+
+        // Выводим иконки для любого кол-ва типов патронов, описанных в XML --#SM+#--
+        bool bAmmoTypeExistInXML = false;
+        string128 str;
+        u8 iCnt = 0;
+        do //--> Считываем кол-во слотов под иконки патронов в XML
+        {
+            iCnt++;
+            xr_sprintf(str, sizeof(str), "wpn_params:static_ammo_type%d", iCnt);
+
+            bAmmoTypeExistInXML = xml_doc.NavigateToNode(str, 0) != nullptr;
+            if (bAmmoTypeExistInXML)
+            {
+                CUIStatic* pStAmmoType = new CUIStatic();
+                AttachChild(pStAmmoType);
+                CUIXmlInit::InitStatic(xml_doc, str, 0, pStAmmoType);
+
+                m_vecStAmmoTypes.push_back(pStAmmoType);
+            }
+        } while (bAmmoTypeExistInXML);
     }
 }
 
@@ -195,37 +219,33 @@ void CUIWpnParams::SetInfo(CInventoryItem* slot_wpn, CInventoryItem& cur_wpn)
         xr_sprintf(str, sizeof(str), "%s", pSettings->r_string(ammo_types[0].c_str(), "inv_name_short"));
         m_textAmmoUsedType.SetTextST(str);
 
-        m_stAmmoType1.SetShader(InventoryUtilities::GetEquipmentIconsShader());
-        Frect tex_rect;
-        tex_rect.x1 = float(pSettings->r_u32(ammo_types[0].c_str(), "inv_grid_x") * INV_GRID_WIDTH);
-        tex_rect.y1 = float(pSettings->r_u32(ammo_types[0].c_str(), "inv_grid_y") * INV_GRID_HEIGHT);
-        tex_rect.x2 = float(pSettings->r_u32(ammo_types[0].c_str(), "inv_grid_width") * INV_GRID_WIDTH);
-        tex_rect.y2 = float(pSettings->r_u32(ammo_types[0].c_str(), "inv_grid_height") * INV_GRID_HEIGHT);
-        tex_rect.rb.add(tex_rect.lt);
-        m_stAmmoType1.SetTextureRect(tex_rect);
-        m_stAmmoType1.TextureOn();
-        m_stAmmoType1.SetStretchTexture(true);
-        m_stAmmoType1.SetWndSize(
-            Fvector2().set((tex_rect.x2 - tex_rect.x1) * UI().get_current_kx(), tex_rect.y2 - tex_rect.y1));
+        // Выводим иконки патронов --#SM+#--
+        for (u8 i = 0; i < m_vecStAmmoTypes.size(); i++)
+        {
+            CUIStatic& StAmmoType = *m_vecStAmmoTypes[i];
 
-        m_stAmmoType2.SetShader(InventoryUtilities::GetEquipmentIconsShader());
-        if (ammo_types.size() == 1)
-        {
-            tex_rect.set(0, 0, 1, 1);
+            StAmmoType.SetShader(InventoryUtilities::GetEquipmentIconsShader());
+
+            Frect tex_rect;
+            if (i >= ammo_types.size())
+            { //--> Мы превысили кол-во типов патронов у текущего оружия - скрываем лишнюю иконку
+                tex_rect.set(0, 0, 1, 1);
+            }
+            else
+            { //--> Иначе отрисовываем её
+                tex_rect.x1 = float(pSettings->r_u32(ammo_types[i].c_str(), "inv_grid_x") * INV_GRID_WIDTH);
+                tex_rect.y1 = float(pSettings->r_u32(ammo_types[i].c_str(), "inv_grid_y") * INV_GRID_HEIGHT);
+                tex_rect.x2 = float(pSettings->r_u32(ammo_types[i].c_str(), "inv_grid_width") * INV_GRID_WIDTH);
+                tex_rect.y2 = float(pSettings->r_u32(ammo_types[i].c_str(), "inv_grid_height") * INV_GRID_HEIGHT);
+                tex_rect.rb.add(tex_rect.lt);
+            }
+
+            StAmmoType.SetTextureRect(tex_rect);
+            StAmmoType.TextureOn();
+            StAmmoType.SetStretchTexture(true);
+            StAmmoType.SetWndSize(
+                Fvector2().set((tex_rect.x2 - tex_rect.x1) * UI().get_current_kx(), tex_rect.y2 - tex_rect.y1));
         }
-        else
-        {
-            tex_rect.x1 = float(pSettings->r_u32(ammo_types[1].c_str(), "inv_grid_x") * INV_GRID_WIDTH);
-            tex_rect.y1 = float(pSettings->r_u32(ammo_types[1].c_str(), "inv_grid_y") * INV_GRID_HEIGHT);
-            tex_rect.x2 = float(pSettings->r_u32(ammo_types[1].c_str(), "inv_grid_width") * INV_GRID_WIDTH);
-            tex_rect.y2 = float(pSettings->r_u32(ammo_types[1].c_str(), "inv_grid_height") * INV_GRID_HEIGHT);
-            tex_rect.rb.add(tex_rect.lt);
-        }
-        m_stAmmoType2.SetTextureRect(tex_rect);
-        m_stAmmoType2.TextureOn();
-        m_stAmmoType2.SetStretchTexture(true);
-        m_stAmmoType2.SetWndSize(
-            Fvector2().set((tex_rect.x2 - tex_rect.x1) * UI().get_current_kx(), tex_rect.y2 - tex_rect.y1));
     }
 }
 
