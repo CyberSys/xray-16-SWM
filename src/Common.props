@@ -112,7 +112,6 @@
         _SECURE_SCL=0;
         _CRT_SECURE_NO_WARNINGS;
 	_CRT_SECURE_NO_DEPRECATE;
-	USE_TBB_PARALLEL;
         %(PreprocessorDefinitions)
       </PreprocessorDefinitions>
       <FloatingPointModel>Fast</FloatingPointModel>
