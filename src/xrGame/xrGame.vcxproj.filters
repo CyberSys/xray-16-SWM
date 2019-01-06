@@ -2573,6 +2573,7 @@
     <ClInclude Include="zone_effector.h" />
     <ClInclude Include="ZudaArtifact.h" />
     <ClInclude Include="ui\UILoadingScreenHardcoded.h" />
+    <ClInclude Include="Weapon_LuaAdapter.hpp" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="ai\monsters\chimera\chimera_attack_state.h" />

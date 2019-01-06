@@ -1611,6 +1611,7 @@
     <ClInclude Include="Weapon_AddonData.h" />
     <ClInclude Include="Weapon_AmmoCompress.h" />
     <ClInclude Include="Weapon_BipodsParams.h" />
+    <ClInclude Include="Weapon_LuaAdapter.hpp" />
     <ClInclude Include="Weapon_ZoomParams.h" />
     <ClInclude Include="Wound.h" />
     <ClInclude Include="wrapper_abstract.h" />

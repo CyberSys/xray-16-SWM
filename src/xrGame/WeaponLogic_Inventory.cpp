@@ -4,6 +4,7 @@
 
 #include "StdAfx.h"
 #include "Weapon.h"
+#include "Weapon_LuaAdapter.hpp"
 
 // Получить текущий вес оружия
 float CWeapon::Weight() const
@@ -311,10 +312,22 @@ bool CWeapon::GetBriefInfo(II_BriefInfo& info)
 // Разрешена-ли мгновенная перезарядка из инвентаря
 bool CWeapon::InventoryFastReloadAllowed(bool bForGL) const
 {
+    // Подствольники нельзя так перезаряжать
     if (bForGL == true)
         return false;
 
-    return IsMagazine() && C_THIS_WPN->ParentIsActor() && (GetMainAmmoElapsed() < GetMainMagSize());
+    // Разрешаем только магазины в инвентаре ГГ
+    bool bAllowed = IsMagazine() && C_THIS_WPN->ParentIsActor();
+
+    // Дополнительно проверяем в Lua, что сейчас можно делать быструю перезарядку
+    if (bAllowed)
+    {
+        CLuaWpnAdapter& WpnLua = CLuaWpnAdapter::Get();
+        if (WpnLua.m_bIsFastReloadAllowedFnExist)
+            bAllowed = WpnLua.m_lfnIsFastReloadAllowed();
+    }
+
+    return bAllowed;
 }
 
 // Мгновенная перезарядка из инвентаря
