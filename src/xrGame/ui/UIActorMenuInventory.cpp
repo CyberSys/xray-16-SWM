@@ -1055,13 +1055,18 @@ void CUIActorMenu::PropertiesBoxForWeapon(CUICellItem* cell_item, PIItem item, b
             }
             if (b)
             {
-                m_UIPropertiesBox->AddItem("st_unload_magazine_gl", nullptr, INVENTORY_UNLOAD_MAGAZINE_SECOND);
+                m_UIPropertiesBox->AddItem(
+                    pWeapon->IsAmmoBeltAttached() ? 
+                    "st_unload_magazine_ab" : "st_unload_magazine_gl",
+                    nullptr, INVENTORY_UNLOAD_MAGAZINE_SECOND);
                 b_show = true;
 
                 if (cell_item->ChildsCount())
                 {
                     m_UIPropertiesBox->AddItem(
-                        "st_unload_magazine_gl_all", (void*)33, INVENTORY_UNLOAD_MAGAZINE_SECOND);
+                        pWeapon->IsAmmoBeltAttached() ?
+                        "st_unload_magazine_ab_all" : "st_unload_magazine_gl_all",
+                        (void*)33, INVENTORY_UNLOAD_MAGAZINE_SECOND);
                 }
             }
         }
