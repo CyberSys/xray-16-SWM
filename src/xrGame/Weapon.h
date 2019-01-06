@@ -65,6 +65,8 @@ private:
 protected:
     bool m_bNeed2UpdateIcon; //--> True если необходимо перерисовать иконку оружия в инвентаре (аддоны)
     bool m_bInvShowAmmoCntInMagaz; //--> Если true, то у оружия в инвентаре будет отображено кол-во патронов каждого типа в обойме (UIWpnParams.cpp)
+    bool m_bInvShowWeaponStats; //--> Если true, то у оружия в инвентаре будут отображены характеристики
+    bool m_bInvShowWeaponAmmo; //--> Если true, то у оружия в инвентаре будут отображены \ подсвечены используемые патроны
 
     // Время удаления бесхозного оружия
     ALife::_TIME_ID m_dwWeaponRemoveTime;
@@ -129,6 +131,8 @@ public:
     IC bool Need2UpdateIcon() const { return m_bNeed2UpdateIcon; }
     IC void SetUpdateIcon(bool bValue) { m_bNeed2UpdateIcon = bValue; }
     IC bool InventoryShowAllAmmoCntInMagazine() const { return m_bInvShowAmmoCntInMagaz; }
+    IC bool InventoryShowWeaponStats() const { return m_bInvShowWeaponStats; }
+    IC bool InventoryShowWeaponAmmo() const { return m_bInvShowWeaponAmmo; }
 
 //======================= Апгрейды =======================//
 private:

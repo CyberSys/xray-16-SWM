@@ -356,6 +356,10 @@ void CUIItemInfo::TryAddWpnInfo(CInventoryItem& pInvItem, CInventoryItem* pCompa
 {
     if (UIWpnParams->Check(pInvItem.object().cNameSect()))
     {
+        CWeapon* pWpn = pInvItem.cast_weapon();
+        if (pWpn && !pWpn->InventoryShowWeaponAmmo() && !pWpn->InventoryShowWeaponStats()) //--#SM+#--
+            return;
+
         UIWpnParams->SetInfo(pCompareItem, pInvItem);
         UIDesc->AddWindow(UIWpnParams, false);
     }

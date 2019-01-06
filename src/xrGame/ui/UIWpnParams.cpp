@@ -220,7 +220,8 @@ void CUIWpnParams::SetInfo(CInventoryItem* slot_wpn, CInventoryItem& cur_wpn)
         m_textAmmoUsedType.SetTextST(str);
 
         // Выводим иконки патронов --#SM+#--
-        bool bShowDetailAmmoCntInMagaz = weapon->InventoryShowAllAmmoCntInMagazine();
+        bool bShowDetailAmmoCntInMagaz = weapon->InventoryShowAllAmmoCntInMagazine(); //--> Отображать кол-во патронов каждого типа
+        bool bShowAmmoIcons = weapon->InventoryShowWeaponAmmo(); //--> Отображать иконки патронов
         for (u8 i = 0; i < m_vecStAmmoTypes.size(); i++)
         {
             CUIStatic& StAmmoType = *m_vecStAmmoTypes[i];
@@ -281,7 +282,33 @@ void CUIWpnParams::SetInfo(CInventoryItem* slot_wpn, CInventoryItem& cur_wpn)
             StAmmoType.TextItemControl()->SetTextColor(
                 bColorizeText ? color_rgba(0, 255, 0, 255) : color_rgba(170, 170, 170, 255));
             StAmmoType.TextItemControl()->SetTextST(sAmmoCntText);
+
+            StAmmoType.Show(bShowAmmoIcons);
         }
+
+        // Контролируем видимость оружейных характеристик //--#SM+#--
+        bool bShowStats = weapon->InventoryShowWeaponStats();
+
+        m_icon_acc.Show(bShowStats);
+        m_icon_dam.Show(bShowStats);
+        m_icon_han.Show(bShowStats);
+        m_icon_rpm.Show(bShowStats);
+
+        m_textAccuracy.Show(bShowStats);
+        m_textDamage.Show(bShowStats);
+        m_textHandling.Show(bShowStats);
+        m_textRPM.Show(bShowStats);
+
+        m_progressAccuracy.Show(bShowStats);
+        m_progressDamage.Show(bShowStats);
+        m_progressHandling.Show(bShowStats);
+        m_progressRPM.Show(bShowStats);
+
+        m_stAmmo.Show(bShowStats);
+        m_textAmmoCount.Show(bShowStats);
+        m_textAmmoCount2.Show(bShowStats);
+        m_textAmmoTypes.Show(bShowStats);
+        m_textAmmoUsedType.Show(bShowStats);
     }
 }
 

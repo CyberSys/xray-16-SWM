@@ -163,6 +163,8 @@ CWeapon::CWeapon() : CShellLauncher(this)
     m_bHideCrosshair = false;
 
     m_bInvShowAmmoCntInMagaz = false;
+    m_bInvShowWeaponStats = false;
+    m_bInvShowWeaponAmmo = false;
 }
 
 // Деструктор

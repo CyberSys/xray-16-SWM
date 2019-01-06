@@ -592,7 +592,7 @@ void CUIActorMenu::highlight_ammo_for_weapon(PIItem weapon_item, CUIDragDropList
     ammo_types.clear();
 
     CWeapon* weapon = smart_cast<CWeapon*>(weapon_item);
-    if (!weapon)
+    if (!weapon || !weapon->InventoryShowWeaponAmmo()) //--#SM+#--
     {
         return;
     }
