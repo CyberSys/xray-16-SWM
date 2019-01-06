@@ -161,6 +161,8 @@ CWeapon::CWeapon() : CShellLauncher(this)
     sReloadSndSectOverride = nullptr;
 
     m_bHideCrosshair = false;
+
+    m_bInvShowAmmoCntInMagaz = false;
 }
 
 // Деструктор

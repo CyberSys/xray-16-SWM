@@ -103,8 +103,8 @@ void CUIWpnParams::InitFromXml(CUIXml& xml_doc)
         CUIXmlInit::InitTextWnd(xml_doc, "wpn_params:cap_ammo_count2", 0, &m_textAmmoCount2);
         CUIXmlInit::InitTextWnd(xml_doc, "wpn_params:cap_ammo_types", 0, &m_textAmmoTypes);
         CUIXmlInit::InitTextWnd(xml_doc, "wpn_params:cap_ammo_used_type", 0, &m_textAmmoUsedType);
-        //CUIXmlInit::InitStatic(xml_doc, "wpn_params:static_ammo_type1", 0, &m_stAmmoType1);  //--#SM+#--
-        //CUIXmlInit::InitStatic(xml_doc, "wpn_params:static_ammo_type2", 0, &m_stAmmoType2);  //--#SM+#--
+        // CUIXmlInit::InitStatic(xml_doc, "wpn_params:static_ammo_type1", 0, &m_stAmmoType1);  //--#SM+#--
+        // CUIXmlInit::InitStatic(xml_doc, "wpn_params:static_ammo_type2", 0, &m_stAmmoType2);  //--#SM+#--
 
         // Выводим иконки для любого кол-ва типов патронов, описанных в XML --#SM+#--
         bool bAmmoTypeExistInXML = false;
@@ -220,16 +220,36 @@ void CUIWpnParams::SetInfo(CInventoryItem* slot_wpn, CInventoryItem& cur_wpn)
         m_textAmmoUsedType.SetTextST(str);
 
         // Выводим иконки патронов --#SM+#--
+        bool bShowDetailAmmoCntInMagaz = weapon->InventoryShowAllAmmoCntInMagazine();
         for (u8 i = 0; i < m_vecStAmmoTypes.size(); i++)
         {
             CUIStatic& StAmmoType = *m_vecStAmmoTypes[i];
 
             StAmmoType.SetShader(InventoryUtilities::GetEquipmentIconsShader());
 
+            // Находим информацию о данном типе патронов в оружии
+            cartridge_info* pCartridgeInfo = nullptr;
+            if (bShowDetailAmmoCntInMagaz)
+            {
+                CartridgesInfoMap AmmoData = weapon->GetAmmoInfo(false);
+                for (u8 j = 0; j < AmmoData.size(); j++)
+                {
+                    if (AmmoData[j].type_idx == i)
+                    {
+                        pCartridgeInfo = &AmmoData[j];
+                        break;
+                    }
+                }
+            }
+
             Frect tex_rect;
+            string128 sAmmoCntText = "";
+            bool bColorizeText = false;
+
             if (i >= ammo_types.size())
             { //--> Мы превысили кол-во типов патронов у текущего оружия - скрываем лишнюю иконку
                 tex_rect.set(0, 0, 1, 1);
+                bColorizeText = false;
             }
             else
             { //--> Иначе отрисовываем её
@@ -238,6 +258,18 @@ void CUIWpnParams::SetInfo(CInventoryItem* slot_wpn, CInventoryItem& cur_wpn)
                 tex_rect.x2 = float(pSettings->r_u32(ammo_types[i].c_str(), "inv_grid_width") * INV_GRID_WIDTH);
                 tex_rect.y2 = float(pSettings->r_u32(ammo_types[i].c_str(), "inv_grid_height") * INV_GRID_HEIGHT);
                 tex_rect.rb.add(tex_rect.lt);
+
+                // Выводим счётчик патронов в обойме для каждой иконки патронов
+                if (bShowDetailAmmoCntInMagaz)
+                {
+                    u32 iAmmoCnt = 0;
+                    if (pCartridgeInfo != nullptr)
+                    {
+                        iAmmoCnt = pCartridgeInfo->ammo_cnt;
+                        bColorizeText = true;
+                    }
+                    xr_sprintf(sAmmoCntText, sizeof(sAmmoCntText), "%d", iAmmoCnt);
+                }
             }
 
             StAmmoType.SetTextureRect(tex_rect);
@@ -245,6 +277,10 @@ void CUIWpnParams::SetInfo(CInventoryItem* slot_wpn, CInventoryItem& cur_wpn)
             StAmmoType.SetStretchTexture(true);
             StAmmoType.SetWndSize(
                 Fvector2().set((tex_rect.x2 - tex_rect.x1) * UI().get_current_kx(), tex_rect.y2 - tex_rect.y1));
+
+            StAmmoType.TextItemControl()->SetTextColor(
+                bColorizeText ? color_rgba(0, 255, 0, 255) : color_rgba(170, 170, 170, 255));
+            StAmmoType.TextItemControl()->SetTextST(sAmmoCntText);
         }
     }
 }

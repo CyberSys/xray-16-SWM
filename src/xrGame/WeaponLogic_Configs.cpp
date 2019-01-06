@@ -190,7 +190,8 @@ void CWeapon::Load(LPCSTR section)
     m_bDisableFire             = READ_IF_EXISTS(pSettings, r_bool, section, "shooting_disabled", false);
     m_bDisableFireWhileZooming = READ_IF_EXISTS(pSettings, r_bool, section, "disable_fire_at_zooming", false);
     m_bDisableMovEffAtZoom     = READ_IF_EXISTS(pSettings, r_bool, section, "disable_mov_eff_at_zoom", false);
-  
+    m_bInvShowAmmoCntInMagaz   = READ_IF_EXISTS(pSettings, r_bool, section, "ui_show_ammo_cnt_for_types", false);
+
     // Added by Axel, to enable optional condition use on any item
     m_flags.set(FUsingCondition, READ_IF_EXISTS(pSettings, r_bool, section, "use_condition", true));
 }
