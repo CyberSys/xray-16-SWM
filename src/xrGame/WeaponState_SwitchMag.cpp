@@ -8,10 +8,6 @@
 // Полноценно использовать магазинное питание может только игрок <!>
 // Логику для НПС потом можно сделать в CObjectActionReload()
 
-// SM_TODO:H
-// Вывод типов патронов в description <!>
-// Обновление баров при UpdateText() в цэлах
-
 // Пробуем начать смену магазина на клиенте
 bool CWeapon::Try2SwitchMag(bool bCheckOnlyMode, bool bFromDetach)
 {
