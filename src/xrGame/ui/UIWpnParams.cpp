@@ -191,14 +191,14 @@ void CUIWpnParams::SetInfo(CInventoryItem* slot_wpn, CInventoryItem& cur_wpn)
         if (!weapon)
             return;
 
-        int ammo_count = weapon->GetAmmoMagSize();
+        int ammo_count = weapon->GetMainMagSize(); //--#SM+#--
         int ammo_count2 = ammo_count;
 
         if (slot_wpn)
         {
             CWeapon* slot_weapon = slot_wpn->cast_weapon();
             if (slot_weapon)
-                ammo_count2 = slot_weapon->GetAmmoMagSize();
+                ammo_count2 = slot_weapon->GetMainMagSize(); //--#SM+#--
         }
 
         if (ammo_count == ammo_count2)
@@ -212,7 +212,7 @@ void CUIWpnParams::SetInfo(CInventoryItem* slot_wpn, CInventoryItem& cur_wpn)
         xr_sprintf(str, sizeof(str), "%d", ammo_count);
         m_textAmmoCount2.SetText(str);
 
-        ammo_types = weapon->m_ammoTypes;
+        ammo_types = *(weapon->GetMainAmmoTypes()); //--#SM+#--
         if (ammo_types.empty())
             return;
 
