@@ -111,4 +111,7 @@
   <ItemGroup>
     <None Include="CommonImportExport.inl" />
   </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="..\TypeHelper.natvis" />
+  </ItemGroup>
 </Project>

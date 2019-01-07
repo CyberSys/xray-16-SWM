@@ -125,6 +125,19 @@ SAddonData* CWeapon::InstallAddon(EAddons iSlot, u8 addon_idx, bool bNoUpdate)
         pAddon->addon_idx   = addon_idx;
         pAddon->bActive     = true;
 
+        // Обновляем список несовместимых аддонов
+        LPCSTR sDisallowStr = READ_IF_EXISTS(pSettings, r_string, pAddon->GetName(), "disallow_addons_ssects", NULL);
+        if (sDisallowStr)
+        {
+            string128 _sect_name;
+            int count = _GetItemCount(sDisallowStr);
+            for (int i = 0; i < count; ++i)
+            {
+                LPCSTR _itm = _GetItem(sDisallowStr, i, _sect_name);
+                m_IncompatibleAddons.insert(_itm);
+            }
+        }
+
         OnAddonInstall(iSlot, pAddon->GetName());
 
         if (!bNoUpdate)
@@ -148,6 +161,22 @@ SAddonData* CWeapon::UnistallAddon(EAddons iSlot, bool bNoUpdate)
 
     if (pAddon->m_attach_status == ALife::eAddonPermanent)
         return pAddon;
+
+    // Обновляем список несовместимых аддонов
+    LPCSTR sDisallowStr = READ_IF_EXISTS(pSettings, r_string, pAddon->GetName(), "disallow_addons_ssects", NULL);
+    if (sDisallowStr)
+    {
+        string128 _sect_name;
+        int count = _GetItemCount(sDisallowStr);
+        for (int i = 0; i < count; ++i)
+        {
+            LPCSTR _itm = _GetItem(sDisallowStr, i, _sect_name);
+
+            const auto it = m_IncompatibleAddons.find(_itm);
+            if (it != m_IncompatibleAddons.end())
+                m_IncompatibleAddons.erase(it); //--> Уменьшаем счётчик на единицу
+        }
+    }
 
     OnAddonUnistall(iSlot, pAddon->GetName());
 
@@ -979,6 +1008,10 @@ bool CWeapon::CanAttach(PIItem pIItem)
 
         // Проверяем на возможность замены аддона
         if (bAttachable == false)
+            return false;
+
+        // Проверяем на совместимость с другими аддонами
+        if (m_IncompatibleAddons.count(pAddon->GetNameByIdx(addonIdx).c_str()) > 0)
             return false;
 
         // Магазин

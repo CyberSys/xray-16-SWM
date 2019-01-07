@@ -4,6 +4,8 @@
 /***** Класс универсального оружия *****/ //--#SM+#--
 /******************************************/
 
+#include "xrCommon/xr_unordered_set.h"
+
 #include "hud_item_object.h"
 #include "ShootingObject.h"
 #include "RocketLauncher.h"
@@ -325,7 +327,9 @@ protected:
 
     virtual void OnDetachAddonSpawn(const char* item_section_name, CSE_ALifeDynamicObject* E);
 
-public:    
+public: 
+    xr_unordered_multiset<xr_string> m_IncompatibleAddons; //--> Список-счётчик текущих несовместимых set-секций аддонов
+
     bool IsGrenadeLauncherAttached() const;
     bool IsScopeAttached() const;
     bool IsSilencerAttached() const;
