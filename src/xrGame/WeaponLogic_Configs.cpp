@@ -187,6 +187,7 @@ void CWeapon::Load(LPCSTR section)
     m_bUIShowAmmo              = READ_IF_EXISTS(pSettings, r_bool, section, "show_ammo", true);
     m_bAllowAutoReload         = READ_IF_EXISTS(pSettings, r_bool, section, "auto_reload", true);
     m_bAllowUnload             = READ_IF_EXISTS(pSettings, r_bool, section, "can_unload_magazine", true);
+    m_bDisableAnimatedReload   = READ_IF_EXISTS(pSettings, r_bool, section, "disable_animated_reload", false);
     m_bDisableFire             = READ_IF_EXISTS(pSettings, r_bool, section, "shooting_disabled", false);
     m_bDisableFireWhileZooming = READ_IF_EXISTS(pSettings, r_bool, section, "disable_fire_at_zooming", false);
     m_bDisableMovEffAtZoom     = READ_IF_EXISTS(pSettings, r_bool, section, "disable_mov_eff_at_zoom", false);

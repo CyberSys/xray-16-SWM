@@ -117,6 +117,7 @@ CWeapon::CWeapon() : CShellLauncher(this)
     m_bAllowAutoReload          = true;
     m_overridenAmmoForReloadAnm = -1;
     m_bAllowUnload              = true;
+    m_bDisableAnimatedReload    = false;
 
     m_bUseMagazines            = false;
     m_set_next_magaz_on_reload = empty_addon_idx;

@@ -8,6 +8,10 @@
 // Пробуем начать перезарядку на клиенте
 bool CWeapon::Try2ReloadFrAB(bool bCheckOnlyMode)
 {
+    // Разрешена-ли перезарядка
+    if (m_bDisableAnimatedReload)
+        return false;
+
     if (!bCheckOnlyMode && GetState() == eReloadFrAB)
         return false;
     if (IsPending() == true)

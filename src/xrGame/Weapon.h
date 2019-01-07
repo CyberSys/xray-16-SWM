@@ -713,6 +713,7 @@ public:
 
     bool m_bAllowAutoReload; //--> Разрешить авто-перезарядку оружия
     bool m_bAllowUnload; //--> Разрешить разрядку
+    bool m_bDisableAnimatedReload; //--> Запретить анимированную перезарядку
     bool m_bUIShowAmmo; //--> Отображать счётчик патронов
 
     bool m_bHasTracers; //--> Есть-ли трассеры у оружия

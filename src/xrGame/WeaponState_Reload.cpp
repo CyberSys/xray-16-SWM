@@ -10,6 +10,10 @@
 // Пробуем начать перезарядку на клиенте
 bool CWeapon::Try2Reload(bool bCheckOnlyMode)
 {
+    // Разрешена-ли перезарядка
+    if (m_bDisableAnimatedReload)
+        return false;
+
     // Если оружие использует магазинное питание, то обрабатываем перезарядку там
     if (m_bUseMagazines && !m_bGrenadeMode)
     {
