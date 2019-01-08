@@ -166,6 +166,8 @@ CWeapon::CWeapon() : CShellLauncher(this)
     m_bInvShowAmmoCntInMagaz = false;
     m_bInvShowWeaponStats = false;
     m_bInvShowWeaponAmmo = false;
+
+    m_iMinRequiredAmmoInMag = 0;
 }
 
 // Деструктор

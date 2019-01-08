@@ -590,12 +590,15 @@ protected:
     u16 m_iMagaz3pHideEndTime; // Время (в м\сек) по умолчанию, когда показывается магазин (от 3-го лица) после начала перезерадяки
 
 public:
+    u32 m_iMinRequiredAmmoInMag; //--> Минимально-необходимое кол-во патронов в магазине, чтобы им можно было зарядить оружие
+
     virtual void LoadMagazinesParams(LPCSTR section);
 
     void UpdateMagazine3p(bool bForceUpdate = false);
 
     IC bool IsUseMagazines() const { return m_bUseMagazines; }
     IC bool IsMagazine() const { return m_bIsMagazine; }
+    IC bool HaveMinRequiredAmmoInMag() const { return GetMainAmmoElapsed() >= m_iMinRequiredAmmoInMag; }
 
     CWeapon* GetBestMagazine(LPCSTR section = nullptr);
 

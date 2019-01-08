@@ -279,8 +279,16 @@ void CUIWpnParams::SetInfo(CInventoryItem* slot_wpn, CInventoryItem& cur_wpn)
             StAmmoType.SetWndSize(
                 Fvector2().set((tex_rect.x2 - tex_rect.x1) * UI().get_current_kx(), tex_rect.y2 - tex_rect.y1));
 
-            StAmmoType.TextItemControl()->SetTextColor(
-                bColorizeText ? color_rgba(0, 255, 0, 255) : color_rgba(170, 170, 170, 255));
+            if (bColorizeText)
+            {
+                bool bIsAmmoEnough = weapon->HaveMinRequiredAmmoInMag();
+                StAmmoType.TextItemControl()->SetTextColor(
+                    bIsAmmoEnough ? color_rgba(0, 255, 0, 255) : color_rgba(255, 0, 0, 255));
+            }
+            else
+            {
+                StAmmoType.TextItemControl()->SetTextColor(color_rgba(170, 170, 170, 255));
+            }
             StAmmoType.TextItemControl()->SetTextST(sAmmoCntText);
 
             StAmmoType.Show(bShowAmmoIcons);

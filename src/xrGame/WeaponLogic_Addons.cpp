@@ -1017,8 +1017,13 @@ bool CWeapon::CanAttach(PIItem pIItem)
         // Магазин
         if (m_bUseMagazines == true && iSlot == eMagaz)
         {
-            CWeapon* pWpn = pIItem->cast_weapon();
-            return (GetState() != eSwitchMag) && (pWpn != NULL && pWpn->IsMagazine()) && Try2SwitchMag(true, true);
+            CWeapon* pMagaz = pIItem->cast_weapon();
+            if ((GetState() != eSwitchMag) && (pMagaz != NULL && pMagaz->IsMagazine()) && Try2SwitchMag(true, true))
+            {
+                return pMagaz->HaveMinRequiredAmmoInMag();
+            }
+
+            return false;
         }
 
         // Подствольник

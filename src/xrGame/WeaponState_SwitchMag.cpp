@@ -9,7 +9,7 @@
 // Логику для НПС потом можно сделать в CObjectActionReload()
 
 // Пробуем начать смену магазина на клиенте
-bool CWeapon::Try2SwitchMag(bool bCheckOnlyMode, bool bFromDetach)
+bool CWeapon::Try2SwitchMag(bool bCheckOnlyMode, bool bFromInv)
 {
     if (!bCheckOnlyMode && GetState() == eSwitchMag)
         return false;
@@ -24,7 +24,7 @@ bool CWeapon::Try2SwitchMag(bool bCheckOnlyMode, bool bFromDetach)
     if (m_sub_state != eSubstateMagazMisfire &&          //--> Осечка
         m_set_next_magaz_on_reload == empty_addon_idx && //--> Тип магазина
         m_set_next_magaz_by_id == u16(-1) &&
-        (bFromDetach == false && m_sub_state != eSubstateMagazDetach) && //--> Снятие магазина
+        (bFromInv == false && m_sub_state != eSubstateMagazDetach) && //--> Снятие магазина
         GetAddonBySlot(eMagaz)->bActive == true)
     {
         // Проверяем что у нас не полный магазин
@@ -214,6 +214,10 @@ CWeapon* CWeapon::GetBestMagazine(LPCSTR section)
                 pMagazBest = pMagaz;
         }
     }
+
+    // В найденном магазине патронов должно быть больше необходимого минимума
+    if (pMagazBest != NULL && pMagazBest->HaveMinRequiredAmmoInMag() == false)
+        return NULL; //--> В текущей логике pMagazBest - всегда магазин с наибольшим числом патронов
 
     return pMagazBest;
 }

@@ -283,6 +283,9 @@ void CWeapon::LoadMagazinesParams(LPCSTR section)
     // Данное оружие является магазином
     m_bIsMagazine = READ_IF_EXISTS(pSettings, r_bool, section, "is_magazine", false);
 
+    // Минимально-необходимое кол-во патронов в магазине, чтобы им можно было зарядить оружие
+    m_iMinRequiredAmmoInMag = READ_IF_EXISTS(pSettings, r_u32, section, "ammo_limit_to_use", 0);
+
     // Использовать магазины для перезарядки (только игрок)
     if (ParentIsActor())
         m_bUseMagazines = READ_IF_EXISTS(pSettings, r_bool, section, "use_magazines", false);
