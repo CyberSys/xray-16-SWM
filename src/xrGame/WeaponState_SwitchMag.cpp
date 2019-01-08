@@ -20,6 +20,10 @@ bool CWeapon::Try2SwitchMag(bool bCheckOnlyMode, bool bFromInv)
     if (m_bGrenadeMode == true)
         return false;
 
+    // Иначе просто перенаправляем вызов
+    if (IsMisfire()) //--> Если у оружия осечка, то её требуется исправить
+        m_sub_state = eSubstateMagazMisfire;
+
     // Если мы не меняем тип магазина\фиксим осечку, то проводим доп. проверки
     if (m_sub_state != eSubstateMagazMisfire &&          //--> Осечка
         m_set_next_magaz_on_reload == empty_addon_idx && //--> Тип магазина

@@ -37,10 +37,6 @@ bool CWeapon::Try2Reload(bool bCheckOnlyMode)
             }
         }
 
-        // Иначе просто перенаправляем вызов
-        if (IsMisfire()) //--> Если у оружия осечка, то её требуется исправить
-            m_sub_state = eSubstateMagazMisfire;
-
         return Try2SwitchMag(false);
     }
 
