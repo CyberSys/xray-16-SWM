@@ -647,10 +647,10 @@ void CWeapon::PlayAnimShow()
     {
         if (iAmmo == 0)
         {
-            if (PlaySoundMotion("anm_show_g_empty", TRUE, NULL, false))
+            if (PlaySoundMotion("anm_show_g_empty", FALSE, NULL, false))
                 return;
         }
-        if (PlaySoundMotion("anm_show_g", TRUE, NULL, false))
+        if (PlaySoundMotion("anm_show_g", FALSE, NULL, false))
             return;
     }
 
@@ -658,10 +658,10 @@ void CWeapon::PlayAnimShow()
     {
         if (iAmmo == 0)
         {
-            if (PlaySoundMotion("anm_show_empty_w_gl", TRUE, NULL, false))
+            if (PlaySoundMotion("anm_show_empty_w_gl", FALSE, NULL, false))
                 return;
         }
-        if (PlaySoundMotion("anm_show_w_gl", TRUE, NULL, false))
+        if (PlaySoundMotion("anm_show_w_gl", FALSE, NULL, false))
             return;
     }
 
@@ -669,12 +669,12 @@ void CWeapon::PlayAnimShow()
     {
         if (iAmmo == 0)
         {
-            if (PlaySoundMotion("anm_show_empty", TRUE, NULL, false))
+            if (PlaySoundMotion("anm_show_empty", FALSE, NULL, false))
                 return;
         }
     }
 
-    PlaySoundMotion("anm_show", TRUE, NULL, true);
+    PlaySoundMotion("anm_show", FALSE, NULL, true);
 }
 
 // Анимация переключения на подствол и обратно
