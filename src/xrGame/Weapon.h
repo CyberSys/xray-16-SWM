@@ -1000,6 +1000,8 @@ protected:
     bool m_bDisableMovEffAtZoom; //--> Нужно-ли блокировать эффекты ходьбы во время зума
     bool m_bTriStateReload_anim_hack; //--> Нужно-ли использовать подмену некоторых анимаций от 3-го лица (перезарядка в 3 этапа)
 
+    virtual void PlayWorldAnimIdle();
+
     virtual void PlayAnimIdle();
     virtual void PlayAnimIdleOnly();
     virtual void PlayAnimIdleMoving();

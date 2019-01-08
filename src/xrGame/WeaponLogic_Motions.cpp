@@ -335,16 +335,17 @@ bool CWeapon::IsWGLAnimRequired() const { return IsGrenadeLauncherAttached() || 
 
 #define def_IsGL_Mode (m_bGrenadeMode == true && m_bUseAmmoBeltMode == false)
 
+// Мировая анимация покоя
+void CWeapon::PlayWorldAnimIdle()
+{
+    GetMainAmmoElapsed() > 0 ? PlayWorldMotion("idle", true) : PlayWorldMotion("idle_empty", true);
+}
+
 // Анимация покоя (включая анимации ходьбы и бега)
 void CWeapon::PlayAnimIdle()
 {
     // Мировая анимация
-    int  iAmmo       = GetMainAmmoElapsed();
-    bool bEmptyExist = false;
-    if (iAmmo == 0)
-        bEmptyExist = PlayWorldMotion("idle_empty", true);
-    if (bEmptyExist == false)
-        PlayWorldMotion("idle", true);
+    PlayWorldAnimIdle();
 
     // Худовая анимация
     if (m_ZoomAnimState == eZANone)     // Проверяем что мы не играем анимацию зума

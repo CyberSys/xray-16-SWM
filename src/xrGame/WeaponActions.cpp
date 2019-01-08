@@ -307,6 +307,7 @@ void CWeapon::OnH_A_Independent()
     SetQueueSize(WEAPON_ININITE_QUEUE);
     Light_Destroy();
     UpdateAddonsVisibility();
+    PlayWorldAnimIdle();
 };
 
 // Колбэк ПЕРЕД аттачем объекта к новому родителю
