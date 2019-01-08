@@ -43,6 +43,8 @@ class CWeaponMagazinedWGrenade;
 #define WEAPON_ADDONS_VIS_UPD_INTERVAL 500  // Интервал (в м\сек), через который обновляем визуалы аддонов на оружии
 #define WEAPON_ADDONS_KAR_UPD_INTERVAL 150  // Интервал (в м\сек), через который проверяем что штыковая атака попала в цель
 #define WEAPON_DEFAULT_LAUNCH_SPEED 40.f    // Скорость по умолчанию для запуска ракеты (если не указана в конфигах)
+#define WEAPON_MRAIM_L "ammo_limit_to_use"  // Название строки из конфига магазина, которая считывается в m_iMinRequiredAmmoInMag
+#define WEAPON_MRAIM_DEF_VAL 0              // Значение по умолчанию для m_iMinRequiredAmmoInMag
 
 #define C_THIS_WPN const_cast<CWeapon*>(this)
 
@@ -598,7 +600,7 @@ public:
 
     IC bool IsUseMagazines() const { return m_bUseMagazines; }
     IC bool IsMagazine() const { return m_bIsMagazine; }
-    IC bool HaveMinRequiredAmmoInMag() const { return GetMainAmmoElapsed() >= m_iMinRequiredAmmoInMag; }
+    IC bool HaveMinRequiredAmmoInMag() const { return GetMainAmmoElapsed() >= m_iMinRequiredAmmoInMag; } //--> + см. Try2SwitchMag()
 
     CWeapon* GetBestMagazine(LPCSTR section = nullptr);
 

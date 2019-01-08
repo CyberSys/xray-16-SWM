@@ -41,6 +41,26 @@ bool CWeapon::Try2SwitchMag(bool bCheckOnlyMode, bool bFromInv)
             return false;
     }
 
+    // Оружие в заклинившем состоянии
+    if (m_sub_state == eSubstateMagazMisfire)
+    {
+        SAddonData* pCurMagaz = GetAddonBySlot(eMagaz);
+        if (pCurMagaz->bActive)
+        { //--> Нельзя исправить клин перезарядкой, если в текущем магазине слишком мало патронов
+            u32 iMinRequiredAmmoInMag =
+                READ_IF_EXISTS(pSettings, r_u32, pCurMagaz->GetAddonName(), WEAPON_MRAIM_L, WEAPON_MRAIM_DEF_VAL);
+            if (GetMainAmmoElapsed() < iMinRequiredAmmoInMag)
+            {
+                //--> Убираем осечку просто так
+                bMisfire = false;
+
+                //--> Не запускаем анимацию
+                m_sub_state = eSubstateMagazFinish;
+                return false;
+            }
+        }
+    }
+
     if (!bCheckOnlyMode)
         SwitchState(eSwitchMag);
 
