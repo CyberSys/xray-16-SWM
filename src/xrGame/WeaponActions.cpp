@@ -392,6 +392,8 @@ void CWeapon::signal_HideComplete()
 
     m_sub_state = eSubstateReloadBegin;
 
+    m_fZoomRotationFactor = 0.0f;
+
     UpdateHUDAddonsVisibility(true); //<--- Сбрасываем все аддоны \ кости худовой модели
 }
 
