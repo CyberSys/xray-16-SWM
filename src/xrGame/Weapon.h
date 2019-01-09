@@ -1050,6 +1050,7 @@ protected:
 
 public:
     float m_fLR_MovingFactor; // Фактор бокового наклона худа при ходьбе [-1; +1]
+    float m_fLR_CameraFactor; // Фактор бокового наклона худа при движении камеры [-1; +1]
 
     virtual void OnOwnedCameraMove(CCameraBase* pCam, float fOldYaw, float fOldPitch);
     virtual void OnFirstAnimationPlayed(const shared_str& sAnmAlias);

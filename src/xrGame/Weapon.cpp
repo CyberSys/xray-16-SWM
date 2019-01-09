@@ -144,6 +144,7 @@ CWeapon::CWeapon() : CShellLauncher(this)
     m_dwShowAnimatedShellVisual  = 0;
 
     m_fLR_MovingFactor = 0.f;
+    m_fLR_CameraFactor = 0.f;
 
     m_bDisableMovEffAtZoom = false;
 
