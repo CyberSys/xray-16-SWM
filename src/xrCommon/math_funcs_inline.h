@@ -53,3 +53,32 @@ inline float snapto(float value, float snap)
         return value;
     return float(iFloor((value + (snap*0.5f)) / snap)) * snap;
 }
+
+// linear interpolation
+template <class T>
+inline constexpr T _lerp(const T& _val_a, const T& _val_b, const float& _factor)
+{
+    return (_val_a * (1.0 - _factor)) + (_val_b * _factor);
+}
+
+template <class T>
+inline constexpr T _lerpc(const T& _val_a, const T& _val_b, const float& _factor)
+{
+    float factor_c = clampr(_factor, 0.0f, 1.0f);
+    return (_val_a * (1.0 - factor_c)) + (_val_b * factor_c);
+}
+
+// inertion
+template <class T>
+inline constexpr void _inertion(T& _val_cur, const T& _val_trgt, const float& _friction)
+{
+    float friction_i = 1.f - _friction;
+    _val_cur = _val_cur * _friction + _val_trgt * friction_i;
+}
+
+template <class T>
+inline constexpr T _inertionr(const T& _val_cur, const T& _val_trgt, const float& _friction)
+{
+    float friction_i = 1.f - _friction;
+    return _val_cur * _friction + _val_trgt * friction_i;
+}
