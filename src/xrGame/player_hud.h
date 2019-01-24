@@ -68,10 +68,11 @@ public:
         return NULL;
     }
 
+    bool inertion_allowed();
+
 private:
     void update_inertion(Fmatrix& trans);
     void update_additional(Fmatrix& trans);
-    bool inertion_allowed();
 
     shared_str m_sect_name;
 

@@ -57,6 +57,9 @@ void player_hud::update_inertion(Fmatrix& trans)
             inertion_data.m_tendto_speed_aim  = TENDTO_SPEED_AIM;
         }
 
+        // Replaced by CWeapon::UpdateHudAdditonal()
+        // Very FPS sensitive and hard to control
+        /*
         // calc difference
         Fvector diff_dir;
         diff_dir.sub(xform.k, st_last_dir);
@@ -97,6 +100,7 @@ void player_hud::update_inertion(Fmatrix& trans)
 
         st_last_dir.mad(diff_dir, _tendto_speed * Device.fTimeDelta);
         origin.mad(diff_dir, _origin_offset);
+        */
 
         // pitch compensation
         float pitch = angle_normalize_signed(xform.k.getP());

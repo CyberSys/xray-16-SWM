@@ -121,10 +121,19 @@ void hud_item_measures::load(const shared_str& sect_name, IKinematics* K)
     m_inertion_params.m_pitch_offset_d  = READ_IF_EXISTS(pSettings, r_float, sect_name, "pitch_offset_forward", PITCH_OFFSET_D);
     m_inertion_params.m_pitch_low_limit = READ_IF_EXISTS(pSettings, r_float, sect_name, "pitch_offset_up_low_limit", PITCH_LOW_LIMIT);
 
-    m_inertion_params.m_origin_offset     = READ_IF_EXISTS(pSettings, r_float, sect_name, "inertion_origin_offset", ORIGIN_OFFSET);
-    m_inertion_params.m_origin_offset_aim = READ_IF_EXISTS(pSettings, r_float, sect_name, "inertion_origin_aim_offset", ORIGIN_OFFSET_AIM);
-    m_inertion_params.m_tendto_speed      = READ_IF_EXISTS(pSettings, r_float, sect_name, "inertion_tendto_speed", TENDTO_SPEED);
-    m_inertion_params.m_tendto_speed_aim  = READ_IF_EXISTS(pSettings, r_float, sect_name, "inertion_tendto_aim_speed", TENDTO_SPEED_AIM);
+    m_inertion_params.m_origin_offset     = READ_IF_EXISTS(pSettings, r_float, sect_name, "inertion_origin_offset", ORIGIN_OFFSET_OLD);
+    m_inertion_params.m_origin_offset_aim = READ_IF_EXISTS(pSettings, r_float, sect_name, "inertion_origin_aim_offset", ORIGIN_OFFSET_AIM_OLD);
+
+    m_inertion_params.m_tendto_speed         = READ_IF_EXISTS(pSettings, r_float, sect_name, "inertion_tendto_speed", TENDTO_SPEED);
+    m_inertion_params.m_tendto_speed_aim     = READ_IF_EXISTS(pSettings, r_float, sect_name, "inertion_tendto_aim_speed", TENDTO_SPEED_AIM);
+    m_inertion_params.m_tendto_ret_speed     = READ_IF_EXISTS(pSettings, r_float, sect_name, "inertion_tendto_ret_speed", TENDTO_SPEED_RET);
+    m_inertion_params.m_tendto_ret_speed_aim = READ_IF_EXISTS(pSettings, r_float, sect_name, "inertion_tendto_ret_aim_speed", TENDTO_SPEED_RET_AIM);
+
+    m_inertion_params.m_min_angle       = READ_IF_EXISTS(pSettings, r_float, sect_name, "inertion_min_angle", INERT_MIN_ANGLE);
+    m_inertion_params.m_min_angle_aim   = READ_IF_EXISTS(pSettings, r_float, sect_name, "inertion_min_angle_aim", INERT_MIN_ANGLE_AIM);
+
+    m_inertion_params.m_offset_LRUD       = READ_IF_EXISTS(pSettings, r_fvector4, sect_name, "inertion_offset_LRUD", Fvector4().set(ORIGIN_OFFSET));
+    m_inertion_params.m_offset_LRUD_aim   = READ_IF_EXISTS(pSettings, r_fvector4, sect_name, "inertion_offset_LRUD_aim", Fvector4().set(ORIGIN_OFFSET_AIM));
 
     // Msg("Measures loaded from %s [%d][%d][%d][%d]", sect_name.c_str(), bReloadAim, bReloadAimGL, bReloadInertion, bReloadPitchOfs);
     //--#SM+# End--
@@ -159,10 +168,16 @@ void hud_item_measures::merge_measures_params(hud_item_measures& new_measures)
     // Инерция
     if (new_measures.bReloadInertion)
     {
-        m_inertion_params.m_origin_offset     = new_measures.m_inertion_params.m_origin_offset;
-        m_inertion_params.m_origin_offset_aim = new_measures.m_inertion_params.m_origin_offset_aim;
-        m_inertion_params.m_tendto_speed      = new_measures.m_inertion_params.m_tendto_speed;
-        m_inertion_params.m_tendto_speed_aim  = new_measures.m_inertion_params.m_tendto_speed_aim;
+        m_inertion_params.m_origin_offset        = new_measures.m_inertion_params.m_origin_offset;
+        m_inertion_params.m_origin_offset_aim    = new_measures.m_inertion_params.m_origin_offset_aim;
+        m_inertion_params.m_offset_LRUD          = new_measures.m_inertion_params.m_offset_LRUD;
+        m_inertion_params.m_offset_LRUD_aim      = new_measures.m_inertion_params.m_offset_LRUD_aim;
+        m_inertion_params.m_tendto_speed         = new_measures.m_inertion_params.m_tendto_speed;
+        m_inertion_params.m_tendto_speed_aim     = new_measures.m_inertion_params.m_tendto_speed_aim;
+        m_inertion_params.m_tendto_ret_speed     = new_measures.m_inertion_params.m_tendto_ret_speed;
+        m_inertion_params.m_tendto_ret_speed_aim = new_measures.m_inertion_params.m_tendto_ret_speed_aim;
+        m_inertion_params.m_min_angle            = new_measures.m_inertion_params.m_min_angle;
+        m_inertion_params.m_min_angle_aim        = new_measures.m_inertion_params.m_min_angle_aim;
     }
 
     // Инерция - смещение ствола при вертикальных поторотах камеры

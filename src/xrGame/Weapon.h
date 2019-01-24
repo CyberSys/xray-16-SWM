@@ -1051,6 +1051,8 @@ protected:
 public:
     float m_fLR_MovingFactor; // Фактор бокового наклона худа при ходьбе [-1; +1]
     float m_fLR_CameraFactor; // Фактор бокового наклона худа при движении камеры [-1; +1]
+    float m_fLR_InertiaFactor; // Фактор горизонтальной инерции худа при движении камеры [-1; +1]
+    float m_fUD_InertiaFactor; // Фактор вертикальной инерции худа при движении камеры [-1; +1]
 
     virtual void OnOwnedCameraMove(CCameraBase* pCam, float fOldYaw, float fOldPitch);
     virtual void OnFirstAnimationPlayed(const shared_str& sAnmAlias);
