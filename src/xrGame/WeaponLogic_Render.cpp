@@ -140,18 +140,27 @@ void CWeapon::UpdateHudAdditonal(Fmatrix& trans)
     if (fStrafeMaxTime <= EPS)
         fStrafeMaxTime = 0.01f;
 
-    float fStepPerUpd = Device.fTimeDelta / fStrafeMaxTime; // Величина изменение фактора поворота
+    float fStepPerUpd = fAvgTimeDelta / fStrafeMaxTime; // Величина изменение фактора поворота
 
     // Добавляем боковой наклон от движения камеры
     float fCamReturnSpeedMod = 1.5f; // Восколько ускоряем нормализацию наклона, полученного от движения камеры (только от бедра)
-    float fCamLimitNoAim = 0.5f; // Максимальный фактор наклона от камеры от бедра
-    float fYMag = pActor->fFPCamYawMagnitude;
 
-    if (fYMag != 0.0f)
+    // Высчитываем минимальную скорость поворота камеры для начала инерции
+    float fStrafeMinAngle = _lerp(
+        hi->m_measures.m_strafe_offset[3][0].y,
+        hi->m_measures.m_strafe_offset[3][1].y,
+        m_fZoomRotationFactor);
+
+    // Высчитываем мксимальный наклон от поворота камеры
+    float fCamLimitBlend = _lerp(
+        hi->m_measures.m_strafe_offset[3][0].x,
+        hi->m_measures.m_strafe_offset[3][1].x,
+        m_fZoomRotationFactor);
+
+    // Считаем стрейф от поворота камеры
+    if (abs(fYMag) > (m_fLR_CameraFactor == 0.0f ? fStrafeMinAngle : 0.0f))
     { //--> Камера крутится по оси Y
         m_fLR_CameraFactor -= (fYMag * 0.025f);
-
-        float fCamLimitBlend = 1.0f - ((1.0f - fCamLimitNoAim) * (1.0f - m_fZoomRotationFactor));
         clamp(m_fLR_CameraFactor, -fCamLimitBlend, fCamLimitBlend);
     }
     else
@@ -159,12 +168,12 @@ void CWeapon::UpdateHudAdditonal(Fmatrix& trans)
         if (m_fLR_CameraFactor < 0.0f)
         {
             m_fLR_CameraFactor += fStepPerUpd * (bForAim ? 1.0f : fCamReturnSpeedMod);
-            clamp(m_fLR_CameraFactor, -1.0f, 0.0f);
+            clamp(m_fLR_CameraFactor, -fCamLimitBlend, 0.0f);
         }
         else
         {
             m_fLR_CameraFactor -= fStepPerUpd * (bForAim ? 1.0f : fCamReturnSpeedMod);
-            clamp(m_fLR_CameraFactor, 0.0f, 1.0f);
+            clamp(m_fLR_CameraFactor, 0.0f, fCamLimitBlend);
         }
     }
 
@@ -201,9 +210,9 @@ void CWeapon::UpdateHudAdditonal(Fmatrix& trans)
     clamp(fLR_Factor, -1.0f, 1.0f); // Фактор боковой ходьбы не должен превышать эти лимиты
 
     // Производим наклон ствола для нормального режима и аима
-    for (int _idx = 0; _idx <= 1; _idx++)
+    for (int _idx = 0; _idx <= 1; _idx++) //<-- Для плавного перехода
     {
-        bool bEnabled = hi->m_measures.m_strafe_offset[2][_idx].x;
+        bool bEnabled = (hi->m_measures.m_strafe_offset[2][_idx].x != 0.0f);
         if (!bEnabled)
             continue;
 
@@ -218,6 +227,7 @@ void CWeapon::UpdateHudAdditonal(Fmatrix& trans)
         curr_rot.mul(-PI / 180.f); // Преобразуем углы в радианы
         curr_rot.mul(fLR_Factor); // Умножаем на фактор стрейфа
 
+        // Мягкий переход между бедром \ прицелом
         if (_idx == 0)
         { // От бедра
             curr_offs.mul(1.f - m_fZoomRotationFactor);

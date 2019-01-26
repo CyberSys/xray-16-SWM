@@ -101,19 +101,29 @@ void hud_item_measures::load(const shared_str& sect_name, IKinematics* K)
     m_strafe_offset[1][1] = READ_IF_EXISTS(pSettings, r_fvector3, sect_name, val_name, vDefStrafeValue);
 
     //--> Параметры стрейфа
-    float fFullStrafeTime     = READ_IF_EXISTS(pSettings, r_float, sect_name, "strafe_transition_time", 0.01f);
-    float fFullStrafeTime_aim = READ_IF_EXISTS(pSettings, r_float, sect_name, "strafe_aim_transition_time", 0.01f);
-    bool  bStrafeEnabled      = READ_IF_EXISTS(pSettings, r_bool, sect_name, "strafe_enabled", false);
-    bool  bStrafeEnabled_aim  = READ_IF_EXISTS(pSettings, r_bool, sect_name, "strafe_aim_enabled", false);
+    bool  bStrafeEnabled        = READ_IF_EXISTS(pSettings, r_bool,  sect_name, "strafe_enabled", false);
+    bool  bStrafeEnabled_aim    = READ_IF_EXISTS(pSettings, r_bool,  sect_name, "strafe_aim_enabled", false);
+    float fFullStrafeTime       = READ_IF_EXISTS(pSettings, r_float, sect_name, "strafe_transition_time", 0.01f);
+    float fFullStrafeTime_aim   = READ_IF_EXISTS(pSettings, r_float, sect_name, "strafe_aim_transition_time", 0.01f);
+    float fStrafeCamLFactor     = READ_IF_EXISTS(pSettings, r_float, sect_name, "strafe_cam_limit_factor", 0.5f);
+    float fStrafeCamLFactor_aim = READ_IF_EXISTS(pSettings, r_float, sect_name, "strafe_cam_limit_aim_factor", 1.0f);
+    float fStrafeMinAngle       = READ_IF_EXISTS(pSettings, r_float, sect_name, "strafe_cam_min_angle", 0.0f);
+    float fStrafeMinAngle_aim   = READ_IF_EXISTS(pSettings, r_float, sect_name, "strafe_cam_aim_min_angle", 7.0f);
+ 
+    //--> (Data 1)
+    m_strafe_offset[2][0].set((bStrafeEnabled ? 1.0f : 0.0f), fFullStrafeTime, NULL);         // normal
+    m_strafe_offset[2][1].set((bStrafeEnabled_aim ? 1.0f : 0.0f), fFullStrafeTime_aim, NULL); // aim-GL
 
-    m_strafe_offset[2][0].set(bStrafeEnabled, fFullStrafeTime, NULL);         // normal
-    m_strafe_offset[2][1].set(bStrafeEnabled_aim, fFullStrafeTime_aim, NULL); // aim-GL
+    //--> (Data 2)
+    m_strafe_offset[3][0].set(fStrafeCamLFactor, fStrafeMinAngle, NULL); // normal
+    m_strafe_offset[3][1].set(fStrafeCamLFactor_aim, fStrafeMinAngle_aim, NULL); // aim-GL
 
     // Нужно-ли использовать координаты худа из потомка, когда он присоединён?
     bReloadAim      = READ_IF_EXISTS(pSettings, r_bool, sect_name, "use_new_aim_position", false);
     bReloadAimGL    = READ_IF_EXISTS(pSettings, r_bool, sect_name, "use_new_aim_gl_position", false);
     bReloadInertion = READ_IF_EXISTS(pSettings, r_bool, sect_name, "use_new_inertion_params", false);
     bReloadPitchOfs = READ_IF_EXISTS(pSettings, r_bool, sect_name, "use_new_pitch_offsets", false);
+    bReloadStrafe   = READ_IF_EXISTS(pSettings, r_bool, sect_name, "use_new_strafe_params", false);
 
     // Загрузка параметров смещения / инерции
     m_inertion_params.m_pitch_offset_r  = READ_IF_EXISTS(pSettings, r_float, sect_name, "pitch_offset_right", PITCH_OFFSET_R);
@@ -135,7 +145,7 @@ void hud_item_measures::load(const shared_str& sect_name, IKinematics* K)
     m_inertion_params.m_offset_LRUD       = READ_IF_EXISTS(pSettings, r_fvector4, sect_name, "inertion_offset_LRUD", Fvector4().set(ORIGIN_OFFSET));
     m_inertion_params.m_offset_LRUD_aim   = READ_IF_EXISTS(pSettings, r_fvector4, sect_name, "inertion_offset_LRUD_aim", Fvector4().set(ORIGIN_OFFSET_AIM));
 
-    // Msg("Measures loaded from %s [%d][%d][%d][%d]", sect_name.c_str(), bReloadAim, bReloadAimGL, bReloadInertion, bReloadPitchOfs);
+    // Msg("Measures loaded from %s [%d][%d][%d][%d][%d]", sect_name.c_str(), bReloadAim, bReloadAimGL, bReloadInertion, bReloadPitchOfs, bReloadStrafe);
     //--#SM+# End--
 }
 
@@ -187,6 +197,19 @@ void hud_item_measures::merge_measures_params(hud_item_measures& new_measures)
         m_inertion_params.m_pitch_offset_n  = new_measures.m_inertion_params.m_pitch_offset_n;
         m_inertion_params.m_pitch_offset_d  = new_measures.m_inertion_params.m_pitch_offset_d;
         m_inertion_params.m_pitch_low_limit = new_measures.m_inertion_params.m_pitch_low_limit;
+    }
+
+    // Параметры стрейфа
+    if (new_measures.bReloadStrafe)
+    {
+        m_strafe_offset[0][0].set(new_measures.m_strafe_offset[0][0]);
+        m_strafe_offset[0][1].set(new_measures.m_strafe_offset[0][1]);
+        m_strafe_offset[1][0].set(new_measures.m_strafe_offset[1][0]);
+        m_strafe_offset[1][1].set(new_measures.m_strafe_offset[1][1]);
+        m_strafe_offset[2][0].set(new_measures.m_strafe_offset[2][0]);
+        m_strafe_offset[2][1].set(new_measures.m_strafe_offset[2][1]);
+        m_strafe_offset[3][0].set(new_measures.m_strafe_offset[3][0]);
+        m_strafe_offset[3][1].set(new_measures.m_strafe_offset[3][1]);
     }
 
     // Msg("Measures reloaded [%d][%d]", new_measures.bReloadAim, new_measures.bReloadAimGL);
