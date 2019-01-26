@@ -712,6 +712,10 @@ bool CUIActorMenu::highlight_addons_for_weapon(PIItem weapon_item, CUICellItem* 
         CWeapon::EAddons iSlot = pWpn->GetAddonSlot(item->cast_game_object());
         if (iSlot != CWeapon::eNotExist)
         {
+            SAddonData* pAddon = pWpn->GetAddonBySlot(iSlot);
+            if (pAddon->m_attach_status != ALife::eAddonAttachable)
+                return false;
+
             if (iSlot == CWeapon::eMagaz)
                 ci->m_select_armament_2 = true;
             else
@@ -746,6 +750,10 @@ void CUIActorMenu::highlight_weapons_for_addon(PIItem addon_item, CUIDragDropLis
 		CWeapon::EAddons iSlot = weapon->GetAddonSlot(addon_item->cast_game_object());
         if (iSlot != CWeapon::eNotExist)
         {
+            SAddonData* pAddon = weapon->GetAddonBySlot(iSlot);
+            if (pAddon->m_attach_status != ALife::eAddonAttachable)
+                continue;
+
             ci->m_select_armament = true;
             continue;
         }
