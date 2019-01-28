@@ -145,6 +145,7 @@ CWeapon::CWeapon() : CShellLauncher(this)
 
     m_fLR_MovingFactor = 0.f;
     m_fLR_CameraFactor = 0.f;
+
     m_fLR_InertiaFactor = 0.f;
     m_fUD_InertiaFactor = 0.f;
 

@@ -14,7 +14,7 @@
 #define TENDTO_SPEED_RET     5.0f     // Модификатор силы отката инерции (больше - быстрее)
 #define TENDTO_SPEED_RET_AIM 5.0f     // (Для прицеливания)
 #define INERT_MIN_ANGLE      0.0f     // Минимальная сила наклона, необходимая для старта инерции
-#define INERT_MIN_ANGLE_AIM  7.0f     // (Для прицеливания)
+#define INERT_MIN_ANGLE_AIM  3.5f     // (Для прицеливания)
 
 // Пределы смещения при инерции (лево / право / верх / низ)
 #define ORIGIN_OFFSET        0.04f,  0.04f,  0.04f, 0.02f 

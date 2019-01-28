@@ -122,17 +122,20 @@ void CWeapon::UpdateHudAdditonal(Fmatrix& trans)
     }
 
     //============= Подготавливаем общие переменные =============//
-    if (!g_player_hud->inertion_allowed())
-        return;
-
     clamp(idx, u8(0), u8(1));
     bool bForAim = (idx == 1);
+
+    float fInertiaPower = GetInertionPowerFactor();
 
     float fYMag = pActor->fFPCamYawMagnitude;
     float fPMag = pActor->fFPCamPitchMagnitude;
 
     static float fAvgTimeDelta = Device.fTimeDelta;
     _inertion(fAvgTimeDelta, Device.fTimeDelta, 0.8f);
+
+    //======== Проверяем доступность инерции и стрейфа ========//
+    if (!g_player_hud->inertion_allowed())
+        return;
 
     //============= Боковой стрейф с оружием =============//
     // Рассчитываем фактор боковой ходьбы
@@ -273,24 +276,24 @@ void CWeapon::UpdateHudAdditonal(Fmatrix& trans)
         hi->m_measures.m_inertion_params.m_min_angle,
         hi->m_measures.m_inertion_params.m_min_angle_aim,
         m_fZoomRotationFactor);
-  
+
     Fvector4 vIOffsets; // x = L, y = R, z = U, w = D
     vIOffsets.x = _lerp(
         hi->m_measures.m_inertion_params.m_offset_LRUD.x,
         hi->m_measures.m_inertion_params.m_offset_LRUD_aim.x,
-        m_fZoomRotationFactor);
+        m_fZoomRotationFactor) * fInertiaPower;
     vIOffsets.y = _lerp(
         hi->m_measures.m_inertion_params.m_offset_LRUD.y,
         hi->m_measures.m_inertion_params.m_offset_LRUD_aim.y,
-        m_fZoomRotationFactor);
+        m_fZoomRotationFactor) * fInertiaPower;
     vIOffsets.z = _lerp(
         hi->m_measures.m_inertion_params.m_offset_LRUD.z,
         hi->m_measures.m_inertion_params.m_offset_LRUD_aim.z,
-        m_fZoomRotationFactor);
+        m_fZoomRotationFactor) * fInertiaPower;
     vIOffsets.w = _lerp(
         hi->m_measures.m_inertion_params.m_offset_LRUD.w,
         hi->m_measures.m_inertion_params.m_offset_LRUD_aim.w,
-        m_fZoomRotationFactor);
+        m_fZoomRotationFactor) * fInertiaPower;
 
     // Высчитываем инерцию из поворотов камеры
     bool bIsInertionPresent = m_fLR_InertiaFactor != 0.0f || m_fUD_InertiaFactor != 0.0f;
@@ -328,15 +331,15 @@ void CWeapon::UpdateHudAdditonal(Fmatrix& trans)
     // Минимальное линейное затухание инерции при покое (горизонталь)
     if (fYMag == 0.0f)
     {
-        float fRetSpeedMod = (fYMag == 0.0f ? 1.0f : 0.75f) * (fInertiaReturnSpeedMod * 0.025f);
+        float fRetSpeedMod = (fYMag == 0.0f ? 1.0f : 0.75f) * (fInertiaReturnSpeedMod * 0.075f);
         if (m_fLR_InertiaFactor < 0.0f)
         {
-            m_fLR_InertiaFactor += fAvgTimeDelta * fInertiaReturnSpeedMod * fRetSpeedMod;
+            m_fLR_InertiaFactor += fAvgTimeDelta * fRetSpeedMod;
             clamp(m_fLR_InertiaFactor, -1.0f, 0.0f);
         }
         else
         {
-            m_fLR_InertiaFactor -= fAvgTimeDelta * fInertiaReturnSpeedMod * fRetSpeedMod;
+            m_fLR_InertiaFactor -= fAvgTimeDelta * fRetSpeedMod;
             clamp(m_fLR_InertiaFactor, 0.0f, 1.0f);
         }
     }
@@ -344,7 +347,7 @@ void CWeapon::UpdateHudAdditonal(Fmatrix& trans)
     // Минимальное линейное затухание инерции при покое (вертикаль)
     if (fPMag == 0.0f)
     {
-        float fRetSpeedMod = (fPMag == 0.0f ? 1.0f : 0.75f) * (fInertiaReturnSpeedMod * 0.025f);
+        float fRetSpeedMod = (fPMag == 0.0f ? 1.0f : 0.75f) * (fInertiaReturnSpeedMod * 0.075f);
         if (m_fUD_InertiaFactor < 0.0f)
         {
             m_fUD_InertiaFactor += fAvgTimeDelta * fRetSpeedMod;
@@ -457,15 +460,15 @@ float CWeapon::GetHudFov()
     }
 }
 
-// Получить фактор силы инерции (насколько далеко и быстро влияет на оружие)
+// Получить фактор силы инерции и cam-стрейфа (насколько далеко и быстро влияет на оружие)
 float CWeapon::GetInertionPowerFactor()
 {
     if (IsBipodsDeployed())
     {
-        return 1.f - ((1.f - m_bipods.m_inertia_power) * GetZRotatingFactor());
+        return 1.0f - ((1.0f - m_bipods.m_inertia_power) * GetZRotatingFactor());
     }
 
-    return 1.f;
+    return 1.0f;
 }
 
 // Требуется-ли отрисовывать худ
