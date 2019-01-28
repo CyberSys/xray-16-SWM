@@ -124,6 +124,7 @@ void hud_item_measures::load(const shared_str& sect_name, IKinematics* K)
     bReloadInertion = READ_IF_EXISTS(pSettings, r_bool, sect_name, "use_new_inertion_params", false);
     bReloadPitchOfs = READ_IF_EXISTS(pSettings, r_bool, sect_name, "use_new_pitch_offsets", false);
     bReloadStrafe   = READ_IF_EXISTS(pSettings, r_bool, sect_name, "use_new_strafe_params", false);
+    bReloadShooting = READ_IF_EXISTS(pSettings, r_bool, sect_name, "use_new_shooting_params", false);
 
     // Загрузка параметров смещения / инерции
     m_inertion_params.m_pitch_offset_r  = READ_IF_EXISTS(pSettings, r_float, sect_name, "pitch_offset_right", PITCH_OFFSET_R);
@@ -145,7 +146,15 @@ void hud_item_measures::load(const shared_str& sect_name, IKinematics* K)
     m_inertion_params.m_offset_LRUD       = READ_IF_EXISTS(pSettings, r_fvector4, sect_name, "inertion_offset_LRUD", Fvector4().set(ORIGIN_OFFSET));
     m_inertion_params.m_offset_LRUD_aim   = READ_IF_EXISTS(pSettings, r_fvector4, sect_name, "inertion_offset_LRUD_aim", Fvector4().set(ORIGIN_OFFSET_AIM));
 
-    // Msg("Measures loaded from %s [%d][%d][%d][%d][%d]", sect_name.c_str(), bReloadAim, bReloadAimGL, bReloadInertion, bReloadPitchOfs, bReloadStrafe);
+    // Загрузка параметров смещения при стрельбе
+    m_shooting_params.m_shot_max_offset_LRUD      = READ_IF_EXISTS(pSettings, r_fvector4, sect_name, "shooting_max_LRUD", Fvector4().set(0,0,0,0));
+    m_shooting_params.m_shot_max_offset_LRUD_aim  = READ_IF_EXISTS(pSettings, r_fvector4, sect_name, "shooting_max_LRUD_aim", Fvector4().set(0,0,0,0));
+    m_shooting_params.m_shot_offset_BACKW         = READ_IF_EXISTS(pSettings, r_fvector2, sect_name, "shooting_backward_offset", Fvector2().set(0,0));
+    m_shooting_params.m_ret_speed                 = READ_IF_EXISTS(pSettings, r_float, sect_name, "shooting_ret_speed", 1.0f);
+    m_shooting_params.m_ret_speed_aim             = READ_IF_EXISTS(pSettings, r_float, sect_name, "shooting_ret_aim_speed", 1.0f);
+    m_shooting_params.m_min_LRUD_power            = READ_IF_EXISTS(pSettings, r_float, sect_name, "shooting_min_LRUD_power", 0.0f);
+
+    // Msg("Measures loaded from %s [%d][%d][%d][%d][%d][%d]", sect_name.c_str(), bReloadAim, bReloadAimGL, bReloadInertion, bReloadPitchOfs, bReloadStrafe, bReloadShooting);
     //--#SM+# End--
 }
 
@@ -210,6 +219,17 @@ void hud_item_measures::merge_measures_params(hud_item_measures& new_measures)
         m_strafe_offset[2][1].set(new_measures.m_strafe_offset[2][1]);
         m_strafe_offset[3][0].set(new_measures.m_strafe_offset[3][0]);
         m_strafe_offset[3][1].set(new_measures.m_strafe_offset[3][1]);
+    }
+
+    // Смещение от стрельбы
+    if (new_measures.bReloadShooting)
+    {
+        m_shooting_params.m_shot_max_offset_LRUD     = new_measures.m_shooting_params.m_shot_max_offset_LRUD;
+        m_shooting_params.m_shot_max_offset_LRUD_aim = new_measures.m_shooting_params.m_shot_max_offset_LRUD_aim;
+        m_shooting_params.m_shot_offset_BACKW        = new_measures.m_shooting_params.m_shot_offset_BACKW;
+        m_shooting_params.m_ret_speed                = new_measures.m_shooting_params.m_ret_speed;
+        m_shooting_params.m_ret_speed_aim            = new_measures.m_shooting_params.m_ret_speed_aim;
+        m_shooting_params.m_min_LRUD_power           = new_measures.m_shooting_params.m_min_LRUD_power;
     }
 
     // Msg("Measures reloaded [%d][%d]", new_measures.bReloadAim, new_measures.bReloadAimGL);

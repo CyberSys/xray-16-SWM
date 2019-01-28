@@ -1054,6 +1054,10 @@ public:
     float m_fLR_InertiaFactor; // Фактор горизонтальной инерции худа при движении камеры [-1; +1]
     float m_fUD_InertiaFactor; // Фактор вертикальной инерции худа при движении камеры [-1; +1]
 
+    float m_fLR_ShootingFactor; // Фактор горизонтального сдвига худа при стрельбе [-1; +1]
+    float m_fUD_ShootingFactor; // Фактор вертикального сдвига худа при стрельбе [-1; +1]
+    float m_fBACKW_ShootingFactor; // Фактор сдвига худа в сторону лица при стрельбе [0; +1]
+
     virtual void OnOwnedCameraMove(CCameraBase* pCam, float fOldYaw, float fOldPitch);
     virtual void OnFirstAnimationPlayed(const shared_str& sAnmAlias);
     virtual motion_params OnBeforeMotionPlayed(const shared_str& sAnmAlias);
@@ -1146,6 +1150,8 @@ public:
 
     virtual void FireBullet(const Fvector& pos, const Fvector& dir, float fire_disp, const CCartridge& cartridge,
         u16 parent_id, u16 weapon_id, bool send_hit);
+
+    void AddHUDShootingEffect();
 
     IC const Fvector& get_LastFP()
     {

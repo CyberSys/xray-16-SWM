@@ -401,6 +401,9 @@ void CWeapon::OnShot(bool bIsRocket, bool bIsBaseDispersionedBullet)
                 CShellLauncher::LaunchShell(_idx, NULL); //SM_TODO:M
         }
     }
+
+    // Эффект сдвига (отдача)
+    AddHUDShootingEffect();
 }
 
 // Колбек на вылет ракеты

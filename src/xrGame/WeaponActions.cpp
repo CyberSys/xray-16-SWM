@@ -310,6 +310,12 @@ void CWeapon::OnH_A_Independent()
     m_fLR_InertiaFactor = 0.f;
     m_fUD_InertiaFactor = 0.f;
 
+    m_fLR_ShootingFactor = 0.f;
+    m_fUD_ShootingFactor = 0.f;
+    m_fBACKW_ShootingFactor = 0.f;
+
+    m_fZoomRotationFactor = 0.0f;
+
     SetQueueSize(WEAPON_ININITE_QUEUE);
     Light_Destroy();
     UpdateAddonsVisibility();
@@ -403,6 +409,10 @@ void CWeapon::signal_HideComplete()
 
     m_fLR_InertiaFactor = 0.f;
     m_fUD_InertiaFactor = 0.f;
+
+    m_fLR_ShootingFactor = 0.f;
+    m_fUD_ShootingFactor = 0.f;
+    m_fBACKW_ShootingFactor = 0.f;
 
     m_fZoomRotationFactor = 0.0f;
 

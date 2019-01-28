@@ -149,6 +149,10 @@ CWeapon::CWeapon() : CShellLauncher(this)
     m_fLR_InertiaFactor = 0.f;
     m_fUD_InertiaFactor = 0.f;
 
+    m_fLR_ShootingFactor = 0.f;
+    m_fUD_ShootingFactor = 0.f;
+    m_fBACKW_ShootingFactor = 0.f;
+
     m_bDisableMovEffAtZoom = false;
 
     m_bMagaz3pHideWhileReload = false;

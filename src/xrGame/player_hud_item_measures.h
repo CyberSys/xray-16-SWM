@@ -33,6 +33,7 @@ struct hud_item_measures
     bool bReloadInertion; //--#SM+#--
     bool bReloadPitchOfs; //--#SM+#--
     bool bReloadStrafe;   //--#SM+#--
+    bool bReloadShooting; //--#SM+#--
 
     void load(const shared_str& sect_name, IKinematics* K);
     void merge_measures_params(hud_item_measures& new_measures); //--#SM+#--
@@ -58,4 +59,15 @@ struct hud_item_measures
         Fvector4 m_offset_LRUD_aim;
     };
     inertion_params m_inertion_params; //--#SM+#--
+
+    struct shooting_params
+    {
+        Fvector4 m_shot_max_offset_LRUD;
+        Fvector4 m_shot_max_offset_LRUD_aim;
+        Fvector2 m_shot_offset_BACKW;
+        float m_ret_speed;
+        float m_ret_speed_aim;
+        float m_min_LRUD_power;
+    };
+    shooting_params m_shooting_params; //--#SM+#--
 };
