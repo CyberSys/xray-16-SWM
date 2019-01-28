@@ -304,6 +304,9 @@ void CWeapon::OnH_A_Independent()
 
     m_dwWeaponIndependencyTime = Level().timeServer();
 
+    m_fLR_MovingFactor = 0.f;
+    m_fLR_CameraFactor = 0.f;
+
     m_fLR_InertiaFactor = 0.f;
     m_fUD_InertiaFactor = 0.f;
 
@@ -394,6 +397,9 @@ void CWeapon::signal_HideComplete()
     m_set_next_magaz_by_id = u16(-1);
 
     m_sub_state = eSubstateReloadBegin;
+
+    m_fLR_MovingFactor = 0.f;
+    m_fLR_CameraFactor = 0.f;
 
     m_fLR_InertiaFactor = 0.f;
     m_fUD_InertiaFactor = 0.f;

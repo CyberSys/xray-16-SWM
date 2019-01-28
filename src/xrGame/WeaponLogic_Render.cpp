@@ -209,7 +209,7 @@ void CWeapon::UpdateHudAdditonal(Fmatrix& trans)
     clamp(m_fLR_MovingFactor, -1.0f, 1.0f); // Фактор боковой ходьбы не должен превышать эти лимиты
 
     // Вычисляем и нормализируем итоговый фактор наклона
-    float fLR_Factor = m_fLR_MovingFactor + m_fLR_CameraFactor;
+    float fLR_Factor = m_fLR_MovingFactor + (m_fLR_CameraFactor * fInertiaPower);
     clamp(fLR_Factor, -1.0f, 1.0f); // Фактор боковой ходьбы не должен превышать эти лимиты
 
     // Производим наклон ствола для нормального режима и аима
