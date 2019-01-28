@@ -142,12 +142,12 @@ void D3DXRenderBase::r_dsgraph_insert_dynamic(dxRender_Visual* pVisual, Fvector&
         Nps.hs = pass.hs->sh;
         Nps.ds = pass.ds->sh;
 
-        auto &Ncs = Nps.mapCS[pass.constants._get()];
+        auto& Ncs = Nps.mapCS[pass.constants._get()];
 #else
-        auto &Ncs = Nps[pass.constants._get()];
+        auto& Ncs = Nps[pass.constants._get()];
 #endif
-        auto &Nstate = Ncs[&*pass.state];
-        auto &Ntex = Nstate[pass.T._get()];
+        auto& Nstate = Ncs[&*pass.state];
+        auto& Ntex = Nstate[pass.T._get()];
         Ntex.push_back(item);
 
         // Need to sort for HZB efficient use
@@ -269,32 +269,32 @@ void D3DXRenderBase::r_dsgraph_insert_static(dxRender_Visual* pVisual)
 
     for (u32 iPass = 0; iPass < sh->passes.size(); ++iPass)
     {
-        auto &pass = *sh->passes[iPass];
-        auto &map = mapNormalPasses[sh->flags.iPriority / 2][iPass];
+        auto& pass = *sh->passes[iPass];
+        auto& map = mapNormalPasses[sh->flags.iPriority / 2][iPass];
 
 #ifdef USE_OGL
-        auto &Nvs = map[pass.vs->sh];
-        auto &Ngs = Nvs[pass.gs->sh];
-        auto &Nps = Ngs[pass.ps->sh];
+        auto& Nvs = map[pass.vs->sh];
+        auto& Ngs = Nvs[pass.gs->sh];
+        auto& Nps = Ngs[pass.ps->sh];
 #elif defined(USE_DX10) || defined(USE_DX11)
-        auto &Nvs = map[&*pass.vs];
-        auto &Ngs = Nvs[pass.gs->sh];
-        auto &Nps = Ngs[pass.ps->sh];
+        auto& Nvs = map[&*pass.vs];
+        auto& Ngs = Nvs[pass.gs->sh];
+        auto& Nps = Ngs[pass.ps->sh];
 #else
-        auto &Nvs = map[pass.vs->sh];
-        auto &Nps = Nvs[pass.ps->sh];
+        auto& Nvs = map[pass.vs->sh];
+        auto& Nps = Nvs[pass.ps->sh];
 #endif
 
 #ifdef USE_DX11
         Nps.hs = pass.hs->sh;
         Nps.ds = pass.ds->sh;
 
-        auto &Ncs = Nps.mapCS[pass.constants._get()];
+        auto& Ncs = Nps.mapCS[pass.constants._get()];
 #else
-        auto &Ncs = Nps[pass.constants._get()];
+        auto& Ncs = Nps[pass.constants._get()];
 #endif
-        auto &Nstate = Ncs[&*pass.state];
-        auto &Ntex = Nstate[pass.T._get()];
+        auto& Nstate = Ncs[&*pass.state];
+        auto& Ntex = Nstate[pass.T._get()];
         Ntex.push_back(item);
 
         // Need to sort for HZB efficient use
@@ -357,14 +357,14 @@ void CRender::add_leafs_Dynamic(dxRender_Visual* pVisual)
     {
         // Add all children, doesn't perform any tests
         PS::CParticleGroup* pG = (PS::CParticleGroup*)pVisual;
-        for (auto &it : pG->items)
+        for (auto& it : pG->items)
         {
             PS::CParticleGroup::SItem& I = it;
             if (I._effect)
                 add_leafs_Dynamic(I._effect);
-            for (auto &pit : I._children_related)
+            for (auto& pit : I._children_related)
                 add_leafs_Dynamic(pit);
-            for (auto &pit : I._children_free)
+            for (auto& pit : I._children_free)
                 add_leafs_Dynamic(pit);
         }
     }
@@ -373,11 +373,10 @@ void CRender::add_leafs_Dynamic(dxRender_Visual* pVisual)
     {
         // Add all children, doesn't perform any tests
         FHierrarhyVisual* pV = (FHierrarhyVisual*)pVisual;
-        for (auto &i : pV->children)
+        for (auto& i : pV->children)
         {
             i->vis.obj_data = pV->getVisData().obj_data; // Наследники используют шейдерные данные от родительского визуала
-                                                                                   // [use shader data from parent model, rather than it childrens] --#SM+#--
-
+                                                         // [use shader data from parent model, rather than it childrens] --#SM+#--
             add_leafs_Dynamic(i);
         }
     }
@@ -405,10 +404,10 @@ void CRender::add_leafs_Dynamic(dxRender_Visual* pVisual)
         {
             pV->CalculateBones(TRUE);
             pV->CalculateWallmarks(); //. bug?
-            for (auto &i : pV->children)
+            for (auto& i : pV->children)
             {
                 i->vis.obj_data = pV->getVisData().obj_data; // Наследники используют шейдерные данные от родительского визуала
-                                                                                       // [use shader data from parent model, rather than it childrens] --#SM+#--
+                                                             // [use shader data from parent model, rather than it childrens] --#SM+#--
                 add_leafs_Dynamic(i);
             }
         }
@@ -438,14 +437,14 @@ void CRender::add_leafs_Static(dxRender_Visual* pVisual)
     {
         // Add all children, doesn't perform any tests
         PS::CParticleGroup* pG = (PS::CParticleGroup*)pVisual;
-        for (auto &it : pG->items)
+        for (auto& it : pG->items)
         {
             PS::CParticleGroup::SItem& I = it;
             if (I._effect)
                 add_leafs_Dynamic(I._effect);
-            for (auto &pit : I._children_related)
+            for (auto& pit : I._children_related)
                 add_leafs_Dynamic(pit);
-            for (auto &pit : I._children_free)
+            for (auto& pit : I._children_free)
                 add_leafs_Dynamic(pit);
         }
     }
@@ -454,7 +453,7 @@ void CRender::add_leafs_Static(dxRender_Visual* pVisual)
     {
         // Add all children, doesn't perform any tests
         FHierrarhyVisual* pV = (FHierrarhyVisual*)pVisual;
-        for (auto &i : pV->children)
+        for (auto& i : pV->children)
         {
             i->vis.obj_data = pV->getVisData().obj_data; // Наследники используют шейдерные данные от родительского визуала
                                                          // [use shader data from parent model, rather than it childrens] --#SM+#--
@@ -468,7 +467,7 @@ void CRender::add_leafs_Static(dxRender_Visual* pVisual)
         // Add all children, doesn't perform any tests
         CKinematics* pV = (CKinematics*)pVisual;
         pV->CalculateBones(TRUE);
-        for (auto &i : pV->children)
+        for (auto& i : pV->children)
         {
             i->vis.obj_data = pV->getVisData().obj_data; // Наследники используют шейдерные данные от родительского визуала
                                                          // [use shader data from parent model, rather than it childrens] --#SM+#--
@@ -495,10 +494,10 @@ void CRender::add_leafs_Static(dxRender_Visual* pVisual)
 #endif
         {
             // Add all children, doesn't perform any tests
-            for (auto &i : pV->children)
+            for (auto& i : pV->children)
             {
                 i->vis.obj_data = pV->getVisData().obj_data; // Наследники используют шейдерные данные от родительского визуала
-                                                                                       // [use shader data from parent model, rather than it childrens] --#SM+#--
+                                                             // [use shader data from parent model, rather than it childrens] --#SM+#--
                 add_leafs_Static(i);
             }
         }
@@ -541,25 +540,25 @@ BOOL CRender::add_Dynamic(dxRender_Visual* pVisual, u32 planes)
     {
         // Add all children, doesn't perform any tests
         PS::CParticleGroup* pG = (PS::CParticleGroup*)pVisual;
-        for (auto &it : pG->items)
+        for (auto& it : pG->items)
         {
             PS::CParticleGroup::SItem& I = it;
             if (fcvPartial == VIS)
             {
                 if (I._effect)
                     add_Dynamic(I._effect, planes);
-                for (auto &pit : I._children_related)
+                for (auto& pit : I._children_related)
                     add_Dynamic(pit, planes);
-                for (auto &pit : I._children_free)
+                for (auto& pit : I._children_free)
                     add_Dynamic(pit, planes);
             }
             else
             {
                 if (I._effect)
                     add_leafs_Dynamic(I._effect);
-                for (auto &pit : I._children_related)
+                for (auto& pit : I._children_related)
                     add_leafs_Dynamic(pit);
-                for (auto &pit : I._children_free)
+                for (auto& pit : I._children_free)
                     add_leafs_Dynamic(pit);
             }
         }
@@ -571,12 +570,12 @@ BOOL CRender::add_Dynamic(dxRender_Visual* pVisual, u32 planes)
         FHierrarhyVisual* pV = (FHierrarhyVisual*)pVisual;
         if (fcvPartial == VIS)
         {
-            for (auto &i : pV->children)
+            for (auto& i : pV->children)
                 add_Dynamic(i, planes);
         }
         else
         {
-            for (auto &i : pV->children)
+            for (auto& i : pV->children)
                 add_leafs_Dynamic(i);
         }
     }
@@ -604,7 +603,7 @@ BOOL CRender::add_Dynamic(dxRender_Visual* pVisual, u32 planes)
         {
             pV->CalculateBones(TRUE);
             pV->CalculateWallmarks(); //. bug?
-            for (auto &i : pV->children)
+            for (auto& i : pV->children)
                 add_leafs_Dynamic(i);
         }
     }
@@ -638,25 +637,25 @@ void CRender::add_Static(dxRender_Visual* pVisual, u32 planes)
     {
         // Add all children, doesn't perform any tests
         PS::CParticleGroup* pG = (PS::CParticleGroup*)pVisual;
-        for (auto &it : pG->items)
+        for (auto& it : pG->items)
         {
             PS::CParticleGroup::SItem& I = it;
             if (fcvPartial == VIS)
             {
                 if (I._effect)
                     add_Dynamic(I._effect, planes);
-                for (auto &pit : I._children_related)
+                for (auto& pit : I._children_related)
                     add_Dynamic(pit, planes);
-                for (auto &pit : I._children_free)
+                for (auto& pit : I._children_free)
                     add_Dynamic(pit, planes);
             }
             else
             {
                 if (I._effect)
                     add_leafs_Dynamic(I._effect);
-                for (auto &pit : I._children_related)
+                for (auto& pit : I._children_related)
                     add_leafs_Dynamic(pit);
-                for (auto &pit : I._children_free)
+                for (auto& pit : I._children_free)
                     add_leafs_Dynamic(pit);
             }
         }
@@ -668,12 +667,12 @@ void CRender::add_Static(dxRender_Visual* pVisual, u32 planes)
         FHierrarhyVisual* pV = (FHierrarhyVisual*)pVisual;
         if (fcvPartial == VIS)
         {
-            for (auto &i : pV->children)
+            for (auto& i : pV->children)
                 add_Static(i, planes);
         }
         else
         {
-            for (auto &i : pV->children)
+            for (auto& i : pV->children)
                 add_leafs_Static(i);
         }
     }
@@ -686,12 +685,12 @@ void CRender::add_Static(dxRender_Visual* pVisual, u32 planes)
         pV->CalculateBones(TRUE);
         if (fcvPartial == VIS)
         {
-            for (auto &i : pV->children)
+            for (auto& i : pV->children)
                 add_Static(i, planes);
         }
         else
         {
-            for (auto &i : pV->children)
+            for (auto& i : pV->children)
                 add_leafs_Static(i);
         }
     }
@@ -715,7 +714,7 @@ void CRender::add_Static(dxRender_Visual* pVisual, u32 planes)
 #endif
         {
             // Add all children, perform tests
-            for (auto &i : pV->children)
+            for (auto& i : pV->children)
                 add_leafs_Static(i);
         }
     }
