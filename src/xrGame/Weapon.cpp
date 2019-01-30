@@ -457,3 +457,45 @@ void CWeapon::load(IReader& input_packet)
     else
         OnZoomOut();
 }
+
+// Сброс состояния оружия в дефолт
+void CWeapon::ResetWeapon(shared_str const& sCallerName)
+{
+    /* Текущие возможные места вызова \ значения sCallerName
+       - OnH_B_Independent       --> Перед выкидыванием из инвентаря
+       - OnH_B_Chield            --> Перед добавлением в инвентарь
+       - signal_HideComplete     --> По завершению прятанья оружия
+    */
+
+    OnZoomOut(true);
+    StopAllEffects(); //--> Light + Particles + Effectors
+
+    m_BriefInfo_CalcFrame = 0;
+
+    m_nearwall_last_hud_fov = psHUD_FOV_def;
+
+    m_fLR_MovingFactor = 0.f;
+    m_fLR_CameraFactor = 0.f;
+
+    m_fLR_InertiaFactor = 0.f;
+    m_fUD_InertiaFactor = 0.f;
+
+    m_fLR_ShootingFactor = 0.f;
+    m_fUD_ShootingFactor = 0.f;
+    m_fBACKW_ShootingFactor = 0.f;
+
+    m_fZoomRotationFactor = 0.0f;
+
+    m_set_next_ammoType_on_reload = undefined_ammo_type;
+    m_set_next_magaz_on_reload = empty_addon_idx;
+    m_set_next_magaz_by_id = u16(-1);
+
+    m_sub_state = eSubstateReloadBegin;
+
+    SetPending(FALSE);
+
+    if (sCallerName.equal("OnH_B_Chield") == false)
+    {
+        UpdateHUDAddonsVisibility(true); //--> Сбрасываем все аддоны \ кости худовой модели
+    }
+}

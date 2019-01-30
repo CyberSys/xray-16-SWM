@@ -10,9 +10,7 @@
 void CWeapon::switch2_Hidden()
 {
     StopCurrentAnimWithoutCallback();
-    StopAllEffects();
     signal_HideComplete();
-    m_nearwall_last_hud_fov = psHUD_FOV_def;
 }
 
 // Переключение на другой стэйт из стэйта "Спрятано"

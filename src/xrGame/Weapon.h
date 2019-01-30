@@ -668,6 +668,8 @@ public:
     virtual void DumpActiveParams(shared_str const& section_name, CInifile& dst_ini) const; //--> Для античита
     virtual shared_str const GetAnticheatSectionName() const { return cNameSect(); };
 
+    virtual void ResetWeapon(shared_str const& sCallerName);
+
 //========== Аммуниция (патроны, обоймы, гранаты, ...) и перезарядка ==========//
 private:
     bool m_bNeed2StopTriStateReload; //--> True при попытке остановить перезарядку в 3 этапа

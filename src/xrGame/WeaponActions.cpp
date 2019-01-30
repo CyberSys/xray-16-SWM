@@ -279,22 +279,17 @@ void CWeapon::OnH_B_Independent(bool just_before_destroy)
 {
     inherited::OnH_B_Independent(just_before_destroy);
 
-    OnZoomOut();
-
-    StopAllEffects();
-    Need2Stop_Fire();
-
-    UpdateHUDAddonsVisibility(true); //<--- Сбрасываем все аддоны \ кости худовой модели
-
-    SetPending(FALSE);
+    Need2Stop_Fire(); //--> Set Idle state
     SwitchState(eHidden);
-
-    m_strapped_mode  = false;
 
     UpdateXForm();
     UpdateMagazine3p();
 
-    m_nearwall_last_hud_fov = psHUD_FOV_def;
+    m_strapped_mode = false;
+
+    SetQueueSize(WEAPON_ININITE_QUEUE);
+
+    ResetWeapon("OnH_B_Independent");
 }
 
 // Колбек ПОСЛЕ детача объекта от старого родителя, новый родитель уже указан
@@ -304,21 +299,7 @@ void CWeapon::OnH_A_Independent()
 
     m_dwWeaponIndependencyTime = Level().timeServer();
 
-    m_fLR_MovingFactor = 0.f;
-    m_fLR_CameraFactor = 0.f;
-
-    m_fLR_InertiaFactor = 0.f;
-    m_fUD_InertiaFactor = 0.f;
-
-    m_fLR_ShootingFactor = 0.f;
-    m_fUD_ShootingFactor = 0.f;
-    m_fBACKW_ShootingFactor = 0.f;
-
-    m_fZoomRotationFactor = 0.0f;
-
-    SetQueueSize(WEAPON_ININITE_QUEUE);
-    Light_Destroy();
-    UpdateAddonsVisibility();
+    UpdateAddonsVisibility(true);
     PlayWorldAnimIdle();
 };
 
@@ -329,13 +310,7 @@ void CWeapon::OnH_B_Chield()
 
     m_dwWeaponIndependencyTime    = 0;
 
-    m_set_next_ammoType_on_reload = undefined_ammo_type;
-    m_set_next_magaz_on_reload    = empty_addon_idx;
-    m_set_next_magaz_by_id        = u16(-1);
-
-    m_sub_state = eSubstateReloadBegin;
-
-    m_nearwall_last_hud_fov = psHUD_FOV_def;
+    ResetWeapon("OnH_B_Chield");
 }
 
 // Колбэк ПОСЛЕ аттача объекта к новому родителю, новый родитель уже указан
@@ -372,11 +347,12 @@ void CWeapon::OnActiveItem()
 }
 
 // Колбек на процесс прятанья оружия
-// UPD: Судя по коду - он никогда не вызывается ... SM_TODO:M
+// UPD: Судя по коду - он никогда не вызывается ...
 void CWeapon::OnHiddenItem()
 {
     inherited::OnHiddenItem();
 
+    /*
     m_BriefInfo_CalcFrame = 0;
 
     if (IsGameTypeSingle())
@@ -389,6 +365,7 @@ void CWeapon::OnHiddenItem()
     m_set_next_ammoType_on_reload = undefined_ammo_type;
     m_set_next_magaz_on_reload    = empty_addon_idx;
     m_set_next_magaz_by_id        = u16(-1);
+    */
 }
 
 // Колбек "Оружие спрятанно"
@@ -396,27 +373,8 @@ void CWeapon::signal_HideComplete()
 {
     if (H_Parent())
         setVisible(FALSE);
-    SetPending(FALSE);
 
-    m_set_next_ammoType_on_reload = undefined_ammo_type;
-    m_set_next_magaz_on_reload = empty_addon_idx;
-    m_set_next_magaz_by_id = u16(-1);
-
-    m_sub_state = eSubstateReloadBegin;
-
-    m_fLR_MovingFactor = 0.f;
-    m_fLR_CameraFactor = 0.f;
-
-    m_fLR_InertiaFactor = 0.f;
-    m_fUD_InertiaFactor = 0.f;
-
-    m_fLR_ShootingFactor = 0.f;
-    m_fUD_ShootingFactor = 0.f;
-    m_fBACKW_ShootingFactor = 0.f;
-
-    m_fZoomRotationFactor = 0.0f;
-
-    UpdateHUDAddonsVisibility(true); //<--- Сбрасываем все аддоны \ кости худовой модели
+    ResetWeapon("signal_HideComplete");
 }
 
 // Колбэк на хит по оружию
