@@ -637,3 +637,12 @@ BOOL CParticleGroup::GetHudMode()
     }
     return false;
 }
+
+void CParticleGroup::OverrideHudFov(float fNewFOV) //--#SM+#--
+{
+    for (auto i_it = items.begin(); i_it != items.end(); ++i_it)
+    {
+        CParticleEffect* E = static_cast<CParticleEffect*>(i_it->_effect);
+        E->OverrideHudFov(fNewFOV);
+    }
+}

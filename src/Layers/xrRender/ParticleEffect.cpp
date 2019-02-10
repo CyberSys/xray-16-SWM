@@ -94,6 +94,7 @@ CParticleEffect::CParticleEffect()
     m_DestroyCallback = nullptr;
     m_CollisionCallback = nullptr;
     m_XFORM.identity();
+    m_fHudFovOverride = -1.f; //--#SM+#--
 }
 CParticleEffect::~CParticleEffect()
 {
@@ -605,7 +606,8 @@ void CParticleEffect::Render(float)
                 Fmatrix FTold = Device.mFullTransform;
                 if (GetHudMode())
                 {
-                    RDEVICE.mProject.build_projection(deg2rad(psHUD_FOV * Device.fFOV), Device.fASPECT, VIEWPORT_NEAR,
+                    float fFOV = deg2rad(m_fHudFovOverride > 0.0f ? m_fHudFovOverride : (psHUD_FOV * Device.fFOV)); //--#SM+#--
+                    RDEVICE.mProject.build_projection(fFOV, Device.fASPECT, VIEWPORT_NEAR,
                         g_pGamePersistent->Environment().CurrentEnv->far_plane);
 
                     Device.mFullTransform.mul(Device.mProject, Device.mView);

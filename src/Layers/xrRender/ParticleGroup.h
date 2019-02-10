@@ -142,6 +142,7 @@ public:
     virtual BOOL IsPlaying() { return m_RT_Flags.is(flRT_Playing); }
     virtual void SetHudMode(BOOL b);
     virtual BOOL GetHudMode();
+    virtual void OverrideHudFov(float fNewFOV); //--#SM+#--
 
     virtual float GetTimeLimit()
     {

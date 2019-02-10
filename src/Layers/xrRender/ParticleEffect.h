@@ -26,6 +26,8 @@ protected:
 
     Fvector m_InitialPosition;
 
+    float m_fHudFovOverride; //--#SM+#--
+
 public:
     CPEDef* m_Def;
     Fmatrix m_XFORM;
@@ -75,6 +77,7 @@ public:
     virtual BOOL IsPlaying() { return m_RT_Flags.is(flRT_Playing); }
     virtual void SetHudMode(BOOL b) { m_RT_Flags.set(flRT_HUDmode, b); }
     virtual BOOL GetHudMode() { return m_RT_Flags.is(flRT_HUDmode); }
+    virtual void OverrideHudFov(float fNewFOV) { m_fHudFovOverride = fNewFOV; } //--#SM+#--
     virtual float GetTimeLimit()
     {
         VERIFY(m_Def);

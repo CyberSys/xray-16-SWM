@@ -23,6 +23,7 @@ public:
     virtual const shared_str Name() = 0;
     virtual void SetHudMode(BOOL b) = 0;
     virtual BOOL GetHudMode() = 0;
+    virtual void OverrideHudFov(float fNewFOV) = 0; //--#SM+#--
 };
 
 #endif //	ParticleCustom_included
