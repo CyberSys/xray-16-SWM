@@ -342,53 +342,61 @@ void D3DXRenderBase::r_dsgraph_render_graph(u32 _priority)
 /*
 Предназначен для установки режима отрисовки HUD и возврата оригинального после отрисовки.
 */
-class hud_transform_helper
+
+static bool g_isHUDRenderMode = false; //--#SM+#--
+extern ENGINE_API float psHUD_FOV; //--#SM+#--
+
+class hud_transform_helper  //--#SM+#--
 {
     Fmatrix Pold;
     Fmatrix FTold;
+    bool bIsHUDModeSet;
 
 public:
-    hud_transform_helper()
+    hud_transform_helper() : hud_transform_helper(psHUD_FOV * Device.fFOV /* *Device.fASPECT */, true)
     {
-        extern ENGINE_API float psHUD_FOV;
+    }
 
-        // Change projection
-        Pold  = Device.mProject;
-        FTold = Device.mFullTransform;
-
-        // SM_TODO:M --#SM+#--
-        // XXX: Xottab_DUTY: custom FOV. Implement it someday
-        // It should be something like this:
-        // float customFOV;
-        // if (isCustomFOV)
-        //     customFOV = V->getVisData().obj_data->m_hud_custom_fov;
-        // else
-        //     customFOV = psHUD_FOV * Device.fFOV;
-        //
-        // Device.mProject.build_projection(deg2rad(customFOV), Device.fASPECT,
-        //    VIEWPORT_NEAR, g_pGamePersistent->Environment().CurrentEnv->far_plane); --#SM+#--
-        //
-        // Look at the function:
-        // void __fastcall sorted_L1_HUD(mapSorted_Node* N)
-        // In the commit:
-        // https://github.com/ShokerStlk/xray-16-SWM/commit/869de0b6e74ac05990f541e006894b6fe78bd2a5#diff-4199ef700b18ce4da0e2b45dee1924d0R83
-
-        Device.mProject.build_projection(deg2rad(psHUD_FOV * Device.fFOV /* *Device.fASPECT*/), Device.fASPECT,
-            VIEWPORT_NEAR, g_pGamePersistent->Environment().CurrentEnv->far_plane);  //--#SM+#--
-
-        Device.mFullTransform.mul(Device.mProject, Device.mView);
-        RCache.set_xform_project(Device.mProject);
-
+    hud_transform_helper(float fFOV, bool bSetHUDFlag)
+    {
+        modify_projection(Pold, FTold, fFOV);
         RImplementation.rmNear();
+
+        bIsHUDModeSet = bSetHUDFlag;
+        if (bIsHUDModeSet)
+            g_isHUDRenderMode = true;
     }
 
     ~hud_transform_helper()
     {
         RImplementation.rmNormal();
+        restore_projection(Pold, FTold);
 
+        if (bIsHUDModeSet)
+        {
+            bIsHUDModeSet = false;
+            g_isHUDRenderMode = false;
+        }
+    }
+
+    IC static void modify_projection(Fmatrix& outPold, Fmatrix& outFTold, float fFOV)
+    {
+        // Change projection
+        outPold = Device.mProject;
+        outFTold = Device.mFullTransform;
+
+        Device.mProject.build_projection(
+            deg2rad(fFOV), Device.fASPECT, VIEWPORT_NEAR, g_pGamePersistent->Environment().CurrentEnv->far_plane);
+
+        Device.mFullTransform.mul(Device.mProject, Device.mView);
+        RCache.set_xform_project(Device.mProject);
+    }
+
+    IC static void restore_projection(Fmatrix& oldPold, Fmatrix& oldFTold)
+    {
         // Restore projection
-        Device.mProject = Pold;
-        Device.mFullTransform = FTold;
+        Device.mProject = oldPold;
+        Device.mFullTransform = oldFTold;
         RCache.set_xform_project(Device.mProject);
     }
 };
@@ -398,6 +406,26 @@ IC void render_item(T &item)
 {
     dxRender_Visual* V = item.second.pVisual;
     VERIFY(V && V->shader._get());
+
+    //--#SM+ Begin#--
+    bool bNeed2RestoreProjection = false;
+    Fmatrix Pold, FTold;
+
+    if (g_isHUDRenderMode)
+    {
+        // HACK: [Dynamic HUD FOV] Т.к дополнительные худовые модели из OnRenderHUD() рендерятся после основного худа,
+        // то для них мы можем менять матрицу проекции прямо здесь, не создавая отдельную функцию, т.к разница в
+        // скорости будет минимальной (для основного худа матрица будет, как и раньше, просчитана лишь раз, если он не
+        // использует динамический HUD FOV)
+        float fCustomFOV = V->getObjectData()->m_hud_custom_fov;
+        if (fCustomFOV >= 1.0f)
+        {
+            hud_transform_helper::modify_projection(Pold, FTold, fCustomFOV);
+            bNeed2RestoreProjection = true;
+        }
+    }
+    //--#SM+ End#--
+
     RCache.set_Element(item.second.se);
     RCache.set_xform_world(item.second.Matrix);
     RImplementation.apply_object(item.second.pObject);
@@ -405,6 +433,12 @@ IC void render_item(T &item)
     //--#SM+#-- Обновляем шейдерные данные модели [update shader values for this model]
     RCache.hemi.c_update(V);
     V->Render(calcLOD(item.first, V->vis.sphere.R));
+
+    if (bNeed2RestoreProjection)
+    {
+        // Restore projection (Dynamic HUD FOV)
+        hud_transform_helper::restore_projection(Pold, FTold);
+    }
 }
 
 template <class T> IC bool cmp_first_l(const T &lhs, const T &rhs) { return (lhs.first < rhs.first); }
