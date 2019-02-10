@@ -40,6 +40,7 @@
 #include "doors.h"
 #include "attachable_visual.h" //--#SM+#--
 #include "xrNetServer/NET_Messages.h"
+#include "xrEngine/vis_object_data.h" //--#SM+#--
 
 #ifndef LINUX // FIXME!!!
 #pragma warning(push)
@@ -1489,20 +1490,20 @@ void CGameObject::PostUpdateCL(bool bUpdateCL_disabled)
             //Обновляем параметры объекта для шейдеров
             CEntity* entity_item = this->cast_entity();
             if (entity_item)
-                _visual->getVisData().obj_data->sh_entity_data.x =
+                _visual->getObjectData()->sh_entity_data.x =
                     entity_item->GetfHealth(); // Обновляем инфу о здоровье объекта
 
             CEntityAlive* ealive_item = this->cast_entity_alive();
             if (ealive_item)
-                _visual->getVisData().obj_data->sh_entity_data.y =
+                _visual->getObjectData()->sh_entity_data.y =
                     ealive_item->conditions().radiation(); // Обновляем инфу о радиации объекта
 
             CInventoryItem* inv_item = this->cast_inventory_item();
             if (inv_item)
-                _visual->getVisData().obj_data->sh_entity_data.z =
+                _visual->getObjectData()->sh_entity_data.z =
                     inv_item->GetCondition(); // Обновляем инфу о износе объекта
 
-            _visual->getVisData().obj_data->sh_entity_data.w =
+            _visual->getObjectData()->sh_entity_data.w =
                 m_common_values.m_fIRNV_value; // Обновляем инфу о тепло-излучении объекта
         }
     }

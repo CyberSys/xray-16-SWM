@@ -3,7 +3,7 @@
 #pragma once
 
 #include "xrEngine/vis_common.h"
-
+#include "xrEngine/vis_object_data.h" //--#SM+#--
 #include "Include/xrRender/RenderVisual.h"
 
 #define VLOAD_NOVERTICES (1 << 0)
@@ -87,6 +87,17 @@ public:
     virtual u32 getType() { return Type; }
     dxRender_Visual();
     virtual ~dxRender_Visual();
+
+private:  //--#SM+#--
+    vis_object_data obj_data_self; // Свои собственные объектные данные [personal shaders data of this model]
+
+public: //--#SM+#--
+    vis_object_data* obj_data; // Объектные данные, используемые при рендере этой модели [shaders data which
+                               // actually will be used at render for this model]
+
+    virtual vis_object_data* getObjectData() { return obj_data; };
+    virtual void setObjectData(vis_object_data* pData) { obj_data = pData; };
+    virtual void cloneObjectData(IRenderVisual* pSrc) { setObjectData( pSrc->getObjectData() ); };
 };
 
 #endif // !FBasicVisualH

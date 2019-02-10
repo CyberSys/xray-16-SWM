@@ -226,9 +226,9 @@ void player_hud::render_hud() //--#SM+#--
         IRenderVisual* pCurViewEntityVis = pCurViewEntity->Visual();
         if (pCurViewEntityVis != NULL)
         {
-            m_model->dcast_RenderVisual()->getVisData().obj_data = pCurViewEntityVis->getVisData().obj_data;
+            m_model->dcast_RenderVisual()->cloneObjectData(pCurViewEntityVis);
             if (m_model_twin != NULL)
-                m_model_twin->dcast_RenderVisual()->getVisData().obj_data = pCurViewEntityVis->getVisData().obj_data;
+                m_model_twin->dcast_RenderVisual()->cloneObjectData(pCurViewEntityVis);
         }
     }
 
@@ -241,18 +241,20 @@ void player_hud::render_hud() //--#SM+#--
         GEnv.Render->add_Visual(m_model_twin->dcast_RenderVisual());
     }
 
-    // Информацию для шейдеров от модели ГГ переносим на худовую модель рук
+    // Информацию от модели ГГ для шейдеров переносим на худовую модель рук
     if (m_attached_items[0])
     {
-        m_attached_items[0]->m_model->dcast_RenderVisual()->getVisData().obj_data =
-            m_attached_items[0]->m_parent_hud_item->item().cast_game_object()->Visual()->getVisData().obj_data;
+        m_attached_items[0]->m_model->dcast_RenderVisual()->cloneObjectData(
+            m_attached_items[0]->m_parent_hud_item->item().cast_game_object()->Visual()
+        );
         m_attached_items[0]->render();
     }
 
     if (m_attached_items[1])
     {
-        m_attached_items[1]->m_model->dcast_RenderVisual()->getVisData().obj_data =
-            m_attached_items[1]->m_parent_hud_item->item().cast_game_object()->Visual()->getVisData().obj_data;
+        m_attached_items[1]->m_model->dcast_RenderVisual()->cloneObjectData(
+            m_attached_items[1]->m_parent_hud_item->item().cast_game_object()->Visual()
+        );
         m_attached_items[1]->render();
     }
 }

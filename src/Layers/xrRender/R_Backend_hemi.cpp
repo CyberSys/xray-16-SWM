@@ -2,6 +2,7 @@
 #pragma hdrstop
 
 #include "R_Backend_hemi.h"
+#include "xrEngine/vis_object_data.h" //--#SM+#--
 
 R_hemi::R_hemi() { unmap(); }
 void R_hemi::unmap()
@@ -34,7 +35,7 @@ void R_hemi::set_material(float x, float y, float z, float w)
 // Обновляем значения в шейдерных константах //--#SM+#-- //SM_TODO:M Переместить
 void R_hemi::c_update(IRenderVisual* pVisual)
 {
-    vis_object_data* _data = pVisual->getVisData().obj_data;
+    vis_object_data* _data = pVisual->getObjectData();
 
     if (c_camo_data)
         RCache.set_c(c_camo_data, _data->sh_camo_data);

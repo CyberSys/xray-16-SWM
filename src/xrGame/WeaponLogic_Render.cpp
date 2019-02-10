@@ -7,6 +7,7 @@
 #include "WeaponKnifeHit.h"
 #include "WeaponBinocularsVision.h"
 
+#include "xrEngine/vis_object_data.h" //--#SM+#--
 #include "attachable_visual.h"
 #include "HUDManager.h"
 #include "player_hud.h"
@@ -1097,7 +1098,7 @@ void CWeapon::UpdateWpnExtraVisuals()
                     IRenderVisual* pVis = item->m_model->dcast_RenderVisual();
                     if (pVis != NULL)
                     {
-                        vis_object_data* object_data = pVis->getVisData().obj_data;
+                        vis_object_data* object_data = pVis->getObjectData();
 
                         // Скрываем кости голографа вне зума
                         if (IsScopeAttached() && m_sHolographBone != NULL)
@@ -1136,7 +1137,7 @@ void CWeapon::UpdateWpnExtraVisuals()
             IRenderVisual* pVis = tVisList[i];
             if (pVis != NULL)
             {
-                vis_object_data* object_data = pVis->getVisData().obj_data;
+                vis_object_data* object_data = pVis->getObjectData();
 
                 // Получаем число костей, привязанных к числу патронов
                 int max_bullet_bones = object_data->m_max_bullet_bones;
@@ -1223,7 +1224,7 @@ void CWeapon::ReadMaxBulletBones(IKinematics* pModel)
 {
     R_ASSERT(pModel != NULL);
 
-    vis_object_data* object_data    = pModel->dcast_RenderVisual()->getVisData().obj_data;
+    vis_object_data* object_data    = pModel->dcast_RenderVisual()->getObjectData();
     object_data->m_max_bullet_bones = 0;
 
     while (true)

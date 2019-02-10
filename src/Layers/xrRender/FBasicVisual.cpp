@@ -33,6 +33,7 @@ dxRender_Visual::dxRender_Visual()
     Type = 0;
     shader = nullptr;
     vis.clear();
+    setObjectData(&obj_data_self); //--#SM+#--
 }
 
 dxRender_Visual::~dxRender_Visual() {}
