@@ -132,9 +132,12 @@ CWeapon::CWeapon() : CShellLauncher(this)
 
     m_ForendSlot = eNotExist;
 
-    m_sBulletHUDVisual           = NULL;
-    m_sAnimatedShellVisData      = NULL;
-    m_sCurrentAnimatedShellModel = NULL;
+    m_sBulletHUDVisSect          = NULL;
+
+    m_sAnimatedShellHUDVisSect   = NULL;
+    m_sCurAnimatedShellHudVisual = NULL;
+
+    m_sCurShell3DSect            = NULL;
 
     m_bNeed2StopTriStateReload = false;
     m_bIsReloadFromAB          = false;

@@ -1,44 +1,27 @@
-//////////////////////////////////////////////////////////////////////
-// ShellLauncher.cpp:	интерфейс для семейства объектов
-//						стреляющих гранатами и ракетами
-//////////////////////////////////////////////////////////////////////
+/********************************/
+/***** Запускатель 3D-Гильз *****/ //--#SM+#--
+/********************************/
 
-/* SM_TODO:M
-// ЗНАК SM + ПОМЕНЯТЬ ОПИСАНИЕ !!!!  //--#SM_TODO+#--
-// extract_type
-// time_based, anim_bases
-// on_shot, on_reload, on_pump
-// shell section
-// Убедиться что гильза спавнится локально, и если это так, то значит в оружии гранаты спавнятся только у клиента ?
-// bUseBoneDir реализовать
-// Учитывать вектор худа (превращать в ускорение гильзы)
-*/
-
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "ShellLauncher.h"
 #include "CustomShell.h"
-#include "xrserver_objects_alife_items.h"
-#include "Level.h"
-#include "xrAICore/Navigation/ai_object_location.h"
-#include "xrEngine/IGame_Persistent.h"
-#include "Common/object_broker.h"
-#include "Include/xrRender/Kinematics.h"
-#include "weapon.h"
+#include "HudItem.h"
 
 CShellLauncher::CShellLauncher(CGameObject* parent)
 {
-    m_params_sect           = NULL; // Не инициализировать здесь <!>
-    m_params_hud_sect       = NULL;
     m_parent_shell_launcher = parent;
+
+    m_params_sect = nullptr; // Не инициализировать здесь <!>
+    m_params_hud_sect = nullptr;
 
     m_launch_points_count = 0;
 }
 
 CShellLauncher::~CShellLauncher() { delete_data(m_launch_points); }
 
-CShellLauncher::_launch_point::_launch_point()
+CShellLauncher::_lpoint::_lpoint()
 {
-    sBoneName   = NULL;
+    sBoneName = nullptr;
     bUseBoneDir = false;
 
     vOfsPos.set(0, 0, 0);
@@ -47,22 +30,29 @@ CShellLauncher::_launch_point::_launch_point()
     vVelocity.set(0, 0, 0);
     vVelocityRnd.set(0, 0, 0);
 
+    fLaunchAVel = 0.0f;
     vLaunchVel.set(0, 0, 0);
     vLaunchMatrix.identity();
 
-    iBoneID  = BI_NONE;
+    iBoneID = BI_NONE;
     bEnabled = false;
 }
 
-CShellLauncher::_launch_point::_launch_point(const shared_str& sect_data, u32 _idx) : _launch_point()
+CShellLauncher::_lpoint::_lpoint(const shared_str& sect_data, u32 _idx) : _lpoint()
 {
     string64 sLine;
+
+    xr_sprintf(sLine, "shells_3d_use_bone_dir_%d", _idx);
+    bUseBoneDir = READ_IF_EXISTS(pSettings, r_bool, sect_data, sLine, false);
 
     xr_sprintf(sLine, "shells_3d_bone_name_%d", _idx);
     sBoneName = READ_IF_EXISTS(pSettings, r_string, sect_data, sLine, "wpn_body");
 
-    xr_sprintf(sLine, "shells_3d_use_bone_dir_%d", _idx);
-    bUseBoneDir = READ_IF_EXISTS(pSettings, r_bool, sect_data, sLine, false);
+    xr_sprintf(sLine, "shells_3d_animated_launch_%d", _idx);
+    bAnimatedLaunch = READ_IF_EXISTS(pSettings, r_bool, sect_data, sLine, false);
+
+    xr_sprintf(sLine, "shells_3d_anim_drop_time_%d", _idx);
+    dwAnimReleaseTime = READ_IF_EXISTS(pSettings, r_u32, sect_data, sLine, 0);
 
     xr_sprintf(sLine, "shells_3d_pos_%d", _idx);
     vOfsPos = READ_IF_EXISTS(pSettings, r_fvector3, sect_data, sLine, vOfsPos);
@@ -79,19 +69,22 @@ CShellLauncher::_launch_point::_launch_point(const shared_str& sect_data, u32 _i
     xr_sprintf(sLine, "shells_3d_vel_disp_%d", _idx);
     vVelocityRnd = READ_IF_EXISTS(pSettings, r_fvector3, sect_data, sLine, vVelocityRnd);
 
+    xr_sprintf(sLine, "shells_3d_avel_%d", _idx);
+    fLaunchAVel = READ_IF_EXISTS(pSettings, r_float, sect_data, sLine, fLaunchAVel);
+
     bEnabled = true;
 }
 
 CShellLauncher::launch_points::launch_points(const shared_str& sWorldSect, const shared_str& sHudSect, u32 _idx)
 {
-    R_ASSERT(pSettings != NULL);
+    R_ASSERT(pSettings != nullptr);
 
     // Грузим переопределённую секцию гильз (если есть)
     string64 sLine;
     xr_sprintf(sLine, "shells_3d_overridden_sect_%d", _idx);
     sShellOverSect = READ_IF_EXISTS(pSettings, r_string, sWorldSect, sLine, "none");
     if (sShellOverSect == "none")
-        sShellOverSect = NULL;
+        sShellOverSect = nullptr;
 
     // Параметры худового FOV
     xr_sprintf(sLine, "shells_3d_fov_transl_time_%d", _idx);
@@ -100,14 +93,17 @@ CShellLauncher::launch_points::launch_points(const shared_str& sWorldSect, const
     xr_sprintf(sLine, "shells_3d_fov_stable_time_%d", _idx);
     dwFOVStableTime = READ_IF_EXISTS(pSettings, r_u32, sWorldSect, sLine, 0);
 
+    xr_sprintf(sLine, "shells_3d_lifetime_%d", _idx);
+    dwLifetimeTime = READ_IF_EXISTS(pSettings, r_u32, sWorldSect, sLine, SHELL3D_DEF_LIFETIME);
+
     // Грузим точки запуска для мировой и худовой модели
-    point_world = _launch_point(sWorldSect, _idx);
-    if (sHudSect != NULL)
-        point_hud = _launch_point(sHudSect, _idx);
+    point_world = _lpoint(sWorldSect, _idx);
+    if (sHudSect != nullptr)
+        point_hud = _lpoint(sHudSect, _idx);
 }
 
-// ПереЗагрузить параметры гильз
-void CShellLauncher::ReLoadShellData(const shared_str& sWorldSect, const shared_str& sHudSect)
+// ПереЗагрузить параметры точек запуска гильз
+void CShellLauncher::ReLoadLaunchPoints(const shared_str& sWorldSect, const shared_str& sHudSect)
 {
     // Считываем число точек для гильз
     m_launch_points_count = READ_IF_EXISTS(pSettings, r_u32, sWorldSect, "shells_3d_lp_count", 0);
@@ -121,34 +117,38 @@ void CShellLauncher::ReLoadShellData(const shared_str& sWorldSect, const shared_
         m_launch_points.push_back(launch_points(sWorldSect, sHudSect, _idx));
 
     // Запоминаем новые секции
-    m_params_sect     = sWorldSect;
-    m_params_hud_sect = sHudSect;
+    m_params_sect = sWorldSect; //--> Секция предмета-гильзы
+    m_params_hud_sect = sHudSect; //--> Секция HUD-а гильзы
 }
 
 // Запустить одну партию гильз
-void CShellLauncher::LaunchShell(u32 launch_point_idx, LPCSTR sOverriddenShellSect)
+void CShellLauncher::LaunchShell3D(u32 launch_point_idx, LPCSTR sShellSect) const
 {
     // Индекс точки запуска должен быть задан верно
     R_ASSERT(launch_point_idx > 0 && launch_point_idx <= m_launch_points_count);
 
     // У нас должен быть родитель и загруженные данные
-    R_ASSERT(m_parent_shell_launcher != NULL);
-    R_ASSERT(m_params_sect != NULL);
+    R_ASSERT(m_parent_shell_launcher != nullptr);
+    R_ASSERT(m_params_sect != nullptr);
 
     // Получаем точки запуска с данным индексом
-    launch_points& lp = m_launch_points[launch_point_idx - 1];
+    const launch_points& lp = m_launch_points[launch_point_idx - 1];
 
     // Достаём из них секцию гильзы
-    R_ASSERT(lp.sShellOverSect != NULL || sOverriddenShellSect != NULL);
-    LPCSTR shell_sect = (lp.sShellOverSect != NULL ? lp.sShellOverSect.c_str() : sOverriddenShellSect);
+    R_ASSERT2(lp.sShellOverSect != nullptr || sShellSect != nullptr, "Shell section is not specified in a weapon\\ammo config");
+
+    LPCSTR shell_sect = (lp.sShellOverSect != nullptr ? lp.sShellOverSect.c_str() : sShellSect);
+    R_ASSERT(shell_sect != nullptr);
 
     // Спавним гильзу
-    CSE_Abstract* pSO = Level().spawn_item(shell_sect, m_parent_shell_launcher->Position(), u32(-1), m_parent_shell_launcher->ID(), true);
+    CSE_Abstract* pSO = Level().spawn_item(
+        shell_sect, m_parent_shell_launcher->Position(), u32(-1), m_parent_shell_launcher->ID(), true);
 
     CSE_Temporary* l_tpTemporary = smart_cast<CSE_Temporary*>(pSO);
     R_ASSERT(l_tpTemporary);
 
-    // PS: Значит custom_data (m_ini_string) мы определяем в CSE_Abstract, зато её сохранение реализовываем лишь в CSE_AlifeObject ._.
+    // PS: Значит custom_data (m_ini_string) мы определяем в CSE_Abstract, зато её сохранение реализовываем лишь в
+    // CSE_AlifeObject ._.
     // => мы не можем передать данные через spawn_ini() => играем грязно
     // client_data использовать в теории можно, но разработчиками это не предусмотренно
     // добавлять новое поле в CSE_Temporary ради одних гильз - расточительно
@@ -180,30 +180,30 @@ void CShellLauncher::RegisterShell(u16 shell_id, CGameObject* parent_shell_launc
     pShell->H_SetParent(m_parent_shell_launcher);
 }
 
-// Обновить параметры для точек вылета
+// Обновить параметры полёта гильз для точек вылета
 void CShellLauncher::RebuildLaunchParams(const Fmatrix& mTransform, IKinematics* pModel, bool bIsHud)
 {
     // У нас должен быть родитель, загруженные данные и визуал
-    R_ASSERT(m_parent_shell_launcher != NULL);
-    R_ASSERT(m_params_sect != NULL);
-    R_ASSERT(pModel != NULL);
+    R_ASSERT(m_parent_shell_launcher != nullptr);
+    R_ASSERT(m_params_sect != nullptr);
+    R_ASSERT(pModel != nullptr);
 
     // Если точек запуска гильз нет, то и считать нечего
     if (m_launch_points_count == 0)
         return;
 
     // Если у нас сменилась худовая секция, то требуется перезагрузить данные
-    CWeapon* pWpn = m_parent_shell_launcher->cast_weapon();
-    if (pWpn != NULL && pWpn->GetHUDmode() == true)
-        if (pWpn->HudSection() != m_params_hud_sect)
-            ReLoadShellData(m_params_sect, pWpn->HudSection());
+    CHudItem* pHudItem = m_parent_shell_launcher->cast_hud_item();
+    if (pHudItem != nullptr && pHudItem->GetHUDmode())
+        if (pHudItem->HudSection() != m_params_hud_sect)
+            ReLoadLaunchPoints(m_params_sect, pHudItem->HudSection());
 
     // Обновляем все точки запуска
     R_ASSERT(m_launch_points.size() == m_launch_points_count);
 
     for (int i = 0; i < m_launch_points.size(); i++)
     {
-        _launch_point& point = (bIsHud ? m_launch_points[i].point_hud : m_launch_points[i].point_world);
+        _lpoint& point = (bIsHud ? m_launch_points[i].point_hud : m_launch_points[i].point_world);
 
         // Если точка не активна - не обновляем её
         if (point.bEnabled == false)
@@ -214,7 +214,8 @@ void CShellLauncher::RebuildLaunchParams(const Fmatrix& mTransform, IKinematics*
             point.iBoneID = pModel->LL_BoneID(point.sBoneName);
 
         R_ASSERT2(point.iBoneID != BI_NONE,
-            make_string("Model from [%s] has no bone [%s]", (bIsHud ? m_params_hud_sect.c_str() : m_params_sect.c_str()), point.sBoneName.c_str())
+            make_string("Model from [%s] has no bone [%s]",
+                (bIsHud ? m_params_hud_sect.c_str() : m_params_sect.c_str()), point.sBoneName.c_str())
                 .c_str());
 
         // Матрица трансформации кости
@@ -222,24 +223,37 @@ void CShellLauncher::RebuildLaunchParams(const Fmatrix& mTransform, IKinematics*
 
         // Вектор поворота
         Fvector vRotate = Fvector(point.vOfsDir);
-        vRotate.x += Random.randFs(point.vOfsDirRnd.x); // +\-
-        vRotate.y += Random.randFs(point.vOfsDirRnd.y);
-        vRotate.z += Random.randFs(point.vOfsDirRnd.z);
+        if (point.bAnimatedLaunch == false)
+        { //--> Случайный поворот не делаем для анимированных гильз
+            vRotate.x += Random.randFs(point.vOfsDirRnd.x); // +\-
+            vRotate.y += Random.randFs(point.vOfsDirRnd.y);
+            vRotate.z += Random.randFs(point.vOfsDirRnd.z);
+        }
         vRotate.mul(PI / 180.f); // Переводим углы в радианы
 
-        // Строим матрицу поворота
+        // Строим матрицу поворота и позиции
         point.vLaunchMatrix.setXYZ(VPUSH(vRotate));
         point.vLaunchMatrix.c.set(point.vOfsPos);
 
-        // Применяем её к матрице кости и самого предмета
-        point.vLaunchMatrix.mulA_43(mBoneTransform);
-        point.vLaunchMatrix.mulA_43(mTransform);
+        // Добавляем к ней поворот от кости и предмета
+        if (point.bUseBoneDir)
+        {
+            point.vLaunchMatrix.mulA_43(mBoneTransform); //--> + XFORM кости предмета
+        }
 
-        // Вектор полёта (не учитывает кость)
+        point.vLaunchMatrix.mulA_43(mTransform); //--> + XFORM самого предмета
+
+        // Случайный вектор скорости полёта
         point.vLaunchVel.set(point.vVelocity);
         point.vLaunchVel.x += Random.randFs(point.vVelocityRnd.x); // +\-
         point.vLaunchVel.y += Random.randFs(point.vVelocityRnd.y);
         point.vLaunchVel.z += Random.randFs(point.vVelocityRnd.z);
+
+        // Модифицируем его с помощью кости и предмета
+        if (point.bUseBoneDir)
+        {
+            mBoneTransform.transform_dir(point.vLaunchVel);
+        }
         mTransform.transform_dir(point.vLaunchVel);
     }
 }

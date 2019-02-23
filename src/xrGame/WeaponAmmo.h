@@ -46,9 +46,10 @@ public:
     float Weight() const;
 
     shared_str m_ammoSect;
-    shared_str m_sHudVisual; //--#SM+#--
-    shared_str m_sWorldVisual; //--#SM+#--
-    shared_str m_sShellVisual; //--#SM+#--
+    shared_str m_sShell3DSect; //--#SM+#--
+    shared_str m_sBulletHudVisual; //--#SM+#--
+    shared_str m_sBulletWorldVisual; //--#SM+#--
+    shared_str m_sShellHudVisual; //--#SM+#--
 
     enum
     {

@@ -84,7 +84,6 @@ public:
 
     virtual CWeapon* cast_weapon() { return this; }
     virtual CWeaponMagazined* cast_weapon_magazined() { return (CWeaponMagazined*)this; }
-    virtual CShellLauncher* cast_shell_launcher() { return (CShellLauncher*)this; }
 
     // Serialization
     virtual void save(NET_Packet& output_packet);
@@ -688,11 +687,13 @@ protected:
     u8 m_set_next_ammoType_on_reload; //--> Тип патронов, который будет выставлен после перезарядки (-1: не менять)
     bool m_bLockType; //--> Заблокировать смену типов патронов
 
+    xr_vector<CCartridge> m_AmmoCartidges;
+    xr_vector<CCartridge> m_AmmoCartidges2;
+
     void ResizeMagazine(int ammo_count, xr_vector<CCartridge*>& Magazine, CCartridge* pCartridge);
     void SetAmmoTypeSafeFor(u8 ammoType, bool bForGL);
 
-    xr_vector<CCartridge> m_AmmoCartidges;
-    xr_vector<CCartridge> m_AmmoCartidges2;
+    void UpdateLastBulletInfo(CCartridge* pBullet);
 
     virtual void OnMagazineEmpty();
 
@@ -975,8 +976,13 @@ private:
                                      //    анимированную гильзу
 
 protected:
-    shared_str m_sAnimatedShellVisData; //--> Секция визуала анимированной гильзы
-    shared_str m_sCurrentAnimatedShellModel; //--> Текущая модель анимированной гильзы (наследуется от патрона)
+    shared_str m_sAnimatedShellHUDVisSect; //--> Визуал-секция анимированной худовой гильзы
+    shared_str m_sCurAnimatedShellHudVisual; //--> Путь к текущему визуалу анимированной худовой гильзы
+
+    shared_str m_sCurShell3DSect; //--> Текущая секция объекта 3D-гильзы от последнего выстрела 
+
+    virtual void Update3DShellTransform();
+    virtual bool CanPlay3DShellAnim() const;
 
     ICF void UpdShellShowTimer() { m_dwShowAnimatedShellVisual = Device.dwTimeGlobal + WEAPON_ANIM_SHELL_SHOW_TIME; }
 
@@ -1233,7 +1239,7 @@ private:
 protected:
     float m_crosshair_inertion; //--> Скорость изменения перекрестия в UI (зависит от разбрсоа оружия)
     
-    shared_str m_sBulletHUDVisual; //--> Секция визуала текущего патрона в руках (HUD)
+    shared_str m_sBulletHUDVisSect; //--> Визуал-секция текущего патрона в руках (HUD, для перезарядки)
 
     shared_str m_sHolographBone; //--> Название кости голографа на худовой модели, которая будет раскрыта при прицеливании
     float m_fHolographRotationFactor; //--> Фактор поворота ствола от бедра к прицеливанию [0, 1], выше которого отобразим голограф

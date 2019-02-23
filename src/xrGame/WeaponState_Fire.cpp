@@ -398,7 +398,7 @@ void CWeapon::OnShot(bool bIsRocket, bool bIsBaseDispersionedBullet)
         if (ParentIsActor())
         {
             for (int _idx = 1; _idx <= GetLPCount(); _idx++)
-                CShellLauncher::LaunchShell(_idx, NULL); //SM_TODO:M
+                LaunchShell3D(_idx, (_idx == 1 ? m_sCurShell3DSect.c_str() : nullptr));
         }
     }
 
@@ -580,7 +580,8 @@ void CWeapon::FireTrace(const Fvector& P, const Fvector& D)
     bool SendHit = SendHitAllowed(H_Parent()); //--> Требуется-ли регистрировать попадание по сети
 
     // Выстерлить пулю (с учетом возможной стрельбы дробью)
-    m_sCurrentAnimatedShellModel = l_cartridge->m_sShellVisual;
+    UpdateLastBulletInfo(l_cartridge);
+
     for (int i = 0; i < l_cartridge->param_s.buckShot; ++i)
     {
         FireBullet(P, D, fire_disp, *l_cartridge, H_Parent()->ID(), ID(), SendHit);
@@ -641,6 +642,28 @@ void CWeapon::LaunchShell2D(Fvector* pVel)
     OnShellDrop(get_LastSP(), vel);
 }
 
+// Можно-ли в данный момент запускать анимированные 3D-гильзы
+bool CWeapon::CanPlay3DShellAnim() const
+{
+    if (CShellLauncher::CanPlay3DShellAnim() == false)
+        return false;
+
+    switch (GetState())
+    {
+        case eIdle:
+        case eFire:
+        case eFire2:
+        case eMisfire:
+        case eMagEmpty:
+        case ePump:
+        {
+            return true;
+        }
+    }
+
+    return false; //--> Гильза будет выкинута сразу
+}
+
 // Можно-ли стрелять из оружия
 bool CWeapon::IsShootingAllowed() const
 {
@@ -651,4 +674,11 @@ bool CWeapon::IsShootingAllowed() const
         return false;
 
     return true;
+}
+
+// Обновить информацию о последнем выстрелянном патроне
+void CWeapon::UpdateLastBulletInfo(CCartridge* pBullet)
+{
+    m_sCurAnimatedShellHudVisual = pBullet->m_sShellHudVisual;
+    m_sCurShell3DSect = pBullet->m_sShell3DSect;
 }

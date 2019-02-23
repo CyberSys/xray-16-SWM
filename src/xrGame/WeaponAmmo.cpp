@@ -19,9 +19,9 @@ CCartridge::CCartridge()
     m_ammoSect = NULL;
     param_s.Init();
     bullet_material_idx = u16(-1);
-    m_sHudVisual = NULL; //--#SM+#--
-    m_sWorldVisual = NULL; //--#SM+#--
-    m_sShellVisual = NULL; //--#SM+#--
+    m_sBulletHudVisual = NULL; //--#SM+#--
+    m_sBulletWorldVisual = NULL; //--#SM+#--
+    m_sShellHudVisual = NULL; //--#SM+#--
 }
 
 void CCartridge::Load(LPCSTR section, u8 LocalAmmoType)
@@ -72,9 +72,11 @@ void CCartridge::Load(LPCSTR section, u8 LocalAmmoType)
 
     m_InvShortName = StringTable().translate(pSettings->r_string(section, "inv_name_short"));
 
-	m_sHudVisual = READ_IF_EXISTS(pSettings, r_string, section, "bullet_hud", NULL); //--#SM+#--
-    m_sWorldVisual = READ_IF_EXISTS(pSettings, r_string, section, "bullet_vis", NULL); //--#SM+#--
-    m_sShellVisual = READ_IF_EXISTS(pSettings, r_string, section, "shell_hud", NULL); //--#SM+#--
+    m_sShell3DSect = READ_IF_EXISTS(pSettings, r_string, section, "shell_3d_sect", nullptr); //--#SM+#--
+
+	m_sBulletHudVisual = READ_IF_EXISTS(pSettings, r_string, section, "bullet_hud", nullptr); //--#SM+#--
+    m_sBulletWorldVisual = READ_IF_EXISTS(pSettings, r_string, section, "bullet_vis", nullptr); //--#SM+#--
+    m_sShellHudVisual = READ_IF_EXISTS(pSettings, r_string, section, "shell_hud", nullptr); //--#SM+#--
 }
 
 float CCartridge::Weight() const

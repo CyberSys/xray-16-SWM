@@ -250,7 +250,7 @@ void CWeapon::UpdateHudAdditonal(Fmatrix& trans)
     // Считаем стрейф от поворота камеры
     if (abs(fYMag) > (m_fLR_CameraFactor == 0.0f ? fStrafeMinAngle : 0.0f))
     { //--> Камера крутится по оси Y
-        m_fLR_CameraFactor -= (fYMag * 0.025f);
+        m_fLR_CameraFactor -= (fYMag * (fAvgTimeDelta*30.0f) * 0.025f);
         clamp(m_fLR_CameraFactor, -fCamLimitBlend, fCamLimitBlend);
     }
     else
@@ -969,13 +969,13 @@ void CWeapon::UpdateAmmoBelt()
                                         iType = m_set_next_ammoType_on_reload;
 
                                     if (iType < cartridges->size())
-                                        sBulletHud = cartridges->at(iType).m_sHudVisual;
+                                        sBulletHud = cartridges->at(iType).m_sBulletHudVisual;
                                 }
                                 else
                                 {
                                     CCartridge* pCartridge = magazine->at(idx);
                                     if (pCartridge != NULL)
-                                        sBulletHud = pCartridge->m_sHudVisual;
+                                        sBulletHud = pCartridge->m_sBulletHudVisual;
                                 }
 
                                 bullet_item->UpdateVisual(sBulletHud);
@@ -1011,13 +1011,13 @@ void CWeapon::UpdateAmmoBelt()
                                     iType = m_set_next_ammoType_on_reload;
 
                                 if (iType < cartridges->size())
-                                    sBulletVis = cartridges->at(iType).m_sWorldVisual;
+                                    sBulletVis = cartridges->at(iType).m_sBulletWorldVisual;
                             }
                             else
                             {
                                 CCartridge* pCartridge = magazine->at(idx);
                                 if (pCartridge != NULL)
-                                    sBulletVis = pCartridge->m_sWorldVisual;
+                                    sBulletVis = pCartridge->m_sBulletWorldVisual;
                             }
 
                             bullet_item->SetVisual(sBulletVis);
@@ -1036,7 +1036,7 @@ void CWeapon::UpdateBulletHUDVisual()
 {
     if (!GetHUDmode())
         return;
-    if (m_sBulletHUDVisual == NULL)
+    if (m_sBulletHUDVisSect == NULL)
         return;
 
     attachable_hud_item* hud_item = HudItemData();
@@ -1045,15 +1045,15 @@ void CWeapon::UpdateBulletHUDVisual()
         bool bVisible = true;
 
         // Отображаем\скрываем патрон
-        hud_item->UpdateChildrenList(m_sBulletHUDVisual, bVisible);
+        hud_item->UpdateChildrenList(m_sBulletHUDVisSect, bVisible);
 
         // Обновляем его визуал
-        attachable_hud_item* bullet_item = hud_item->FindChildren(m_sBulletHUDVisual);
+        attachable_hud_item* bullet_item = hud_item->FindChildren(m_sBulletHUDVisSect);
         if (bullet_item != NULL)
         {
             u8 iType = (m_set_next_ammoType_on_reload == undefined_ammo_type ? m_ammoType : m_set_next_ammoType_on_reload);
             if (iType < m_AmmoCartidges.size())
-                bullet_item->UpdateVisual(m_AmmoCartidges[iType].m_sHudVisual);
+                bullet_item->UpdateVisual(m_AmmoCartidges[iType].m_sBulletHudVisual);
         }
     }
 }
@@ -1063,7 +1063,7 @@ void CWeapon::UpdateAnimatedShellVisual()
 {
     if (!GetHUDmode())
         return;
-    if (m_sAnimatedShellVisData == NULL)
+    if (m_sAnimatedShellHUDVisSect == NULL)
         return;
 
     attachable_hud_item* hud_item = HudItemData();
@@ -1072,12 +1072,12 @@ void CWeapon::UpdateAnimatedShellVisual()
         bool bVisible = (m_dwShowAnimatedShellVisual >= Device.dwTimeGlobal && GetState() != eReload);
 
         // Отображаем\скрываем гильзу
-        hud_item->UpdateChildrenList(m_sAnimatedShellVisData, bVisible);
+        hud_item->UpdateChildrenList(m_sAnimatedShellHUDVisSect, bVisible);
 
         // Обновляем её визуал
-        attachable_hud_item* shell_item = hud_item->FindChildren(m_sAnimatedShellVisData);
+        attachable_hud_item* shell_item = hud_item->FindChildren(m_sAnimatedShellHUDVisSect);
         if (shell_item != NULL)
-            shell_item->UpdateVisual(m_sCurrentAnimatedShellModel);
+            shell_item->UpdateVisual(m_sCurAnimatedShellHudVisual);
     }
 }
 
@@ -1335,4 +1335,10 @@ void CWeapon::UpdateMagazine3p(bool bForceUpdate)
             m_bMagaz3pIsHidden = false;
         }
     }
+}
+
+// Получить текущую целевую позицию 3D-гильзы на оружии
+void CWeapon::Update3DShellTransform()
+{
+    UpdateFireDependencies_internal();
 }

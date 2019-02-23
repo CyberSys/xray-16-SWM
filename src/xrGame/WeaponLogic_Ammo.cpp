@@ -753,6 +753,9 @@ bool CWeapon::SpawnAndLaunchRocket()
             CRocketLauncher::SpawnRocket(*fake_grenade_name, this);
 
             VERIFY(m_magazine.size());
+            CCartridge* l_cartridge = m_magazine.back();
+            UpdateLastBulletInfo(l_cartridge);
+
             m_magazine.pop_back();
             --iAmmoElapsed;
             VERIFY((u32)iAmmoElapsed == m_magazine.size());

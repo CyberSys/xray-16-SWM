@@ -246,7 +246,8 @@ public:
     virtual CAttachableItem* cast_attachable_item() override { return NULL; }
     virtual CHolderCustom* cast_holder_custom() override { return NULL; }
     virtual CBaseMonster* cast_base_monster() override { return NULL; }
-    CShellLauncher* cast_shell_launcher() override { return nullptr; } //--#SM+#--
+    virtual CShellLauncher* cast_shell_launcher() override; //--#SM+#--
+    virtual CHudItem* cast_hud_item() override { return NULL; } //--#SM+#--
     virtual bool feel_touch_on_contact(IGameObject*) override { return TRUE; }
     // Utilities
     // XXX: move out

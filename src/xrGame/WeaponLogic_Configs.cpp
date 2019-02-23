@@ -130,8 +130,8 @@ void CWeapon::Load(LPCSTR section)
     LoadMagazinesParams(section);
 
     // Визуализация патрона во время перезарядки и гильзы после выстрела
-    m_sBulletHUDVisual = READ_IF_EXISTS(pSettings, r_string, section, "hud_bullet_visual", NULL);
-    m_sAnimatedShellVisData = READ_IF_EXISTS(pSettings, r_string, section, "hud_shell_visual", NULL);
+    m_sBulletHUDVisSect = READ_IF_EXISTS(pSettings, r_string, section, "hud_bullet_visual", NULL);
+    m_sAnimatedShellHUDVisSect = READ_IF_EXISTS(pSettings, r_string, section, "hud_shell_visual", NULL);
 
     // Аддоны
     LoadAddons(section);
@@ -172,7 +172,7 @@ void CWeapon::Load(LPCSTR section)
     CRocketLauncher::Load(section);
 
     // Параметры гильз
-    CShellLauncher::ReLoadShellData(section, hud_sect);
+    CShellLauncher::ReLoadLaunchPoints(section, hud_sect);
 
     // Модификатор для HUD FOV от бедра
     m_HudFovAddition = READ_IF_EXISTS(pSettings, r_float, section, "hud_fov_addition_modifier", 0.f);

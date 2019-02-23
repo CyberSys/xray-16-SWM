@@ -1,75 +1,102 @@
 #pragma once
 
-/**********************************/
-/***** Присоединяемые визуалы *****/ //--#SM+#--
-/**********************************/
-// SM_TODO:M ^^^
+/********************************/
+/***** Запускатель 3D-Гильз *****/ //--#SM+#--
+/********************************/
 
 class CCustomShell;
 class CGameObject;
 
+#define SHELL3D_DEF_LIFETIME 5000 // Время существования гильзы по умолчанию
+
 class CShellLauncher
 {
+    friend CCustomShell;
+
+protected: // Abstract <!>
+    virtual void Update3DShellTransform() = 0; // Получить текущую целевую позицию 3D-гильзы на оружии
+
 public:
-    struct _launch_point
+    // Детальные параметры конкретной точки запуска
+    struct _lpoint
     {
     private:
         friend CShellLauncher;
 
     public:
-        shared_str sBoneName;    // Кость, относительно которой спавним гильзу
-        bool       bUseBoneDir;  // Использовать дирекцию кости при спавне гильзы
-        Fvector    vOfsPos;      // Смещение начальной позиции гильзы относительно кости
-        Fvector    vOfsDir;      // Смещение начального поворота гильзы относительно кости (в градусах)
-        Fvector    vOfsDirRnd;   // Лимиты случайного отклонения начального поворота (в градусах)
-        Fvector    vVelocity;    // Вектор полёта после спавна относительно кости
-        Fvector    vVelocityRnd; // Лимиты случайного отклонения начального вектора полёта
-                                 /*===================*/
-    private:
-        bool    bEnabled;      // Флаг активности для данной точки
-        u16     iBoneID;       // ID кости, относительно которой спавним гильзу
-        Fmatrix vLaunchMatrix; // Матрица трансформации при спавне, содержимт текущий поворот и позицию
-        Fvector vLaunchVel;    // Текущий вектор полёта при спавне
-    public:
-        ICF bool IsEnabled() { return bEnabled; }
-        ICF u16   GetBoneID() { return iBoneID; }
-        ICF const Fmatrix& GetLaunchMatrix() { return vLaunchMatrix; }
-        ICF const Fvector& GetLaunchVel() { return vLaunchVel; }
+        //--> Начальные параметры запуска гильз из конфига
+        bool bUseBoneDir; // Использовать дирекцию кости при спавне гильзы
+        shared_str sBoneName; // Кость, относительно которой спавним гильзу (+ анимация)
 
-        _launch_point();
-        _launch_point(const shared_str& sect_data, u32 _idx);
+        bool bAnimatedLaunch; // Использовать анимированный запуск гильзы
+        u32 dwAnimReleaseTime; // Время (в м\сек) через которое включится физика после анимации
+
+        Fvector vOfsPos; // Смещение начальной позиции гильзы относительно кости
+        Fvector vOfsDir; // Смещение начального поворота гильзы относительно кости (в градусах)
+        Fvector vOfsDirRnd; // Лимиты случайного отклонения начального поворота (в градусах)
+        Fvector vVelocity; // Вектор полёта после спавна относительно кости
+        Fvector vVelocityRnd; // Лимиты случайного отклонения начального вектора полёта
+        /*===================*/
+
+    private:
+        //--> Обработанные параметры запуска, которые будут использованы гильзой
+        bool bEnabled; // Флаг активности для данной точки
+        u16 iBoneID; // ID кости, относительно которой спавним гильзу
+        Fmatrix vLaunchMatrix; // Матрица трансформации при спавне, содержит текущий поворот и позицию
+        Fvector vLaunchVel; // Текущий вектор полёта при спавне
+        float fLaunchAVel; // Сила стартового "кручения" гильзы в полёте (угловая скорость)
+
+    public:
+        ICF bool IsEnabled() const { return bEnabled; }
+        ICF u16 GetBoneID() const { return iBoneID; }
+        ICF const Fmatrix& GetLaunchMatrix() const { return vLaunchMatrix; }
+        ICF const Fvector& GetLaunchVel() const { return vLaunchVel; }
+        ICF const float GetLaunchAVel() const { return fLaunchAVel; }
+
+        _lpoint();
+        _lpoint(const shared_str& sect_data, u32 _idx);
     };
 
+    // Точка запуска гильз (мировая + худовая)
     struct launch_points
     {
-        shared_str sShellOverSect;     // Переопределённая секция гильзы (NULL - возмёт секцию из LaunchShell)
-        u32        dwFOVTranslateTime; // Время (в м\сек) за которое FOV гильзы переходит из худового в мировой
-        u32        dwFOVStableTime;    // Время (в м\сек) в течении которого FOV гильзы ещё не меняется
+        shared_str sShellOverSect; // Переопределённая секция гильзы (NULL - возмёт секцию из LaunchShell3D)
+        u32 dwFOVTranslateTime; // Время (в м\сек) за которое FOV гильзы переходит из худового в мировой
+        u32 dwFOVStableTime; // Время (в м\сек) в течении которого FOV гильзы ещё не меняется
+        u32 dwLifetimeTime; // Время (в м\сек) после которого удалим гильзу (0 - не удаляем)
 
-        _launch_point point_world; // Параметры гильзы для мировой модели
-        _launch_point point_hud;   // Параметры гильзы для худовой модели
+        _lpoint point_world; // Параметры запуска гильзы для мировой модели
+        _lpoint point_hud; // Параметры запуска гильзы для худовой модели
 
         launch_points(const shared_str& sWorldSect, const shared_str& sHudSect, u32 _idx);
     };
 
     CShellLauncher(CGameObject* parent);
-    ~CShellLauncher();
+    virtual ~CShellLauncher();
 
     DEFINE_VECTOR(launch_points, LAUNCH_VECTOR, LAUNCH_VECTOR_IT);
-    LAUNCH_VECTOR m_launch_points; // Содержит все доступные точки запуска гильзы (для оружия с несколькими гильзами, например БМ-16)
+    LAUNCH_VECTOR m_launch_points; // Содержит все доступные точки запуска гильзы (для оружия с несколькими гильзами,
+                                   // например БМ-16, ПКМ\ПКП)
 
-    void LaunchShell(
-        u32 launch_point_idx, LPCSTR sOverriddenShellSect = NULL); // Запустить гильзу из указанного launch_point (с возможностью указать свою секцию)
-    u32 GetLPCount() { return m_launch_points_count; }             // Узнать число точек запуска
+    void LaunchShell3D(u32 launch_point_idx, LPCSTR sShellSect = nullptr)
+        const; // Запустить гильзу из указанного launch_point (с возможностью указать свою секцию гильзы)
+
+    ICF u32 GetLPCount() const { return m_launch_points_count; } // Узнать число точек запуска
+    ICF CGameObject* GetParentObject() { return m_parent_shell_launcher; } // Получить владельца CShellLauncher
+
 protected:
-    void ReLoadShellData(const shared_str& sWorldSect, const shared_str& sHudSect = NULL); // ПереЗагрузить параметры гильз
-    void RegisterShell(u16 shell_id, CGameObject* parent_shell_launcher);                  // Зарегестрировать заспавненную гильзу
-
-    void RebuildLaunchParams(const Fmatrix& mTransform, IKinematics* pModel, bool bIsHud); // Обновить параметры для точек вылета
-
-private:
-    shared_str   m_params_sect;           // Секция с параметрами
-    shared_str   m_params_hud_sect;       // Худовая секция с параметрами (если есть)
+    shared_str m_params_sect; // Секция параметров запуска гильз для мировой модели
+    shared_str m_params_hud_sect; // Секция параметров запуска гильз для худовой модели (если есть)
     CGameObject* m_parent_shell_launcher; // Владелец данного CShellLauncher
-    u32          m_launch_points_count;   // Число точек запуска
+    u32 m_launch_points_count; // Число точек запуска
+
+    void RegisterShell(u16 shell_id, CGameObject* parent_shell_launcher); // Зарегестрировать заспавненную гильзу
+
+    void ReLoadLaunchPoints(
+        const shared_str& sWorldSect, const shared_str& sHudSect = nullptr); // ПереЗагрузить параметры точек запуска гильз
+
+    void RebuildLaunchParams(
+        const Fmatrix& mTransform, IKinematics* pModel, bool bIsHud); // Пересчитать актуальные параметры точек запуска гильз
+
+    virtual bool CanPlay3DShellAnim() const { return true; } // Можно-ли в данный момент запускать анимированные 3D-гильзы
 };

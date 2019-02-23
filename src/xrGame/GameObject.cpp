@@ -39,6 +39,7 @@
 #include "doors_door.h"
 #include "doors.h"
 #include "attachable_visual.h" //--#SM+#--
+#include "ShellLauncher.h" //---#SM+#--
 #include "xrNetServer/NET_Messages.h"
 #include "xrEngine/vis_object_data.h" //--#SM+#--
 
@@ -1734,4 +1735,9 @@ void CGameObject::GetAllInheritedVisuals(xr_vector<IRenderVisual*>& tOutVisList)
                 tOutVisList.push_back(pVis);
         }
     }
+}
+
+CShellLauncher* CGameObject::cast_shell_launcher() //--#SM+#--
+{
+    return dynamic_cast<CShellLauncher*>(this);
 }

@@ -50,6 +50,7 @@ class CAttachableItem;
 class CHolderCustom;
 class CBaseMonster;
 class CShellLauncher; //--#SM+#--
+class CHudItem; //--#SM+#--
 class CBlend;
 struct SHit;
 class CScriptGameObject;
@@ -259,6 +260,7 @@ public:
     virtual CHolderCustom* cast_holder_custom() = 0;
     virtual CBaseMonster* cast_base_monster() = 0;
     virtual CShellLauncher* cast_shell_launcher() = 0; //--#SM+#--
+    virtual CHudItem* cast_hud_item() = 0; //--#SM+#--
     virtual bool feel_touch_on_contact(IGameObject* obj) = 0;
     // Utilities
     // XXX: move out
