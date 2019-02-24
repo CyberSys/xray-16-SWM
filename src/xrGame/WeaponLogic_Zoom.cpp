@@ -228,7 +228,7 @@ CUIWindow* CWeapon::ZoomTexture() const
 // Можно-ли использовать текстурный прицел при зуме?
 bool CWeapon::CanUseScopeTexture() const
 {
-    if (IsBipodsDeployed() && !m_bipods.m_bUseZoomFov)
+    if (IsBipodsDeployed() && !m_bipods.m_bZoomMode)
         return false;
 
     return true;

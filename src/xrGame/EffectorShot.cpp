@@ -53,10 +53,11 @@ void CWeaponShotEffector::Shot(CWeapon* weapon)
     float angle = m_cam_recoil.Dispersion * weapon->cur_silencer_koef.cam_dispersion;
     angle += m_cam_recoil.DispersionInc * weapon->cur_silencer_koef.cam_disper_inc * (float)m_shot_numer;
 
-	// Учёт разброса от сошек [add bipods recoil mod] --#SM+#--
+    // Учёт разброса от сошек [add bipods recoil mod] --#SM+#--
     if (weapon->IsBipodsDeployed())
-        angle *= (1.f * (1.f - weapon->m_bipods.m_translation_factor) +
-            weapon->m_bipods.m_fRecoilMod * weapon->m_bipods.m_translation_factor);
+    {
+        angle *= _lerpc(1.0f, weapon->m_bipods.fRecoilMod, weapon->GetBipodsTranslationFactor());
+    }
 
     Shot2(angle);
 }

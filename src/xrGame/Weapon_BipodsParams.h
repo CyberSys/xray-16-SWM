@@ -4,6 +4,8 @@
 /***** Параметры сошек *****/ //--#SM+#--
 /******************************/
 
+class CPHCollideHelper;
+
 struct bipods_data
 {
     friend CWeapon;
@@ -11,58 +13,71 @@ struct bipods_data
     enum bipods_state
     {
         eBS_SwitchedOFF = 0, // Выключены
-        eBS_TranslateInto, // Установка
+        eBS_TranslateInto, // Анимация установки
         eBS_SwitchedON, // Включены
-        eBS_TranslateOutro // Выключение
+        eBS_TranslateOutro // Анимация снятия
     };
-    bipods_state m_iBipodState;
+    bipods_state m_iBipodState; //--> Текущее состояние сошек
 
-    bool m_bInstalled;
+    bool m_bInstalled; //--> Присутствуют-ли сошки на оружии
 
-    shared_str m_sBipod_hud;
-    shared_str m_sBipod_vis;
+    Fvector m_vBipodInitPos; //--> Актуальная позиция установки сошек
+    Fvector m_vBipodInitDir; //--> Актуальная дирекция установки сошек
+    Fvector m_vBipodInitNormal; //--> Актуальная нормаль установки сошек
 
-    bool m_bAnimated; // Флаг наличия двигающихся костей у сошек
-    float m_i_range; // Макс. расстояние установки сошек от центра камеры
-    float m_i_angle_f; // Мин. необходимая величина наклона поверхности (1 - идеально ровная, 0 - стена, -1 - потолок)
-    float m_cam_dist; // Макс. дистанция от точки установки до камеры
-    float m_cam_y_offset; // Смещение координаты Y у камеры от точки установки
-    float m_hud_z_offset; // Смещение худа по Z-координате
-    float m_pitch_vis_factor; // Фактор влияния наклона по X на степень раздвига ножек (больше => меньше)
-    float m_inertia_power; // Модификатор силы инерции худа
-    float m_pos_displ; // Сдвиг точки установки m_vBipodInitPos в направлении m_vBipodInitDir
-    float m_deploy_time; // Время на установку сошек (секунды)
-    float m_undeploy_time; // Время на снятие сошек (секунды)
-    float m_fZoomFOV; // FOV при зуме в сошках (без прицела)
-    float m_fHUD_FOV; // HUD FOV при разложенных сошках
-    float m_fDispersionMod; // Модификатор разброса пуль при разложенных сошках
-    float m_fRecoilMod; // Модификатор отдачи при разложенных сошках
-    float m_max_dist; // Максимальное расстояние, на которое игрок может отойти от установленных сошек
-    Fvector2 m_yaw_limit; // Лимиты вращения сошек по Y
-    Fvector2 m_pitch_limit; // Лимиты вращения сошек по X
-    Fvector m_torch_offset; // Координаты смещения света фонарика от центра худа
-    Fvector m_deploy_pos; // Смещение главной кости при установке сошек
-    Fvector m_deploy_rot; // Поворот главной кости при установке сошек
-    Fvector m_legs_rot; // Базовый поворот ножек при установке сошек
+    bool m_bZoomMode; //--> Включён-ли режим прицеливания
+    float m_fCurScopeZoomFov; //--> FOV в режиме прицеливания
 
-    Fvector m_vParentInitPos;
-    Fvector m_vBipodInitPos;
-    Fvector m_vBipodInitDir;
-    Fvector m_vBipodInitNormal;
-    Fvector2 m_vPrevYP;
-    bool m_bUseZoomFov;
-    float m_fCurScopeZoomFov;
-    float m_translation_factor; // 0.f - 1.f
+    float m_fTranslationFactor; //--> Степень стадии установки сошек (0.f сложены - 1.f установлены)
 
     bipods_data()
-        : m_bInstalled(false), m_bUseZoomFov(false), m_iBipodState(eBS_SwitchedOFF), m_translation_factor(0.0f),
-          m_fCurScopeZoomFov(0.0f)
+        : m_bInstalled(false), m_bZoomMode(false), m_iBipodState(eBS_SwitchedOFF), m_fTranslationFactor(0.0f),
+          m_fCurScopeZoomFov(0.0f), bDbgDraw(false)
     {
         m_vPrevYP.set(0.f, 0.f);
+        sInstCamAnm = nullptr;
+
+        m_pPHWpnBody = nullptr;
+        m_pPHBipodsLegL = nullptr;
+        m_pPHBipodsLegR = nullptr;
     }
 
+public:
+    shared_str sBipodsHudSect; // Худовая секция визуала сошек
+    shared_str sBipodsVisSect; // Мировая секция визуала сошек
+
+    bool bDbgDraw; // Отрисовывать отладочную информацию (только R1/R2 Mixed)
+    bool bAnimatedLegs; // Флаг наличия двигающихся костей у сошек (ножек сошек)
+    bool bEnableWpnTilt; // Должно-ли оружие принимать наклон поверхности при установке
+    float fInstRangeMax; // Макс. расстояние установки сошек от центра камеры
+    float fInstAngleMax; // Максимальный наклон поверхности в градусах (0 - ровная, 90 - стена, 180 - потолок)
+    float fCamDistMax; // Макс. дистанция от точки установки до камеры
+    float fCamYOffset; // Смещение координаты Y у камеры от точки установки
+    float fHudZOffset; // Смещение худа по Z-координате
+    float fPitch2LegsTiltFactor; // Фактор влияния наклона по X на степень раздвига ножек (больше => меньше)
+    float fInertiaMod; // Модификатор силы инерции худа
+    float fPosZOffset; // Сдвиг точки установки m_vBipodInitPos в направлении m_vBipodInitDir
+    float fDeployTime; // Время на установку сошек (секунды)
+    float fUndeployTime; // Время на снятие сошек (секунды)
+    float fZoomFOV; // FOV при зуме в сошках (без прицела)
+    float fHudFOVFactor; // HUD FOV при разложенных сошках
+    float fDispersionMod; // Модификатор разброса пуль при разложенных сошках
+    float fRecoilMod; // Модификатор отдачи при разложенных сошках
+    Fvector2 vCamYawLimits; // Лимиты вращения сошек по Y
+    Fvector2 vCamPitchLimits; // Лимиты вращения сошек по X
+    Fvector vTorchOffset; // Координаты смещения света фонарика от центра худа
+    Fvector vBoneMDeployPosOffs; // Смещение главной кости при установке сошек
+    Fvector vBoneMDeployRotOffs; // Поворот главной кости при установке сошек
+    Fvector vBoneLDeployRotOffs; // Базовый поворот ножек при установке сошек
+    shared_str sInstCamAnm; // Путь до анимации камеры (.anm) во время установки
+
 private:
-    bool m_bFirstCamUpdate;
+    bool m_bFirstCamUpdate; //--> True когда делаем первый апдейт камеры после установки сошек
+    bool m_bCamLimitsWasSaved; //--> True если мы уже запомнили параметры камеры игрока, False если сбросили в дефолт
+    bool m_bBipodsIntroEffPlayed; //--> True если уже был проигран эффект установки сошек (snd + cam anm)
+
+    Fvector2 m_vPrevYP; //--> Yaw\Pitch камеры с предыдущего кадра
+    Fvector m_vParentInitPos; //--> Позиция владельца оружия в момент установки сошек
 
     // Параметры камеры до входа в режим сошек
     Fvector m_vOldCamPos;
@@ -71,4 +86,25 @@ private:
     Fvector2 m_fOldPitchLimit;
     bool m_bOldClampYaw;
     bool m_bOldClampPitch;
+
+    // Параметры поворота модели сошек с прошлого кадра
+    Fvector m_vPrevLegsXYZ;
+
+    // Физическая модель сошек (для просчёта столкновений и проверки наличия места)
+    CPHCollideHelper* m_pPHWpnBody;
+    CPHCollideHelper* m_pPHBipodsLegL;
+    CPHCollideHelper* m_pPHBipodsLegR;
+
+    // Для отладки
+    enum EDBGCollideType
+    {
+        ctNoCollide = 0,
+        ctBox,
+        ctCamera,
+        ctCount
+    };
+
+    Fmatrix dbg_mPHCamBody; //--> XFORM камеры игрока
+    Fvector dbg_vPHCamBodyHalfsize; //--> Размер камеры игрока (в половину)
+    EDBGCollideType dbg_CollideType; //--> По какой причине не прошли проверку коллизии
 };

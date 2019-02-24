@@ -537,18 +537,35 @@ public:
 
 //========================= Аддоны - Сошки =========================//
 private:
+    bool bBipodsUseSavedData; //--> True если надо разложить сошки после загрузки
+    Fvector vBipodsSavedIPos, vBipodsSavedIDir, vBipodsSavedINormal; //--> Сохранённые параметры сошек после загрузки
 
 protected:
     EAddons m_BipodsSlot; //--> Слот аддона, который занимают сошки
 
     void UpdateBipods();
+    void BipodsOnRender(bool bHudMode);
+    void BipodsOnDestroy();
+    void BipodsOnSave(NET_Packet& output_packet);
+    void BipodsOnLoad(IReader& input_packet);
+
+    void BipodsPlayEffects(bool bIsIntro);
+    void BipodsSetCameraLimits(CCameraBase* pCam, bool bLimit);
+    bool BipodsDoCollide(Fvector& vCalcCamPos, Fvector& vCalcCamDir, Fvector& vCalcNormal, IGameObject* pCameraOwner, Fvector noise_dangle);
+
+    // True если в данный момент мы можем отрисовывать dbg-информацию о сошках
+    IC bool BipodsCanDrawDbg()
+    {
+        return (m_bipods.m_iBipodState == bipods_data::eBS_TranslateInto ||
+            m_bipods.m_iBipodState == bipods_data::eBS_SwitchedON);
+    };
 
     // Каллбэки на установку\снятие сошек
     void OnBipodsAttach(EAddons iSlot, const shared_str& sAddonDataName);
     void OnBipodsDetach(const shared_str& sAddonDataName);
 
 public:
-    bipods_data m_bipods; // Параметры сошек оружия
+    bipods_data m_bipods; //--> Параметры сошек оружия
 
     virtual void LoadBipodsParams();
 
@@ -557,21 +574,25 @@ public:
 
     virtual void OnOwnedCameraMoveWhileBipods(CCameraBase* pCam, float fOldYaw, float fOldPitch);
 
-    void Try2DeployBipods();
-    void Need2UndeployBipods(bool bInstantly = true);
+    bool Try2DeployBipods();
 
     IC bool IsBipodsAttached() const { return m_bipods.m_bInstalled; }
-    IC bool CWeapon::IsBipodsDeployed() const
+    IC bool CWeapon::IsBipodsDeployed() const //--> True когда сошки активны
     {
-        return m_bipods.m_bInstalled &&
-            (m_bipods.m_iBipodState == bipods_data::eBS_SwitchedON ||
-                m_bipods.m_iBipodState == bipods_data::eBS_TranslateInto);
+        return m_bipods.m_bInstalled && m_bipods.m_iBipodState != bipods_data::eBS_SwitchedOFF;
+    }
+    IC bool CWeapon::IsBipodsZoomed() const //--> True когда целимся из сошек
+    {
+        return m_bipods.m_bZoomMode;
+    }
+    IC float CWeapon::GetBipodsTranslationFactor() const //--> Фактор степени установки оружия на сошки
+    {
+        return m_bipods.m_fTranslationFactor;
     }
 
-    void DeployBipods(Fvector vDeployPos, Fvector vDeployDir, Fvector vDeployNormal, bool bInstantly = false);
+    bool DeployBipods(Fvector vDeployPos, Fvector vDeployDir, Fvector vDeployNormal, bool bInstantly = false);
     void UndeployBipods(bool bInstantly = false);
 
-    void BipodsSetCameraLimits(CCameraBase* pCam, bool bLimit);
     void BipodsZoom(u32 flags);
 
 //===================== Аддоны - Магазинное питание =====================//

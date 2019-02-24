@@ -768,6 +768,7 @@ private:
         mstate_real = state;
     }
 
+public: //--#SM+#--
     IC u32 get_state_wishful() const
     {
         return this->mstate_wishful;

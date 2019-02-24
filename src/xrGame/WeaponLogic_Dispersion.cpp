@@ -36,7 +36,9 @@ float CWeapon::GetFireDispersion(float cartridge_k, bool for_crosshair)
 
     // Учёт дисперсии от сошек
     if (IsBipodsDeployed())
-        fire_disp *= (1.f * (1.f - m_bipods.m_translation_factor) + m_bipods.m_fDispersionMod * m_bipods.m_translation_factor);
+    {
+        fire_disp *= _lerpc(1.0f, m_bipods.fDispersionMod, GetBipodsTranslationFactor());
+    }
 
     // Вычислить дисперсию, вносимую самим стрелком
     if (H_Parent())

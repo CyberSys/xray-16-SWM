@@ -179,6 +179,8 @@ CWeapon::CWeapon() : CShellLauncher(this)
     m_bInvShowWeaponAmmo = false;
 
     m_iMinRequiredAmmoInMag = 0;
+
+    bBipodsUseSavedData = false;
 }
 
 // Деструктор
@@ -259,6 +261,7 @@ void CWeapon::net_Destroy()
         m_magazine2.pop_back();
 
     UpdateMagazine3p();
+    BipodsOnDestroy();
 }
 
 // Экспорт данных в серверный объект и по сети
@@ -417,6 +420,8 @@ void CWeapon::save(NET_Packet& output_packet)
     save_data(m_iCurFireMode, output_packet);
     save_data(m_bGrenadeMode, output_packet);
     save_data(bMisfire, output_packet);
+
+    BipodsOnSave(output_packet);
 }
 
 // Загрузка данных клиентского объекта
@@ -459,6 +464,8 @@ void CWeapon::load(IReader& input_packet)
         OnZoomIn();
     else
         OnZoomOut();
+
+    BipodsOnLoad(input_packet);
 }
 
 // Сброс состояния оружия в дефолт
@@ -470,6 +477,7 @@ void CWeapon::ResetWeapon(shared_str const& sCallerName)
        - signal_HideComplete     --> По завершению прятанья оружия
     */
 
+    UndeployBipods(true);
     OnZoomOut(true);
     StopAllEffects(); //--> Light + Particles + Effectors
 

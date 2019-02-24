@@ -92,7 +92,7 @@ void CWeapon::UpdateHudAdditonal(Fmatrix& trans)
 
         if (IsBipodsDeployed())
         {
-            curr_offs.z += m_bipods.m_hud_z_offset;
+            curr_offs.z += (m_bipods.fHudZOffset * GetBipodsTranslationFactor());
         }
 
         curr_offs.mul(m_fZoomRotationFactor);
@@ -491,9 +491,9 @@ float CWeapon::GetFov() const
 {
     if (IsBipodsDeployed() && !ZoomTexture())
     { // FOV при сошках
-        if (m_bipods.m_bUseZoomFov)
+        if (m_bipods.m_bZoomMode)
         {
-            return (IsScopeAttached() && m_bipods.m_fCurScopeZoomFov > 0.0f ? m_bipods.m_fCurScopeZoomFov : m_bipods.m_fZoomFOV);
+            return (IsScopeAttached() && m_bipods.m_fCurScopeZoomFov > 0.0f ? m_bipods.m_fCurScopeZoomFov : m_bipods.fZoomFOV);
         }
         else
             return g_fov;
@@ -554,23 +554,28 @@ float CWeapon::GetHudFov()
         m_nearwall_last_hud_fov = m_nearwall_last_hud_fov * (1 - src) + fTrgFov * src;
     }
 
-    if (IsBipodsDeployed())
-    { // При разложенных сошках
-        return m_bipods.m_fHUD_FOV;
-    }
-
     // Возвращаем итоговый HUD FOV
+    float fRes = 1.0f;
+
     if (m_fZoomRotationFactor > 0.0f)
     {
-        // В процессе зума
+        //--> В процессе зума
         float fDiff = m_nearwall_last_hud_fov - GetZoomParams().m_fZoomHudFov;
-        return GetZoomParams().m_fZoomHudFov + (fDiff * (1 - m_fZoomRotationFactor));
+        fRes = GetZoomParams().m_fZoomHudFov + (fDiff * (1 - m_fZoomRotationFactor));
     }
     else
     {
-        // От бедра
-        return m_nearwall_last_hud_fov;
+        //--> От бедра
+        fRes = m_nearwall_last_hud_fov;
     }
+    
+    if (IsBipodsDeployed())
+    { 
+        // При разложенных сошках
+        fRes = _lerpc(fRes, m_bipods.fHudFOVFactor, GetBipodsTranslationFactor());
+    }
+    
+    return fRes;
 }
 
 // Получить фактор силы инерции и cam-стрейфа (насколько далеко и быстро влияет на оружие)
@@ -578,7 +583,7 @@ float CWeapon::GetInertionPowerFactor()
 {
     if (IsBipodsDeployed())
     {
-        return 1.0f - ((1.0f - m_bipods.m_inertia_power) * GetZRotatingFactor());
+        return 1.0f - ((1.0f - m_bipods.fInertiaMod) * GetZRotatingFactor());
     }
 
     return 1.0f;
@@ -606,7 +611,14 @@ void CWeapon::render_item_ui()
 }
 
 // Рендеринг в режиме худа
-void CWeapon::render_hud_mode() { RenderLight(); }
+void CWeapon::render_hud_mode()
+{
+    // Рисуем подсветку
+    RenderLight();
+
+    // Рисуем инфу от сошек
+    BipodsOnRender(true);
+}
 
 // Апдейт во время рендера оружия (вызывается только для оружия в зоне видимости игрока)
 // НЕ ВЫЗЫВАЕТСЯ когда оружие в руках от первого лица, т.к его мировая модель в этот момент не рендерится <!>
@@ -617,6 +629,9 @@ void CWeapon::renderable_Render()
 
     // Рисуем подсветку
     RenderLight();
+
+    // Рисуем инфу от сошек
+    BipodsOnRender(false);
 
     inherited::renderable_Render();
 }

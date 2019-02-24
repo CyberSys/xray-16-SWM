@@ -248,7 +248,7 @@ bool CWeapon::Action(u16 cmd, u32 flags)
     ///////////////////////////////////////
     case kWPN_ACTION: //--> Различные действия в зависимости от контекста
     {
-        if (IsZoomed())
+        if (IsZoomed() && (IsBipodsDeployed() == false || IsBipodsZoomed()))
         { //--> Переключаем типы зума
             if (!m_bGrenadeMode && IsAltZoomEnabled())
             {

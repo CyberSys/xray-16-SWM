@@ -14,6 +14,7 @@ void CWeapon::switch2_Hiding()
     if (owner)
         bSoundsEnabled = owner->CanPlayShHdRldSounds();
 
+    UndeployBipods();
     OnZoomOut();
 
     if (bSoundsEnabled)
