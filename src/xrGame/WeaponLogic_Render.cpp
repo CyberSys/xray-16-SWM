@@ -250,7 +250,7 @@ void CWeapon::UpdateHudAdditonal(Fmatrix& trans)
     // Считаем стрейф от поворота камеры
     if (abs(fYMag) > (m_fLR_CameraFactor == 0.0f ? fStrafeMinAngle : 0.0f))
     { //--> Камера крутится по оси Y
-        m_fLR_CameraFactor -= (fYMag * (fAvgTimeDelta*30.0f) * 0.025f);
+        m_fLR_CameraFactor -= (fYMag * fAvgTimeDelta * 0.75f);
         clamp(m_fLR_CameraFactor, -fCamLimitBlend, fCamLimitBlend);
     }
     else
