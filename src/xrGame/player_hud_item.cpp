@@ -317,25 +317,9 @@ u32 attachable_hud_item::anim_play_hands(anim_find_result anim_to_play, bool bMi
 
     if (IsGameTypeSingle() && parent_object.H_Parent() == Level().CurrentControlEntity() && !IsChildHudItem())
     {
-        CActor* current_actor = static_cast_checked<CActor*>(Level().CurrentControlEntity());
-        VERIFY(current_actor);
-        CEffectorCam* ec = current_actor->Cameras().GetCamEffector(eCEWeaponAction);
-
-        if (NULL == ec)
-        {
-            string_path ce_path;
-            string_path anm_name;
-            strconcat(sizeof(anm_name), anm_name, "camera_effects\\weapon\\", anim_to_play.handsMotionDescr->name.c_str(), ".anm");
-            if (FS.exist(ce_path, "$game_anims$", anm_name))
-            {
-                CAnimatorCamEffector* e = new CAnimatorCamEffector();
-                e->SetType(eCEWeaponAction);
-                e->SetHudAffect(false);
-                e->SetCyclic(false);
-                e->Start(anm_name);
-                current_actor->Cameras().AddCamEffector(e);
-            }
-        }
+        string_path anm_name;
+        strconcat(sizeof(anm_name), anm_name, "camera_effects\\weapon\\", anim_to_play.handsMotionDescr->name.c_str(), ".anm");
+        anim_play_cam_eff(anm_name);
     }
 
     return ret;
@@ -407,6 +391,27 @@ void attachable_hud_item::anim_play_item(
 
             // Следующий потомок
             ++it;
+        }
+    }
+}
+
+// Запустить худовой эффект камеры --#SM+#--
+void attachable_hud_item::anim_play_cam_eff(LPCSTR sAnmPath)
+{
+    CActor* current_actor = static_cast_checked<CActor*>(Level().CurrentControlEntity());
+    VERIFY(current_actor);
+    CEffectorCam* ec = current_actor->Cameras().GetCamEffector(eCEWeaponAction);
+    if (NULL == ec)
+    {
+        string_path ce_path;
+        if (FS.exist(ce_path, "$game_anims$", sAnmPath))
+        {
+            CAnimatorCamEffector* e = new CAnimatorCamEffector();
+            e->SetType(eCEWeaponAction);
+            e->SetHudAffect(false);
+            e->SetCyclic(false);
+            e->Start(sAnmPath);
+            current_actor->Cameras().AddCamEffector(e);
         }
     }
 }

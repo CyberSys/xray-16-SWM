@@ -75,6 +75,8 @@ struct attachable_hud_item
     void anim_play_item(
         anim_find_result anim_to_play, bool bMixIn, bool bNoChilds, float fSpeed = 1.0f, float fStartFromTime = 0.0f, float _fRootStartTime = -1.f);
 
+    void anim_play_cam_eff(LPCSTR sAnmPath);
+
     // childs
     xr_vector<attachable_hud_item*> m_child_items;      // Присоединённые потомки
     attachable_hud_item*            m_parent_aitem;     // Ссылка на родительский attachable_item, к которому мы присоединены
