@@ -319,15 +319,38 @@ bool test_camera_box(const Fvector& box_size, const Fmatrix& xform, IPhysicsShel
     return ret;
 }
 
-// Протестировать камеру на факт столкновения с геометрией [Test camera collide with geometry, generate box from camera] --#SM+#--
-bool test_camera_collide(
-    CCameraBase& camera, float _viewport_near, IPhysicsShellHolder* l_actor, Fvector& vPosOffset, float fBoxSizeMod)
+/* Протестировать камеру на факт столкновения с геометрией [Test camera collide with geometry, generate box from camera] --#SM+#--
+   vPosOffsetView  - Смещение позиции камеры с учётом её наклона 
+   vPosOffsetWorld - Смещение позиции камеры без учёта её наклона (строго вверх и вперёд)
+*/
+bool test_camera_collide(CCameraBase& camera, float _viewport_near, IPhysicsShellHolder* l_actor,
+    Fvector& vPosOffsetView, Fvector& vPosOffsetWorld, float fBoxSizeMod, Fmatrix* pOutCamXFORM, Fvector* pOutCamBox)
 {
     Fvector box_size;
     Fmatrix xform;
     get_camera_box(box_size, xform, camera, _viewport_near);
     box_size.mul(fBoxSizeMod);
-    xform.c.mad(camera.Direction(), vPosOffset);
+
+    // View offset
+    xform.c.mad(camera.Right(), vPosOffsetView.x);
+    xform.c.mad(camera.Up(), vPosOffsetView.y);
+    xform.c.mad(camera.Direction(), vPosOffsetView.z);
+
+    // World offset
+    xform.c.mad(camera.Right(), vPosOffsetWorld.x);
+    
+    Fvector vUpWorld = {0.0f, 1.0f, 0.0f};
+    xform.c.mad(vUpWorld, vPosOffsetWorld.y);
+
+    float fCamYaw = camera.Direction().getH();
+    Fvector vDirWorld = (camera.Direction().setHP(fCamYaw, 0.0f));
+    xform.c.mad(vDirWorld, vPosOffsetWorld.z);
+
+    if (pOutCamXFORM != nullptr)
+        *pOutCamXFORM = xform;
+
+    if (pOutCamBox != nullptr)
+        *pOutCamBox = box_size;
 
     return test_camera_box(box_size, xform, l_actor);
 }
