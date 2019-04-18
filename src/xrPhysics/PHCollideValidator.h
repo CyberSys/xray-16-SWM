@@ -36,8 +36,10 @@ public:
     static bool IsGroupObject(const CPHObject& obj);
     static bool IsAnimatedObject(const CPHObject& obj);
     static void SetStaticNotCollide(CPHObject& obj);
+    static void SetStaticCollide(CPHObject& obj); //--#SM+#--
     static void SetNonDynamicObject(CPHObject& obj);
     static void SetDynamicNotCollide(CPHObject& obj);
+    static void SetDynamicCollide(CPHObject& obj); //--#SM+#--
     static void SetCharacterClass(CPHObject& obj);
     static void SetCharacterClassNotCollide(CPHObject& obj);
     static void SetRagDollClass(CPHObject& obj);

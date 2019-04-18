@@ -1407,7 +1407,9 @@ void CPHShell::CollideAll()
 void CPHShell::RegisterToCLGroup(CGID g) { CPHCollideValidator::RegisterObjToGroup(g, *static_cast<CPHObject*>(this)); }
 bool CPHShell::IsGroupObject() { return CPHCollideValidator::IsGroupObject(*this); };
 void CPHShell::SetIgnoreStatic() { CPHCollideValidator::SetStaticNotCollide(*this); }
+void CPHShell::SetCollideStatic() { CPHCollideValidator::SetStaticCollide(*this); } //--#SM+#--
 void CPHShell::SetIgnoreDynamic() { CPHCollideValidator::SetDynamicNotCollide(*this); }
+void CPHShell::SetCollideDynamic() { CPHCollideValidator::SetDynamicCollide(*this); } //--#SM+#--
 void CPHShell::SetRagDoll() { CPHCollideValidator::SetRagDollClass(*this); }
 void CPHShell::SetIgnoreRagDoll() { CPHCollideValidator::SetRagDollClassNotCollide(*this); }
 //Makes this physical object animated

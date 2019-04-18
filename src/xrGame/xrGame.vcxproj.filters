@@ -2284,6 +2284,9 @@
     <Filter Include="Core\Client\Objects\items &amp; weapons\Weapons\Logics\BipodsParams">
       <UniqueIdentifier>{516b8421-4c60-4e97-9a38-8826035037b3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Physics\PHCollideHelper">
+      <UniqueIdentifier>{a47ead05-aae2-49bf-8325-2fd2fae1c12c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="mt_config.h">
@@ -6546,6 +6549,9 @@
     <ClInclude Include="Weapon_LuaAdapter.hpp">
       <Filter>Core\Client\Objects\items &amp; weapons\Weapons\WeaponScript</Filter>
     </ClInclude>
+    <ClInclude Include="PHCollideHelper.h">
+      <Filter>Physics\PHCollideHelper</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="damage_manager.cpp">
@@ -9987,6 +9993,9 @@
     </ClCompile>
     <ClCompile Include="player_hud_item_measures.cpp">
       <Filter>Core\Client\Objects\items &amp; weapons\HudItem\PlayerHUD</Filter>
+    </ClCompile>
+    <ClCompile Include="PHCollideHelper.cpp">
+      <Filter>Physics\PHCollideHelper</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

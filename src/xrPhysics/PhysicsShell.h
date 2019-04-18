@@ -326,7 +326,9 @@ public:
     virtual void RegisterToCLGroup(CGID g) = 0;
     virtual bool IsGroupObject() = 0;
     virtual void SetIgnoreStatic() = 0;
+    virtual void SetCollideStatic() = 0; //--#SM+#--
     virtual void SetIgnoreDynamic() = 0;
+    virtual void SetCollideDynamic() = 0; //--#SM+#--
     virtual void SetRagDoll() = 0;
     virtual void SetIgnoreRagDoll() = 0;
     virtual const CLBits& collide_bits() const = 0;

@@ -98,7 +98,9 @@ public:
     virtual void RegisterToCLGroup(CGID g);
     virtual bool IsGroupObject();
     virtual void SetIgnoreStatic();
+    virtual void SetCollideStatic(); //--#SM+#--
     virtual void SetIgnoreDynamic();
+    virtual void SetCollideDynamic(); //--#SM+#--
     virtual void SetRagDoll();
     virtual void SetIgnoreRagDoll();
 

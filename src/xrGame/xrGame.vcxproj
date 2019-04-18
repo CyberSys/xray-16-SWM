@@ -945,6 +945,7 @@
     <ClInclude Include="HairsZone.h" />
     <ClInclude Include="HangingLamp.h" />
     <ClInclude Include="harvest_time.h" />
+    <ClInclude Include="PHCollideHelper.h" />
     <ClInclude Include="player_hud_item.h" />
     <ClInclude Include="helicopter.h" />
     <ClInclude Include="Hit.h" />
@@ -2236,6 +2237,7 @@
       </PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="atlas_submit_queue.cpp" />
+    <ClCompile Include="PHCollideHelper.cpp" />
     <ClCompile Include="player_hud_item.cpp" />
     <ClCompile Include="attachable_item.cpp" />
     <ClCompile Include="attachable_visual.cpp" />
