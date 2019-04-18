@@ -3,7 +3,7 @@
 
 struct HUD_SOUND_ITEM
 {
-    HUD_SOUND_ITEM() : m_activeSnd(NULL), m_b_exclusive(false) {}
+    HUD_SOUND_ITEM() : m_activeSnd(NULL), m_b_exclusive(false), m_b_overlay_exclusive(false) {} //--#SM+#--
     static void LoadSound(LPCSTR section, LPCSTR line, ref_sound& hud_snd, int type = sg_SourceType,
         float* volume = NULL, float* delay = NULL);
 
@@ -58,6 +58,7 @@ struct HUD_SOUND_ITEM
     shared_str m_alias;
     SSnd* m_activeSnd;
     bool m_b_exclusive;
+    bool m_b_overlay_exclusive; //--#SM+#--
     xr_vector<SSnd> sounds;
 
     bool operator==(LPCSTR alias) const { return 0 == xr_stricmp(m_alias.c_str(), alias); }
@@ -83,8 +84,10 @@ public:
     void StopSound(LPCSTR alias);
     void StopAllSoundsWhichContain(LPCSTR alias); //--#SM+#--
 
-    void LoadSound(LPCSTR section, LPCSTR line, LPCSTR alias, bool exclusive = false, int type = sg_SourceType);
-    void ReLoadSound(LPCSTR section, LPCSTR line, LPCSTR alias, bool exclusive = false, int type = sg_SourceType); //--#SM+#--
+    void LoadSound(LPCSTR section, LPCSTR line, LPCSTR alias, bool exclusive = false, int type = sg_SourceType,
+        bool overlay = false); //--#SM+#--
+    void ReLoadSound(LPCSTR section, LPCSTR line, LPCSTR alias, bool exclusive = false, int type = sg_SourceType,
+        bool overlay = false); //--#SM+#--
 
     void SetPosition(LPCSTR alias, const Fvector& pos);
     void SetCurentTime(LPCSTR alias, float fTime); //--#SM+#--

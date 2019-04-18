@@ -16,5 +16,5 @@ void CWeaponKnife::Load(LPCSTR section)
 void CWeaponKnife::ReloadAllSounds()
 {
     inherited::ReloadAllSounds();
-    ReloadSound("snd_shoot", "sndKnife", false, SOUND_TYPE_WEAPON_SHOOTING);
+    ReloadSound("snd_shoot", "sndKnife", ESndExcl::eExNot, SOUND_TYPE_WEAPON_SHOOTING);
 }

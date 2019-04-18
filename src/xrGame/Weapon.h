@@ -1226,8 +1226,15 @@ protected:
     virtual void UpdateSounds();
 
 public:
+    enum ESndExcl
+    {
+        eExNot = 0, //--> Звук может дублироваться и накладываться
+        eExYes, //--> Звук всегда в одном экземпляре и останавливает другие эксклюзивные
+        eExOver, //--> Звук всегда в одном экземпляре, но не останавливает другие эксклюзивные
+
+    };
     virtual void ReloadSound(
-        shared_str const& strName, shared_str const& strAlias, bool exclusive = false, int type = sg_SourceType);
+        shared_str const& strName, shared_str const& strAlias, ESndExcl exMode = eExNot, int type = sg_SourceType);
 
     virtual void ReloadAllSounds();
     virtual void ReloadAllSounds(LPCSTR sFromSect);

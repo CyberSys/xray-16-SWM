@@ -159,11 +159,17 @@ HUD_SOUND_ITEM* HUD_SOUND_COLLECTION::FindSoundItem(LPCSTR alias, bool b_assert)
 void HUD_SOUND_COLLECTION::PlaySound(
     LPCSTR alias, const Fvector& position, const IGameObject* parent, bool hud_mode, bool looped, u8 index)
 {
-    for (auto& sound_item : m_sound_items)
-        if (sound_item.m_b_exclusive)
-            HUD_SOUND_ITEM::StopSound(sound_item);
-
     HUD_SOUND_ITEM* snd_item = FindSoundItem(alias, true);
+
+    //--> Останавливаем все другие эксклюзивные звуки
+    if (snd_item->m_b_overlay_exclusive != true) //--#SM+#--
+    {
+        for (auto& sound_item : m_sound_items)
+            if (sound_item.m_b_exclusive)
+                HUD_SOUND_ITEM::StopSound(sound_item);
+    }
+
+    //--> Эксклюзивные звуки играем всегда в одном экземпляре, остальные могут накладываться
     if (snd_item->m_b_exclusive) //--#SM+#--
         HUD_SOUND_ITEM::PlaySound(*snd_item, position, parent, hud_mode, looped, index);
     else
@@ -214,7 +220,7 @@ void HUD_SOUND_COLLECTION::StopAllSounds()
         HUD_SOUND_ITEM::StopSound(sound_item);
 }
 
-void HUD_SOUND_COLLECTION::LoadSound(LPCSTR section, LPCSTR line, LPCSTR alias, bool exclusive, int type)
+void HUD_SOUND_COLLECTION::LoadSound(LPCSTR section, LPCSTR line, LPCSTR alias, bool exclusive, int type, bool overlay) //--#SM+#--
 {
     R_ASSERT4(nullptr == FindSoundItem(alias, false), section, line, alias); //--#SM+#--
     m_sound_items.resize(m_sound_items.size() + 1);
@@ -222,10 +228,12 @@ void HUD_SOUND_COLLECTION::LoadSound(LPCSTR section, LPCSTR line, LPCSTR alias, 
     HUD_SOUND_ITEM::LoadSound(section, line, snd_item, type);
     snd_item.m_alias = alias;
     snd_item.m_b_exclusive = exclusive;
+    snd_item.m_b_overlay_exclusive = overlay; //--#SM+#--
 }
 
 // Загрузить или перезагрузить (если уже есть) звук. //--#SM+#--
-void HUD_SOUND_COLLECTION::ReLoadSound(LPCSTR section, LPCSTR line, LPCSTR alias, bool exclusive, int type)
+void HUD_SOUND_COLLECTION::ReLoadSound(
+    LPCSTR section, LPCSTR line, LPCSTR alias, bool exclusive, int type, bool overlay) //--#SM+#--
 {
     // Проверяем, существует-ли уже звук с таким alies в коллекции
     HUD_SOUND_ITEM* sndItem = FindSoundItem(alias, false);
@@ -237,11 +245,12 @@ void HUD_SOUND_COLLECTION::ReLoadSound(LPCSTR section, LPCSTR line, LPCSTR alias
         HUD_SOUND_ITEM::LoadSound(section, line, *sndItem, type);
         sndItem->m_alias = alias;
         sndItem->m_b_exclusive = exclusive;
+        sndItem->m_b_overlay_exclusive = overlay; //--#SM+#--
     }
     else
     {
         // Такого звука нету - грузим с нуля
-        this->LoadSound(section, line, alias, exclusive, type);
+        this->LoadSound(section, line, alias, exclusive, type, overlay);
     }
 }
 
