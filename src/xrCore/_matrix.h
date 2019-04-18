@@ -95,6 +95,7 @@ struct _matrix
     SelfRef identity();
     SelfRef rotation(const _quaternion<T>& Q);
     SelfRef mk_xform(const _quaternion<T>& Q, const Tvector& V);
+    SelfRef mk_xform_from_vec(const Tvector& D, const Tvector& N, const Tvector& P);
 
     // Multiply RES = A[4x4]*B[4x4] (WITH projection)
     SelfRef mul(const Self& A, const Self& B);

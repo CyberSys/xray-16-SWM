@@ -74,6 +74,27 @@ _matrix<T>& _matrix<T>::mk_xform(const _quaternion<T>& Q, const Tvector& V)
 }
 
 template <typename T>
+_matrix<T>& _matrix<T>::mk_xform_from_vec(const Tvector& D, const Tvector& N, const Tvector& P)
+{
+    _14 = 0;
+    _24 = 0;
+    _34 = 0;
+    _44 = 1;
+
+    k.set(D);
+    k.normalize();
+
+    j.set(N);
+    j.normalize();
+
+    i.crossproduct(j, k);
+    j.crossproduct(k, i);
+
+    c.set(P);
+	return *this;
+}
+
+template <typename T>
 _matrix<T>& _matrix<T>::identity()
 {
 	_11 = 1;
@@ -452,6 +473,8 @@ template Fmatrix& Fmatrix::rotation(const _quaternion<float>& Q);
 template Dmatrix& Dmatrix::rotation(const _quaternion<double>& Q);
 template Fmatrix& Fmatrix::mk_xform(const _quaternion<float>& Q, const Tvector& V);
 template Dmatrix& Dmatrix::mk_xform(const _quaternion<double>& Q, const Tvector& V);
+template Fmatrix& Fmatrix::mk_xform_from_vec(const Tvector& D, const Tvector& N, const Tvector& P);
+template Dmatrix& Dmatrix::mk_xform_from_vec(const Tvector& D, const Tvector& N, const Tvector& P);
 template Fmatrix& Fmatrix::identity();
 template Dmatrix& Dmatrix::identity();
 template Fmatrix& Fmatrix::mul(const Fmatrix& A, const Fmatrix& B);
