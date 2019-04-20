@@ -102,6 +102,7 @@ void CSE_ALifeObject::spawn_supplies(LPCSTR ini_string)
                     {
                         // SM_TODO:L Возможность указывать конкретную секцию аддона в xml-е
                         Flags8 addon_flags;
+                        addon_flags.zero();
 
                         if (W->m_scope_status == ALife::eAddonAttachable && bScope)
                             addon_flags.set(CSE_ALifeItemWeapon::eWeaponAddonScope, bScope);
@@ -206,7 +207,8 @@ void CSE_ALifeObject::spawn_supplies(LPCSTR ini_string)
                         {
                             // SM_TODO:L Возможность указывать конкретную секцию аддона в xml-е
                             Flags8 addon_flags;
-
+                            addon_flags.zero();
+                      
                             if (W->m_scope_status == ALife::eAddonAttachable && bScope)
                                 addon_flags.set(CSE_ALifeItemWeapon::eWeaponAddonScope, bScope);
                             if (W->m_silencer_status == ALife::eAddonAttachable && bSilencer)

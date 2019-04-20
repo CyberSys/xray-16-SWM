@@ -792,6 +792,7 @@ void CGameObject::spawn_supplies()
                     { //--#SM+#--
                       // SM_TODO:L Возможность указывать конкретную секцию аддона в xml-е
                         Flags8 addon_flags;
+                        addon_flags.zero();
 
                         if (W->m_scope_status == ALife::eAddonAttachable && bScope)
                             addon_flags.set(CSE_ALifeItemWeapon::eWeaponAddonScope, bScope);
