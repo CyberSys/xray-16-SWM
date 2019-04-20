@@ -13,6 +13,10 @@ struct _flags
 
     T flags;
 
+    _flags() { zero(); }
+
+    _flags(const T values) { flags = values; }
+
     TYPE get() const noexcept { return flags; }
 
     SelfRef zero() noexcept
