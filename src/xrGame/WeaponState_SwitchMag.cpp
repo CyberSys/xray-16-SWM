@@ -13,7 +13,7 @@ bool CWeapon::Try2SwitchMag(bool bCheckOnlyMode, bool bFromInv)
 {
     if (!bCheckOnlyMode && GetState() == eSwitchMag)
         return false;
-    if (IsPending() == true)
+    if ((bool)IsPending() == true)
         return false;
     if (m_bUseMagazines == false)
         return false;

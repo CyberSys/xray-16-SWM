@@ -11,7 +11,7 @@ bool CWeapon::Try2Kick(bool bCheckOnlyMode)
 {
     if (!bCheckOnlyMode && GetState() == eKick)
         return false;
-    if (IsPending() == true)
+    if ((bool)IsPending() == true)
         return false;
 
     // Проверяем, есть-ли такая возможность у оружия.

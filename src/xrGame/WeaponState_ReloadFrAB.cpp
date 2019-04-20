@@ -14,7 +14,7 @@ bool CWeapon::Try2ReloadFrAB(bool bCheckOnlyMode)
 
     if (!bCheckOnlyMode && GetState() == eReloadFrAB)
         return false;
-    if (IsPending() == true)
+    if ((bool)IsPending() == true)
         return false;
     if (!IsAmmoBeltAttached())
         return false;

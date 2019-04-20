@@ -10,7 +10,7 @@ bool CWeapon::Try2Switch(bool bCheckOnlyMode)
 {
     if (!bCheckOnlyMode && GetState() == eSwitch)
         return false;
-    if (IsPending() == true)
+    if ((bool)IsPending() == true)
         return false;
 
     if (m_bUseAmmoBeltMode)

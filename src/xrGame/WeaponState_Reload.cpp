@@ -42,7 +42,7 @@ bool CWeapon::Try2Reload(bool bCheckOnlyMode)
 
     if (!bCheckOnlyMode && GetState() == eReload)
         return false;
-    if (IsPending() == true)
+    if ((bool)IsPending() == true)
         return false;
 
     int AmmoElapsed = iAmmoElapsed;

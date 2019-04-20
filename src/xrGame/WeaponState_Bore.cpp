@@ -10,7 +10,7 @@ bool CWeapon::Try2Bore(bool bCheckOnlyMode)
 {
     if (!bCheckOnlyMode && GetState() == eBore)
         return false;
-    if (IsPending() == true)
+    if ((bool)IsPending() == true)
         return false;
 
     if (AllowBore())

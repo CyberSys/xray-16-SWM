@@ -846,7 +846,7 @@ void CWeapon::_UpdateAddonsVisibility(SAddonData* m_pAddon)
     // Для совместимости с оригиналом
     u16 def_bone_id = pWeaponVisual->LL_BoneID(m_pAddon->m_addon_bone);
     if (def_bone_id != BI_NONE)
-        if (pWeaponVisual->LL_GetBoneVisible(def_bone_id) != bIsAddonActive)
+        if ((bool)pWeaponVisual->LL_GetBoneVisible(def_bone_id) != bIsAddonActive)
             pWeaponVisual->LL_SetBoneVisible(def_bone_id, bIsAddonActive, TRUE);
 
     // Перебираем все аддоны данного типа и производим операции над костями и аттачами модели
@@ -924,7 +924,7 @@ void CWeapon::_UpdateAddonsVisibility(SAddonData* m_pAddon)
             {
                 u16 bone_id = pWeaponVisual->LL_BoneID(hide_bones_vec[j]);
                 if (bone_id != BI_NONE)
-                    if (pWeaponVisual->LL_GetBoneVisible(bone_id) == bIsAddonActive)
+                    if ((bool)pWeaponVisual->LL_GetBoneVisible(bone_id) == bIsAddonActive)
                         pWeaponVisual->LL_SetBoneVisible(bone_id, !bIsAddonActive, TRUE);
             }
 
@@ -933,7 +933,7 @@ void CWeapon::_UpdateAddonsVisibility(SAddonData* m_pAddon)
             {
                 u16 bone_id = pWeaponVisual->LL_BoneID(show_bones_vec[j]);
                 if (bone_id != BI_NONE)
-                    if (pWeaponVisual->LL_GetBoneVisible(bone_id) != bIsAddonActive)
+                    if ((bool)pWeaponVisual->LL_GetBoneVisible(bone_id) != bIsAddonActive)
                         pWeaponVisual->LL_SetBoneVisible(bone_id, bIsAddonActive, TRUE);
             }
 

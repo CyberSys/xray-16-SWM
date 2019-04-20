@@ -14,7 +14,7 @@ bool CWeapon::Try2Pump(bool bCheckOnlyMode)
         return false;
     if (!bCheckOnlyMode && GetState() == ePump)
         return false;
-    if (IsPending() == true)
+    if ((bool)IsPending() == true)
         return false;
 
     if (!bCheckOnlyMode)

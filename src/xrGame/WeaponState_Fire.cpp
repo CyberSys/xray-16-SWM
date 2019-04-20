@@ -21,7 +21,7 @@ bool CWeapon::Try2Fire(bool bCheckOnlyMode)
         return false;
     if (!bCheckOnlyMode && GetState() == eFire)
         return false;
-    if (IsPending() == true)
+    if ((bool)IsPending() == true)
         return false;
 
     if (IsAmmoBeltReloadNow())
@@ -77,7 +77,7 @@ bool CWeapon::Try2Knife(bool bAltAttack)
         return false;
     if (m_bKnifeMode == false)
         return false;
-    if (IsPending() == true)
+    if ((bool)IsPending() == true)
         return false;
 
     if (!bAltAttack)

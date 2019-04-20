@@ -69,6 +69,8 @@ u8 CWeapon::GetCurrentHudOffsetIdx()
         return 3;
     else
         R_ASSERT2("Unknown zoom type", GetZoomType());
+
+    return 0;
 }
 
 // Обновление координат текущего худа
@@ -957,7 +959,7 @@ void CWeapon::UpdateAmmoBelt()
             // Msg("[%d]:bVisible = [%d] (iAmmoIdx = %d iAmmoCnt = %d GetState() = %d GetReloadState() = %d IsTriStateReload() = %d, m_bGrenadeMode = %d)", idx, bVisible, iAmmoIdx, iAmmoCnt, GetState() == eReload, GetReloadState() == eSubstateReloadInProcess, m_bGrenadeMode, IsTriStateReload());
 
             // HUD
-            if (GetHUDmode() == true && m_sAB_hud != NULL)
+            if ((bool)GetHUDmode() == true && m_sAB_hud != NULL)
             {
                 attachable_hud_item* hud_item = HudItemData();
                 if (hud_item != NULL && data.first != NULL)
@@ -1099,7 +1101,7 @@ void CWeapon::UpdateAnimatedShellVisual()
 // Обновляем все связанные с текущим оружием доп. визуалы (не связаны напрямую с аддонами)
 void CWeapon::UpdateWpnExtraVisuals()
 {
-    if (GetHUDmode() == true)
+    if ((bool)GetHUDmode() == true)
     { // Обновляем визуалы худа
         attachable_hud_item* hud_item = HudItemData();
         if (hud_item != NULL)
@@ -1172,7 +1174,7 @@ void CWeapon::UpdateWpnExtraVisuals()
 
                         u16 bone_id = pModel->LL_BoneID(sBulletBone);
                         if (bone_id != BI_NONE)
-                            if (pModel->LL_GetBoneVisible(bone_id) != bShow)
+                            if ((bool)pModel->LL_GetBoneVisible(bone_id) != bShow)
                                 pModel->LL_SetBoneVisible(bone_id, bShow, TRUE);
                     }
                 }
