@@ -508,7 +508,7 @@ float CWeapon::GetFov() const
                 GetZoomParams().m_fRTZoomFactor :
                 GetAimZoomFactor();
 
-            return fCurZoomFactor * 0.75f;
+            return fCurZoomFactor;
         }
     }
 

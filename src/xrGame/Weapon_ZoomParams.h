@@ -17,15 +17,19 @@ public:
     void Initialize(LPCSTR section, LPCSTR prefix = NULL, bool bOverrideMode = false);
     void UpdateUIScope();
 
-    bool  m_bZoomDofEnabled;    // DOF-эффект во время зума
-    float m_fRTZoomFactor;      // Последний сохранённый FOV для зума с регулируемой кратностью
-    float m_fZoomFovFactor;     // Модификатор FOV при зуме (g_fov * (m_fZoomFovFactor / 100.f))
-    float m_fSecondVPFovFactor; // Модификатор для FOV во втором вьюпорте при зуме
+    float m_fZoomFovFactor;     // Модификатор FOV при зуме (g_fov * 0.75f)) - совместимость с оригиналом
+    float m_fZoomFov;           // Целевой FOV при зуме (заменяет m_fZoomFovFactor)
+    bool  m_bNoZoom;            // Прицел с регулируемой кратностью
     float m_fZoomHudFov;        // Целевой HUD FOV при зуме
 
+    float m_fSecondVPFovFactor; // Модификатор для FOV во втором вьюпорте при зуме
+
+    bool m_bUseDynamicZoom;     // Прицел с регулируемой кратностью
+    float m_fRTZoomFactor;      // Последний сохранённый FOV для зума с регулируемой кратностью
+
+    bool                  m_bZoomDofEnabled;     // DOF-эффект во время зума
     Fvector               m_ZoomDof;             // Параметры DOF-эффекта при прицеливании
     Fvector4              m_ReloadDof;           // Параметры DOF-эффекта при перезарядке
-    bool                  m_bUseDynamicZoom;     // Прицел с регулируемой кратностью
     shared_str            m_sUseScopeTexture;    // 2D-текстура прицельной сетки
     shared_str            m_sUseZoomPostprocess; // Пост-эффект прицела
     shared_str            m_sUseBinocularVision; // Эффект выделения в прицеле живых существ
