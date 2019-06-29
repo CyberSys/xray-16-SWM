@@ -55,7 +55,6 @@ CWeapon::CWeapon() : CShellLauncher(this)
     m_fZoomFovFactorUpgr  = 0.f;
     m_bIdleFromZoomOut    = false;
     m_bIsZoomModeNow      = false;
-    m_bUseOldZoomFactor   = false;
     m_iCurZoomType        = eZoomMain;
     m_iPrevZoomType       = m_iCurZoomType;
 

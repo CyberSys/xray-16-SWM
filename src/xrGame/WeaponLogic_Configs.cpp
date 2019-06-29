@@ -456,9 +456,6 @@ void CWeapon::LoadZoomParams(LPCSTR section)
     // Скрыть прицел (в зуме)
     m_bHideCrosshairInZoom = READ_IF_EXISTS(pSettings, r_bool, hud_sect, "zoom_hide_crosshair", true);
 
-    // Модификатор для всего прицеливания ("совместимость" с конфигами оригинальной игры)
-    m_bUseOldZoomFactor = READ_IF_EXISTS(pSettings, r_bool, section, "zoom_old_mode", true);
-
     // Основной зум
     GetZoomParams(eZoomMain).Initialize(section);
 

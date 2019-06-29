@@ -12,9 +12,9 @@
 #include "GamePersistent.h"
 
 // Получить необходимые параметры для динамического зума
-void GetZoomData(const float scope_factor, float& delta, float& min_zoom_factor, bool bOldMode = true)
+void GetZoomData(const float scope_factor, float& delta, float& min_zoom_factor)
 {
-    float def_fov            = (bOldMode ? float(g_fov) : 100.0f);
+    float def_fov            = float(g_fov);
     float min_zoom_k         = 0.3f;
     float zoom_step_count    = 3.0f;
     float delta_factor_total = def_fov - scope_factor;
@@ -37,7 +37,7 @@ void CWeapon::ZoomDynamicMod(bool bIncrement, bool bForceLimit)
 
     float delta, min_zoom_factor, max_zoom_factor;
     max_zoom_factor = (IsSecondVPZoomPresent() ? (GetSecondVPZoomFactor() * 100.f) : GetAimZoomFactor());
-    GetZoomData(max_zoom_factor, delta, min_zoom_factor, (m_bUseOldZoomFactor && !IsSecondVPZoomPresent()));
+    GetZoomData(max_zoom_factor, delta, min_zoom_factor);
 
     if (bForceLimit)
     {

@@ -944,7 +944,6 @@ protected:
 
     float m_fZoomRotationFactor; //--> Степень разворота ствола от бедра к прицеливанию [0.f - 1.f]
     float m_fZoomRotateTime; //--> Скорость прицеливания
-    float m_bUseOldZoomFactor; //--> Использовать старый механизм увеличения (FOV прицеливания = m_fCurrentZoomFactor * 0.75f)
     float m_fZoomFovFactorUpgr; //--> Добавляется к текущему FOV зума (для апгрейдов)
 
     shared_str m_sUseZoomPostprocessUpgr; //--> Пост-эффект прицела (переопределённый апгрейдами)

@@ -504,15 +504,11 @@ float CWeapon::GetFov() const
     { // FOV при обычном зуме
         if (IsZoomed() && (!ZoomTexture() || (!IsRotatingToZoom() && ZoomTexture())))
         {
-            float fCurZoomFactor =
-                (GetZoomParams().m_bUseDynamicZoom && !IsSecondVPZoomPresent()) ? GetZoomParams().m_fRTZoomFactor : GetAimZoomFactor();
+            float fCurZoomFactor = (GetZoomParams().m_bUseDynamicZoom && !IsSecondVPZoomPresent()) ?
+                GetZoomParams().m_fRTZoomFactor :
+                GetAimZoomFactor();
 
-            // Считаем FOV по старому (как в оригинале)
-            if (m_bUseOldZoomFactor)
-                return fCurZoomFactor * 0.75f;
-
-            // По новому (ZoomFactor в процентах)
-            return (fCurZoomFactor / 100.f) * g_fov;
+            return fCurZoomFactor * 0.75f;
         }
     }
 
