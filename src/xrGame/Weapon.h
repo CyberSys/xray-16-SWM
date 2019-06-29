@@ -1106,7 +1106,7 @@ public:
 
     // Play HUD Animation
     bool PlaySoundMotion(const shared_str& M, BOOL bMixIn, LPCSTR alias, bool bAssert = false, int anim_idx = -1);
-    void PlaySoundMotionNoHUD(LPCSTR sAnmAlias_base, LPCSTR sSndAlias, LPCSTR sAnmAliasDef, LPCSTR sSndAliasDef);
+    void PlaySoundMotionForNPC(LPCSTR sAnmAlias_base, LPCSTR sSndAlias, LPCSTR sAnmAliasDef, LPCSTR sSndAliasDef);
 
     // Play world (3P) Animation
     bool PlayWorldMotion(const shared_str& M, BOOL bMixIn);

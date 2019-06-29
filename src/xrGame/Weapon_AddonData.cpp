@@ -16,10 +16,11 @@ SAddonData::SAddonData()
 SAddonData::~SAddonData() { delete_data(m_addons_list); }
 
 /* Инициализировать аддон параметрами из конфига
-   section - секция оружия, которому принадлежит аддон;
-   sAddonsList - название строки из конфига, где перечислены все set-секции адона данного типа;
-   sAttachAlias - название строки из конфига, где прописывается имя предмета-аддона;
-   sAddonBone - название кости в модели, отображение которой привязано к аддону;
+   section      - секция оружия, которому принадлежит аддон;
+   sAddonsList  - название строки из конфига оружия, где перечислены все set-секции адона данного типа;
+   sAddonAlias  - название строки из конфига оружия, где прописывается имя предмета-аддона;
+   sAttachAlias - название строки из конфига оружия, где прописывается статус возможности установки аддонов; 
+   sAddonBone   - название кости в модели, отображение которой привязано к аддону;
 */
 void SAddonData::Initialize(LPCSTR section, LPCSTR sAddonsList, LPCSTR sAddonAlias, LPCSTR sAttachAlias, LPCSTR sAddonBone)
 {
@@ -40,10 +41,10 @@ void SAddonData::Initialize(LPCSTR section, LPCSTR sAddonsList, LPCSTR sAddonAli
             {
                 for (int i = 0, count = _GetItemCount(str); i < count; ++i)
                 {
-                    string128 addon_section;
-                    _GetItem(str, i, addon_section);
-                    m_addons_list.push_back(addon_section);
-                    R_ASSERT4(pSettings->line_exist(addon_section, m_addon_alias), section, addon_section,
+                    string128 addon_set_section;
+                    _GetItem(str, i, addon_set_section);
+                    m_addons_list.push_back(addon_set_section);
+                    R_ASSERT4(pSettings->line_exist(addon_set_section, m_addon_alias), section, addon_set_section,
                         m_addon_alias.c_str());
                 }
             }

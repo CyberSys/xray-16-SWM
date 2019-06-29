@@ -295,7 +295,7 @@ bool CWeapon::PlaySoundMotion(const shared_str& M, BOOL bMixIn, LPCSTR alias, bo
 
 // Проиграть худовую анимацию для NPC \ Третьего лица (игрок её не видит)
 // Необходимо т.к из-за аддонов анимаций у игрока много (и они разной длины), а у моделей NPC она всегда одна
-void CWeapon::PlaySoundMotionNoHUD(LPCSTR sAnmAlias_base, LPCSTR sSndAlias, LPCSTR sAnmAliasDef, LPCSTR sSndAliasDef)
+void CWeapon::PlaySoundMotionForNPC(LPCSTR sAnmAlias_base, LPCSTR sSndAlias, LPCSTR sAnmAliasDef, LPCSTR sSndAliasDef)
 {
     // Прибавляем к названию анимации номер анимационного слота оружия
     string256 sAnmAlias;
@@ -736,7 +736,7 @@ void CWeapon::PlayAnimReload()
                             true :
                             false;
 
-        PlaySoundMotionNoHUD("anm_npc_reload", (bPlaySnd ? "sndReloadNPC" : NULL), "anm_reload", (bPlaySnd ? "sndReload" : NULL));
+        PlaySoundMotionForNPC("anm_npc_reload", (bPlaySnd ? "sndReloadNPC" : NULL), "anm_reload", (bPlaySnd ? "sndReload" : NULL));
         return;
     }
 
