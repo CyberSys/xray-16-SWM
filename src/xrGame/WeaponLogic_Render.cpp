@@ -488,7 +488,7 @@ void CWeapon::AddHUDShootingEffect()
     m_fUD_ShootingFactor += (m_fUD_ShootingFactor >= 0.0f ? fPowerMin : -fPowerMin);
 }
 
-// Получить FOV от текущего оружия игрока
+// Получить мировой FOV от текущего оружия игрока
 float CWeapon::GetFov() const
 {
     if (IsBipodsDeployed() && !ZoomTexture())
@@ -505,7 +505,7 @@ float CWeapon::GetFov() const
         if (IsZoomed() && (!ZoomTexture() || (!IsRotatingToZoom() && ZoomTexture())))
         {
             float fCurZoomFactor = (GetZoomParams().m_bUseDynamicZoom && !IsSecondVPZoomPresent()) ?
-                GetZoomParams().m_fRTZoomFactor :
+                GetZoomParams().m_fRTZoomFactor : //--> Динамический зум, только если прицел без двойного вьюпорта
                 GetAimZoomFactor();
 
             return fCurZoomFactor;
@@ -516,13 +516,13 @@ float CWeapon::GetFov() const
     return g_fov;
 }
 
-// Получить FOV от текущего оружия игрока для второго рендера
-float CWeapon::GetSecondVPFov() const
+// Получить линзовый FOV от текущего оружия игрока для второго вьюпорта
+float CWeapon::GetFovSVP() const
 {
     if (GetZoomParams().m_bUseDynamicZoom && IsSecondVPZoomPresent())
-        return (GetZoomParams().m_fRTZoomFactor / 100.f) * g_fov;
+        return GetZoomParams().m_fRTZoomFactor;
 
-    return GetSecondVPZoomFactor() * g_fov;
+    return GetAimZoomFactor(true);
 }
 
 // Получить HUD FOV от текущего оружия игрока
@@ -1224,7 +1224,7 @@ void CWeapon::UpdateSecondVP()
     CActor* pActor = H_Parent()->cast_actor();
 
     bool bCond_1 = m_fZoomRotationFactor > 0.05f; // Мы должны целиться
-    bool bCond_2 = IsSecondVPZoomPresent();       // В конфиге должен быть прописан фактор зума для линзы (scope_lense_factor больше чем 0)
+    bool bCond_2 = IsSecondVPZoomPresent();       // В конфиге должен быть прописан FOV для второго вьюпорта
     bool bCond_3 = pActor->cam_Active() == pActor->cam_FirstEye(); // Мы должны быть от 1-го лица
 
     Device.m_SecondViewport.SetSVPActive(bCond_1 && bCond_2 && bCond_3);

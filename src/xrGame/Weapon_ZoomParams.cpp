@@ -35,25 +35,31 @@ void SZoomParams::Initialize(LPCSTR section, LPCSTR prefix, bool bOverrideMode)
     xr_sprintf(_prefix, "%s", prefix != NULL ? prefix : "");
     string128 val_name;
 
-    // Целевой FOV-фактор при зуме (умножается на 0.75)
+    // Мир
+    //--> Целевой FOV-фактор при зуме (умножается на 0.75)
     strconcat(sizeof(val_name), val_name, "scope_zoom_factor", _prefix);
     m_fZoomFovFactor = READ_IF_EXISTS(pSettings, r_float, section, val_name, (bOverrideMode ? m_fZoomFovFactor : g_defScopeZoomFactor));
 
-    // Целевой FOV при зуме (если > 0, то будет использоваться он вместо scope_zoom_factor)
+    //--> Целевой FOV при зуме (если > 0, то будет использоваться он вместо scope_zoom_factor)
     strconcat(sizeof(val_name), val_name, "scope_zoom_fov", _prefix);
     m_fZoomFov = READ_IF_EXISTS(pSettings, r_float, section, val_name, (bOverrideMode ? m_fZoomFov : 0.000f));
 
-    // Зум отсутствует
+    //--> Зум отсутствует
     strconcat(sizeof(val_name), val_name, "scope_no_zoom", _prefix);
     m_bNoZoom = READ_IF_EXISTS(pSettings, r_bool, section, val_name, (bOverrideMode ? m_bNoZoom : false));
+
+    // Линза
+    //--> Целевой FOV при зуме
+    strconcat(sizeof(val_name), val_name, "scope_svp_zoom_fov", _prefix);
+    m_fZoomFovSVP = READ_IF_EXISTS(pSettings, r_float, section, val_name, (bOverrideMode ? m_fZoomFovSVP : 0.000f));
+
+    //--> Зум отсутствует
+    strconcat(sizeof(val_name), val_name, "scope_svp_no_zoom", _prefix);
+    m_bNoZoomSVP = READ_IF_EXISTS(pSettings, r_bool, section, val_name, (bOverrideMode ? m_bNoZoomSVP : false));
 
     // Целевой HUD FOV при зуме
     strconcat(sizeof(val_name), val_name, "scope_zoom_hud_fov", _prefix);
     m_fZoomHudFov = READ_IF_EXISTS(pSettings, r_float, section, val_name, (bOverrideMode ? m_fZoomHudFov : psHUD_FOV_def));
-
-    // Целевой FOV второго вьюпорта при зуме (линзы)
-    strconcat(sizeof(val_name), val_name, "scope_lense_factor", _prefix);
-    m_fSecondVPFovFactor = READ_IF_EXISTS(pSettings, r_float, section, val_name, (bOverrideMode ? m_fSecondVPFovFactor : 0.0f));
 
     // Использовать динамический зум (если указан)
     strconcat(sizeof(val_name), val_name, "scope_dynamic_zoom", _prefix);

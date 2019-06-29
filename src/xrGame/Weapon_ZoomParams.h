@@ -17,12 +17,16 @@ public:
     void Initialize(LPCSTR section, LPCSTR prefix = NULL, bool bOverrideMode = false);
     void UpdateUIScope();
 
+    // Мир
     float m_fZoomFovFactor;     // Модификатор FOV при зуме (g_fov * 0.75f)) - совместимость с оригиналом
     float m_fZoomFov;           // Целевой FOV при зуме (заменяет m_fZoomFovFactor)
     bool  m_bNoZoom;            // Прицел с регулируемой кратностью
     float m_fZoomHudFov;        // Целевой HUD FOV при зуме
 
-    float m_fSecondVPFovFactor; // Модификатор для FOV во втором вьюпорте при зуме
+    // Линза
+    float m_fZoomFovSVP;        // Целевой FOV при зуме (заменяет m_fZoomFovFactor)
+    bool  m_bNoZoomSVP;         // Прицел с регулируемой кратностью
+    float m_fZoomHudFovSVP;     // Целевой HUD FOV при зуме
 
     bool m_bUseDynamicZoom;     // Прицел с регулируемой кратностью
     float m_fRTZoomFactor;      // Последний сохранённый FOV для зума с регулируемой кратностью

@@ -966,17 +966,8 @@ public:
     void SwitchZoomType(EZoomTypes iType);
     void SwitchZoomType(EZoomTypes iCurType, EZoomTypes iPrevType);
 
-    IC float GetAimZoomFactor() const
-    {
-        if (GetZoomParams().m_bNoZoom == true)
-            return g_fov;
-
-        return (GetZoomParams().m_fZoomFov > 0.000f ?
-                GetZoomParams().m_fZoomFov + m_fZoomFovFactorUpgr :
-                (GetZoomParams().m_fZoomFovFactor + m_fZoomFovFactorUpgr) * 0.75f);
-    }
-    IC float GetSecondVPZoomFactor() const { return GetZoomParams().m_fSecondVPFovFactor; }
-    IC float IsSecondVPZoomPresent() const { return GetSecondVPZoomFactor() > 0.000f; }
+    float GetAimZoomFactor(bool bForSVP = false) const;
+    IC float IsSecondVPZoomPresent() const { return GetZoomParams().m_fZoomFovSVP > 0.000f; }
 
     IC float GetZRotatingFactor() const { return m_fZoomRotationFactor; }
     IC bool IsRotatingToZoom() const { return (m_fZoomRotationFactor < 1.f); }
@@ -1314,7 +1305,7 @@ public:
     static void ReadMaxBulletBones(IKinematics* pModel);
 
     float GetFov() const;
-    float GetSecondVPFov() const;
+    float GetFovSVP() const;
     float GetHudFov();
 
     virtual u8 GetCurrentHudOffsetIdx();

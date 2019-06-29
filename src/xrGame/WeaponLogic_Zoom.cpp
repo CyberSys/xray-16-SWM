@@ -12,15 +12,47 @@
 #include "GamePersistent.h"
 
 // Получить необходимые параметры для динамического зума
-void GetZoomData(const float scope_factor, float& delta, float& min_zoom_factor)
+void GetDynZoomData(float& scope_factor, float& delta, float& min_zoom_factor)
 {
-    float def_fov            = float(g_fov);
+    float def_fov = float(g_fov);
+
+    if (scope_factor > def_fov)
+    { //--> Если FOV прицеливания по какой-то причине больше чем мировой - инвертируем параметры
+        float def_fov_old = def_fov;
+        def_fov = scope_factor;
+        scope_factor = def_fov_old;
+    }
+
     float min_zoom_k         = 0.3f;
     float zoom_step_count    = 3.0f;
     float delta_factor_total = def_fov - scope_factor;
-    VERIFY(delta_factor_total > 0);
+    VERIFY(delta_factor_total >= 0);
     min_zoom_factor = def_fov - delta_factor_total * min_zoom_k;
     delta           = (delta_factor_total * (1 - min_zoom_k)) / zoom_step_count;
+}
+
+// Получить целевой FOV для обычного зума (не динамического)
+float CWeapon::GetAimZoomFactor(bool bForSVP) const
+{
+    if (bForSVP)
+    { // Линза
+        if (IsSecondVPZoomPresent())
+        {
+            if (GetZoomParams().m_bNoZoomSVP == true)
+                return g_fov;
+
+            return GetZoomParams().m_fZoomFovSVP + m_fZoomFovFactorUpgr;
+        }
+
+        return 0.0f;
+    }
+
+    // Мир
+    if (GetZoomParams().m_bNoZoom == true)
+        return g_fov;
+
+    return (GetZoomParams().m_fZoomFov > 0.000f ? GetZoomParams().m_fZoomFov + m_fZoomFovFactorUpgr :
+                                                  (GetZoomParams().m_fZoomFovFactor + m_fZoomFovFactorUpgr) * 0.75f);
 }
 
 // Увеличение динамического зума
@@ -36,8 +68,8 @@ void CWeapon::ZoomDynamicMod(bool bIncrement, bool bForceLimit)
         return;
 
     float delta, min_zoom_factor, max_zoom_factor;
-    max_zoom_factor = (IsSecondVPZoomPresent() ? (GetSecondVPZoomFactor() * 100.f) : GetAimZoomFactor());
-    GetZoomData(max_zoom_factor, delta, min_zoom_factor);
+    max_zoom_factor = GetAimZoomFactor(IsSecondVPZoomPresent()); //--> Получаем макс. возможный зум (для мира \ линзы)
+    GetDynZoomData(max_zoom_factor, delta, min_zoom_factor);
 
     if (bForceLimit)
     {
