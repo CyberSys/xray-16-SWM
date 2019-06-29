@@ -30,8 +30,10 @@ const LPCSTR st_months[12] = // StringTable for GetDateAsString()
     {"month_january", "month_february", "month_march", "month_april", "month_may", "month_june", "month_july",
         "month_august", "month_september", "month_october", "month_november", "month_december"};
 
+typedef xr_unordered_map<xr_string, ui_shader*> ui_shader_map; //--#SM+#--
+
+ui_shader_map g_EquipmentIconsShaders; //--#SM+#--
 ui_shader* g_BuyMenuShader = NULL;
-ui_shader* g_EquipmentIconsShader = NULL;
 ui_shader* g_MPCharIconsShader = NULL;
 ui_shader* g_OutfitUpgradeIconsShader = NULL;
 ui_shader* g_WeaponUpgradeIconsShader = NULL;
@@ -57,8 +59,11 @@ void InventoryUtilities::DestroyShaders()
     xr_delete(g_BuyMenuShader);
     g_BuyMenuShader = 0;
 
-    xr_delete(g_EquipmentIconsShader);
-    g_EquipmentIconsShader = 0;
+    for (auto& pair : g_EquipmentIconsShaders) //--#SM+#--
+    {
+        xr_delete(pair.second);
+    }
+    g_EquipmentIconsShaders.clear();
 
     xr_delete(g_MPCharIconsShader);
     g_MPCharIconsShader = 0;
@@ -184,15 +189,24 @@ const ui_shader& InventoryUtilities::GetBuyMenuShader()
     return *g_BuyMenuShader;
 }
 
-const ui_shader& InventoryUtilities::GetEquipmentIconsShader()
+const ui_shader& InventoryUtilities::GetEquipmentIconsShader(xr_string sTexturePath) //--#SM+#--
 {
-    if (!g_EquipmentIconsShader)
+    R_ASSERT(sTexturePath.size() > 0);
+
+    // Ищем текстуру иконок среди уже созданных
+    auto pItRes = g_EquipmentIconsShaders.find(sTexturePath);
+    if (pItRes != g_EquipmentIconsShaders.end())
     {
-        g_EquipmentIconsShader = new ui_shader();
-        (*g_EquipmentIconsShader)->create("hud" DELIMITER "default", "ui" DELIMITER "ui_icon_equipment");
+        return *(pItRes->second);
     }
 
-    return *g_EquipmentIconsShader;
+    // Иначе создаём новую текстуру
+    ui_shader* pUIShader = new ui_shader();
+    (*pUIShader)->create("hud" DELIMITER "default", sTexturePath.c_str());
+
+    g_EquipmentIconsShaders[sTexturePath] = pUIShader;
+
+    return *pUIShader;
 }
 
 const ui_shader& InventoryUtilities::GetMPCharIconsShader()

@@ -1423,6 +1423,11 @@ Frect CInventoryItem::GetKillMsgRect() const
     return Frect().set(x, y, w, h);
 }
 
+xr_string CInventoryItem::GetInvTexture() const //--#SM+#--
+{
+    return READ_IF_EXISTS(pSettings, r_string, m_object->cNameSect(), "inv_texture", INV_TEXTURE_DEF);
+}
+
 Irect CInventoryItem::GetInvGridRect() const
 {
     u32 x, y, w, h;

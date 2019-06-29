@@ -21,7 +21,7 @@ CUIInventoryCellItem::CUIInventoryCellItem(CInventoryItem* itm)
 {
     m_pData = (void*)itm;
 
-    inherited::SetShader(InventoryUtilities::GetEquipmentIconsShader());
+    inherited::SetShader(InventoryUtilities::GetEquipmentIconsShader(itm->GetInvTexture())); //--#SM+#--
 
     m_grid_size.set(itm->GetInvGridRect().rb);
     Frect rect;
@@ -229,10 +229,11 @@ void CUIWeaponCellItem::CreateIcon(eAddonType t)
 {
     if (m_addons[t])
         return;
+
     m_addons[t] = new CUIStatic();
     m_addons[t]->SetAutoDelete(true);
     AttachChild(m_addons[t]);
-    m_addons[t]->SetShader(InventoryUtilities::GetEquipmentIconsShader());
+    m_addons[t]->SetShader(InventoryUtilities::GetEquipmentIconsShader(object()->GetInvTexture())); //--#SM+#--
 
     u32 color = GetTextureColor();
     m_addons[t]->SetTextureColor(color);
@@ -591,7 +592,7 @@ CUIDragItem* CUIWeaponCellItem::CreateDragItem(bool bRotate) //--#SM+#--
     {
         s = new CUIStatic();
         s->SetAutoDelete(true);
-        s->SetShader(InventoryUtilities::GetEquipmentIconsShader());
+        s->SetShader(InventoryUtilities::GetEquipmentIconsShader(object()->GetInvTexture())); //--#SM+#--
         InitAddon(s, *object()->GetSilencerName(), m_addon_offset[eSilencer], bRotate); //--#SM+#--
         s->SetTextureColor(i->wnd()->GetTextureColor());
         i->wnd()->AttachChild(s);
@@ -601,7 +602,7 @@ CUIDragItem* CUIWeaponCellItem::CreateDragItem(bool bRotate) //--#SM+#--
     {
         s = new CUIStatic();
         s->SetAutoDelete(true);
-        s->SetShader(InventoryUtilities::GetEquipmentIconsShader());
+        s->SetShader(InventoryUtilities::GetEquipmentIconsShader(object()->GetInvTexture())); //--#SM+#--
         InitAddon(s, *object()->GetScopeName(), m_addon_offset[eScope], bRotate); //--#SM+#--
         s->SetTextureColor(i->wnd()->GetTextureColor());
         i->wnd()->AttachChild(s);
@@ -611,7 +612,7 @@ CUIDragItem* CUIWeaponCellItem::CreateDragItem(bool bRotate) //--#SM+#--
     {
         s = new CUIStatic();
         s->SetAutoDelete(true);
-        s->SetShader(InventoryUtilities::GetEquipmentIconsShader());
+        s->SetShader(InventoryUtilities::GetEquipmentIconsShader(object()->GetInvTexture())); //--#SM+#--
         InitAddon(s, *object()->GetGrenadeLauncherName(), m_addon_offset[eLauncher], bRotate); //--#SM+#--
         s->SetTextureColor(i->wnd()->GetTextureColor());
         i->wnd()->AttachChild(s);
@@ -621,7 +622,7 @@ CUIDragItem* CUIWeaponCellItem::CreateDragItem(bool bRotate) //--#SM+#--
     {
         s = new CUIStatic();
         s->SetAutoDelete(true);
-        s->SetShader(InventoryUtilities::GetEquipmentIconsShader());
+        s->SetShader(InventoryUtilities::GetEquipmentIconsShader(object()->GetInvTexture())); //--#SM+#--
         InitAddon(s, *object()->GetMagazineName(), m_addon_offset[eMagazine], bRotate);
         s->SetTextureColor(i->wnd()->GetTextureColor());
         i->wnd()->AttachChild(s);
@@ -631,7 +632,7 @@ CUIDragItem* CUIWeaponCellItem::CreateDragItem(bool bRotate) //--#SM+#--
     {
         s = new CUIStatic();
         s->SetAutoDelete(true);
-        s->SetShader(InventoryUtilities::GetEquipmentIconsShader());
+        s->SetShader(InventoryUtilities::GetEquipmentIconsShader(object()->GetInvTexture())); //--#SM+#--
         InitAddon(s, *object()->GetSpecial_1_Name(), m_addon_offset[eSpecial_1], bRotate);
         s->SetTextureColor(i->wnd()->GetTextureColor());
         i->wnd()->AttachChild(s);
@@ -641,7 +642,7 @@ CUIDragItem* CUIWeaponCellItem::CreateDragItem(bool bRotate) //--#SM+#--
     {
         s = new CUIStatic();
         s->SetAutoDelete(true);
-        s->SetShader(InventoryUtilities::GetEquipmentIconsShader());
+        s->SetShader(InventoryUtilities::GetEquipmentIconsShader(object()->GetInvTexture())); //--#SM+#--
         InitAddon(s, *object()->GetSpecial_2_Name(), m_addon_offset[eSpecial_2], bRotate);
         s->SetTextureColor(i->wnd()->GetTextureColor());
         i->wnd()->AttachChild(s);
@@ -651,7 +652,7 @@ CUIDragItem* CUIWeaponCellItem::CreateDragItem(bool bRotate) //--#SM+#--
     {
         s = new CUIStatic();
         s->SetAutoDelete(true);
-        s->SetShader(InventoryUtilities::GetEquipmentIconsShader());
+        s->SetShader(InventoryUtilities::GetEquipmentIconsShader(object()->GetInvTexture())); //--#SM+#--
         InitAddon(s, *object()->GetSpecial_3_Name(), m_addon_offset[eSpecial_3], bRotate);
         s->SetTextureColor(i->wnd()->GetTextureColor());
         i->wnd()->AttachChild(s);
@@ -661,7 +662,7 @@ CUIDragItem* CUIWeaponCellItem::CreateDragItem(bool bRotate) //--#SM+#--
     {
         s = new CUIStatic();
         s->SetAutoDelete(true);
-        s->SetShader(InventoryUtilities::GetEquipmentIconsShader());
+        s->SetShader(InventoryUtilities::GetEquipmentIconsShader(object()->GetInvTexture())); //--#SM+#--
         InitAddon(s, *object()->GetSpecial_4_Name(), m_addon_offset[eSpecial_4], bRotate);
         s->SetTextureColor(i->wnd()->GetTextureColor());
         i->wnd()->AttachChild(s);

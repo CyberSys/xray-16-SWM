@@ -112,7 +112,7 @@ void CUIMainIngameWnd::Init()
 	UIWeaponIcon_rect			= UIWeaponIcon.GetWndRect();
 */ //---------------------------------------------------------
     UIPickUpItemIcon = UIHelper::CreateStatic(uiXml, "pick_up_item", this);
-    UIPickUpItemIcon->SetShader(GetEquipmentIconsShader());
+    UIPickUpItemIcon->SetShader(GetEquipmentIconsShader(INV_TEXTURE_DEF)); //--#SM+#--
 
     m_iPickUpItemIconWidth = UIPickUpItemIcon->GetWidth();
     m_iPickUpItemIconHeight = UIPickUpItemIcon->GetHeight();
@@ -576,6 +576,11 @@ void CUIMainIngameWnd::UpdatePickUpItem()
     texture_rect.lt.set(m_iXPos * INV_GRID_WIDTH, m_iYPos * INV_GRID_HEIGHT);
     texture_rect.rb.set(m_iGridWidth * INV_GRID_WIDTH, m_iGridHeight * INV_GRID_HEIGHT);
     texture_rect.rb.add(texture_rect.lt);
+
+    xr_string sIconsTexture =
+        READ_IF_EXISTS(pSettings, r_string, sect_name, "inv_texture", INV_TEXTURE_DEF); //--#SM+#--
+    UIPickUpItemIcon->SetShader(InventoryUtilities::GetEquipmentIconsShader(sIconsTexture));
+
     UIPickUpItemIcon->GetStaticItem()->SetTextureRect(texture_rect);
     UIPickUpItemIcon->SetStretchTexture(true);
 
@@ -816,7 +821,10 @@ void CUIMainIngameWnd::UpdateQuickSlots()
                 wnd->Show(true);
 
                 CUIStatic* main_slot = m_quick_slots_icons[i];
-                main_slot->SetShader(InventoryUtilities::GetEquipmentIconsShader());
+                xr_string sIconsTexture =
+                    READ_IF_EXISTS(pSettings, r_string, item_name, "inv_texture", INV_TEXTURE_DEF); //--#SM+#--
+                main_slot->SetShader(InventoryUtilities::GetEquipmentIconsShader(sIconsTexture));
+
                 Frect texture_rect;
                 texture_rect.x1 = pSettings->r_float(item_name, "inv_grid_x") * INV_GRID_WIDTH;
                 texture_rect.y1 = pSettings->r_float(item_name, "inv_grid_y") * INV_GRID_HEIGHT;

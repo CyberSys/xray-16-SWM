@@ -114,7 +114,7 @@ void CUIHudStatesWnd::InitFromXml(CUIXml& xml, LPCSTR path)
     m_ui_grenade = UIHelper::CreateTextWnd(xml, "static_grenade", this);
 
     m_ui_weapon_icon = UIHelper::CreateStatic(xml, "static_wpn_icon", this);
-    m_ui_weapon_icon->SetShader(InventoryUtilities::GetEquipmentIconsShader());
+    m_ui_weapon_icon->SetShader(InventoryUtilities::GetEquipmentIconsShader(INV_TEXTURE_DEF)); //--#SM+#--
     //	m_ui_weapon_icon->Enable	( false );
     m_ui_weapon_icon_rect = m_ui_weapon_icon->GetWndRect();
 
@@ -377,6 +377,11 @@ void CUIHudStatesWnd::SetAmmoIcon(const shared_str& sect_name)
     texture_rect.x2 = pSettings->r_float(sect_name, "inv_grid_width") * INV_GRID_WIDTH;
     texture_rect.y2 = pSettings->r_float(sect_name, "inv_grid_height") * INV_GRID_HEIGHT;
     texture_rect.rb.add(texture_rect.lt);
+
+    xr_string sIconsTexture =
+        READ_IF_EXISTS(pSettings, r_string, sect_name, "inv_texture", INV_TEXTURE_DEF); //--#SM+#--
+    m_ui_weapon_icon->SetShader(InventoryUtilities::GetEquipmentIconsShader(sIconsTexture));
+
     m_ui_weapon_icon->GetUIStaticItem().SetTextureRect(texture_rect);
     m_ui_weapon_icon->SetStretchTexture(true);
 

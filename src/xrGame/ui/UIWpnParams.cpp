@@ -226,7 +226,7 @@ void CUIWpnParams::SetInfo(CInventoryItem* slot_wpn, CInventoryItem& cur_wpn)
         {
             CUIStatic& StAmmoType = *m_vecStAmmoTypes[i];
 
-            StAmmoType.SetShader(InventoryUtilities::GetEquipmentIconsShader());
+            StAmmoType.SetShader(InventoryUtilities::GetEquipmentIconsShader(INV_TEXTURE_DEF)); //--#SM+#--
 
             // Находим информацию о данном типе патронов в оружии
             cartridge_info* pCartridgeInfo = nullptr;
@@ -259,6 +259,10 @@ void CUIWpnParams::SetInfo(CInventoryItem* slot_wpn, CInventoryItem& cur_wpn)
                 tex_rect.x2 = float(pSettings->r_u32(ammo_types[i].c_str(), "inv_grid_width") * INV_GRID_WIDTH);
                 tex_rect.y2 = float(pSettings->r_u32(ammo_types[i].c_str(), "inv_grid_height") * INV_GRID_HEIGHT);
                 tex_rect.rb.add(tex_rect.lt);
+
+                xr_string sIconsTexture = READ_IF_EXISTS(
+                    pSettings, r_string, ammo_types[i].c_str(), "inv_texture", INV_TEXTURE_DEF); //--#SM+#--
+                StAmmoType.SetShader(InventoryUtilities::GetEquipmentIconsShader(sIconsTexture));
 
                 // Выводим счётчик патронов в обойме для каждой иконки патронов
                 if (bShowDetailAmmoCntInMagaz)

@@ -5,6 +5,9 @@
 
 class CUITextWnd;
 
+//текстура инвентарных иконок по умолчанию --#SM+#--
+#define INV_TEXTURE_DEF "ui" DELIMITER "ui_icon_equipment"
+
 //размеры сетки в текстуре инвентаря
 #define INV_GRID_WIDTH 50.0f
 #define INV_GRID_HEIGHT 50.0f
@@ -33,7 +36,7 @@ bool FreeRoom_inBelt(TIItemContainer& item_list, PIItem item, int width, int hei
 // get shader for BuyWeaponWnd
 const ui_shader& GetBuyMenuShader();
 //получить shader на иконки инвенторя
-const ui_shader& GetEquipmentIconsShader();
+const ui_shader& GetEquipmentIconsShader(xr_string sTexturePath); //--#SM+#--
 // shader на иконки персонажей в мультиплеере
 const ui_shader& GetMPCharIconsShader();
 // get shader for outfit icons in upgrade menu

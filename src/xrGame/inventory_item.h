@@ -170,6 +170,7 @@ public:
     virtual void OnMoveToBelt(const SInvItemPlace& prev){};
     virtual void OnMoveToRuck(const SInvItemPlace& prev){};
 
+    xr_string GetInvTexture() const; //--#SM+#--
     Irect GetInvGridRect() const;
     Irect GetUpgrIconRect() const;
     const shared_str& GetIconName() const { return m_icon_name; };
