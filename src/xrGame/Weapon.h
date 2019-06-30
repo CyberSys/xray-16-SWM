@@ -895,7 +895,8 @@ protected:
     CWeaponKnifeHit* m_second_attack; //--> Вторая атака ножа
 
 public:
-    bool m_bKnifeMode;  //--> Режим ножа (вместо стрельбы пулями использует CWeaponKnifeHit)
+    bool m_bKnifeMode;          //--> Режим ножа (вместо стрельбы пулями использует CWeaponKnifeHit)
+    float m_fKnifeSpeedMod;     //--> Модификатор скорости атаки ножа
 
 //=========================== Удар прикладом и штык-нож ===========================//
 private:

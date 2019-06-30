@@ -89,9 +89,10 @@ CWeapon::CWeapon() : CShellLauncher(this)
     m_kicker_main         = NULL;
     m_kicker_alt          = NULL;
 
-    m_bKnifeMode    = false;
-    m_first_attack  = NULL;
-    m_second_attack = NULL;
+    m_bKnifeMode     = false;
+    m_fKnifeSpeedMod = 1.0f;
+    m_first_attack   = NULL;
+    m_second_attack  = NULL;
 
     m_dwLastAddonsVisUpdTime = 0;
 

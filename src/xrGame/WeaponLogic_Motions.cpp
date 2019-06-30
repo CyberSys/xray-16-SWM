@@ -175,6 +175,14 @@ void CWeapon::OnMotionMark(u32 state, const motion_marks& M)
 CWeapon::motion_params CWeapon::OnBeforeMotionPlayed(const shared_str& sAnmAlias)
 {
     motion_params params; //--> Параметры по умолчанию
+    xr_string sAnmAliasStr = sAnmAlias.c_str();
+  
+    // Ускоряем анимацию атаки ножом
+    if (m_bKnifeMode && sAnmAliasStr.find("anm_attack") != xr_string::npos)
+    {
+        params.fSpeed = m_fKnifeSpeedMod;
+        return params;
+    }
 
     // Для анимации зума управляем её стартовой секундой и направлением движения
     if (m_ZoomAnimState != eZANone)

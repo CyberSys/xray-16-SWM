@@ -111,6 +111,8 @@ void CWeapon::Load(LPCSTR section)
 
     if (m_bKnifeMode == true)
     {
+        m_fKnifeSpeedMod = READ_IF_EXISTS(pSettings, r_float, section, "knife_speed_mod", 1.0f);
+
         R_ASSERT(m_first_attack == NULL);
         R_ASSERT(m_second_attack == NULL);
 
