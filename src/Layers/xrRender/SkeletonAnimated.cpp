@@ -811,6 +811,62 @@ void CKinematicsAnimated::Load(const char* N, IReader* data, u32 dwFlags)
         m_Motions.back().motions.create(nm, data, bones);
     }
 
+    // Load motions from model config --#SM+#--
+    {
+        // Get path to model .ltx-config
+        string_path fn, fn_full;
+        xr_strcpy(fn, sizeof(fn), N);
+        if (strext(fn))
+            *strext(fn) = 0;
+        xr_strcat(fn, sizeof(fn), ".ltx");
+
+        FS.update_path(fn_full, "$game_meshes$", fn);
+
+        // Get config
+        CInifile ini(fn_full, TRUE, TRUE, FALSE); // .ltx has the same name, as model
+
+        // Load motions
+        LPCSTR sMotionsSect = "motions_add";
+        if (ini.section_exist(sMotionsSect))
+        {
+            u32 motions_count = ini.line_count(sMotionsSect);
+            for (u32 i = 0; i < motions_count; ++i)
+            {
+                LPCSTR motion_name = nullptr;
+                LPCSTR motion_data = nullptr;
+                ini.r_line(sMotionsSect, i, &motion_name, &motion_data);
+
+                if (motion_name && xr_strlen(motion_name))
+                {
+                    if (!FS.exist(fn, "$level$", motion_name))
+                    {
+                        if (!FS.exist(fn, "$game_meshes$", motion_name))
+                        {
+                            xrDebug::Fatal(DEBUG_INFO, "Can't find motion file '%s' [%s].", motion_name, fn_full);
+                        }
+                    }
+
+                    // Check compatibility
+                    m_Motions.push_back(SMotionsSlot());
+                    bool create_res = true;
+                    if (!g_pMotionsContainer->has(motion_name)) // optimize fs operations
+                    {
+                        IReader* MS = FS.r_open(fn);
+                        create_res = m_Motions.back().motions.create(motion_name, MS, bones);
+                        FS.r_close(MS);
+                    }
+                    if (create_res)
+                        m_Motions.back().motions.create(motion_name, nullptr, bones);
+                    else
+                    {
+                        m_Motions.pop_back();
+                        Msg("! error in model [%s]. Unable to load motion file '%s'.", N, motion_name);
+                    }
+                }
+            }
+        }
+    }
+
     R_ASSERT(m_Motions.size());
 
     m_Partition = m_Motions[0].motions.partition();
