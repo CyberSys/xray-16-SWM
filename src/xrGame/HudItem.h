@@ -191,10 +191,10 @@ protected:
 
     bool m_bEnableMovAnimAtCrouch; //--#SM+#--
     bool m_bEnableIdleAnimRandomST; //--#SM+#--
-    float m_fLastAnimStartTime; //--#SM+#--
-
     float m_fIdleSpeedCrouchFactor; //--#SM+#--
     float m_fIdleSpeedNoAccelFactor; //--#SM+#--
+    float m_fLastAnimStartTime; //--#SM+#--
+    float m_fLastAnimSpeed; //--#SM+#--
 
     HUD_SOUND_COLLECTION m_sounds;
 

@@ -26,6 +26,7 @@ CHudItem::CHudItem()
     m_current_motion_def = NULL;
     m_started_rnd_anim_idx = u8(-1);
     m_fLastAnimStartTime = 0.0f; //--#SM+#--
+    m_fLastAnimSpeed = 1.0f; //--#SM+#--
     m_bEnableMovAnimAtCrouch = false; //--#SM+#--
     m_bEnableIdleAnimRandomST = false; //--#SM+#--
     m_fIdleSpeedCrouchFactor = 1.f; //--#SM+#--
@@ -209,8 +210,8 @@ void CHudItem::UpdateCL()
                     if (M.is_empty())
                         continue;
 
-                    const motion_marks::interval* Iprev = M.pick_mark(motion_prev_time);
-                    const motion_marks::interval* Icurr = M.pick_mark(motion_curr_time);
+                    const motion_marks::interval* Iprev = M.pick_mark(motion_prev_time * m_fLastAnimSpeed); //--#SM+#--
+                    const motion_marks::interval* Icurr = M.pick_mark(motion_curr_time * m_fLastAnimSpeed); //--#SM+#--
                     if (Iprev == NULL && Icurr != NULL /* || M.is_mark_between(motion_prev_time, motion_curr_time)*/)
                     {
                         OnMotionMark(m_startedMotionState, M);
@@ -396,6 +397,9 @@ u32 CHudItem::PlayHUDMotion_noCB(const shared_str& sAnmAlias, bool bMixIn, motio
 
     // Запоминаем стартовую секунду текущей анимации
     m_fLastAnimStartTime = fStartFromTime;
+
+    // Запоминаем стартовую скорость текущей анимации
+    m_fLastAnimSpeed = fSpeed;
 
     // Отыгрываем анимацию или получаем её длину
     if (g_LogHUDAnims && bIsHUDPresent)
