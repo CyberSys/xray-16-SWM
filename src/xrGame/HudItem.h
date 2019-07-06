@@ -220,7 +220,7 @@ public:
     virtual void debug_draw_firedeps(){};
 
     virtual CHudItem* cast_hud_item() { return this; }
-    bool isHUDAnimationExist(pcstr anim_name);
+    bool isHUDAnimationExist(pcstr sAnmAliasBase, bool bNoChilds = false, bool bAssert = false); //--#SM+#--
 
     inline HUD_SOUND_COLLECTION* get_sound_collection() { return &m_sounds; }; //--#SM+#--
 };

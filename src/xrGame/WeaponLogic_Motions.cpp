@@ -249,14 +249,14 @@ bool CWeapon::PlaySoundMotion(const shared_str& M, BOOL bMixIn, LPCSTR alias, bo
         // Ищем анимацию с привязкой к точному числу патронов\индексу
         //--> Старый формат (поддержка совместимости для двухстволок из оригинальной игры)
         xr_sprintf(sAnm, "%s_%d", M.c_str(), idx);
-        if (pSettings->line_exist(hud_sect, sAnm))
+        if (isHUDAnimationExist(sAnm))
         {
             bFound = true;
             break;
         }
         //--> Новый формат
         xr_sprintf(sAnm, "%s_(%d)", M.c_str(), idx);
-        if (pSettings->line_exist(hud_sect, sAnm))
+        if (isHUDAnimationExist(sAnm))
         {
             bFound = true;
             break;
@@ -266,21 +266,19 @@ bool CWeapon::PlaySoundMotion(const shared_str& M, BOOL bMixIn, LPCSTR alias, bo
         if (idx > 0)
         {
             xr_sprintf(sAnm, "%s_(%s)", M.c_str(), (idx % 2 == 0 ? "%2" : "%1"));
-            if (pSettings->line_exist(hud_sect, sAnm))
+            if (isHUDAnimationExist(sAnm))
             {
                 bFound = true;
                 break;
             }
         }
-
-        // Играем обычную анимацию
-        xr_sprintf(sAnm, "%s", M.c_str());
     } while (false);
 
     // Ищем анимацию дальше, уже без привязки к числу патронов
     if (bFound == false)
     {
-        if (pSettings->line_exist(hud_sect, sAnm))
+        xr_sprintf(sAnm, "%s", M.c_str());
+        if (isHUDAnimationExist(sAnm))
         {
             bFound = true;
         }
@@ -334,7 +332,7 @@ void CWeapon::PlaySoundMotionForNPC(LPCSTR sAnmAlias_base, LPCSTR sSndAlias, LPC
     string256 sAnmAlias;
     xr_sprintf(sAnmAlias, "%s_%d", sAnmAlias_base, m_animation_slot);
 
-    // Проверяем наличие полученной анимации в худовой секции оружия
+    // Проверяем наличие полученной анимации в главной худовой секции оружия
     bool bAnimExist = pSettings->line_exist(hud_sect, sAnmAlias);
 
     // Проигрываем найденную худовую анимацию, либо анимацию по умолчанию

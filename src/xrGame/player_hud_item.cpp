@@ -204,7 +204,8 @@ void attachable_hud_item::set_bone_visible(const shared_str& bone_names, BOOL bV
 }
 
 // Ищем анимации для всех моделей (руки, оружие, аддоны) по её алиасу --#SM+#--
-attachable_hud_item::anim_find_result attachable_hud_item::anim_find(const shared_str& sAnmAliasBase, bool bNoChilds, u8& rnd_idx)
+attachable_hud_item::anim_find_result attachable_hud_item::anim_find(
+    const shared_str& sAnmAliasBase, bool bNoChilds, u8& rnd_idx, bool bAssert)
 {
     R_ASSERT(strstr(sAnmAliasBase.c_str(), "anm_") == sAnmAliasBase.c_str());
 
@@ -268,16 +269,24 @@ attachable_hud_item::anim_find_result attachable_hud_item::anim_find(const share
 
     if (pHandsMotions == NULL)
     { //--> Не смогли найти анимацию рук с таким алиасом
-        Msg("[PRINT CHILD'S LIST]");
-        xr_vector<attachable_hud_item*>::iterator it = m_child_items.begin();
-        while (it != m_child_items.end())
+        if (bAssert == true)
         {
-            Msg("%s\n", (*it)->m_sect_name);
-            ++it;
+            Msg("[PRINT CHILD'S LIST]");
+            xr_vector<attachable_hud_item*>::iterator it = m_child_items.begin();
+            while (it != m_child_items.end())
+            {
+                Msg("%s\n", (*it)->m_sect_name);
+                ++it;
+            }
+
+            R_ASSERT2(pHandsMotions != NULL,
+                make_string("hudItem model [%s] and childs: can't find any motion with alias [%s]", m_sect_name.c_str(),
+                    sAnmAlias)
+                    .c_str());
         }
 
-        R_ASSERT2(pHandsMotions != NULL,
-            make_string("hudItem model [%s] and childs: can't find any motion with alias [%s]", m_sect_name.c_str(), sAnmAlias).c_str());
+        // Возвращаем пустой результат
+        return result;
     }
 
     // Заполняем результат поиска актуальными данными

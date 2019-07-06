@@ -466,23 +466,20 @@ bool CHudItem::TryPlayAnimIdle()
     return false;
 }
 
-//AVO: check if animation exists
-bool CHudItem::isHUDAnimationExist(pcstr anim_name) //--#SM+#--
+// Проверка на наличие анимации в текущей худовой модели (с учётом аддонов и дочерних HUD-ов)
+bool CHudItem::isHUDAnimationExist(pcstr sAnmAliasBase, bool bNoChilds, bool bAssert) //--#SM+#-- \ AVO
 {
-    // SM_TODO:L Make more complex check?
-    string256 anim_name_r;
-    bool is_16x9 = UI().is_widescreen();
-    u16 attach_place_idx = pSettings->r_u16(HudItemData()->m_sect_name, "attach_place_idx");
-    xr_sprintf(anim_name_r, "%s%s", anim_name, (attach_place_idx == 1 && is_16x9) ? "_16x9" : "");
+    // Получаем доступ к текущему худу
+    bool bIsHUDPresent = (HudItemData() != NULL);
+    attachable_hud_item* pHudItem = bIsHUDPresent ? HudItemData() : g_player_hud->create_hud_item(HudSection());
 
-    if (pSettings->line_exist(hud_sect, anim_name_r))
-        return true;
+    // Ищем нужную анимацию
+    u8 rnd_idx = -1;
+    attachable_hud_item::anim_find_result motion_data =
+        pHudItem->anim_find(sAnmAliasBase, bNoChilds, rnd_idx, bAssert);
 
-#ifdef DEBUG
-    Msg("~ [WARNING] ------ Animation [%s] does not exist in [%s]", anim_name, HudSection().c_str());
-#endif
-
-    return false;
+    // Проверяем нашли-или-нет
+    return motion_data.handsMotionDescr != nullptr;
 }
 
 void CHudItem::PlayAnimIdleMoving() { PlayHUDMotion("anm_idle_moving", true, nullptr, GetState()); }

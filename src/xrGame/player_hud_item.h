@@ -64,7 +64,7 @@ struct attachable_hud_item
         const motion_descr* handsMotionDescr;
         ChildMotions        child_motions_map;
     };
-    anim_find_result anim_find(const shared_str& sAnmAliasBase, bool bNoChilds, u8& rnd_idx);
+    anim_find_result anim_find(const shared_str& sAnmAliasBase, bool bNoChilds, u8& rnd_idx, bool bAssert = true);
 
     u32 anim_play_both(anim_find_result anim_to_play, bool bMixIn, bool bNoChilds, float fSpeed = 1.0f, float fStartFromTime = 0.0f);
 
