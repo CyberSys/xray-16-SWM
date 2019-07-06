@@ -235,33 +235,53 @@ void CWeapon::OnFirstAnimationPlayed(const shared_str& sAnmAlias)
 bool CWeapon::PlaySoundMotion(const shared_str& M, BOOL bMixIn, LPCSTR alias, bool bAssert, int anim_idx)
 {
     bool bFound = false;
-
-    // Сперва ищем анимацию с привязкой к кол-ву патронов в основном стволе
-    int idx;
-    if (anim_idx != -1)
-        idx = anim_idx;
-    else
-        idx = GetMainAmmoElapsed();
-
     string256 sAnm;
-    xr_sprintf(sAnm, "%s_%d", M.c_str(), idx);
 
-    if (pSettings->line_exist(hud_sect, sAnm))
-    { // Нашли анимацию с привязкой к числу патронов\индексу - играем её
-        PlayHUDMotion(sAnm, bMixIn, NULL, GetState());
-        bFound = true;
-    }
-    else
-    { // Не нашли анимацию с привязкой к числу патронов\индексу - ищем без них
+    // Ищем альтернативные варианты анимации
+    do
+    {
+        int idx;
+        if (anim_idx != -1)
+            idx = anim_idx;
+        else
+            idx = GetMainAmmoElapsed();
+
+        // Ищем анимацию с привязкой к точному числу патронов\индексу
+        //--> Старый формат (поддержка совместимости для двухстволок из оригинальной игры)
+        xr_sprintf(sAnm, "%s_%d", M.c_str(), idx);
+        if (pSettings->line_exist(hud_sect, sAnm))
+        {
+            bFound = true;
+            break;
+        }
+        //--> Новый формат
+        xr_sprintf(sAnm, "%s_(%d)", M.c_str(), idx);
+        if (pSettings->line_exist(hud_sect, sAnm))
+        {
+            bFound = true;
+            break;
+        }
+
+        // Ищем анимацию с привязкой к чётному (%2) \ нечётному (%1) числу патронов (кроме 0)
+        if (idx > 0)
+        {
+            xr_sprintf(sAnm, "%s_(%s)", M.c_str(), (idx % 2 == 0 ? "%2" : "%1"));
+            if (pSettings->line_exist(hud_sect, sAnm))
+            {
+                bFound = true;
+                break;
+            }
+        }
+
+        // Играем обычную анимацию
         xr_sprintf(sAnm, "%s", M.c_str());
-    }
+    } while (false);
 
     // Ищем анимацию дальше, уже без привязки к числу патронов
     if (bFound == false)
     {
         if (pSettings->line_exist(hud_sect, sAnm))
         {
-            PlayHUDMotion(sAnm, bMixIn, NULL, GetState());
             bFound = true;
         }
         else
@@ -277,18 +297,23 @@ bool CWeapon::PlaySoundMotion(const shared_str& M, BOOL bMixIn, LPCSTR alias, bo
     // Если такая анимация существует...
     if (bFound)
     {
+        // Отыгрываем анимацию
+        PlayHUDMotion(sAnm, bMixIn, NULL, GetState());
+
         // Отыгрыаем звук
         string256 sSnd;
-        xr_sprintf(sSnd, "%s%s", "snd_", sAnm);
 
+        //--> Пробуем подыскать к ней особый звук
+        xr_sprintf(sSnd, "%s%s", "snd_", sAnm);
         if (m_sounds.FindSoundItem(sSnd, false))
-        { //--> Пробуем подыскать к ней особый звук
+        {
             PlaySound(sSnd, get_LastFP());
             if (m_fLastAnimStartTime > 0.0f)
                 m_sounds.SetCurentTime(sSnd, m_fLastAnimStartTime);
         }
         else
-        { //--> Иначе пробуем играть стандартный
+        //--> Иначе пробуем играть стандартный
+        {
             if (alias != NULL)
             {
                 PlaySound(alias, get_LastFP());
