@@ -346,7 +346,10 @@ bool CWeapon::IsWGLAnimRequired() const { return IsGrenadeLauncherAttached() || 
 // Мировая анимация покоя
 void CWeapon::PlayWorldAnimIdle()
 {
-    GetMainAmmoElapsed() > 0 ? PlayWorldMotion("idle", true) : PlayWorldMotion("idle_empty", true);
+    if (GetMainAmmoElapsed() <= 0 && PlayWorldMotion("idle_empty", true) == true)
+        return;
+
+    PlayWorldMotion("idle", true);
 }
 
 // Анимация покоя (включая анимации ходьбы и бега)
