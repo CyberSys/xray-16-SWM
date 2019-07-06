@@ -532,24 +532,25 @@ CSE_ALifeItemWeapon::CSE_ALifeItemWeapon(LPCSTR caSection) : CSE_ALifeItem(caSec
 
 CSE_ALifeItemWeapon::~CSE_ALifeItemWeapon() {}
 
-// Заполнить главный магазин оружия, патроны сбрасываются на стандартный тип
+// Попытаться заполнить главный магазин оружия, патроны сбрасываются на стандартный тип, bForce = true: гарантированное заполнение
 void CSE_ALifeItemWeapon::refill_with_ammo(bool bForce)
 {
     u32 a_elapsed = 0;
+    bool bAutoSpawnAmmo =
+        bForce || READ_IF_EXISTS(pSettings, r_bool, s_name, "auto_spawn_ammo", true); // + CWeapon:Load()
 
-    if (m_magaz_section != NULL)
-    { // При установленном магазине считываем из него
-        bool bFillMagazWithAmmo = bForce || READ_IF_EXISTS(pSettings, r_bool, s_name, "magaz_spawn_ammo", false);
-        if (bFillMagazWithAmmo)
-        {
+    if (bAutoSpawnAmmo)
+    {
+        if (m_magaz_section != NULL)
+        { //--> При установленном магазине считываем из него
             LPCSTR sMagazineSect = READ_IF_EXISTS(pSettings, r_string, m_magaz_section, "magazine_name", NULL);
             if (sMagazineSect != NULL)
                 a_elapsed = READ_IF_EXISTS(pSettings, r_u16, sMagazineSect, "ammo_mag_size", 0);
         }
-    }
-    else
-    {
-        a_elapsed = get_ammo_magsize();
+        else
+        { //--> Иначе из секции оружия
+            a_elapsed = get_ammo_magsize();
+        }
     }
 
     CAmmoCompressUtil::AddAmmo(m_pAmmoMain, a_elapsed, 0, true);

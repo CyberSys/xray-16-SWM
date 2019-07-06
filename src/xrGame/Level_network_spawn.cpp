@@ -192,7 +192,7 @@ CSE_Abstract* CLevel::spawn_item(
     //оружие спавним с полным магазинои
     CSE_ALifeItemWeapon* weapon = smart_cast<CSE_ALifeItemWeapon*>(abstract);
     if (weapon)
-        weapon->refill_with_ammo(); //--#SM+#--
+        weapon->refill_with_ammo(false); //--#SM+#--
 
     // Fill
     abstract->s_name = section;

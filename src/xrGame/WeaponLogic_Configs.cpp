@@ -50,11 +50,8 @@ void CWeapon::Load(LPCSTR section)
     else
         m_dwWeaponRemoveTime = WEAPON_REMOVE_TIME;
 
-    // Спавнить оружие с патронами
-    if (pSettings->line_exist(section, "auto_spawn_ammo"))
-        m_bAutoSpawnAmmo = pSettings->r_bool(section, "auto_spawn_ammo");
-    else
-        m_bAutoSpawnAmmo = TRUE;
+    // Спавнить-ли оружие с патронами
+    m_bAutoSpawnAmmo = READ_IF_EXISTS(pSettings, r_bool, section, "auto_spawn_ammo", true); // + CSE_ALifeItemWeapon::refill_with_ammo()
 
     // Параметры трассеров пуль
     m_bHasTracers     = !!READ_IF_EXISTS(pSettings, r_bool, section, "tracers", true);
