@@ -215,6 +215,7 @@ void CWeapon::UpdateHudAdditonal(Fmatrix& trans)
 
         Fvector curr_offs;
         curr_offs = {fLR_lim * m_fLR_ShootingFactor, fUD_lim * -1.f * m_fUD_ShootingFactor, -1.f * fShootingBackwOffset * m_fBACKW_ShootingFactor};
+        curr_offs.mul(cur_silencer_koef.shooting_shake);
 
         Fmatrix hud_rotation;
         hud_rotation.identity();

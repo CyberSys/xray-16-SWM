@@ -1273,6 +1273,7 @@ void CWeapon::LoadSilencerKoeffs()
         m_silencer_koef.fire_dispersion = READ_IF_EXISTS(pSettings, r_float, sect, "fire_dispersion_base_k", 1.0f);
         m_silencer_koef.cam_dispersion  = READ_IF_EXISTS(pSettings, r_float, sect, "cam_dispersion_k", 1.0f);
         m_silencer_koef.cam_disper_inc  = READ_IF_EXISTS(pSettings, r_float, sect, "cam_dispersion_inc_k", 1.0f);
+        m_silencer_koef.shooting_shake  = READ_IF_EXISTS(pSettings, r_float, sect, "shooting_shake_k", 1.0f);
     }
 
     clamp(m_silencer_koef.hit_power, 0.0f, 1000.0f);
@@ -1281,6 +1282,7 @@ void CWeapon::LoadSilencerKoeffs()
     clamp(m_silencer_koef.fire_dispersion, 0.0f, 1000.0f);
     clamp(m_silencer_koef.cam_dispersion, 0.0f, 1000.0f);
     clamp(m_silencer_koef.cam_disper_inc, 0.0f, 1000.0f);
+    clamp(m_silencer_koef.shooting_shake, 0.0f, 1000.0f);
 }
 
 void CWeapon::ApplySilencerKoeffs() { cur_silencer_koef = m_silencer_koef; }
