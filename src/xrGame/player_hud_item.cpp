@@ -216,16 +216,6 @@ attachable_hud_item::anim_find_result attachable_hud_item::anim_find(
     bool      is_16x9 = UI().is_widescreen() && !bIsChild;
     xr_sprintf(sAnmAlias, "%s%s", sAnmAliasBase.c_str(), ((m_attach_place_idx == 1) && is_16x9) ? "_16x9" : "");
 
-    // Для потомков проверяем, есть ли у них в конфиге отдельная анимация под комбинацию со своим родительским attachable_hud_item
-    if (bIsChild)
-    {
-        string512 sAnmAliasSpec;
-        xr_sprintf(sAnmAliasSpec, "%s+%s", sAnmAlias, m_parent_aitem->m_sect_name.c_str());
-
-        if (pSettings->line_exist(this->m_sect_name, sAnmAliasSpec))
-            xr_sprintf(sAnmAlias, "%s", sAnmAliasSpec);
-    }
-
     // Создаём дефолтный результат поиска
     anim_find_result result;
     result.anm_alias        = sAnmAlias; //--> Алиас анимации
