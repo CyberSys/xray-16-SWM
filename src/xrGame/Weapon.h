@@ -45,6 +45,7 @@ class CWeaponMagazinedWGrenade;
 #define WEAPON_DEFAULT_LAUNCH_SPEED 40.f    // Скорость по умолчанию для запуска ракеты (если не указана в конфигах)
 #define WEAPON_MRAIM_L "ammo_limit_to_use"  // Название строки из конфига магазина, которая считывается в m_iMinRequiredAmmoInMag
 #define WEAPON_MRAIM_DEF_VAL 0              // Значение по умолчанию для m_iMinRequiredAmmoInMag
+#define WEAPON_ADDON_REQ_L "required_addon" // Название строки из set-секции аддона, в которой прописана set-секция аддона, требуемого для установки этого  
 
 #define C_THIS_WPN const_cast<CWeapon*>(this)
 
@@ -323,8 +324,8 @@ protected:
     void _UpdateAddonsVisibility(SAddonData* m_pAddon);
     void _UpdateHUDAddonVisibility(SAddonData* m_pAddon, bool bForceReset = false);
 
-    void OnAddonInstall(EAddons iSlot, const shared_str& sAddonDataName);
-    void OnAddonUnistall(EAddons iSlot, const shared_str& sAddonDataName);
+    void OnAddonInstall(EAddons iSlot, const shared_str& sAddonSetSect);
+    void OnAddonUnistall(EAddons iSlot, const shared_str& sAddonSetSect);
 
     virtual void OnDetachAddonSpawn(const char* item_section_name, CSE_ALifeDynamicObject* E);
 
@@ -561,8 +562,8 @@ protected:
     };
 
     // Каллбэки на установку\снятие сошек
-    void OnBipodsAttach(EAddons iSlot, const shared_str& sAddonDataName);
-    void OnBipodsDetach(const shared_str& sAddonDataName);
+    void OnBipodsAttach(EAddons iSlot, const shared_str& sAddonSetSect);
+    void OnBipodsDetach(const shared_str& sAddonSetSect);
 
 public:
     bipods_data m_bipods; //--> Параметры сошек оружия

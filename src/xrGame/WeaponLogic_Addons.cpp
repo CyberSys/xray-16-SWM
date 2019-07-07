@@ -193,56 +193,56 @@ SAddonData* CWeapon::UnistallAddon(EAddons iSlot, bool bNoUpdate)
 }
 
 // Колбэк на установку аддона
-void CWeapon::OnAddonInstall(EAddons iSlot, const shared_str& sAddonDataName)
+void CWeapon::OnAddonInstall(EAddons iSlot, const shared_str& sAddonSetSect)
 {
     // Установка патронташа
-    bool bIsAmmoBelt = READ_IF_EXISTS(pSettings, r_bool, sAddonDataName, "is_ammo_belt", false);
+    bool bIsAmmoBelt = READ_IF_EXISTS(pSettings, r_bool, sAddonSetSect, "is_ammo_belt", false);
     if (bIsAmmoBelt)
     {
         R_ASSERT4(IsAmmoBeltAttached() == false,
             "Ammo Belt already installed <!>",
-            sAddonDataName.c_str(),
+            sAddonSetSect.c_str(),
             GetAddonBySlot(m_AmmoBeltSlot)->GetName().c_str());
         m_AmmoBeltSlot = iSlot;
     }
 
     // Установка рукоятки
-    bool bIsForegrip = READ_IF_EXISTS(pSettings, r_bool, sAddonDataName, "is_foregrip", false);
+    bool bIsForegrip = READ_IF_EXISTS(pSettings, r_bool, sAddonSetSect, "is_foregrip", false);
     if (bIsForegrip)
     {
         R_ASSERT4(IsForegripAttached() == false,
             "Foregrip already installed <!>",
-            sAddonDataName.c_str(),
+            sAddonSetSect.c_str(),
             GetAddonBySlot(m_ForegripSlot)->GetName().c_str());
         m_ForegripSlot = iSlot;
     }
 
     // Установка цевья
-    bool bIsForend = READ_IF_EXISTS(pSettings, r_bool, sAddonDataName, "is_forend", false);
+    bool bIsForend = READ_IF_EXISTS(pSettings, r_bool, sAddonSetSect, "is_forend", false);
     if (bIsForend)
     {
         R_ASSERT4(
-            IsForendAttached() == false, "Forend already installed <!>", sAddonDataName.c_str(), GetAddonBySlot(m_ForendSlot)->GetName().c_str());
+            IsForendAttached() == false, "Forend already installed <!>", sAddonSetSect.c_str(), GetAddonBySlot(m_ForendSlot)->GetName().c_str());
         m_ForendSlot = iSlot;
     }
 
     // Установка сошек
-    bool bIsBipods = READ_IF_EXISTS(pSettings, r_bool, sAddonDataName, "is_bipods", false);
+    bool bIsBipods = READ_IF_EXISTS(pSettings, r_bool, sAddonSetSect, "is_bipods", false);
     if (bIsBipods)
     {
         R_ASSERT4(IsBipodsAttached() == false,
             "Bipods already installed <!>",
-            sAddonDataName.c_str(),
+            sAddonSetSect.c_str(),
             GetAddonBySlot(m_BipodsSlot)->GetName().c_str());
-        OnBipodsAttach(iSlot, sAddonDataName);
+        OnBipodsAttach(iSlot, sAddonSetSect);
     }
 
     // Установка штык-ножа
-    bool bIsBayonet = READ_IF_EXISTS(pSettings, r_bool, sAddonDataName, "is_bayonet", false);
+    bool bIsBayonet = READ_IF_EXISTS(pSettings, r_bool, sAddonSetSect, "is_bayonet", false);
     if (bIsBayonet)
     {
         R_ASSERT4(
-            IsBayonetAttached() == false, "Bayonet already installed <!>", sAddonDataName.c_str(), GetAddonBySlot(m_BayonetSlot)->GetName().c_str());
+            IsBayonetAttached() == false, "Bayonet already installed <!>", sAddonSetSect.c_str(), GetAddonBySlot(m_BayonetSlot)->GetName().c_str());
         Need2Stop_Kick();
         m_BayonetSlot = iSlot;
     }
@@ -268,8 +268,26 @@ void CWeapon::OnAddonInstall(EAddons iSlot, const shared_str& sAddonDataName)
 }
 
 // Колбэк на снятие аддона
-void CWeapon::OnAddonUnistall(EAddons iSlot, const shared_str& sAddonDataName)
+void CWeapon::OnAddonUnistall(EAddons iSlot, const shared_str& sAddonSetSect)
 {
+    // Снимаем все аддоны, зависящие от нашего
+    for (int iSlotNext = 0; iSlotNext < EAddons::eAddonsSize; iSlotNext++)
+    {
+        if (iSlotNext != iSlot)
+        {
+            SAddonData* pAddonNext = GetAddonBySlot((EAddons)iSlotNext);
+            if (pAddonNext->bActive)
+            {
+                shared_str sRequiredAddonSetSect =
+                    READ_IF_EXISTS(pSettings, r_string, pAddonNext->GetName(), WEAPON_ADDON_REQ_L, nullptr);
+                if (sRequiredAddonSetSect != nullptr && sRequiredAddonSetSect.equal(sAddonSetSect))
+                {
+                    Detach(pAddonNext->GetAddonName().c_str(), true, false);
+                }
+            }
+        }
+    }
+
     // Снятие патронташа
     bool bIsAmmoBelt = (IsAmmoBeltAttached() && iSlot == m_AmmoBeltSlot);
     if (bIsAmmoBelt)
@@ -306,7 +324,7 @@ void CWeapon::OnAddonUnistall(EAddons iSlot, const shared_str& sAddonDataName)
     // Снятие сошек
     bool bIsBipods = (IsBipodsAttached() && iSlot == m_BipodsSlot);
     if (bIsBipods)
-        OnBipodsDetach(sAddonDataName);
+        OnBipodsDetach(sAddonSetSect);
 
     // Снятие штык-ножа
     bool bIsBayonet = (IsBayonetAttached() && iSlot == m_BayonetSlot);
@@ -1013,6 +1031,26 @@ bool CWeapon::CanAttach(PIItem pIItem)
         // Проверяем на совместимость с другими аддонами
         if (m_IncompatibleAddons.count(pAddon->GetNameByIdx(addonIdx).c_str()) > 0)
             return false;
+
+        // Проверяем на наличие соседних аддонов, требуемых для установки этого
+        shared_str sRequiredAddonSetSect =
+            READ_IF_EXISTS(pSettings, r_string, pAddon->GetNameByIdx(addonIdx), WEAPON_ADDON_REQ_L, nullptr);
+        if (sRequiredAddonSetSect != nullptr)
+        {
+            for (int iSlotNext = 0; iSlotNext < EAddons::eAddonsSize; iSlotNext++)
+            {
+                if (iSlotNext != iSlot)
+                {
+                    SAddonData* pAddonNext = GetAddonBySlot((EAddons)iSlotNext);
+                    if (pAddonNext->bActive && pAddonNext->GetName().equal(sRequiredAddonSetSect))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
 
         // Магазин
         if (m_bUseMagazines == true && iSlot == eMagaz)
