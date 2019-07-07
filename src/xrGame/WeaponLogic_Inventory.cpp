@@ -14,35 +14,51 @@ float CWeapon::Weight() const
     // Прибавляем вес аддонов
     if (IsGrenadeLauncherAttached())
     {
-        res += pSettings->r_float(GetGrenadeLauncherName(), "inv_weight");
+        const shared_str sAddonSect = GetGrenadeLauncherName();
+        res += READ_IF_EXISTS(
+            pSettings, r_float, sAddonSect, "inv_weight_inst", pSettings->r_float(sAddonSect, "inv_weight"));
     }
     if (IsScopeAttached())
     {
-        res += pSettings->r_float(GetScopeName(), "inv_weight");
+        const shared_str sAddonSect = GetScopeName();
+        res += READ_IF_EXISTS(
+            pSettings, r_float, sAddonSect, "inv_weight_inst", pSettings->r_float(sAddonSect, "inv_weight"));
     }
     if (IsSilencerAttached())
     {
-        res += pSettings->r_float(GetSilencerName(), "inv_weight");
+        const shared_str sAddonSect = GetSilencerName();
+        res += READ_IF_EXISTS(
+            pSettings, r_float, sAddonSect, "inv_weight_inst", pSettings->r_float(sAddonSect, "inv_weight"));
     }
     if (IsMagazineAttached())
     {
-        res += pSettings->r_float(GetMagazineName(), "inv_weight");
+        const shared_str sAddonSect = GetMagazineName();
+        res += READ_IF_EXISTS(
+            pSettings, r_float, sAddonSect, "inv_weight_inst", pSettings->r_float(sAddonSect, "inv_weight"));
     }
     if (IsSpecial_1_Attached())
     {
-        res += pSettings->r_float(GetSpecial_1_Name(), "inv_weight");
+        const shared_str sAddonSect = GetSpecial_1_Name();
+        res += READ_IF_EXISTS(
+            pSettings, r_float, sAddonSect, "inv_weight_inst", pSettings->r_float(sAddonSect, "inv_weight"));
     }
     if (IsSpecial_2_Attached())
     {
-        res += pSettings->r_float(GetSpecial_2_Name(), "inv_weight");
+        const shared_str sAddonSect = GetSpecial_2_Name();
+        res += READ_IF_EXISTS(
+            pSettings, r_float, sAddonSect, "inv_weight_inst", pSettings->r_float(sAddonSect, "inv_weight"));
     }
     if (IsSpecial_3_Attached())
     {
-        res += pSettings->r_float(GetSpecial_3_Name(), "inv_weight");
+        const shared_str sAddonSect = GetSpecial_3_Name();
+        res += READ_IF_EXISTS(
+            pSettings, r_float, sAddonSect, "inv_weight_inst", pSettings->r_float(sAddonSect, "inv_weight"));
     }
     if (IsSpecial_4_Attached())
     {
-        res += pSettings->r_float(GetSpecial_4_Name(), "inv_weight");
+        const shared_str sAddonSect = GetSpecial_4_Name();
+        res += READ_IF_EXISTS(
+            pSettings, r_float, sAddonSect, "inv_weight_inst", pSettings->r_float(sAddonSect, "inv_weight"));
     }
 
     // Прибавляем вес патронов
