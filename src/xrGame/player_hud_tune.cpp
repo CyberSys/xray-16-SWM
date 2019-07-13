@@ -289,7 +289,9 @@ void player_hud::tune(Ivector _values) //--#SM+#--
         float _curr_dp = _delta_pos;
 
         u8 idx = hi->m_parent_hud_item->GetCurrentHudOffsetIdx();
-        if (idx)
+        bool bIsDetector = (idx != 0);
+
+        if (bIsDetector)
         {
             if (!pInput->iGetAsyncKeyState(SDL_SCANCODE_SPACE))
             {
@@ -311,8 +313,8 @@ void player_hud::tune(Ivector _values) //--#SM+#--
             }
         }
 
-        Fvector& pos_ = (idx != 0) ? hi->hands_offset_pos() : hi->hands_attach_pos();
-        Fvector& rot_ = (idx != 0) ? hi->hands_offset_rot() : hi->hands_attach_rot();
+        Fvector& pos_ = (bIsDetector) ? hi->hands_offset_pos() : hi->hands_attach_pos();
+        Fvector& rot_ = (bIsDetector) ? hi->hands_offset_rot() : hi->hands_attach_rot();
 
         if (hud_adj_mode == 1)
         {
@@ -332,7 +334,7 @@ void player_hud::tune(Ivector _values) //--#SM+#--
 
         if (hud_adj_mode == 2)
         {
-            if ((idx) == 0)
+            if (bIsDetector == false)
             {
                 if (values.x)
                     diff.x = (values.x > 0) ? _curr_dr : -_curr_dr;
