@@ -1106,7 +1106,7 @@ public:
     IC bool TriStateReloadAnimHack() const { return m_bTriStateReload_anim_hack; }
 
     // Play HUD Animation
-    bool PlaySoundMotion(const shared_str& M, BOOL bMixIn, LPCSTR alias, bool bAssert = false, int anim_idx = -1);
+    bool PlaySoundMotion(const shared_str& sAnmAlias, BOOL bMixIn, LPCSTR sSndAlias, bool bAssert = false, int anim_idx = -1);
     void PlaySoundMotionForNPC(LPCSTR sAnmAlias_base, LPCSTR sSndAlias, LPCSTR sAnmAliasDef, LPCSTR sSndAliasDef);
 
     // Play world (3P) Animation

@@ -232,9 +232,10 @@ void CWeapon::OnFirstAnimationPlayed(const shared_str& sAnmAlias)
 }
 
 // Проиграть анимацию со звуком (а также учитывая число патронов в основном магазине)
-bool CWeapon::PlaySoundMotion(const shared_str& M, BOOL bMixIn, LPCSTR alias, bool bAssert, int anim_idx)
+bool CWeapon::PlaySoundMotion(const shared_str& sAnmAlias, BOOL bMixIn, LPCSTR sSndAlias, bool bAssert, int anim_idx)
 {
     bool bFound = false;
+    bool bIsHUDPresent = (HudItemData() != NULL);
     string256 sAnm;
 
     // Ищем альтернативные варианты анимации
@@ -248,15 +249,15 @@ bool CWeapon::PlaySoundMotion(const shared_str& M, BOOL bMixIn, LPCSTR alias, bo
 
         // Ищем анимацию с привязкой к точному числу патронов\индексу
         //--> Старый формат (поддержка совместимости для двухстволок из оригинальной игры)
-        xr_sprintf(sAnm, "%s_%d", M.c_str(), idx);
-        if (isHUDAnimationExist(sAnm))
+        xr_sprintf(sAnm, "%s_%d", sAnmAlias.c_str(), idx);
+        if (isHUDAnimationExist(sAnm, (bIsHUDPresent == false)))
         {
             bFound = true;
             break;
         }
         //--> Новый формат
-        xr_sprintf(sAnm, "%s_(%d)", M.c_str(), idx);
-        if (isHUDAnimationExist(sAnm))
+        xr_sprintf(sAnm, "%s_(%d)", sAnmAlias.c_str(), idx);
+        if (isHUDAnimationExist(sAnm, (bIsHUDPresent == false)))
         {
             bFound = true;
             break;
@@ -265,8 +266,8 @@ bool CWeapon::PlaySoundMotion(const shared_str& M, BOOL bMixIn, LPCSTR alias, bo
         // Ищем анимацию с привязкой к чётному (%2) \ нечётному (%1) числу патронов (кроме 0)
         if (idx > 0)
         {
-            xr_sprintf(sAnm, "%s_(%s)", M.c_str(), (idx % 2 == 0 ? "%2" : "%1"));
-            if (isHUDAnimationExist(sAnm))
+            xr_sprintf(sAnm, "%s_(%s)", sAnmAlias.c_str(), (idx % 2 == 0 ? "%2" : "%1"));
+            if (isHUDAnimationExist(sAnm, (bIsHUDPresent == false)))
             {
                 bFound = true;
                 break;
@@ -277,8 +278,8 @@ bool CWeapon::PlaySoundMotion(const shared_str& M, BOOL bMixIn, LPCSTR alias, bo
     // Ищем анимацию дальше, уже без привязки к числу патронов
     if (bFound == false)
     {
-        xr_sprintf(sAnm, "%s", M.c_str());
-        if (isHUDAnimationExist(sAnm))
+        xr_sprintf(sAnm, "%s", sAnmAlias.c_str());
+        if (isHUDAnimationExist(sAnm, (bIsHUDPresent == false)))
         {
             bFound = true;
         }
@@ -287,7 +288,12 @@ bool CWeapon::PlaySoundMotion(const shared_str& M, BOOL bMixIn, LPCSTR alias, bo
             // Если анимация не найдена, но она обязательна - крашим игру
             if (bAssert == true)
             {
-                R_ASSERT2(false, make_string("hudItem model [%s] has no motion with alias [%s]", hud_sect.c_str(), sAnm).c_str());
+                R_ASSERT2(false,
+                    make_string("hudItem model [%s] has no motion with alias [%s] %s",
+                        hud_sect.c_str(),
+                        sAnm,
+                        (bIsHUDPresent ? "": "(third person - weapon addons not included <!>)")
+                    ).c_str());
             }
         }
     }
@@ -312,11 +318,11 @@ bool CWeapon::PlaySoundMotion(const shared_str& M, BOOL bMixIn, LPCSTR alias, bo
         else
         //--> Иначе пробуем играть стандартный
         {
-            if (alias != NULL)
+            if (sSndAlias != NULL)
             {
-                PlaySound(alias, get_LastFP());
+                PlaySound(sSndAlias, get_LastFP());
                 if (m_fLastAnimStartTime > 0.0f)
-                    m_sounds.SetCurentTime(alias, m_fLastAnimStartTime);
+                    m_sounds.SetCurentTime(sSndAlias, m_fLastAnimStartTime);
             }
         }
     }
