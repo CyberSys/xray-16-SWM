@@ -169,6 +169,12 @@ MotionID CStalkerAnimationManager::unknown_object_animation(u32 slot, const EBod
 
 MotionID CStalkerAnimationManager::weapon_animation(u32 slot, const EBodyState& body_state)
 {
+    if (slot >= m_data_storage->m_part_animations.A[body_state].m_torso.A.size()) //--#SM+#--
+    {
+        // Fix for binocular (slot = 13) being treated as a weapon in SWM
+        return MotionID(); // valid() = false
+    }
+
     const xr_vector<CAniVector>& animation = m_data_storage->m_part_animations.A[body_state].m_torso.A[slot].A;
     const xr_vector<CAniVector>& animation_9 = m_data_storage->m_part_animations.A[body_state].m_torso.A[9].A;  //--#SM+#--
 
@@ -360,8 +366,12 @@ MotionID CStalkerAnimationManager::assign_torso_animation()
 
     if (m_weapon)
     {
-        if (!strapped())
-            return (weapon_animation(object_slot(), body_state));
+        if (!strapped()) //--#SM+#--
+        {
+            MotionID iRes = weapon_animation(object_slot(), body_state);
+            if (iRes.valid())
+                return iRes;
+        }
 
         return (no_object_animation(body_state));
     }
