@@ -14,6 +14,10 @@ bool CWeapon::Try2Kick(bool bCheckOnlyMode)
     if ((bool)IsPending() == true)
         return false;
 
+    // При активных сошках нельзя делать удар
+    if (IsBipodsDeployed())
+        return false;
+
     // Проверяем, есть-ли такая возможность у оружия.
     if (m_kicker_main == NULL && m_kicker_alt == NULL)
         return false;
