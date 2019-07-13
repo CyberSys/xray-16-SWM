@@ -33,19 +33,20 @@ class CSE_ALifeItemWeaponAmmo;
 class CWeaponMagazined;
 class CWeaponMagazinedWGrenade;
 
-#define WEAPON_REMOVE_TIME 60000            // Время по умолчанию, через которое бесхозное оружие будет удалено из игры
-#define WEAPON_ININITE_QUEUE -1             // Число, которым в конфиге обозначается режим стрельбы без очереди
-#define WEAPON_DEFAULT_QUEUE 1              // Режим стрельбы по умолчанию, когда у оружия это не указано в конфиге
-#define WEAPON_AB_BULLET_VIS_UPD_DELAY 150  // Время (в м\сек), в течении которого по особому высчитываем видимость патронов в патронташе
-#define WEAPON_ANIM_SHELL_SHOW_TIME 400     // Время (в м\сек), в течении которого показываем анимированную гильзу
-#define WEAPON_MAGAZ_3P_HIDE_START_TIME 300 // Время (в м\сек) по умолчанию, когда скрывается магазин (от 3-го лица) после начала перезерадяки
-#define WEAPON_MAGAZ_3P_HIDE_END_TIME 1700  // Время (в м\сек) по умолчанию, когда показывается магазин (от 3-го лица) после начала перезерадяки
-#define WEAPON_ADDONS_VIS_UPD_INTERVAL 500  // Интервал (в м\сек), через который обновляем визуалы аддонов на оружии
-#define WEAPON_ADDONS_KAR_UPD_INTERVAL 150  // Интервал (в м\сек), через который проверяем что штыковая атака попала в цель
-#define WEAPON_DEFAULT_LAUNCH_SPEED 40.f    // Скорость по умолчанию для запуска ракеты (если не указана в конфигах)
-#define WEAPON_MRAIM_L "ammo_limit_to_use"  // Название строки из конфига магазина, которая считывается в m_iMinRequiredAmmoInMag
-#define WEAPON_MRAIM_DEF_VAL 0              // Значение по умолчанию для m_iMinRequiredAmmoInMag
-#define WEAPON_ADDON_REQ_L "required_addon" // Название строки из set-секции аддона, в которой прописана set-секция аддона, требуемого для установки этого  
+#define WEAPON_REMOVE_TIME 60000                // Время по умолчанию, через которое бесхозное оружие будет удалено из игры
+#define WEAPON_ININITE_QUEUE -1                 // Число, которым в конфиге обозначается режим стрельбы без очереди
+#define WEAPON_DEFAULT_QUEUE 1                  // Режим стрельбы по умолчанию, когда у оружия это не указано в конфиге
+#define WEAPON_AB_BULLET_VIS_UPD_DELAY 150      // Время (в м\сек), в течении которого по особому высчитываем видимость патронов в патронташе
+#define WEAPON_ANIM_SHELL_SHOW_TIME 400         // Время (в м\сек), в течении которого показываем анимированную гильзу
+#define WEAPON_MAGAZ_3P_HIDE_START_TIME 300     // Время (в м\сек) по умолчанию, когда скрывается магазин (от 3-го лица) после начала перезерадяки
+#define WEAPON_MAGAZ_3P_HIDE_END_TIME 1700      // Время (в м\сек) по умолчанию, когда показывается магазин (от 3-го лица) после начала перезерадяки
+#define WEAPON_ADDONS_VIS_UPD_INTERVAL 500      // Интервал (в м\сек), через который обновляем визуалы аддонов на оружии
+#define WEAPON_ADDONS_KAR_UPD_INTERVAL 150      // Интервал (в м\сек), через который проверяем что штыковая атака попала в цель
+#define WEAPON_DEFAULT_LAUNCH_SPEED 40.f        // Скорость по умолчанию для запуска ракеты (если не указана в конфигах)
+#define WEAPON_MRAIM_L "ammo_limit_to_use"      // Название строки из конфига магазина, которая считывается в m_iMinRequiredAmmoInMag
+#define WEAPON_MRAIM_DEF_VAL 0                  // Значение по умолчанию для m_iMinRequiredAmmoInMag
+#define WEAPON_ADDON_DIS_L "disallowed_addons"  // Название строки из set-секции аддона, в которой прописаны set-секции аддонов, запрещаемых для установки с этим
+#define WEAPON_ADDON_REQ_L "required_addon"     // Название строки из set-секции аддона, в которой прописана set-секция аддона, требуемого для установки этого  
 
 #define C_THIS_WPN const_cast<CWeapon*>(this)
 

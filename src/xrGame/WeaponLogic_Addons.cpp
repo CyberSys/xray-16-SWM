@@ -126,8 +126,8 @@ SAddonData* CWeapon::InstallAddon(EAddons iSlot, u8 addon_idx, bool bNoUpdate)
         pAddon->bActive     = true;
 
         // Обновляем список несовместимых аддонов
-        LPCSTR sDisallowStr = READ_IF_EXISTS(pSettings, r_string, pAddon->GetName(), "disallow_addons_ssects", NULL);
-        if (sDisallowStr)
+        LPCSTR sDisallowStr = READ_IF_EXISTS(pSettings, r_string, pAddon->GetName(), WEAPON_ADDON_DIS_L, nullptr);
+        if (sDisallowStr != nullptr)
         {
             string128 _sect_name;
             int count = _GetItemCount(sDisallowStr);
@@ -163,8 +163,8 @@ SAddonData* CWeapon::UnistallAddon(EAddons iSlot, bool bNoUpdate)
         return pAddon;
 
     // Обновляем список несовместимых аддонов
-    LPCSTR sDisallowStr = READ_IF_EXISTS(pSettings, r_string, pAddon->GetName(), "disallow_addons_ssects", NULL);
-    if (sDisallowStr)
+    LPCSTR sDisallowStr = READ_IF_EXISTS(pSettings, r_string, pAddon->GetName(), WEAPON_ADDON_DIS_L, nullptr);
+    if (sDisallowStr != nullptr)
     {
         string128 _sect_name;
         int count = _GetItemCount(sDisallowStr);
@@ -1021,6 +1021,7 @@ bool CWeapon::CanAttach(PIItem pIItem)
     if (iSlot != eNotExist)
     {
         SAddonData* pAddon      = GetAddonBySlot(iSlot);
+        shared_str  sAddonName  = pAddon->GetNameByIdx(addonIdx);
         bool        bIsSlotFree = pAddon->bActive == false;
         bool        bAttachable = pAddon->m_attach_status == ALife::EWeaponAddonStatus::eAddonAttachable;
 
@@ -1029,14 +1030,41 @@ bool CWeapon::CanAttach(PIItem pIItem)
             return false;
 
         // Проверяем на совместимость с другими аддонами
-        if (m_IncompatibleAddons.count(pAddon->GetNameByIdx(addonIdx).c_str()) > 0)
+        //--> Быстрая проверка - сработает если у нас уже установлен аддон, который блокирует этот
+        if (m_IncompatibleAddons.count(sAddonName.c_str()) > 0)
             return false;
 
+        //--> Медленная проверка - на случаи если это мы блокируем аддон, который уже был установлен (нет в m_IncompatibleAddons)
+        {
+            LPCSTR sDisallowStr = READ_IF_EXISTS(pSettings, r_string, sAddonName, WEAPON_ADDON_DIS_L, nullptr);
+            if (sDisallowStr != nullptr)
+            {
+                string128 _sect_name;
+                int count = _GetItemCount(sDisallowStr);
+                for (int i = 0; i < count; ++i)
+                {
+                    shared_str sDisallowedAddonSSect = _GetItem(sDisallowStr, i, _sect_name);
+                    for (int iSlotNext = 0; iSlotNext < EAddons::eAddonsSize; iSlotNext++)
+                    {
+                        if (iSlotNext != iSlot)
+                        {
+                            SAddonData* pAddonNext = GetAddonBySlot((EAddons)iSlotNext);
+                            if (pAddonNext->bActive && pAddonNext->GetName().equal(sDisallowedAddonSSect))
+                            {
+                                return false;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         // Проверяем на наличие соседних аддонов, требуемых для установки этого
-        shared_str sRequiredAddonSetSect =
-            READ_IF_EXISTS(pSettings, r_string, pAddon->GetNameByIdx(addonIdx), WEAPON_ADDON_REQ_L, nullptr);
+        shared_str sRequiredAddonSetSect = READ_IF_EXISTS(pSettings, r_string, sAddonName, WEAPON_ADDON_REQ_L, nullptr);
         if (sRequiredAddonSetSect != nullptr)
         {
+            bool bRequiredAddonExist = false;
+
             for (int iSlotNext = 0; iSlotNext < EAddons::eAddonsSize; iSlotNext++)
             {
                 if (iSlotNext != iSlot)
@@ -1044,12 +1072,16 @@ bool CWeapon::CanAttach(PIItem pIItem)
                     SAddonData* pAddonNext = GetAddonBySlot((EAddons)iSlotNext);
                     if (pAddonNext->bActive && pAddonNext->GetName().equal(sRequiredAddonSetSect))
                     {
-                        return true;
+                        bRequiredAddonExist = true;
+                        break;
                     }
                 }
             }
 
-            return false;
+            if (bRequiredAddonExist == false)
+            {
+                return false;
+            }
         }
 
         // Магазин
@@ -1071,21 +1103,21 @@ bool CWeapon::CanAttach(PIItem pIItem)
         }
 
         // Патронташ
-        bool bIsAmmoBelt = READ_IF_EXISTS(pSettings, r_bool, pAddon->GetNameByIdx(addonIdx), "is_ammo_belt", false);
+        bool bIsAmmoBelt = READ_IF_EXISTS(pSettings, r_bool, sAddonName, "is_ammo_belt", false);
         if (bIsAmmoBelt)
         {
             return m_bUseAmmoBeltMode == true && IsAmmoBeltAttached() == false;
         }
 
         // Подствольная рукоятка
-        bool bIsForegrip = READ_IF_EXISTS(pSettings, r_bool, pAddon->GetNameByIdx(addonIdx), "is_foregrip", false);
+        bool bIsForegrip = READ_IF_EXISTS(pSettings, r_bool, sAddonName, "is_foregrip", false);
         if (bIsForegrip)
         {
             return IsGrenadeLauncherAttached() == false && IsForegripAttached() == false;
         }
 
         // Сошки
-        bool bIsBipods = READ_IF_EXISTS(pSettings, r_bool, pAddon->GetNameByIdx(addonIdx), "is_bipods", false);
+        bool bIsBipods = READ_IF_EXISTS(pSettings, r_bool, sAddonName, "is_bipods", false);
         if (bIsBipods)
         {
             return IsBipodsDeployed() == false && IsBipodsAttached() == false;
