@@ -99,8 +99,6 @@ void CWeapon::LoadBipodsParams()
     if (!IsBipodsAttached())
         return;
 
-    m_bipods.m_fTranslationFactor = 0.f;
-
     SAddonData* pAddonBipods = GetAddonBySlot(m_BipodsSlot);
 
     m_bipods.sBipodsHudSect = pAddonBipods->GetVisuals("visuals_hud", true);
@@ -134,6 +132,8 @@ void CWeapon::LoadBipodsParams()
     m_bipods.vBoneMDeployPosOffs = READ_ADDON_DATA(r_fvector3, "bipods_deploy_pos", pAddonBipods->GetName(), pAddonBipods->GetAddonName(), vZero);
     m_bipods.vBoneMDeployRotOffs = READ_ADDON_DATA(r_fvector3, "bipods_deploy_rot", pAddonBipods->GetName(), pAddonBipods->GetAddonName(), vZero);
     m_bipods.vBoneLDeployRotOffs = READ_ADDON_DATA(r_fvector3, "bipods_legs_rot", pAddonBipods->GetName(), pAddonBipods->GetAddonName(), vZero);
+    m_bipods.bInvertYaw = READ_ADDON_DATA(r_bool, "bipods_invert_yaw", pAddonBipods->GetName(), pAddonBipods->GetAddonName(), false);
+    m_bipods.bInvertPitch = READ_ADDON_DATA(r_bool, "bipods_invert_pitch", pAddonBipods->GetName(), pAddonBipods->GetAddonName(), false);
     // clang-format on
 
     // Создаём физическую оболочку
@@ -867,10 +867,18 @@ bool CWeapon::UpdateCameraFromBipods(IGameObject* pCameraOwner, Fvector noise_da
         float yaw = (-m_bipods.m_vBipodInitDir.getH()); // Y
         float& cam_yaw = C->yaw;
         float fH = angle_difference_signed(yaw, cam_yaw); // Разница текущего Yaw от Yaw при установке
+        if (m_bipods.bInvertYaw)
+        {
+            fH *= -1.f;
+        }
 
         float pitch = (-m_bipods.m_vBipodInitDir.getP()); // X
         float& cam_pitch = C->pitch;
         float fP = angle_difference_signed(pitch, cam_pitch); // Разница текущего Pitch от Pitch при установке
+        if (m_bipods.bInvertPitch)
+        {
+            fP *= -1.f;
+        }
 
         //--> В мировой модели
         // TODO: При необходимости
