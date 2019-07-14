@@ -7,6 +7,7 @@
 
 #define INV_GRID_WIDTHF 50.0f
 #define INV_GRID_HEIGHTF 50.0f
+#define INV_BACKGR_ICON_NAME "__bgr_icon"  // Название CUIStatic иконки, которое используется для определения порядка отрисовки аддонов оружия --#SM+#--
 
 namespace detail
 {
@@ -225,7 +226,7 @@ bool CUIWeaponCellItem::is_special_4() //--#SM+#--
     return object()->Special_4_Attachable() && object()->IsSpecial_4_Attached();
 }
 
-void CUIWeaponCellItem::CreateIcon(eAddonType t)
+void CUIWeaponCellItem::CreateIcon(eAddonType t, const shared_str& sAddonName) //--#SM+#--
 {
     if (m_addons[t])
         return;
@@ -234,6 +235,13 @@ void CUIWeaponCellItem::CreateIcon(eAddonType t)
     m_addons[t]->SetAutoDelete(true);
     AttachChild(m_addons[t]);
     m_addons[t]->SetShader(InventoryUtilities::GetEquipmentIconsShader(object()->GetInvTexture())); //--#SM+#--
+
+    // Регулируем порядок отрисовки иконок аддонов --#SM+#--
+    bool bIconToBackground = READ_IF_EXISTS(pSettings, r_bool, sAddonName, "inv_icon_to_back", false);
+    if (bIconToBackground)
+    {
+        m_addons[t]->SetWindowName(INV_BACKGR_ICON_NAME);
+    }
 
     u32 color = GetTextureColor();
     m_addons[t]->SetTextureColor(color);
@@ -273,9 +281,44 @@ void CUIWeaponCellItem::RefreshOffset() //--#SM+#--
         m_addon_offset[eSpecial_4].set(object()->GetSpecial_4_X(), object()->GetSpecial_4_Y());
 }
 
-void CUIWeaponCellItem::Draw()
+void CUIWeaponCellItem::Draw() //--#SM+#--
 {
-    inherited::Draw();
+    // Рисуем только аддоны заднего плана
+    bool bBackgrIconsFound = false;
+    for (auto it = m_ChildWndList.begin(); m_ChildWndList.end() != it; ++it)
+    {
+        CUIStatic* pStatic = (CUIStatic*)(*it);
+        if (pStatic->WindowName().equal(INV_BACKGR_ICON_NAME))
+        {
+            bBackgrIconsFound = true;
+            pStatic->TextureOn(); //--> Включаем текстуру у аддонов заднего плана
+        }
+        else
+        {
+            pStatic->TextureOff(); //--> Отключаем текстуру у аддонов переднего плана
+        }
+    }
+    if (bBackgrIconsFound == true)
+    {
+        TextureOff(); //--> Отключаем текстуру оружия
+        inherited::Draw(); //--> Рисуем иконки заднего плана
+        TextureOn(); //--> Включаем текстуру оружия
+    }
+
+    // Рисуем только оружие и аддоны переднего плана
+    for (auto it = m_ChildWndList.begin(); m_ChildWndList.end() != it; ++it)
+    {
+        CUIStatic* pStatic = (CUIStatic*)(*it);
+        if (pStatic->WindowName().equal(INV_BACKGR_ICON_NAME))
+        {
+            pStatic->TextureOff(); //--> Отключаем текстуру у аддонов заднего плана
+        }
+        else
+        {
+            pStatic->TextureOn(); //--> Включаем текстуру у аддонов переднего плана
+        }
+    }
+    inherited::Draw(); //--> Рисуем оружие и иконки переднего плана
 
     if (m_upgrade && m_upgrade->IsShown())
         m_upgrade->Draw();
@@ -294,7 +337,7 @@ void CUIWeaponCellItem::Update()
         {
             if (!GetIcon(eSilencer) || bForceReInitAddons)
             {
-                CreateIcon(eSilencer);
+                CreateIcon(eSilencer, object()->GetSilencerName()); //--#SM+#--
                 RefreshOffset();
                 InitAddon(GetIcon(eSilencer), *object()->GetSilencerName(), m_addon_offset[eSilencer], Heading());
             }
@@ -312,7 +355,7 @@ void CUIWeaponCellItem::Update()
         {
             if (!GetIcon(eScope) || bForceReInitAddons)
             {
-                CreateIcon(eScope);
+                CreateIcon(eScope, object()->GetScopeName()); //--#SM+#--
                 RefreshOffset();
                 InitAddon(GetIcon(eScope), *object()->GetScopeName(), m_addon_offset[eScope], Heading());
             }
@@ -330,7 +373,7 @@ void CUIWeaponCellItem::Update()
         {
             if (!GetIcon(eLauncher) || bForceReInitAddons)
             {
-                CreateIcon(eLauncher);
+                CreateIcon(eLauncher, object()->GetGrenadeLauncherName()); //--#SM+#--
                 RefreshOffset();
                 InitAddon(
                     GetIcon(eLauncher), *object()->GetGrenadeLauncherName(), m_addon_offset[eLauncher], Heading());
@@ -349,7 +392,7 @@ void CUIWeaponCellItem::Update()
         {
             if (!GetIcon(eMagazine) || bForceReInitAddons || object()->GetState() == CWeapon::eSwitchMag)
             {
-                CreateIcon(eMagazine);
+                CreateIcon(eMagazine, object()->GetMagazineName()); //--#SM+#--
                 RefreshOffset();
                 InitAddon(GetIcon(eMagazine), *object()->GetMagazineName(), m_addon_offset[eMagazine], Heading());
             }
@@ -367,7 +410,7 @@ void CUIWeaponCellItem::Update()
         {
             if (!GetIcon(eSpecial_1) || bForceReInitAddons)
             {
-                CreateIcon(eSpecial_1);
+                CreateIcon(eSpecial_1, object()->GetSpecial_1_Name()); //--#SM+#--
                 RefreshOffset();
                 InitAddon(GetIcon(eSpecial_1), *object()->GetSpecial_1_Name(), m_addon_offset[eSpecial_1], Heading());
             }
@@ -385,7 +428,7 @@ void CUIWeaponCellItem::Update()
         {
             if (!GetIcon(eSpecial_2) || bForceReInitAddons)
             {
-                CreateIcon(eSpecial_2);
+                CreateIcon(eSpecial_2, object()->GetSpecial_2_Name()); //--#SM+#--
                 RefreshOffset();
                 InitAddon(GetIcon(eSpecial_2), *object()->GetSpecial_2_Name(), m_addon_offset[eSpecial_2], Heading());
             }
@@ -403,7 +446,7 @@ void CUIWeaponCellItem::Update()
         {
             if (!GetIcon(eSpecial_3) || bForceReInitAddons)
             {
-                CreateIcon(eSpecial_3);
+                CreateIcon(eSpecial_3, object()->GetSpecial_3_Name()); //--#SM+#--
                 RefreshOffset();
                 InitAddon(GetIcon(eSpecial_3), *object()->GetSpecial_3_Name(), m_addon_offset[eSpecial_3], Heading());
             }
@@ -421,7 +464,7 @@ void CUIWeaponCellItem::Update()
         {
             if (!GetIcon(eSpecial_4) || bForceReInitAddons)
             {
-                CreateIcon(eSpecial_4);
+                CreateIcon(eSpecial_4, object()->GetSpecial_4_Name()); //--#SM+#--
                 RefreshOffset();
                 InitAddon(GetIcon(eSpecial_4), *object()->GetSpecial_4_Name(), m_addon_offset[eSpecial_4], Heading());
             }
