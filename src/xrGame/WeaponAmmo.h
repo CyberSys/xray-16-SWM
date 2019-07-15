@@ -58,6 +58,7 @@ public:
         cfCanBeUnlimited = (1 << 2),
         cfExplosive = (1 << 3),
         cfMagneticBeam = (1 << 4),
+        cfUseAirResistInSP = (1 << 5), //--#SM+#--
     };
     SCartridgeParam param_s;
 

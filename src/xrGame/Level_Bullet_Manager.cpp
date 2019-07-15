@@ -77,6 +77,7 @@ void SBullet::Init(const Fvector& position, const Fvector& direction, float star
     flags.allow_ricochet = !!cartridge.m_flags.test(CCartridge::cfRicochet);
     flags.explosive = !!cartridge.m_flags.test(CCartridge::cfExplosive);
     flags.magnetic_beam = !!cartridge.m_flags.test(CCartridge::cfMagneticBeam);
+    flags.use_airRes_in_SP = !!cartridge.m_flags.test(CCartridge::cfUseAirResistInSP); //--#SM+#--
     //	flags.skipped_frame		= 0;
 
     init_frame_num = Device.dwFrame;
@@ -574,8 +575,9 @@ BOOL CBulletManager::firetrace_callback(collide::rq_result& result, LPVOID param
     Fvector& collide_position = data.collide_position;
     collide_position = Fvector().mad(bullet.bullet_pos, bullet.dir, result.range);
 
-    float const air_resistance =
-        (GameID() == eGameIDSingle) ? Level().BulletManager().m_fAirResistanceK : bullet.air_resistance;
+    float const air_resistance = (GameID() == eGameIDSingle && !bullet.flags.use_airRes_in_SP) ? //--#SM+#--
+        Level().BulletManager().m_fAirResistanceK :
+        bullet.air_resistance;
 
     CBulletManager& bullet_manager = Level().BulletManager();
     Fvector const gravity = {0.f, -bullet_manager.m_fGravityConst, 0.f};
@@ -687,7 +689,9 @@ bool CBulletManager::process_bullet(collide::rq_results& storage, SBullet& bulle
     float const time_delta = delta_time / 1000.f;
     Fvector const gravity = Fvector().set(0.f, -m_fGravityConst, 0.f);
 
-    float const air_resistance = (GameID() == eGameIDSingle) ? m_fAirResistanceK : bullet.air_resistance;
+    float const air_resistance = (GameID() == eGameIDSingle && !bullet.flags.use_airRes_in_SP) ? //--#SM+#--
+        m_fAirResistanceK :
+        bullet.air_resistance;
     bullet.tracer_start_position = bullet.bullet_pos;
 
 #if 0 // def DEBUG

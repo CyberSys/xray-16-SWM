@@ -49,6 +49,7 @@ void CCartridge::Load(LPCSTR section, u8 LocalAmmoType)
 
     m_flags.set(cfCanBeUnlimited | cfRicochet, TRUE);
     m_flags.set(cfMagneticBeam, FALSE);
+    m_flags.set(cfUseAirResistInSP, READ_IF_EXISTS(pSettings, r_bool, section, "use_air_res_in_sp", FALSE)); //--#SM+#--
 
     if (pSettings->line_exist(section, "allow_ricochet"))
     {
