@@ -24,4 +24,6 @@ public:
 
     virtual void UpdateCL();
     virtual void renderable_Render();
+
+    virtual bool item_is_wpn_addon() override { return true; } //--#SM+#--
 };

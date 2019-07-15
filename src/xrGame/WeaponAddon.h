@@ -18,4 +18,6 @@ private:
 public:
     CWeaponAddon();
     virtual ~CWeaponAddon();
+
+    virtual bool item_is_wpn_addon() override { return true; }
 };

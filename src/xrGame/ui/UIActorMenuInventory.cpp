@@ -504,6 +504,26 @@ bool CUIActorMenu::TryActiveSlot(CUICellItem* itm)
     if (slot == DETECTOR_SLOT)
     {
     }
+    
+    // Пробуем прикрепить предмет к активному оружию --#SM+#--
+    if (iitem->object().item_is_wpn_addon() == true)
+    {
+        PIItem pActiveItem = m_pActorInvOwner->inventory().ActiveItem();
+        if (pActiveItem != nullptr)
+        {
+            CWeapon* pWpn = pActiveItem->cast_weapon();
+            if (pWpn != nullptr && iitem->cast_weapon() == nullptr) //--> Исключаем магазины (они сделаны на основе оружия)
+            {
+                if (pWpn->CanAttach(iitem) == true)
+                {
+                    AttachAddon(pWpn);
+                }
+            }
+        }
+
+        return true; //--> Останавливаем дальнейший поиск вариантов
+    }
+
     return false;
 }
 

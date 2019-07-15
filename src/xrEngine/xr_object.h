@@ -261,6 +261,7 @@ public:
     virtual CBaseMonster* cast_base_monster() = 0;
     virtual CShellLauncher* cast_shell_launcher() = 0; //--#SM+#--
     virtual CHudItem* cast_hud_item() = 0; //--#SM+#--
+    virtual bool item_is_wpn_addon() = 0; //--#SM+#--
     virtual bool feel_touch_on_contact(IGameObject* obj) = 0;
     // Utilities
     // XXX: move out

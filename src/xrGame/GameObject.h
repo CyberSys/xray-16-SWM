@@ -248,6 +248,7 @@ public:
     virtual CBaseMonster* cast_base_monster() override { return NULL; }
     virtual CShellLauncher* cast_shell_launcher() override; //--#SM+#--
     virtual CHudItem* cast_hud_item() override { return NULL; } //--#SM+#--
+    virtual bool item_is_wpn_addon() override { return false; } //--#SM+#--
     virtual bool feel_touch_on_contact(IGameObject*) override { return TRUE; }
     // Utilities
     // XXX: move out
