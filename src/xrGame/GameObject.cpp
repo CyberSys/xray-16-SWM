@@ -743,6 +743,8 @@ void CGameObject::spawn_supplies()
     bool bSpec_2 = false; //--#SM+#--
     bool bSpec_3 = false; //--#SM+#--
     bool bSpec_4 = false; //--#SM+#--
+    bool bSpec_5 = false; //--#SM+#--
+    bool bSpec_6 = false; //--#SM+#--
 
     for (u32 k = 0, j; spawn_ini()->r_line("spawn", k, &N, &V); k++)
     {
@@ -776,6 +778,8 @@ void CGameObject::spawn_supplies()
                 bSpec_2 = (NULL != strstr(V, "special_2")); //--#SM+#--
                 bSpec_3 = (NULL != strstr(V, "special_3")); //--#SM+#--
                 bSpec_4 = (NULL != strstr(V, "special_4")); //--#SM+#--
+                bSpec_5 = (NULL != strstr(V, "special_5")); //--#SM+#--
+                bSpec_6 = (NULL != strstr(V, "special_6")); //--#SM+#--
             }
             for (u32 i = 0; i < j; ++i)
             {
@@ -791,7 +795,7 @@ void CGameObject::spawn_supplies()
                     if (W)
                     { //--#SM+#--
                       // SM_TODO:L Возможность указывать конкретную секцию аддона в xml-е
-                        Flags8 addon_flags;
+                        Flags16 addon_flags;
                         addon_flags.zero();
 
                         if (W->m_scope_status == ALife::eAddonAttachable && bScope)
@@ -810,6 +814,10 @@ void CGameObject::spawn_supplies()
                             addon_flags.set(CSE_ALifeItemWeapon::eWeaponAddonSpecial_3, bSpec_3);
                         if (W->m_spec_4_status == ALife::eAddonAttachable && bSpec_4)
                             addon_flags.set(CSE_ALifeItemWeapon::eWeaponAddonSpecial_4, bSpec_4);
+                        if (W->m_spec_5_status == ALife::eAddonAttachable && bSpec_5)
+                            addon_flags.set(CSE_ALifeItemWeapon::eWeaponAddonSpecial_5, bSpec_5);
+                        if (W->m_spec_6_status == ALife::eAddonAttachable && bSpec_6)
+                            addon_flags.set(CSE_ALifeItemWeapon::eWeaponAddonSpecial_6, bSpec_6);
 
                         W->SetAddonsState(addon_flags.get(), true);
                     }

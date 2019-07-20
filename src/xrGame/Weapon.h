@@ -303,18 +303,20 @@ public:
 
 //================= Аддоны и аттачменты (общее) =================//
 public:
-    enum EAddons //--> Индексы-слоты аддонов в массиве m_addons
+    enum EAddons //--> Индексы-слоты аддонов в массиве m_addons (eAddonsSize = 16 это макс [u16])
     {
+        eNotExist = u16(-1),
         eScope = 0,
-        eMuzzle = 1,
+        eSilencer = 1,
         eLauncher = 2,
         eMagaz = 3,
         eSpec_1 = 4,
         eSpec_2 = 5,
         eSpec_3 = 6,
         eSpec_4 = 7,
-        eAddonsSize = 8,
-        eNotExist = 9,
+        eSpec_5 = 8,
+        eSpec_6 = 9,
+        eAddonsSize = 10,
     };
     SAddonData m_addons[EAddons::eAddonsSize]; //--> Массив всех возможных аддонов оружия
 
@@ -333,95 +335,6 @@ protected:
 public: 
     xr_unordered_multiset<xr_string> m_IncompatibleAddons; //--> Список-счётчик текущих несовместимых set-секций аддонов
 
-    bool IsGrenadeLauncherAttached() const;
-    bool IsScopeAttached() const;
-    bool IsSilencerAttached() const;
-    bool IsMagazineAttached() const;
-    bool IsSpecial_1_Attached() const;
-    bool IsSpecial_2_Attached() const;
-    bool IsSpecial_3_Attached() const;
-    bool IsSpecial_4_Attached() const;
-
-    bool GrenadeLauncherAttachable() const;
-    bool ScopeAttachable() const;
-    bool SilencerAttachable() const;
-    bool MagazineAttachable() const;
-    bool Special_1_Attachable() const;
-    bool Special_2_Attachable() const;
-    bool Special_3_Attachable() const;
-    bool Special_4_Attachable() const;
-
-    ALife::EWeaponAddonStatus get_GrenadeLauncherStatus() const { return GetAddonBySlot(eLauncher)->m_attach_status; }
-    ALife::EWeaponAddonStatus get_ScopeStatus() const { return GetAddonBySlot(eScope)->m_attach_status; }
-    ALife::EWeaponAddonStatus get_SilencerStatus() const { return GetAddonBySlot(eMuzzle)->m_attach_status; }
-    ALife::EWeaponAddonStatus get_MagazineStatus() const { return GetAddonBySlot(eMagaz)->m_attach_status; }
-    ALife::EWeaponAddonStatus get_Special_1_Status() const { return GetAddonBySlot(eSpec_1)->m_attach_status; }
-    ALife::EWeaponAddonStatus get_Special_2_Status() const { return GetAddonBySlot(eSpec_2)->m_attach_status; }
-    ALife::EWeaponAddonStatus get_Special_3_Status() const { return GetAddonBySlot(eSpec_3)->m_attach_status; }
-    ALife::EWeaponAddonStatus get_Special_4_Status() const { return GetAddonBySlot(eSpec_4)->m_attach_status; }
-
-    // Для отоброажения иконок апгрейдов в интерфейсе
-    int GetScopeX() const { return pSettings->r_s32(GetAddonBySlot(eScope)->GetName(), "scope_x"); }
-    int GetScopeY() const { return pSettings->r_s32(GetAddonBySlot(eScope)->GetName(), "scope_y"); }
-    int GetSilencerX() const { return pSettings->r_s32(GetAddonBySlot(eMuzzle)->GetName(), "muzzle_x"); }
-    int GetSilencerY() const { return pSettings->r_s32(GetAddonBySlot(eMuzzle)->GetName(), "muzzle_y"); }
-    int GetGrenadeLauncherX() const { return pSettings->r_s32(GetAddonBySlot(eLauncher)->GetName(), "launcher_x"); }
-    int GetGrenadeLauncherY() const { return pSettings->r_s32(GetAddonBySlot(eLauncher)->GetName(), "launcher_y"); }
-    int GetMagazineX() const { return pSettings->r_s32(GetAddonBySlot(eMagaz)->GetName(), "magazine_x"); }
-    int GetMagazineY() const { return pSettings->r_s32(GetAddonBySlot(eMagaz)->GetName(), "magazine_y"); }
-    int GetSpecial_1_X() const { return pSettings->r_s32(GetAddonBySlot(eSpec_1)->GetName(), "special_x"); }
-    int GetSpecial_1_Y() const { return pSettings->r_s32(GetAddonBySlot(eSpec_1)->GetName(), "special_y"); }
-    int GetSpecial_2_X() const { return pSettings->r_s32(GetAddonBySlot(eSpec_2)->GetName(), "special_x"); }
-    int GetSpecial_2_Y() const { return pSettings->r_s32(GetAddonBySlot(eSpec_2)->GetName(), "special_y"); }
-    int GetSpecial_3_X() const { return pSettings->r_s32(GetAddonBySlot(eSpec_3)->GetName(), "special_x"); }
-    int GetSpecial_3_Y() const { return pSettings->r_s32(GetAddonBySlot(eSpec_3)->GetName(), "special_y"); }
-    int GetSpecial_4_X() const { return pSettings->r_s32(GetAddonBySlot(eSpec_4)->GetName(), "special_x"); }
-    int GetSpecial_4_Y() const { return pSettings->r_s32(GetAddonBySlot(eSpec_4)->GetName(), "special_y"); }
-
-    // Получить секции предметов установленных аддонов
-    const shared_str GetGrenadeLauncherName() const { return GetAddonBySlot(eLauncher)->GetAddonName(); }
-    const shared_str GetScopeName() const { return GetAddonBySlot(eScope)->GetAddonName(); }
-    const shared_str GetSilencerName() const { return GetAddonBySlot(eMuzzle)->GetAddonName(); }
-    const shared_str GetMagazineName() const { return GetAddonBySlot(eMagaz)->GetAddonName(); }
-    const shared_str GetSpecial_1_Name() const { return GetAddonBySlot(eSpec_1)->GetAddonName(); }
-    const shared_str GetSpecial_2_Name() const { return GetAddonBySlot(eSpec_2)->GetAddonName(); }
-    const shared_str GetSpecial_3_Name() const { return GetAddonBySlot(eSpec_3)->GetAddonName(); }
-    const shared_str GetSpecial_4_Name() const { return GetAddonBySlot(eSpec_4)->GetAddonName(); }
-
-    // Получить set-секции установленных аддонов
-    const shared_str GetGrenadeLauncherSetSect() const
-    {
-        return IsGrenadeLauncherAttached() ? GetAddonBySlot(eLauncher)->GetName() : nullptr;
-    }
-    const shared_str GetScopeSetSect() const
-    {
-        return IsScopeAttached() ? GetAddonBySlot(eScope)->GetName() : nullptr;
-    }
-    const shared_str GetSilencerSetSect() const
-    {
-        return IsSilencerAttached() ? GetAddonBySlot(eMuzzle)->GetName() : nullptr;
-    }
-    const shared_str GetMagazineSetSect() const
-    {
-        return IsMagazineAttached() ? GetAddonBySlot(eMagaz)->GetName() : nullptr;
-    }
-    const shared_str GetSpecial_1_SetSect() const
-    {
-        return IsSpecial_1_Attached() ? GetAddonBySlot(eSpec_1)->GetName() : nullptr;
-    }
-    const shared_str GetSpecial_2_SetSect() const
-    {
-        return IsSpecial_2_Attached() ? GetAddonBySlot(eSpec_2)->GetName() : nullptr;
-    }
-    const shared_str GetSpecial_3_SetSect() const
-    {
-        return IsSpecial_3_Attached() ? GetAddonBySlot(eSpec_3)->GetName() : nullptr;
-    }
-    const shared_str GetSpecial_4_SetSect() const
-    {
-        return IsSpecial_4_Attached() ? GetAddonBySlot(eSpec_4)->GetName() : nullptr;
-    }
-
     EAddons GetAddonSlot(IGameObject* pObj, u8* idx = nullptr) const;
     EAddons GetAddonSlot(LPCSTR section, u8* idx = nullptr, EAddons slotID2Search = eNotExist) const;
     EAddons GetAddonSlotBySetSect(LPCSTR section, u8* idx = nullptr, EAddons slotID2Search = eNotExist) const;
@@ -432,8 +345,8 @@ public:
         return (SAddonData*)(&(m_addons[slotID]));
     }
 
-    u8 GetAddonsState() const;
-    void SetAddonsState(u8 m_flagsAddOnState);
+    u16 GetAddonsState() const;
+    void SetAddonsState(u16 m_flagsAddOnState);
 
     bool IsAddonsEqual(CWeapon* pWpn2Cmp) const;
 
@@ -465,6 +378,20 @@ protected:
     float m_addon_holder_fov_modifier; //--> Модификатор угла обзора для AI
 
 public:
+    bool IsScopeAttached() const;
+    bool ScopeAttachable() const;
+    ALife::EWeaponAddonStatus get_ScopeStatus() const { return GetAddonBySlot(eScope)->m_attach_status; }
+
+    // Получить секцию текущего активного предмета аддона в данном слоте
+    const shared_str GetScopeName() const { return GetAddonBySlot(eScope)->GetAddonName(); }
+
+    // Получить set-секцию текущего активного аддона в данном слоте
+    const shared_str GetScopeSetSect() const { return IsScopeAttached() ? GetAddonBySlot(eScope)->GetName() : nullptr; }
+
+    // Для отоброажения иконок апгрейдов в интерфейсе
+    int GetScopeX() const { return pSettings->r_s32(GetAddonBySlot(eScope)->GetName(), "scope_x"); }
+    int GetScopeY() const { return pSettings->r_s32(GetAddonBySlot(eScope)->GetName(), "scope_y"); }
+    
     virtual void modify_holder_params(float& range, float& fov) const;
 
 //================= Аддоны - Глушитель =================//
@@ -475,6 +402,23 @@ protected:
     void ResetSilencerKoeffs();
 
 public:
+    bool IsSilencerAttached() const;
+    bool SilencerAttachable() const;
+    ALife::EWeaponAddonStatus get_SilencerStatus() const { return GetAddonBySlot(eSilencer)->m_attach_status; }
+    
+    // Получить секцию текущего активного предмета аддона в данном слоте
+    const shared_str GetSilencerName() const { return GetAddonBySlot(eSilencer)->GetAddonName(); }
+
+    // Получить set-секцию текущего активного аддона в данном слоте
+    const shared_str GetSilencerSetSect() const
+    {
+        return IsSilencerAttached() ? GetAddonBySlot(eSilencer)->GetName() : nullptr;
+    }
+
+    // Для отоброажения иконок апгрейдов в интерфейсе
+    int GetSilencerX() const { return pSettings->r_s32(GetAddonBySlot(eSilencer)->GetName(), "silencer_x"); }
+    int GetSilencerY() const { return pSettings->r_s32(GetAddonBySlot(eSilencer)->GetName(), "silencer_y"); }
+
     void LoadSilencerKoeffs();
 
 //================= Аддоны - Подствольник =================//
@@ -484,6 +428,23 @@ protected:
 
 public:
     bool m_bGrenadeMode;
+
+    bool IsGrenadeLauncherAttached() const;
+    bool GrenadeLauncherAttachable() const;
+    ALife::EWeaponAddonStatus get_GrenadeLauncherStatus() const { return GetAddonBySlot(eLauncher)->m_attach_status; }
+
+    // Получить секцию текущего активного предмета аддона в данном слоте
+    const shared_str GetGrenadeLauncherName() const { return GetAddonBySlot(eLauncher)->GetAddonName(); }
+
+    // Получить set-секцию текущего активного аддона в данном слоте
+    const shared_str GetGrenadeLauncherSetSect() const
+    {
+        return IsGrenadeLauncherAttached() ? GetAddonBySlot(eLauncher)->GetName() : nullptr;
+    }
+
+    // Для отоброажения иконок апгрейдов в интерфейсе
+    int GetGrenadeLauncherX() const { return pSettings->r_s32(GetAddonBySlot(eLauncher)->GetName(), "launcher_x"); }
+    int GetGrenadeLauncherY() const { return pSettings->r_s32(GetAddonBySlot(eLauncher)->GetName(), "launcher_y"); }
 
     virtual void LoadGLParams();
 
@@ -501,7 +462,7 @@ protected:
 public:
     IC bool IsForegripAttached() const { return m_ForegripSlot != eNotExist; }
 
-//============== Аддоны - Передняя рама (L85) ==============//
+//================= Аддоны - Цевье =================//
 private:
 
 protected:
@@ -616,6 +577,23 @@ protected:
 public:
     u32 m_iMinRequiredAmmoInMag; //--> Минимально-необходимое кол-во патронов в магазине, чтобы им можно было зарядить оружие
 
+    bool IsMagazineAttached() const;
+    bool MagazineAttachable() const;
+    ALife::EWeaponAddonStatus get_MagazineStatus() const { return GetAddonBySlot(eMagaz)->m_attach_status; }
+
+    // Получить секцию текущего активного предмета аддона в данном слоте
+    const shared_str GetMagazineName() const { return GetAddonBySlot(eMagaz)->GetAddonName(); }
+
+    // Получить set-секцию текущего активного аддона в данном слоте
+    const shared_str GetMagazineSetSect() const
+    {
+        return IsMagazineAttached() ? GetAddonBySlot(eMagaz)->GetName() : nullptr;
+    }
+
+    // Для отоброажения иконок апгрейдов в интерфейсе
+    int GetMagazineX() const { return pSettings->r_s32(GetAddonBySlot(eMagaz)->GetName(), "magazine_x"); }
+    int GetMagazineY() const { return pSettings->r_s32(GetAddonBySlot(eMagaz)->GetName(), "magazine_y"); }
+
     virtual void LoadMagazinesParams(LPCSTR section);
 
     void UpdateMagazine3p(bool bForceUpdate = false);
@@ -627,6 +605,81 @@ public:
     CWeapon* GetBestMagazine(LPCSTR section = nullptr);
 
     bool SwitchMagazineType();
+
+//================= Аддоны - Прочее =================//
+private:
+
+protected:
+
+public:
+    bool IsSpecial_1_Attached() const;
+    bool IsSpecial_2_Attached() const;
+    bool IsSpecial_3_Attached() const;
+    bool IsSpecial_4_Attached() const;
+    bool IsSpecial_5_Attached() const;
+    bool IsSpecial_6_Attached() const;
+
+    bool Special_1_Attachable() const;
+    bool Special_2_Attachable() const;
+    bool Special_3_Attachable() const;
+    bool Special_4_Attachable() const;
+    bool Special_5_Attachable() const;
+    bool Special_6_Attachable() const;
+
+    ALife::EWeaponAddonStatus get_Special_1_Status() const { return GetAddonBySlot(eSpec_1)->m_attach_status; }
+    ALife::EWeaponAddonStatus get_Special_2_Status() const { return GetAddonBySlot(eSpec_2)->m_attach_status; }
+    ALife::EWeaponAddonStatus get_Special_3_Status() const { return GetAddonBySlot(eSpec_3)->m_attach_status; }
+    ALife::EWeaponAddonStatus get_Special_4_Status() const { return GetAddonBySlot(eSpec_4)->m_attach_status; }
+    ALife::EWeaponAddonStatus get_Special_5_Status() const { return GetAddonBySlot(eSpec_5)->m_attach_status; }
+    ALife::EWeaponAddonStatus get_Special_6_Status() const { return GetAddonBySlot(eSpec_6)->m_attach_status; }
+
+    // Получить секцию текущего активного предмета аддона в данном слоте
+    const shared_str GetSpecial_1_Name() const { return GetAddonBySlot(eSpec_1)->GetAddonName(); }
+    const shared_str GetSpecial_2_Name() const { return GetAddonBySlot(eSpec_2)->GetAddonName(); }
+    const shared_str GetSpecial_3_Name() const { return GetAddonBySlot(eSpec_3)->GetAddonName(); }
+    const shared_str GetSpecial_4_Name() const { return GetAddonBySlot(eSpec_4)->GetAddonName(); }
+    const shared_str GetSpecial_5_Name() const { return GetAddonBySlot(eSpec_5)->GetAddonName(); }
+    const shared_str GetSpecial_6_Name() const { return GetAddonBySlot(eSpec_6)->GetAddonName(); }
+
+    // Получить set-секцию текущего активного аддона в данном слоте
+    const shared_str GetSpecial_1_SetSect() const
+    {
+        return IsSpecial_1_Attached() ? GetAddonBySlot(eSpec_1)->GetName() : nullptr;
+    }
+    const shared_str GetSpecial_2_SetSect() const
+    {
+        return IsSpecial_2_Attached() ? GetAddonBySlot(eSpec_2)->GetName() : nullptr;
+    }
+    const shared_str GetSpecial_3_SetSect() const
+    {
+        return IsSpecial_3_Attached() ? GetAddonBySlot(eSpec_3)->GetName() : nullptr;
+    }
+    const shared_str GetSpecial_4_SetSect() const
+    {
+        return IsSpecial_4_Attached() ? GetAddonBySlot(eSpec_4)->GetName() : nullptr;
+    }
+    const shared_str GetSpecial_5_SetSect() const
+    {
+        return IsSpecial_5_Attached() ? GetAddonBySlot(eSpec_5)->GetName() : nullptr;
+    }
+    const shared_str GetSpecial_6_SetSect() const
+    {
+        return IsSpecial_6_Attached() ? GetAddonBySlot(eSpec_6)->GetName() : nullptr;
+    }
+
+    // Для отоброажения иконок апгрейдов в интерфейсе
+    int GetSpecial_1_X() const { return pSettings->r_s32(GetAddonBySlot(eSpec_1)->GetName(), "special_x"); }
+    int GetSpecial_1_Y() const { return pSettings->r_s32(GetAddonBySlot(eSpec_1)->GetName(), "special_y"); }
+    int GetSpecial_2_X() const { return pSettings->r_s32(GetAddonBySlot(eSpec_2)->GetName(), "special_x"); }
+    int GetSpecial_2_Y() const { return pSettings->r_s32(GetAddonBySlot(eSpec_2)->GetName(), "special_y"); }
+    int GetSpecial_3_X() const { return pSettings->r_s32(GetAddonBySlot(eSpec_3)->GetName(), "special_x"); }
+    int GetSpecial_3_Y() const { return pSettings->r_s32(GetAddonBySlot(eSpec_3)->GetName(), "special_y"); }
+    int GetSpecial_4_X() const { return pSettings->r_s32(GetAddonBySlot(eSpec_4)->GetName(), "special_x"); }
+    int GetSpecial_4_Y() const { return pSettings->r_s32(GetAddonBySlot(eSpec_4)->GetName(), "special_y"); }
+    int GetSpecial_5_X() const { return pSettings->r_s32(GetAddonBySlot(eSpec_5)->GetName(), "special_x"); }
+    int GetSpecial_5_Y() const { return pSettings->r_s32(GetAddonBySlot(eSpec_5)->GetName(), "special_y"); }
+    int GetSpecial_6_X() const { return pSettings->r_s32(GetAddonBySlot(eSpec_6)->GetName(), "special_x"); }
+    int GetSpecial_6_Y() const { return pSettings->r_s32(GetAddonBySlot(eSpec_6)->GetName(), "special_y"); }
 
 //=================== Различные методы и свойства оружия ===================//
 private:

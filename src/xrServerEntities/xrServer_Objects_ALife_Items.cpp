@@ -470,13 +470,15 @@ CSE_ALifeItemWeapon::CSE_ALifeItemWeapon(LPCSTR caSection) : CSE_ALifeItem(caSec
     m_addon_flags_sdk.zero();
 
     m_scope_section = nullptr;
-    m_muzzle_section = nullptr;
+    m_silencer_section = nullptr;
     m_launcher_section = nullptr;
     m_magaz_section = nullptr;
     m_spec_1_section = nullptr;
     m_spec_2_section = nullptr;
     m_spec_3_section = nullptr;
     m_spec_4_section = nullptr;
+    m_spec_5_section = nullptr;
+    m_spec_6_section = nullptr;
 
     m_scope_status = (EWeaponAddonStatus)(READ_IF_EXISTS(pSettings, r_s32, s_name, "scope_status", 0));
     m_silencer_status = (EWeaponAddonStatus)(READ_IF_EXISTS(pSettings, r_s32, s_name, "silencer_status", 0));
@@ -486,11 +488,13 @@ CSE_ALifeItemWeapon::CSE_ALifeItemWeapon(LPCSTR caSection) : CSE_ALifeItem(caSec
     m_spec_2_status = (EWeaponAddonStatus)(READ_IF_EXISTS(pSettings, r_s32, s_name, "special_2_status", 0));
     m_spec_3_status = (EWeaponAddonStatus)(READ_IF_EXISTS(pSettings, r_s32, s_name, "special_3_status", 0));
     m_spec_4_status = (EWeaponAddonStatus)(READ_IF_EXISTS(pSettings, r_s32, s_name, "special_4_status", 0));
+    m_spec_5_status = (EWeaponAddonStatus)(READ_IF_EXISTS(pSettings, r_s32, s_name, "special_5_status", 0));
+    m_spec_6_status = (EWeaponAddonStatus)(READ_IF_EXISTS(pSettings, r_s32, s_name, "special_6_status", 0));
 
     if (m_scope_status != EWeaponAddonStatus::eAddonDisabled)
         load_def_addons_list("scopes_sect", m_def_scope_list);
     if (m_silencer_status != EWeaponAddonStatus::eAddonDisabled)
-        load_def_addons_list("muzzles_sect", m_def_muzzle_list);
+        load_def_addons_list("silencers_sect", m_def_silencer_list);
     if (m_grenade_launcher_status != EWeaponAddonStatus::eAddonDisabled)
         load_def_addons_list("launchers_sect", m_def_launcher_list);
     if (m_magazine_status != EWeaponAddonStatus::eAddonDisabled)
@@ -503,6 +507,10 @@ CSE_ALifeItemWeapon::CSE_ALifeItemWeapon(LPCSTR caSection) : CSE_ALifeItem(caSec
         load_def_addons_list("specials_3_sect", m_def_spec_3_list);
     if (m_spec_4_status != EWeaponAddonStatus::eAddonDisabled)
         load_def_addons_list("specials_4_sect", m_def_spec_4_list);
+    if (m_spec_5_status != EWeaponAddonStatus::eAddonDisabled)
+        load_def_addons_list("specials_5_sect", m_def_spec_5_list);
+    if (m_spec_6_status != EWeaponAddonStatus::eAddonDisabled)
+        load_def_addons_list("specials_6_sect", m_def_spec_6_list);
 
     m_ef_main_weapon_type = READ_IF_EXISTS(pSettings, r_u32, caSection, "ef_main_weapon_type", u32(-1));
     m_ef_weapon_type = READ_IF_EXISTS(pSettings, r_u32, caSection, "ef_weapon_type", u32(-1));
@@ -521,13 +529,15 @@ CSE_ALifeItemWeapon::CSE_ALifeItemWeapon(LPCSTR caSection) : CSE_ALifeItem(caSec
     }
 
     DEF_LoadDefaultAddon(m_scope_status, m_scope_section, "scope_by_default");
-    DEF_LoadDefaultAddon(m_silencer_status, m_muzzle_section, "sil_by_default");
+    DEF_LoadDefaultAddon(m_silencer_status, m_silencer_section, "sil_by_default");
     DEF_LoadDefaultAddon(m_grenade_launcher_status, m_launcher_section, "gl_by_default");
     DEF_LoadDefaultAddon(m_magazine_status, m_magaz_section, "magaz_by_default");
     DEF_LoadDefaultAddon(m_spec_1_status, m_spec_1_section, "spec_1_by_default");
     DEF_LoadDefaultAddon(m_spec_2_status, m_spec_2_section, "spec_2_by_default");
     DEF_LoadDefaultAddon(m_spec_3_status, m_spec_3_section, "spec_3_by_default");
     DEF_LoadDefaultAddon(m_spec_4_status, m_spec_4_section, "spec_4_by_default");
+    DEF_LoadDefaultAddon(m_spec_5_status, m_spec_5_section, "spec_5_by_default");
+    DEF_LoadDefaultAddon(m_spec_6_status, m_spec_6_section, "spec_6_by_default");
 }
 
 CSE_ALifeItemWeapon::~CSE_ALifeItemWeapon() {}
@@ -586,9 +596,9 @@ void CSE_ALifeItemWeapon::load_def_addons_list(LPCSTR sAddonsList, ADDONS_VECTOR
     }
 }
 
-u8 CSE_ALifeItemWeapon::GetAddonsState() const
+u16 CSE_ALifeItemWeapon::GetAddonsState() const
 {
-    u8 m_flagsAddOnState = 0;
+    u16 m_flagsAddOnState = 0;
 
     if (m_launcher_section != nullptr)
         m_flagsAddOnState |= CSE_ALifeItemWeapon::eWeaponAddonGrenadeLauncher;
@@ -596,7 +606,7 @@ u8 CSE_ALifeItemWeapon::GetAddonsState() const
     if (m_scope_section != nullptr)
         m_flagsAddOnState |= CSE_ALifeItemWeapon::eWeaponAddonScope;
 
-    if (m_muzzle_section != nullptr)
+    if (m_silencer_section != nullptr)
         m_flagsAddOnState |= CSE_ALifeItemWeapon::eWeaponAddonSilencer;
 
     if (m_magaz_section != nullptr)
@@ -614,23 +624,31 @@ u8 CSE_ALifeItemWeapon::GetAddonsState() const
     if (m_spec_4_section != nullptr)
         m_flagsAddOnState |= CSE_ALifeItemWeapon::eWeaponAddonSpecial_4;
 
+    if (m_spec_5_section != nullptr)
+        m_flagsAddOnState |= CSE_ALifeItemWeapon::eWeaponAddonSpecial_5;
+
+    if (m_spec_6_section != nullptr)
+        m_flagsAddOnState |= CSE_ALifeItemWeapon::eWeaponAddonSpecial_6;
+
     return m_flagsAddOnState;
 }
 
 // Выставить аддоны в оружии через 8-битовый флаг (секцию аддона выбрать нельзя - всегда первая)
 // bAddMode - если true, текущие аддоны не будут удалены, а лишь добавлены новые
-void CSE_ALifeItemWeapon::SetAddonsState(u8 m_flagsAddOnState, bool bAddMode)
+void CSE_ALifeItemWeapon::SetAddonsState(u16 m_flagsAddOnState, bool bAddMode)
 {
     if (bAddMode == false)
     {
         m_scope_section = nullptr;
-        m_muzzle_section = nullptr;
+        m_silencer_section = nullptr;
         m_launcher_section = nullptr;
         m_magaz_section = nullptr;
         m_spec_1_section = nullptr;
         m_spec_2_section = nullptr;
         m_spec_3_section = nullptr;
         m_spec_4_section = nullptr;
+        m_spec_5_section = nullptr;
+        m_spec_6_section = nullptr;
     }
 
     if (m_flagsAddOnState & CSE_ALifeItemWeapon::eWeaponAddonScope)
@@ -638,8 +656,8 @@ void CSE_ALifeItemWeapon::SetAddonsState(u8 m_flagsAddOnState, bool bAddMode)
             m_scope_section = m_def_scope_list[0];
 
     if (m_flagsAddOnState & CSE_ALifeItemWeapon::eWeaponAddonSilencer)
-        if (m_def_muzzle_list.size() > 0)
-            m_muzzle_section = m_def_muzzle_list[0];
+        if (m_def_silencer_list.size() > 0)
+            m_silencer_section = m_def_silencer_list[0];
 
     if (m_flagsAddOnState & CSE_ALifeItemWeapon::eWeaponAddonGrenadeLauncher)
         if (m_def_launcher_list.size() > 0)
@@ -664,27 +682,39 @@ void CSE_ALifeItemWeapon::SetAddonsState(u8 m_flagsAddOnState, bool bAddMode)
     if (m_flagsAddOnState & CSE_ALifeItemWeapon::eWeaponAddonSpecial_4)
         if (m_def_spec_4_list.size() > 0)
             m_spec_4_section = m_def_spec_4_list[0];
+
+    if (m_flagsAddOnState & CSE_ALifeItemWeapon::eWeaponAddonSpecial_5)
+        if (m_def_spec_5_list.size() > 0)
+            m_spec_5_section = m_def_spec_5_list[0];
+
+    if (m_flagsAddOnState & CSE_ALifeItemWeapon::eWeaponAddonSpecial_6)
+        if (m_def_spec_6_list.size() > 0)
+            m_spec_6_section = m_def_spec_6_list[0];
 }
 
 void CSE_ALifeItemWeapon::clone_addons(CSE_ALifeItemWeapon* parent)
 {
     m_scope_section = parent->m_scope_section;
-    m_muzzle_section = parent->m_muzzle_section;
+    m_silencer_section = parent->m_silencer_section;
     m_launcher_section = parent->m_launcher_section;
     m_magaz_section = parent->m_magaz_section;
     m_spec_1_section = parent->m_spec_1_section;
     m_spec_2_section = parent->m_spec_2_section;
     m_spec_3_section = parent->m_spec_3_section;
     m_spec_4_section = parent->m_spec_4_section;
+    m_spec_5_section = parent->m_spec_5_section;
+    m_spec_6_section = parent->m_spec_6_section;
 
     m_def_scope_list = parent->m_def_scope_list;
-    m_def_muzzle_list = parent->m_def_muzzle_list;
+    m_def_silencer_list = parent->m_def_silencer_list;
     m_def_launcher_list = parent->m_def_launcher_list;
     m_def_magaz_list = parent->m_def_magaz_list;
     m_def_spec_1_list = parent->m_def_spec_1_list;
     m_def_spec_2_list = parent->m_def_spec_2_list;
     m_def_spec_3_list = parent->m_def_spec_3_list;
     m_def_spec_4_list = parent->m_def_spec_4_list;
+    m_def_spec_5_list = parent->m_def_spec_5_list;
+    m_def_spec_6_list = parent->m_def_spec_6_list;
 }
 
 void CSE_ALifeItemWeapon::UPDATE_Read(NET_Packet& tNetPacket)
@@ -725,13 +755,15 @@ void CSE_ALifeItemWeapon::UPDATE_Read(NET_Packet& tNetPacket)
         tNetPacket.r_u8(m_u8CurFireMode);
 
         tNetPacket.r_stringZ(m_scope_section);
-        tNetPacket.r_stringZ(m_muzzle_section);
+        tNetPacket.r_stringZ(m_silencer_section);
         tNetPacket.r_stringZ(m_launcher_section);
         tNetPacket.r_stringZ(m_magaz_section);
         tNetPacket.r_stringZ(m_spec_1_section);
         tNetPacket.r_stringZ(m_spec_2_section);
         tNetPacket.r_stringZ(m_spec_3_section);
         tNetPacket.r_stringZ(m_spec_4_section);
+        tNetPacket.r_stringZ(m_spec_5_section);
+        tNetPacket.r_stringZ(m_spec_6_section);
     }
 
     // Override addons with data from SDK
@@ -756,13 +788,15 @@ void CSE_ALifeItemWeapon::UPDATE_Write(NET_Packet& tNetPacket)
     tNetPacket.w_u8(m_u8CurFireMode);
 
     tNetPacket.w_stringZ(m_scope_section);
-    tNetPacket.w_stringZ(m_muzzle_section);
+    tNetPacket.w_stringZ(m_silencer_section);
     tNetPacket.w_stringZ(m_launcher_section);
     tNetPacket.w_stringZ(m_magaz_section);
     tNetPacket.w_stringZ(m_spec_1_section);
     tNetPacket.w_stringZ(m_spec_2_section);
     tNetPacket.w_stringZ(m_spec_3_section);
     tNetPacket.w_stringZ(m_spec_4_section);
+    tNetPacket.w_stringZ(m_spec_5_section);
+    tNetPacket.w_stringZ(m_spec_6_section);
 }
 
 void CSE_ALifeItemWeapon::STATE_Read(NET_Packet& tNetPacket, u16 size)
@@ -804,13 +838,15 @@ void CSE_ALifeItemWeapon::STATE_Read(NET_Packet& tNetPacket, u16 size)
         tNetPacket.r_u8(m_addon_flags_sdk.flags);
 
         tNetPacket.r_stringZ(m_scope_section);
-        tNetPacket.r_stringZ(m_muzzle_section);
+        tNetPacket.r_stringZ(m_silencer_section);
         tNetPacket.r_stringZ(m_launcher_section);
         tNetPacket.r_stringZ(m_magaz_section);
         tNetPacket.r_stringZ(m_spec_1_section);
         tNetPacket.r_stringZ(m_spec_2_section);
         tNetPacket.r_stringZ(m_spec_3_section);
         tNetPacket.r_stringZ(m_spec_4_section);
+        tNetPacket.r_stringZ(m_spec_5_section);
+        tNetPacket.r_stringZ(m_spec_6_section);
     }
 
     // Override ammo with data from SDK
@@ -838,13 +874,15 @@ void CSE_ALifeItemWeapon::STATE_Write(NET_Packet& tNetPacket)
     tNetPacket.w_u8(m_addon_flags_sdk.get());
 
     tNetPacket.w_stringZ(m_scope_section);
-    tNetPacket.w_stringZ(m_muzzle_section);
+    tNetPacket.w_stringZ(m_silencer_section);
     tNetPacket.w_stringZ(m_launcher_section);
     tNetPacket.w_stringZ(m_magaz_section);
     tNetPacket.w_stringZ(m_spec_1_section);
     tNetPacket.w_stringZ(m_spec_2_section);
     tNetPacket.w_stringZ(m_spec_3_section);
     tNetPacket.w_stringZ(m_spec_4_section);
+    tNetPacket.w_stringZ(m_spec_5_section);
+    tNetPacket.w_stringZ(m_spec_6_section);
 }
 
 void CSE_ALifeItemWeapon::OnEvent(NET_Packet& tNetPacket, u16 type, u32 time, ClientID sender)

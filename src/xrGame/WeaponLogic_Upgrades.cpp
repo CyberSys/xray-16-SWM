@@ -74,6 +74,14 @@ void CWeapon::pre_install_upgrade()
     {
         Detach(GetSpecial_4_Name().c_str(), true);
     }
+    if (Special_5_Attachable() && IsSpecial_5_Attached())
+    {
+        Detach(GetSpecial_5_Name().c_str(), true);
+    }
+    if (Special_6_Attachable() && IsSpecial_6_Attached())
+    {
+        Detach(GetSpecial_6_Name().c_str(), true);
+    }
 }
 
 // Вызывается при установке \ тестировании апгрейда
@@ -316,8 +324,8 @@ bool CWeapon::install_upgrade_addon(LPCSTR section, bool test)
             InstallAddon(eScope, first_addon_idx, true);
             bNeed2UpdateZoomTexture = true;
         }
-        if (GetAddonBySlot(eMuzzle)->m_attach_status == ALife::eAddonPermanent)
-            InstallAddon(eMuzzle, first_addon_idx, true);
+        if (GetAddonBySlot(eSilencer)->m_attach_status == ALife::eAddonPermanent)
+            InstallAddon(eSilencer, first_addon_idx, true);
         if (GetAddonBySlot(eLauncher)->m_attach_status == ALife::eAddonPermanent)
         {
             InstallAddon(eLauncher, first_addon_idx, true);
@@ -333,7 +341,11 @@ bool CWeapon::install_upgrade_addon(LPCSTR section, bool test)
             InstallAddon(eSpec_3, first_addon_idx, true);
         if (GetAddonBySlot(eSpec_4)->m_attach_status == ALife::eAddonPermanent)
             InstallAddon(eSpec_4, first_addon_idx, true);
-
+        if (GetAddonBySlot(eSpec_5)->m_attach_status == ALife::eAddonPermanent)
+            InstallAddon(eSpec_5, first_addon_idx, true);
+        if (GetAddonBySlot(eSpec_6)->m_attach_status == ALife::eAddonPermanent)
+            InstallAddon(eSpec_6, first_addon_idx, true);
+        
         // Обновляем состояние аддонов на оружии
         UpdateAddons();
 

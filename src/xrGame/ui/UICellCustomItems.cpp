@@ -167,6 +167,8 @@ CUIWeaponCellItem::CUIWeaponCellItem(CWeapon* itm) : inherited(itm) //--#SM+#--
     m_addons[eSpecial_2] = NULL;
     m_addons[eSpecial_3] = NULL;
     m_addons[eSpecial_4] = NULL; 
+    m_addons[eSpecial_5] = NULL;
+    m_addons[eSpecial_6] = NULL; 
 
 	if (itm->IsSilencerAttached())
         m_addon_offset[eSilencer].set(object()->GetSilencerX(), object()->GetSilencerY());
@@ -191,6 +193,12 @@ CUIWeaponCellItem::CUIWeaponCellItem(CWeapon* itm) : inherited(itm) //--#SM+#--
 
     if (itm->IsSpecial_4_Attached())
         m_addon_offset[eSpecial_4].set(object()->GetSpecial_4_X(), object()->GetSpecial_4_Y());
+
+    if (itm->IsSpecial_5_Attached())
+        m_addon_offset[eSpecial_5].set(object()->GetSpecial_5_X(), object()->GetSpecial_5_Y());
+
+    if (itm->IsSpecial_6_Attached())
+        m_addon_offset[eSpecial_6].set(object()->GetSpecial_6_X(), object()->GetSpecial_6_Y());
 }
 
 #include "Common/object_broker.h"
@@ -224,6 +232,16 @@ bool CUIWeaponCellItem::is_special_3() //--#SM+#--
 bool CUIWeaponCellItem::is_special_4() //--#SM+#--
 {
     return object()->Special_4_Attachable() && object()->IsSpecial_4_Attached();
+}
+
+bool CUIWeaponCellItem::is_special_5() //--#SM+#--
+{
+    return object()->Special_5_Attachable() && object()->IsSpecial_5_Attached();
+}
+
+bool CUIWeaponCellItem::is_special_6() //--#SM+#--
+{
+    return object()->Special_6_Attachable() && object()->IsSpecial_6_Attached();
 }
 
 void CUIWeaponCellItem::CreateIcon(eAddonType t, const shared_str& sAddonName) //--#SM+#--
@@ -279,6 +297,12 @@ void CUIWeaponCellItem::RefreshOffset() //--#SM+#--
 
     if (object()->IsSpecial_4_Attached())
         m_addon_offset[eSpecial_4].set(object()->GetSpecial_4_X(), object()->GetSpecial_4_Y());
+
+    if (object()->IsSpecial_5_Attached())
+        m_addon_offset[eSpecial_5].set(object()->GetSpecial_5_X(), object()->GetSpecial_5_Y());
+
+    if (object()->IsSpecial_6_Attached())
+        m_addon_offset[eSpecial_6].set(object()->GetSpecial_6_X(), object()->GetSpecial_6_Y());
 }
 
 void CUIWeaponCellItem::Draw() //--#SM+#--
@@ -476,6 +500,42 @@ void CUIWeaponCellItem::Update()
         }
     }
 
+    if (object()->Special_5_Attachable())
+    { //--#SM+#--
+        if (object()->IsSpecial_5_Attached())
+        {
+            if (!GetIcon(eSpecial_5) || bForceReInitAddons)
+            {
+                CreateIcon(eSpecial_5, object()->GetSpecial_5_Name()); //--#SM+#--
+                RefreshOffset();
+                InitAddon(GetIcon(eSpecial_5), *object()->GetSpecial_5_Name(), m_addon_offset[eSpecial_5], Heading());
+            }
+        }
+        else
+        {
+            if (m_addons[eSpecial_5])
+                DestroyIcon(eSpecial_5);
+        }
+    }
+
+    if (object()->Special_6_Attachable())
+    { //--#SM+#--
+        if (object()->IsSpecial_6_Attached())
+        {
+            if (!GetIcon(eSpecial_6) || bForceReInitAddons)
+            {
+                CreateIcon(eSpecial_6, object()->GetSpecial_6_Name()); //--#SM+#--
+                RefreshOffset();
+                InitAddon(GetIcon(eSpecial_6), *object()->GetSpecial_6_Name(), m_addon_offset[eSpecial_6], Heading());
+            }
+        }
+        else
+        {
+            if (m_addons[eSpecial_6])
+                DestroyIcon(eSpecial_6);
+        }
+    }
+
     object()->SetUpdateIcon(false); //--#SM+#--
 }
 
@@ -514,6 +574,14 @@ void CUIWeaponCellItem::SetTextureColor(u32 color)
     {
         m_addons[eSpecial_4]->SetTextureColor(color);
     }
+    if (m_addons[eSpecial_5]) //--#SM+#--
+    {
+        m_addons[eSpecial_5]->SetTextureColor(color);
+    }
+    if (m_addons[eSpecial_6]) //--#SM+#--
+    {
+        m_addons[eSpecial_6]->SetTextureColor(color);
+    }
 }
 
 void CUIWeaponCellItem::OnAfterChild(CUIDragDropListEx* parent_list)
@@ -548,6 +616,14 @@ void CUIWeaponCellItem::OnAfterChild(CUIDragDropListEx* parent_list)
 
     if (is_special_4() && GetIcon(eSpecial_4)) //--#SM+#--
         InitAddon(GetIcon(eSpecial_4), *object()->GetSpecial_4_Name(), m_addon_offset[eSpecial_4],
+            parent_list->GetVerticalPlacement());
+
+    if (is_special_5() && GetIcon(eSpecial_5)) //--#SM+#--
+        InitAddon(GetIcon(eSpecial_5), *object()->GetSpecial_5_Name(), m_addon_offset[eSpecial_5],
+            parent_list->GetVerticalPlacement());
+
+    if (is_special_6() && GetIcon(eSpecial_6)) //--#SM+#--
+        InitAddon(GetIcon(eSpecial_6), *object()->GetSpecial_6_Name(), m_addon_offset[eSpecial_6],
             parent_list->GetVerticalPlacement());
 }
 
@@ -707,6 +783,26 @@ CUIDragItem* CUIWeaponCellItem::CreateDragItem(bool bRotate) //--#SM+#--
         s->SetAutoDelete(true);
         s->SetShader(InventoryUtilities::GetEquipmentIconsShader(object()->GetInvTexture())); //--#SM+#--
         InitAddon(s, *object()->GetSpecial_4_Name(), m_addon_offset[eSpecial_4], bRotate);
+        s->SetTextureColor(i->wnd()->GetTextureColor());
+        i->wnd()->AttachChild(s);
+    }
+
+    if (GetIcon(eSpecial_5)) //--#SM+#--
+    {
+        s = new CUIStatic();
+        s->SetAutoDelete(true);
+        s->SetShader(InventoryUtilities::GetEquipmentIconsShader(object()->GetInvTexture())); //--#SM+#--
+        InitAddon(s, *object()->GetSpecial_5_Name(), m_addon_offset[eSpecial_5], bRotate);
+        s->SetTextureColor(i->wnd()->GetTextureColor());
+        i->wnd()->AttachChild(s);
+    }
+
+    if (GetIcon(eSpecial_6)) //--#SM+#--
+    {
+        s = new CUIStatic();
+        s->SetAutoDelete(true);
+        s->SetShader(InventoryUtilities::GetEquipmentIconsShader(object()->GetInvTexture())); //--#SM+#--
+        InitAddon(s, *object()->GetSpecial_6_Name(), m_addon_offset[eSpecial_6], bRotate);
         s->SetTextureColor(i->wnd()->GetTextureColor());
         i->wnd()->AttachChild(s);
     }

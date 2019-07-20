@@ -1024,7 +1024,9 @@ void CUIActorMenu::PropertiesBoxForWeapon(CUICellItem* cell_item, PIItem item, b
 	DEF_DetachAddon(pWeapon->Special_2_Attachable(),		pWeapon->IsSpecial_2_Attached(),		pWeapon->GetSpecial_2_Name(),		INVENTORY_DETACH_SPECIAL_2_ADDON)
 	DEF_DetachAddon(pWeapon->Special_3_Attachable(),		pWeapon->IsSpecial_3_Attached(),		pWeapon->GetSpecial_3_Name(),		INVENTORY_DETACH_SPECIAL_3_ADDON)
 	DEF_DetachAddon(pWeapon->Special_4_Attachable(),		pWeapon->IsSpecial_4_Attached(),		pWeapon->GetSpecial_4_Name(),		INVENTORY_DETACH_SPECIAL_4_ADDON)
-	DEF_DetachAddon(pWeapon->MagazineAttachable(),			pWeapon->IsMagazineAttached(),			pWeapon->GetMagazineName(),			INVENTORY_DETACH_MAGAZINE_ADDON)
+	DEF_DetachAddon(pWeapon->Special_5_Attachable(),		pWeapon->IsSpecial_5_Attached(),        pWeapon->GetSpecial_5_Name(),       INVENTORY_DETACH_SPECIAL_5_ADDON)
+	DEF_DetachAddon(pWeapon->Special_6_Attachable(),        pWeapon->IsSpecial_6_Attached(),        pWeapon->GetSpecial_6_Name(),       INVENTORY_DETACH_SPECIAL_6_ADDON)
+	DEF_DetachAddon(pWeapon->MagazineAttachable(),          pWeapon->IsMagazineAttached(),          pWeapon->GetMagazineName(),         INVENTORY_DETACH_MAGAZINE_ADDON)
 
     if (IsGameTypeSingle())
     {
@@ -1500,6 +1502,38 @@ void CUIActorMenu::ProcessPropertiesBoxClicked(CUIWindow* w, void* d)
                 if (child_iitm && wpn)
                 {
                     DetachAddon(wpn->GetSpecial_4_Name().c_str(), child_iitm);
+                }
+            }
+        }
+        break;
+    case INVENTORY_DETACH_SPECIAL_5_ADDON: //--#SM+#--
+        if (weapon && weapon->IsSpecial_5_Attached())
+        {
+            DetachAddon(weapon->GetSpecial_5_Name().c_str());
+            for (u32 i = 0; i < cell_item->ChildsCount(); ++i)
+            {
+                CUICellItem* child_itm = cell_item->Child(i);
+                PIItem child_iitm = (PIItem)(child_itm->m_pData);
+                CWeapon* wpn = smart_cast<CWeapon*>(child_iitm);
+                if (child_iitm && wpn)
+                {
+                    DetachAddon(wpn->GetSpecial_5_Name().c_str(), child_iitm);
+                }
+            }
+        }
+        break;
+    case INVENTORY_DETACH_SPECIAL_6_ADDON: //--#SM+#--
+        if (weapon && weapon->IsSpecial_6_Attached())
+        {
+            DetachAddon(weapon->GetSpecial_6_Name().c_str());
+            for (u32 i = 0; i < cell_item->ChildsCount(); ++i)
+            {
+                CUICellItem* child_itm = cell_item->Child(i);
+                PIItem child_iitm = (PIItem)(child_itm->m_pData);
+                CWeapon* wpn = smart_cast<CWeapon*>(child_iitm);
+                if (child_iitm && wpn)
+                {
+                    DetachAddon(wpn->GetSpecial_6_Name().c_str(), child_iitm);
                 }
             }
         }

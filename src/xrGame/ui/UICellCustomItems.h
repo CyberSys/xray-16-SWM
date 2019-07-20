@@ -49,6 +49,8 @@ public:
         eSpecial_2,
         eSpecial_3,
         eSpecial_4,
+        eSpecial_5,
+        eSpecial_6,
         eMaxAddon
     }; //--#SM+#--
 
@@ -68,6 +70,8 @@ protected:
     bool is_special_2(); //--#SM+#--
     bool is_special_3(); //--#SM+#--
     bool is_special_4(); //--#SM+#--
+    bool is_special_5(); //--#SM+#--
+    bool is_special_6(); //--#SM+#--
 
 public:
     CUIWeaponCellItem(CWeapon* itm);

@@ -177,13 +177,15 @@ public:
 
 private:
     ADDONS_VECTOR m_def_scope_list;
-    ADDONS_VECTOR m_def_muzzle_list;
+    ADDONS_VECTOR m_def_silencer_list;
     ADDONS_VECTOR m_def_launcher_list;
     ADDONS_VECTOR m_def_magaz_list;
     ADDONS_VECTOR m_def_spec_1_list;
     ADDONS_VECTOR m_def_spec_2_list;
     ADDONS_VECTOR m_def_spec_3_list;
     ADDONS_VECTOR m_def_spec_4_list;
+    ADDONS_VECTOR m_def_spec_5_list;
+    ADDONS_VECTOR m_def_spec_6_list;
 
 public:
     enum EWeaponAddonState
@@ -195,7 +197,9 @@ public:
         eWeaponAddonSpecial_1 = 0x10,
         eWeaponAddonSpecial_2 = 0x20,
         eWeaponAddonSpecial_3 = 0x40,
-        eWeaponAddonSpecial_4 = 0x80
+        eWeaponAddonSpecial_4 = 0x80,
+        eWeaponAddonSpecial_5 = 0x100,
+        eWeaponAddonSpecial_6 = 0x200,
     };
 
     EWeaponAddonStatus m_scope_status;
@@ -206,21 +210,25 @@ public:
     EWeaponAddonStatus m_spec_2_status;
     EWeaponAddonStatus m_spec_3_status;
     EWeaponAddonStatus m_spec_4_status;
+    EWeaponAddonStatus m_spec_5_status;
+    EWeaponAddonStatus m_spec_6_status;
 
     Flags8 m_addon_flags_sdk; // Backward compatibility with SDK
 
     shared_str m_scope_section;
-    shared_str m_muzzle_section;
+    shared_str m_silencer_section;
     shared_str m_launcher_section;
     shared_str m_magaz_section;
     shared_str m_spec_1_section;
     shared_str m_spec_2_section;
     shared_str m_spec_3_section;
     shared_str m_spec_4_section;
+    shared_str m_spec_5_section;
+    shared_str m_spec_6_section;
 
     // For MP Buy menu, install addon with idx = 0
-    u8 GetAddonsState() const;
-    void SetAddonsState(u8 m_flagsAddOnState, bool bAddMode = false);
+    u16 GetAddonsState() const;
+    void SetAddonsState(u16 m_flagsAddOnState, bool bAddMode = false);
 
     void clone_addons(CSE_ALifeItemWeapon* parent);
 

@@ -60,6 +60,18 @@ float CWeapon::Weight() const
         res += READ_IF_EXISTS(
             pSettings, r_float, sAddonSect, "inv_weight_inst", pSettings->r_float(sAddonSect, "inv_weight"));
     }
+    if (IsSpecial_5_Attached())
+    {
+        const shared_str sAddonSect = GetSpecial_5_Name();
+        res += READ_IF_EXISTS(
+            pSettings, r_float, sAddonSect, "inv_weight_inst", pSettings->r_float(sAddonSect, "inv_weight"));
+    }
+    if (IsSpecial_6_Attached())
+    {
+        const shared_str sAddonSect = GetSpecial_6_Name();
+        res += READ_IF_EXISTS(
+            pSettings, r_float, sAddonSect, "inv_weight_inst", pSettings->r_float(sAddonSect, "inv_weight"));
+    }
 
     // Прибавляем вес патронов
     if (iAmmoElapsed)
@@ -118,6 +130,14 @@ u32 CWeapon::Cost() const
     if (IsSpecial_4_Attached())
     {
         res += pSettings->r_u32(GetSpecial_4_Name(), "cost");
+    }
+    if (IsSpecial_5_Attached())
+    {
+        res += pSettings->r_u32(GetSpecial_5_Name(), "cost");
+    }
+    if (IsSpecial_6_Attached())
+    {
+        res += pSettings->r_u32(GetSpecial_6_Name(), "cost");
     }
 
     // Прибавляем стоймость патронов

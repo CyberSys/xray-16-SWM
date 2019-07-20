@@ -31,9 +31,9 @@ bool CWeapon::IsAddonsEqual(CWeapon* pWpn2Cmp) const
 }
 
 // Пакует присоединённые аддоны в число-флаг (не учитывает их индексы)
-u8 CWeapon::GetAddonsState() const
+u16 CWeapon::GetAddonsState() const
 {
-    u8 m_flagsAddOnState = 0;
+    u16 m_flagsAddOnState = 0;
 
     if (IsGrenadeLauncherAttached())
         m_flagsAddOnState |= CSE_ALifeItemWeapon::eWeaponAddonGrenadeLauncher;
@@ -59,11 +59,17 @@ u8 CWeapon::GetAddonsState() const
     if (IsSpecial_4_Attached())
         m_flagsAddOnState |= CSE_ALifeItemWeapon::eWeaponAddonSpecial_4;
 
+    if (IsSpecial_5_Attached())
+        m_flagsAddOnState |= CSE_ALifeItemWeapon::eWeaponAddonSpecial_5;
+
+    if (IsSpecial_6_Attached())
+        m_flagsAddOnState |= CSE_ALifeItemWeapon::eWeaponAddonSpecial_6;
+
     return m_flagsAddOnState;
 }
 
 // Распаковывает число-флаг и присоединяет соответствующие аддоны к оружию (по 0 индексу)
-void CWeapon::SetAddonsState(u8 m_flagsAddOnState)
+void CWeapon::SetAddonsState(u16 m_flagsAddOnState)
 {
     if (m_flagsAddOnState & CSE_ALifeItemWeapon::eWeaponAddonGrenadeLauncher)
         InstallAddon(eLauncher, first_addon_idx, true);
@@ -72,7 +78,7 @@ void CWeapon::SetAddonsState(u8 m_flagsAddOnState)
         InstallAddon(eScope, first_addon_idx, true);
 
     if (m_flagsAddOnState & CSE_ALifeItemWeapon::eWeaponAddonSilencer)
-        InstallAddon(eMuzzle, first_addon_idx, true);
+        InstallAddon(eSilencer, first_addon_idx, true);
 
     if (m_flagsAddOnState & CSE_ALifeItemWeapon::eWeaponAddonMagazine)
         InstallAddon(eMagaz, first_addon_idx, true);
@@ -88,6 +94,12 @@ void CWeapon::SetAddonsState(u8 m_flagsAddOnState)
 
     if (m_flagsAddOnState & CSE_ALifeItemWeapon::eWeaponAddonSpecial_4)
         InstallAddon(eSpec_4, first_addon_idx, true);
+
+    if (m_flagsAddOnState & CSE_ALifeItemWeapon::eWeaponAddonSpecial_5)
+        InstallAddon(eSpec_5, first_addon_idx, true);
+
+    if (m_flagsAddOnState & CSE_ALifeItemWeapon::eWeaponAddonSpecial_6)
+        InstallAddon(eSpec_6, first_addon_idx, true);
 
     UpdateAddons();
     ResetIdleAnim();
@@ -392,7 +404,7 @@ bool CWeapon::LoadAddons(LPCSTR section, EFuncUpgrMode upgrMode)
     }
 
     ALife::EWeaponAddonStatus sil_status = (ALife::EWeaponAddonStatus)READ_IF_EXISTS(pSettings, r_s32, section, "silencer_status", 0);
-    if ((sil_status == ALife::eAddonAttachable || sil_status == ALife::eAddonPermanent) && !pSettings->line_exist(section, "muzzles_sect"))
+    if ((sil_status == ALife::eAddonAttachable || sil_status == ALife::eAddonPermanent) && !pSettings->line_exist(section, "silencers_sect"))
     {
         // Глушитель
         LPCSTR m_sSilencerName = pSettings->r_string(section, "silencer_name");
@@ -403,10 +415,10 @@ bool CWeapon::LoadAddons(LPCSTR section, EFuncUpgrMode upgrMode)
         xr_strcpy(m_sSilencerName_str, section);
         xr_strcat(m_sSilencerName_str, "_sil_gen");
 
-        pSettings->w_string(section, "muzzles_sect", m_sSilencerName_str);
-        pSettings->w_string(m_sSilencerName_str, "muzzle_name", m_sSilencerName);
-        pSettings->w_s32(m_sSilencerName_str, "muzzle_x", m_iSilencerX);
-        pSettings->w_s32(m_sSilencerName_str, "muzzle_y", m_iSilencerY);
+        pSettings->w_string(section, "silencers_sect", m_sSilencerName_str);
+        pSettings->w_string(m_sSilencerName_str, "silencer_name", m_sSilencerName);
+        pSettings->w_s32(m_sSilencerName_str, "silencer_x", m_iSilencerX);
+        pSettings->w_s32(m_sSilencerName_str, "silencer_y", m_iSilencerY);
     }
 
     ALife::EWeaponAddonStatus grl_status = (ALife::EWeaponAddonStatus)READ_IF_EXISTS(pSettings, r_s32, section, "grenade_launcher_status", 0);
@@ -448,13 +460,15 @@ bool CWeapon::LoadAddons(LPCSTR section, EFuncUpgrMode upgrMode)
     }                                                                                           
 
     DEF_InitAddonSlot(eScope,    "scopes_sect",     "scope_name",    "scope_status",            "wpn_scope");
-    DEF_InitAddonSlot(eMuzzle,   "muzzles_sect",    "muzzle_name",   "silencer_status",         "wpn_silencer");
+    DEF_InitAddonSlot(eSilencer, "silencers_sect",  "silencer_name", "silencer_status",         "wpn_silencer");
     DEF_InitAddonSlot(eLauncher, "launchers_sect",  "launcher_name", "grenade_launcher_status", "wpn_launcher");
     DEF_InitAddonSlot(eMagaz,    "magazines_sect",  "magazine_name", "magazine_status",         "wpn_a_magazine");
     DEF_InitAddonSlot(eSpec_1,   "specials_1_sect", "special_name",  "special_1_status",        "wpn_a_special_1");
     DEF_InitAddonSlot(eSpec_2,   "specials_2_sect", "special_name",  "special_2_status",        "wpn_a_special_2");
     DEF_InitAddonSlot(eSpec_3,   "specials_3_sect", "special_name",  "special_3_status",        "wpn_a_special_3");
     DEF_InitAddonSlot(eSpec_4,   "specials_4_sect", "special_name",  "special_4_status",        "wpn_a_special_4");
+    DEF_InitAddonSlot(eSpec_5,   "specials_5_sect", "special_name",  "special_5_status",        "wpn_a_special_5");
+    DEF_InitAddonSlot(eSpec_6,   "specials_6_sect", "special_name",  "special_6_status",        "wpn_a_special_6");
     // clang-format on
 
     return bAddonsInitialized;
@@ -613,13 +627,15 @@ CWeapon::EAddons CWeapon::GetAddonSlot(LPCSTR section, u8* idx, EAddons slotID2S
     if (slotID2Search == eNotExist)
     {
         DEF_GetAddonSlot(eScope);
-        DEF_GetAddonSlot(eMuzzle);
+        DEF_GetAddonSlot(eSilencer);
         DEF_GetAddonSlot(eLauncher);
         DEF_GetAddonSlot(eMagaz);
         DEF_GetAddonSlot(eSpec_1);
         DEF_GetAddonSlot(eSpec_2);
         DEF_GetAddonSlot(eSpec_3);
         DEF_GetAddonSlot(eSpec_4);
+        DEF_GetAddonSlot(eSpec_5);
+        DEF_GetAddonSlot(eSpec_6);
     }
     else
         DEF_GetAddonSlot(slotID2Search);
@@ -650,13 +666,15 @@ CWeapon::EAddons CWeapon::GetAddonSlotBySetSect(LPCSTR section, u8* idx, EAddons
     if (slotID2Search == eNotExist)
     {
         DEF_GetAddonSlot(eScope);
-        DEF_GetAddonSlot(eMuzzle);
+        DEF_GetAddonSlot(eSilencer);
         DEF_GetAddonSlot(eLauncher);
         DEF_GetAddonSlot(eMagaz);
         DEF_GetAddonSlot(eSpec_1);
         DEF_GetAddonSlot(eSpec_2);
         DEF_GetAddonSlot(eSpec_3);
         DEF_GetAddonSlot(eSpec_4);
+        DEF_GetAddonSlot(eSpec_5);
+        DEF_GetAddonSlot(eSpec_6);
     }
     else
         DEF_GetAddonSlot(slotID2Search);
@@ -670,12 +688,14 @@ CWeapon::EAddons CWeapon::GetAddonSlotBySetSect(LPCSTR section, u8* idx, EAddons
 
 bool CWeapon::IsGrenadeLauncherAttached() const { return m_addons[eLauncher].bActive == true; }
 bool CWeapon::IsScopeAttached() const { return m_addons[eScope].bActive == true; }
-bool CWeapon::IsSilencerAttached() const { return m_addons[eMuzzle].bActive == true; }
+bool CWeapon::IsSilencerAttached() const { return m_addons[eSilencer].bActive == true; }
 bool CWeapon::IsMagazineAttached() const { return m_addons[eMagaz].bActive == true; }
 bool CWeapon::IsSpecial_1_Attached() const { return m_addons[eSpec_1].bActive == true; }
 bool CWeapon::IsSpecial_2_Attached() const { return m_addons[eSpec_2].bActive == true; }
 bool CWeapon::IsSpecial_3_Attached() const { return m_addons[eSpec_3].bActive == true; }
 bool CWeapon::IsSpecial_4_Attached() const { return m_addons[eSpec_4].bActive == true; }
+bool CWeapon::IsSpecial_5_Attached() const { return m_addons[eSpec_5].bActive == true; }
+bool CWeapon::IsSpecial_6_Attached() const { return m_addons[eSpec_6].bActive == true; }
 
 //****** Проверки на возможность присоединения аддонов ******//
 
@@ -687,6 +707,8 @@ bool CWeapon::Special_1_Attachable() const { return (ALife::eAddonAttachable == 
 bool CWeapon::Special_2_Attachable() const { return (ALife::eAddonAttachable == get_Special_2_Status()); }
 bool CWeapon::Special_3_Attachable() const { return (ALife::eAddonAttachable == get_Special_3_Status()); }
 bool CWeapon::Special_4_Attachable() const { return (ALife::eAddonAttachable == get_Special_4_Status()); }
+bool CWeapon::Special_5_Attachable() const { return (ALife::eAddonAttachable == get_Special_5_Status()); }
+bool CWeapon::Special_6_Attachable() const { return (ALife::eAddonAttachable == get_Special_6_Status()); }
 
 // Обновляем визуальное состояние всех аддонов данного типа на худе
 void CWeapon::_UpdateHUDAddonVisibility(SAddonData* m_pAddon, bool bForceReset)
@@ -813,13 +835,15 @@ void CWeapon::UpdateHUDAddonsVisibility(bool bForceReset)
         return;
 
     _UpdateHUDAddonVisibility(GetAddonBySlot(eScope), bForceReset);
-    _UpdateHUDAddonVisibility(GetAddonBySlot(eMuzzle), bForceReset);
+    _UpdateHUDAddonVisibility(GetAddonBySlot(eSilencer), bForceReset);
     _UpdateHUDAddonVisibility(GetAddonBySlot(eLauncher), bForceReset);
     _UpdateHUDAddonVisibility(GetAddonBySlot(eMagaz), bForceReset);
     _UpdateHUDAddonVisibility(GetAddonBySlot(eSpec_1), bForceReset);
     _UpdateHUDAddonVisibility(GetAddonBySlot(eSpec_2), bForceReset);
     _UpdateHUDAddonVisibility(GetAddonBySlot(eSpec_3), bForceReset);
     _UpdateHUDAddonVisibility(GetAddonBySlot(eSpec_4), bForceReset);
+    _UpdateHUDAddonVisibility(GetAddonBySlot(eSpec_5), bForceReset);
+    _UpdateHUDAddonVisibility(GetAddonBySlot(eSpec_6), bForceReset);
 }
 
 // Обновляем отображение косточки гранаты на худе
@@ -992,13 +1016,15 @@ void CWeapon::UpdateAddonsVisibility(bool bDontUpdateHUD)
     m_dwLastAddonsVisUpdTime = Device.dwTimeGlobal;
 
     _UpdateAddonsVisibility(GetAddonBySlot(eScope));
-    _UpdateAddonsVisibility(GetAddonBySlot(eMuzzle));
+    _UpdateAddonsVisibility(GetAddonBySlot(eSilencer));
     _UpdateAddonsVisibility(GetAddonBySlot(eLauncher));
     _UpdateAddonsVisibility(GetAddonBySlot(eMagaz));
     _UpdateAddonsVisibility(GetAddonBySlot(eSpec_1));
     _UpdateAddonsVisibility(GetAddonBySlot(eSpec_2));
     _UpdateAddonsVisibility(GetAddonBySlot(eSpec_3));
     _UpdateAddonsVisibility(GetAddonBySlot(eSpec_4));
+    _UpdateAddonsVisibility(GetAddonBySlot(eSpec_5));
+    _UpdateAddonsVisibility(GetAddonBySlot(eSpec_6));
 
     // Обновляем кости на мировой модели
     IKinematics* pWeaponVisual = smart_cast<IKinematics*>(Visual());

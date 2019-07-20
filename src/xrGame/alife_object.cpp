@@ -66,6 +66,8 @@ void CSE_ALifeObject::spawn_supplies(LPCSTR ini_string)
                     bool bSpec_2 = false; //--#SM+#--
                     bool bSpec_3 = false; //--#SM+#--
                     bool bSpec_4 = false; //--#SM+#--
+                    bool bSpec_5 = false; //--#SM+#--
+                    bool bSpec_6 = false; //--#SM+#--
 
                     float f_cond = 1.0f;
                     int i_ammo_type = 0, n = 0;
@@ -91,6 +93,8 @@ void CSE_ALifeObject::spawn_supplies(LPCSTR ini_string)
                         bSpec_2 = (nullptr != strstr(V, "special_2")); //--#SM+#--
                         bSpec_3 = (nullptr != strstr(V, "special_3")); //--#SM+#--
                         bSpec_4 = (nullptr != strstr(V, "special_4")); //--#SM+#--
+                        bSpec_5 = (nullptr != strstr(V, "special_5")); //--#SM+#--
+                        bSpec_6 = (nullptr != strstr(V, "special_6")); //--#SM+#--
 
                         if (nullptr != strstr(V, "ammo_type="))
                             i_ammo_type = atoi(strstr(V, "ammo_type=") + 10);
@@ -101,7 +105,7 @@ void CSE_ALifeObject::spawn_supplies(LPCSTR ini_string)
                     if (W)
                     {
                         // SM_TODO:L Возможность указывать конкретную секцию аддона в xml-е
-                        Flags8 addon_flags;
+                        Flags16 addon_flags;
                         addon_flags.zero();
 
                         if (W->m_scope_status == ALife::eAddonAttachable && bScope)
@@ -120,6 +124,10 @@ void CSE_ALifeObject::spawn_supplies(LPCSTR ini_string)
                             addon_flags.set(CSE_ALifeItemWeapon::eWeaponAddonSpecial_3, bSpec_3);
                         if (W->m_spec_4_status == ALife::eAddonAttachable && bSpec_4)
                             addon_flags.set(CSE_ALifeItemWeapon::eWeaponAddonSpecial_4, bSpec_4);
+                        if (W->m_spec_5_status == ALife::eAddonAttachable && bSpec_5)
+                            addon_flags.set(CSE_ALifeItemWeapon::eWeaponAddonSpecial_5, bSpec_5);
+                        if (W->m_spec_6_status == ALife::eAddonAttachable && bSpec_6)
+                            addon_flags.set(CSE_ALifeItemWeapon::eWeaponAddonSpecial_6, bSpec_6);
 
                         W->SetAddonsState(addon_flags.get(), true);
 
@@ -168,6 +176,8 @@ void CSE_ALifeObject::spawn_supplies(LPCSTR ini_string)
                 bool bSpec_2 = false; //--#SM+#--
                 bool bSpec_3 = false; //--#SM+#--
                 bool bSpec_4 = false; //--#SM+#--
+                bool bSpec_5 = false; //--#SM+#--
+                bool bSpec_6 = false; //--#SM+#--
 
                 j = 1;
                 p = 1.f;
@@ -187,6 +197,8 @@ void CSE_ALifeObject::spawn_supplies(LPCSTR ini_string)
                     bSpec_2 = (nullptr != strstr(V, "special_2")); //--#SM+#--
                     bSpec_3 = (nullptr != strstr(V, "special_3")); //--#SM+#--
                     bSpec_4 = (nullptr != strstr(V, "special_4")); //--#SM+#--
+                    bSpec_5 = (nullptr != strstr(V, "special_5")); //--#SM+#--
+                    bSpec_6 = (nullptr != strstr(V, "special_6")); //--#SM+#--
 
                     // probability
                     if (nullptr != strstr(V, "prob="))
@@ -206,7 +218,7 @@ void CSE_ALifeObject::spawn_supplies(LPCSTR ini_string)
                         if (W) //--#SM+#--
                         {
                             // SM_TODO:L Возможность указывать конкретную секцию аддона в xml-е
-                            Flags8 addon_flags;
+                            Flags16 addon_flags;
                             addon_flags.zero();
                       
                             if (W->m_scope_status == ALife::eAddonAttachable && bScope)
@@ -225,6 +237,10 @@ void CSE_ALifeObject::spawn_supplies(LPCSTR ini_string)
                                 addon_flags.set(CSE_ALifeItemWeapon::eWeaponAddonSpecial_3, bSpec_3);
                             if (W->m_spec_4_status == ALife::eAddonAttachable && bSpec_4)
                                 addon_flags.set(CSE_ALifeItemWeapon::eWeaponAddonSpecial_4, bSpec_4);
+                            if (W->m_spec_5_status == ALife::eAddonAttachable && bSpec_5)
+                                addon_flags.set(CSE_ALifeItemWeapon::eWeaponAddonSpecial_5, bSpec_5);
+                            if (W->m_spec_6_status == ALife::eAddonAttachable && bSpec_6)
+                                addon_flags.set(CSE_ALifeItemWeapon::eWeaponAddonSpecial_6, bSpec_6);
 
                             W->SetAddonsState(addon_flags.get(), true);
                         }

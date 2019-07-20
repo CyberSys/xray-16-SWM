@@ -211,6 +211,26 @@ void CWeapon::ReloadSound(shared_str const& strName, shared_str const& strAlias,
         }
     }
 
+    // Специальный аддон 5
+    if (IsSpecial_5_Attached() && get_Special_5_Status() == ALife::eAddonAttachable)
+    {
+        if (pSettings->line_exist(GetSpecial_5_SetSect(), strName))
+        {
+            strSection = GetSpecial_5_SetSect();
+            goto label_ReloadSound_reload;
+        }
+    }
+
+    // Специальный аддон 6
+    if (IsSpecial_6_Attached() && get_Special_6_Status() == ALife::eAddonAttachable)
+    {
+        if (pSettings->line_exist(GetSpecial_6_SetSect(), strName))
+        {
+            strSection = GetSpecial_6_SetSect();
+            goto label_ReloadSound_reload;
+        }
+    }
+
     // Магазин
     if (IsMagazineAttached() && get_MagazineStatus() == ALife::eAddonAttachable)
     {

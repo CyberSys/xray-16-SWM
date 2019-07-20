@@ -208,13 +208,15 @@ BOOL CWeapon::net_Spawn(CSE_Abstract* DC)
 
     // Аддоны
     InstallAddon(eScope, E->m_scope_section, true);
-    InstallAddon(eMuzzle, E->m_muzzle_section, true);
+    InstallAddon(eSilencer, E->m_silencer_section, true);
     InstallAddon(eLauncher, E->m_launcher_section, true);
     InstallAddon(eMagaz, E->m_magaz_section, true);
     InstallAddon(eSpec_1, E->m_spec_1_section, true);
     InstallAddon(eSpec_2, E->m_spec_2_section, true);
     InstallAddon(eSpec_3, E->m_spec_3_section, true);
     InstallAddon(eSpec_4, E->m_spec_4_section, true);
+    InstallAddon(eSpec_5, E->m_spec_5_section, true);
+    InstallAddon(eSpec_6, E->m_spec_6_section, true);
     UpdateAddons(); // <-- Данные из конфигов аддонов незагружены до этого момента <!>
 
     // Разное
@@ -298,13 +300,15 @@ void CWeapon::net_Export(NET_Packet& P)
     // clang-format off
 	// Аддоны
 	P.w_stringZ (( IsScopeAttached() ? GetAddonBySlot(eScope)->GetName() : nullptr ));
-	P.w_stringZ (( IsSilencerAttached() ? GetAddonBySlot(eMuzzle)->GetName() : nullptr ));
+	P.w_stringZ (( IsSilencerAttached() ? GetAddonBySlot(eSilencer)->GetName() : nullptr ));
 	P.w_stringZ (( IsGrenadeLauncherAttached() ? GetAddonBySlot(eLauncher)->GetName() : nullptr ));
 	P.w_stringZ (( IsMagazineAttached() ? GetAddonBySlot(eMagaz)->GetName() : nullptr ));
 	P.w_stringZ (( IsSpecial_1_Attached() ? GetAddonBySlot(eSpec_1)->GetName() : nullptr ));
 	P.w_stringZ (( IsSpecial_2_Attached() ? GetAddonBySlot(eSpec_2)->GetName() : nullptr ));
 	P.w_stringZ (( IsSpecial_3_Attached() ? GetAddonBySlot(eSpec_3)->GetName() : nullptr ));
 	P.w_stringZ (( IsSpecial_4_Attached() ? GetAddonBySlot(eSpec_4)->GetName() : nullptr ));
+	P.w_stringZ (( IsSpecial_5_Attached() ? GetAddonBySlot(eSpec_5)->GetName() : nullptr ));
+	P.w_stringZ (( IsSpecial_6_Attached() ? GetAddonBySlot(eSpec_6)->GetName() : nullptr ));
     // clang-format on
 }
 
@@ -354,7 +358,7 @@ void CWeapon::net_Import(NET_Packet& P)
     InstallAddon(eScope, sAddonSetSect, true);
 
     P.r_stringZ(sAddonSetSect);
-    InstallAddon(eMuzzle, sAddonSetSect, true);
+    InstallAddon(eSilencer, sAddonSetSect, true);
 
     P.r_stringZ(sAddonSetSect);
     InstallAddon(eLauncher, sAddonSetSect, true);
@@ -373,6 +377,12 @@ void CWeapon::net_Import(NET_Packet& P)
 
     P.r_stringZ(sAddonSetSect);
     InstallAddon(eSpec_4, sAddonSetSect, true);
+
+    P.r_stringZ(sAddonSetSect);
+    InstallAddon(eSpec_5, sAddonSetSect, true);
+
+    P.r_stringZ(sAddonSetSect);
+    InstallAddon(eSpec_6, sAddonSetSect, true);
 
     UpdateAddons();
 
