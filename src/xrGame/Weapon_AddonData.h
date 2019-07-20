@@ -18,6 +18,11 @@ enum
 			READ_IF_EXISTS(pSettings, DEF_method, DEF_fnc_2,	DEF_Name,	 \
 			READ_IF_EXISTS(pSettings, DEF_method, cNameSect(),	DEF_Name,	 \
 		DEF_def_val)));
+
+#define READ_ADDON_DATA_NO_WPN(DEF_method,DEF_Name,DEF_fnc_1,DEF_fnc_2,DEF_def_val) \
+			READ_IF_EXISTS(pSettings, DEF_method, DEF_fnc_1,	DEF_Name,	 \
+			READ_IF_EXISTS(pSettings, DEF_method, DEF_fnc_2,	DEF_Name,	 \
+		DEF_def_val));
 // clang-format on
 
 // Вектор, хранящий в себе все set-секции аддонов данного типа у оружия
@@ -36,11 +41,21 @@ public:
     ADDONS_VECTOR m_addons_list; //--> Список всех set-секций аддона данного типа у оружия
     shared_str m_addon_alias;    //--> Название строки из set-секции аддона, где указана секция предмета аддона
     shared_str m_addon_bone;     //--> Название кости на оружии, отображение которой привязано к аддону
+    shared_str m_parent_sect;    //--> Название секции оружия, которой была инициализирована текущая SAddonData
 
     // Возможность присоединения аддонов (0 - отсутствует, 1 - встроен, 2 - присоединяем)
     ALife::EWeaponAddonStatus m_attach_status;
 
     bool bHideVis3p; //--> Нужно-ли скрыть доп. модель аддона на мировой модели
+
+    // Коэфиценты оружейных характеристик от текущего аддона
+    float m_kHitPower;
+    float m_kImpulse;
+    float m_kBulletSpeed;
+    float m_kFireDispersion;
+    float m_kCamVDispersion;
+    float m_kCamHDispersion;
+    float m_kShootingShake;
 
     //==============================================================//
 
@@ -86,4 +101,10 @@ public:
 
     // Получить список всех визуалов (мировых или худовых) аддона (текущего или по его idx)
     const shared_str GetVisuals(LPCSTR vis_alias, bool bOnlyFirst = false, u8 idx = empty_addon_idx) const;
+
+    // Применить оружейные коэфиценты текущего аддона
+    void ApplyWeaponKoefs();
+
+    // Сбросить оружейные коэфиценты текущего аддона
+    void ResetWeaponKoefs();
 };

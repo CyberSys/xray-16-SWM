@@ -11,6 +11,8 @@ SAddonData::SAddonData()
     bActive = false;
     bHideVis3p = false;
     addon_idx = empty_addon_idx;
+
+    ResetWeaponKoefs();
 }
 
 SAddonData::~SAddonData() { delete_data(m_addons_list); }
@@ -27,6 +29,8 @@ void SAddonData::Initialize(LPCSTR section, LPCSTR sAddonsList, LPCSTR sAddonAli
     bActive = false;
     bHideVis3p = false;
     addon_idx = empty_addon_idx; 
+
+    m_parent_sect = section;
 
     m_addon_alias = sAddonAlias;
     m_addon_bone = sAddonBone;
@@ -81,4 +85,33 @@ const shared_str SAddonData::GetVisuals(LPCSTR vis_alias, bool bOnlyFirst, u8 id
     }
 
     return sRes;
+}
+
+// Применить оружейные коэфиценты текущего аддона
+void SAddonData::ApplyWeaponKoefs()
+{
+    ResetWeaponKoefs();
+
+    if (bActive == false)
+        return;
+
+    m_kHitPower = READ_ADDON_DATA_NO_WPN(r_float, "addon_hit_power_k", GetName(), GetAddonName(), m_kHitPower);
+    m_kImpulse = READ_ADDON_DATA_NO_WPN(r_float, "addon_impulse_k", GetName(), GetAddonName(), m_kImpulse);
+    m_kBulletSpeed = READ_ADDON_DATA_NO_WPN(r_float, "addon_bullet_speed_k", GetName(), GetAddonName(), m_kBulletSpeed);
+    m_kFireDispersion = READ_ADDON_DATA_NO_WPN(r_float, "addon_fire_disp_k", GetName(), GetAddonName(), m_kFireDispersion);
+    m_kCamVDispersion = READ_ADDON_DATA_NO_WPN(r_float, "addon_cam_v_disp_k", GetName(), GetAddonName(), m_kCamVDispersion);
+    m_kCamHDispersion = READ_ADDON_DATA_NO_WPN(r_float, "addon_cam_h_disp_k", GetName(), GetAddonName(), m_kCamHDispersion);
+    m_kShootingShake = READ_ADDON_DATA_NO_WPN(r_float, "addon_shot_shake_k", GetName(), GetAddonName(), m_kShootingShake);
+}
+
+// Сбросить оружейные коэфиценты текущего аддона
+void SAddonData::ResetWeaponKoefs()
+{
+    m_kHitPower = 1.0f;
+    m_kImpulse = 1.0f;
+    m_kBulletSpeed = 1.0f;
+    m_kFireDispersion = 1.0f;
+    m_kCamVDispersion = 1.0f;
+    m_kCamHDispersion = 1.0f;
+    m_kShootingShake = 1.0f;
 }

@@ -215,7 +215,21 @@ void CWeapon::UpdateHudAdditonal(Fmatrix& trans)
 
         Fvector curr_offs;
         curr_offs = {fLR_lim * m_fLR_ShootingFactor, fUD_lim * -1.f * m_fUD_ShootingFactor, -1.f * fShootingBackwOffset * m_fBACKW_ShootingFactor};
+
+        //--> Глушители могут изменять силу тряски
         curr_offs.mul(cur_silencer_koef.shooting_shake);
+
+        //--> Прочие generic-аддоны могут изменять силу тряски
+        float fTrgtShakeKoef = 1.0f;
+        for (int iSlot = 0; iSlot < EAddons::eAddonsSize; iSlot++)
+        {
+            SAddonData* pAddon = GetAddonBySlot((CWeapon::EAddons)iSlot);
+            if (pAddon->bActive)
+            {
+                fTrgtShakeKoef *= pAddon->m_kShootingShake;
+            }
+        }
+        curr_offs.mul(fTrgtShakeKoef);
 
         Fmatrix hud_rotation;
         hud_rotation.identity();

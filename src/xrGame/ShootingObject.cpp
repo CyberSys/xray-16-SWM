@@ -519,8 +519,34 @@ void CShootingObject::FireBullet(const Fvector& pos, const Fvector& shot_dir, fl
         l_fHitPower = fvHitPower[egdMaster];
     }
 
-    Level().BulletManager().AddBullet(pos, dir, m_fStartBulletSpeed * cur_silencer_koef.bullet_speed,
-        l_fHitPower * cur_silencer_koef.hit_power, fHitImpulse * cur_silencer_koef.hit_impulse, parent_id, weapon_id,
+    // Модифицируем параметры выстрела generic-данными из аддонов --#SM+#--
+    float fTrgtBulletSpeed = m_fStartBulletSpeed * cur_silencer_koef.bullet_speed;
+    float fTrgtHitPower = l_fHitPower * cur_silencer_koef.hit_power;
+    float fTrgtImpulse = fHitImpulse * cur_silencer_koef.hit_impulse;
+
+    if (weapon_id >= 0)
+    {
+        IGameObject* pShootingObject = Level().Objects.net_Find(weapon_id);
+        if (pShootingObject != nullptr)
+        {
+            CWeapon* pWeapon = pShootingObject->cast_weapon();
+            if (pWeapon != nullptr)
+            {
+                for (int iSlot = 0; iSlot < CWeapon::EAddons::eAddonsSize; iSlot++)
+                {
+                    SAddonData* pAddon = pWeapon->GetAddonBySlot((CWeapon::EAddons)iSlot);
+                    if (pAddon->bActive)
+                    {
+                        fTrgtBulletSpeed *= pAddon->m_kBulletSpeed;
+                        fTrgtHitPower *= pAddon->m_kHitPower;
+                        fTrgtImpulse *= pAddon->m_kImpulse;
+                    }
+                }
+            }
+        }
+    }
+
+    Level().BulletManager().AddBullet(pos, dir, fTrgtBulletSpeed, fTrgtHitPower, fTrgtImpulse, parent_id, weapon_id,
         ALife::eHitTypeFireWound, fireDistance, cartridge, m_air_resistance_factor, send_hit, aim_bullet);
 }
 void CShootingObject::FireStart() { bWorking = true; }

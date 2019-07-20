@@ -207,6 +207,9 @@ SAddonData* CWeapon::UnistallAddon(EAddons iSlot, bool bNoUpdate)
 // Колбэк на установку аддона
 void CWeapon::OnAddonInstall(EAddons iSlot, const shared_str& sAddonSetSect)
 {
+    // Изменяем характеристики оружия коэфицентами аддона
+    GetAddonBySlot(iSlot)->ApplyWeaponKoefs();
+
     // Установка патронташа
     bool bIsAmmoBelt = READ_IF_EXISTS(pSettings, r_bool, sAddonSetSect, "is_ammo_belt", false);
     if (bIsAmmoBelt)
@@ -282,6 +285,9 @@ void CWeapon::OnAddonInstall(EAddons iSlot, const shared_str& sAddonSetSect)
 // Колбэк на снятие аддона
 void CWeapon::OnAddonUnistall(EAddons iSlot, const shared_str& sAddonSetSect)
 {
+    // Сбрасываем коэфиценты характеристик оружия
+    GetAddonBySlot(iSlot)->ResetWeaponKoefs();
+
     // Снимаем все аддоны, зависящие от нашего
     for (int iSlotNext = 0; iSlotNext < EAddons::eAddonsSize; iSlotNext++)
     {

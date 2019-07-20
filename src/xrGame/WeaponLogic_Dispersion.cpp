@@ -11,7 +11,19 @@ float CWeapon::GetConditionDispersionFactor() const { return (1.f + fireDispersi
 // Рассчитать базовый разброс самого оружия, используя коэфицент от патрона
 float CWeapon::GetBaseDispersion(float cartridge_k)
 {
-    return fireDispersionBase * cur_silencer_koef.fire_dispersion * cartridge_k * GetConditionDispersionFactor();
+    float fTrgtDisp = fireDispersionBase * cur_silencer_koef.fire_dispersion * cartridge_k * GetConditionDispersionFactor();
+
+    // Модифицируем разброс выстрела generic-данными из аддонов
+    for (int iSlot = 0; iSlot < CWeapon::EAddons::eAddonsSize; iSlot++)
+    {
+        SAddonData* pAddon = GetAddonBySlot((CWeapon::EAddons)iSlot);
+        if (pAddon->bActive)
+        {
+            fTrgtDisp *= pAddon->m_kFireDispersion;
+        }
+    }
+
+    return fTrgtDisp;
 }
 
 // Получить текущий разброс

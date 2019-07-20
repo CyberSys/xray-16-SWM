@@ -59,13 +59,30 @@ void CWeaponShotEffector::Shot(CWeapon* weapon)
         angle *= _lerpc(1.0f, weapon->m_bipods.fRecoilMod, weapon->GetBipodsTranslationFactor());
     }
 
-    Shot2(angle);
+    Shot2(angle, weapon); //--#SM+#--
 }
 
-void CWeaponShotEffector::Shot2(float angle)
+void CWeaponShotEffector::Shot2(float angle, CWeapon* weapon) //--#SM+#--
 {
-    m_angle_vert +=
-        angle * (m_cam_recoil.DispersionFrac + m_Random.randF(-1.0f, 1.0f) * (1.0f - m_cam_recoil.DispersionFrac));
+    float fTrgtKVFactor = 1.0f;
+    float fTrgtKHFactor = 1.0f;
+
+    // Модифицируем отдачу выстрела generic-данными из аддонов
+    if (weapon != nullptr)
+    {
+        for (int iSlot = 0; iSlot < CWeapon::EAddons::eAddonsSize; iSlot++)
+        {
+            SAddonData* pAddon = weapon->GetAddonBySlot((CWeapon::EAddons)iSlot);
+            if (pAddon->bActive)
+            {
+                fTrgtKVFactor *= pAddon->m_kCamVDispersion;
+                fTrgtKHFactor *= pAddon->m_kCamHDispersion;
+            }
+        }
+    }
+
+    m_angle_vert += angle * fTrgtKVFactor *
+        (m_cam_recoil.DispersionFrac + m_Random.randF(-1.0f, 1.0f) * (1.0f - m_cam_recoil.DispersionFrac));
 
     clamp(m_angle_vert, -m_cam_recoil.MaxAngleVert, m_cam_recoil.MaxAngleVert);
     if (fis_zero(m_angle_vert - m_cam_recoil.MaxAngleVert))
@@ -74,7 +91,7 @@ void CWeaponShotEffector::Shot2(float angle)
     }
 
     float rdm = m_Random.randF(-1.0f, 1.0f);
-    m_angle_horz += (m_angle_vert / m_cam_recoil.MaxAngleVert) * rdm * m_cam_recoil.StepAngleHorz;
+    m_angle_horz += fTrgtKHFactor * (m_angle_vert / m_cam_recoil.MaxAngleVert) * rdm * m_cam_recoil.StepAngleHorz;
 
     clamp(m_angle_horz, -m_cam_recoil.MaxAngleHorz, m_cam_recoil.MaxAngleHorz);
 
