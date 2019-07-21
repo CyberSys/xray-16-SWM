@@ -1543,6 +1543,28 @@ void CWeapon::PlayAnimKick()
 {
     int iAmmo = GetMainAmmoElapsed();
 
+    if (IsForegripAttached() && IsBayonetAttached())
+    {
+        if (iAmmo == 0)
+        {
+            if (PlaySoundMotion("anm_kick_empty_w_gak", FALSE, NULL, false))
+                return;
+        }
+        if (PlaySoundMotion("anm_kick_w_gak", FALSE, NULL, false))
+            return;
+    }
+
+    if (IsForendAttached() && IsBayonetAttached())
+    {
+        if (iAmmo == 0)
+        {
+            if (PlaySoundMotion("anm_kick_empty_w_fak", FALSE, NULL, false))
+                return;
+        }
+        if (PlaySoundMotion("anm_kick_w_fak", FALSE, NULL, false))
+            return;
+    }
+
     if (def_IsGL_Mode)
     {
         if (iAmmo == 0)
@@ -1582,6 +1604,28 @@ void CWeapon::PlayAnimKickAlt()
 {
     int iAmmo = GetMainAmmoElapsed();
 
+    if (IsForegripAttached() && IsBayonetAttached())
+    {
+        if (iAmmo == 0)
+        {
+            if (PlaySoundMotion("anm_kick_alt_empty_w_gak", TRUE, NULL, false))
+                return;
+        }
+        if (PlaySoundMotion("anm_kick_alt_w_gak", TRUE, NULL, false))
+            return;
+    }
+
+    if (IsForendAttached() && IsBayonetAttached())
+    {
+        if (iAmmo == 0)
+        {
+            if (PlaySoundMotion("anm_kick_alt_empty_w_fak", TRUE, NULL, false))
+                return;
+        }
+        if (PlaySoundMotion("anm_kick_alt_w_fak", TRUE, NULL, false))
+            return;
+    }
+
     if (def_IsGL_Mode)
     {
         if (iAmmo == 0)
@@ -1620,6 +1664,28 @@ void CWeapon::PlayAnimKickAlt()
 bool CWeapon::PlayAnimKickOut()
 {
     int iAmmo = GetMainAmmoElapsed();
+
+    if (IsForegripAttached() && IsBayonetAttached())
+    {
+        if (iAmmo == 0)
+        {
+            if (PlaySoundMotion("anm_kick_out_empty_w_gak", FALSE, NULL, false))
+                return true;
+        }
+        if (PlaySoundMotion("anm_kick_out_w_gak", FALSE, NULL, false))
+            return true;
+    }
+
+    if (IsForendAttached() && IsBayonetAttached())
+    {
+        if (iAmmo == 0)
+        {
+            if (PlaySoundMotion("anm_kick_out_empty_w_fak", FALSE, NULL, false))
+                return true;
+        }
+        if (PlaySoundMotion("anm_kick_out_w_fak", FALSE, NULL, false))
+            return true;
+    }
 
     if (def_IsGL_Mode)
     {
@@ -1662,6 +1728,29 @@ bool CWeapon::PlayAnimKickOut()
 bool CWeapon::PlayAnimKickOutAlt()
 {
     int iAmmo = GetMainAmmoElapsed();
+
+
+    if (IsForegripAttached() && IsBayonetAttached())
+    {
+        if (iAmmo == 0)
+        {
+            if (PlaySoundMotion("anm_kick_alt_out_empty_w_gak", FALSE, NULL, false))
+                return true;
+        }
+        if (PlaySoundMotion("anm_kick_alt_out_w_gak", FALSE, NULL, false))
+            return true;
+    }
+
+    if (IsForendAttached() && IsBayonetAttached())
+    {
+        if (iAmmo == 0)
+        {
+            if (PlaySoundMotion("anm_kick_alt_out_empty_w_fak", FALSE, NULL, false))
+                return true;
+        }
+        if (PlaySoundMotion("anm_kick_alt_out_w_fak", FALSE, NULL, false))
+            return true;
+    }
 
     if (def_IsGL_Mode)
     {
