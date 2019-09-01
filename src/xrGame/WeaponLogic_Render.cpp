@@ -1119,7 +1119,7 @@ void CWeapon::UpdateWpnExtraVisuals()
         attachable_hud_item* hud_item = HudItemData();
         if (hud_item != NULL)
         {
-            // Перебираем все активные атачи худа и скрываем\раскрываем кости в зависимости от числа патронов
+            // Перебираем все активные атачи худа
             for (u32 i = 0; i < hud_item->m_child_items.size(); i++)
             {
                 attachable_hud_item* item = hud_item->m_child_items[i];
@@ -1130,13 +1130,29 @@ void CWeapon::UpdateWpnExtraVisuals()
                     {
                         vis_object_data* object_data = pVis->getObjectData();
 
-                        // Скрываем кости голографа вне зума
+                        // Скрываем кости голографа вне зума, двигаем их в зуме
                         if (IsScopeAttached() && m_sHolographBone != NULL)
                         {
-                            bool bShow = (m_bGrenadeMode == false && GetZRotatingFactor() >= m_fHolographRotationFactor);
-                            item->set_bone_visible(m_sHolographBone, bShow, TRUE);
+                            xr_string hud_vis = GetAddonBySlot(eScope)->GetVisuals("visuals_hud").c_str();
+                            if (hud_vis.find(item->m_sect_name.c_str()) != xr_string::npos)
+                            {
+                                // Скрываем \ показываем метку
+                                bool bShow =
+                                    (m_bGrenadeMode == false && GetZRotatingFactor() >= m_fHolographRotationFactor);
+                                item->set_bone_visible(m_sHolographBone, bShow, TRUE);
+
+                                // Сдвигаем её на произвольное расстояние
+                                item->m_model->LL_ClearAdditionalTransform(BI_NONE); //--> Очищаем старые смещения
+
+                                KinematicsABT::additional_bone_transform holoOffsets;
+                                holoOffsets.m_bone_id = item->m_model->LL_BoneID(m_sHolographBone);
+                                holoOffsets.setPosOffset(m_vHolographOffset);
+
+                                item->m_model->LL_AddTransformToBone(holoOffsets);
+                            }
                         }
 
+                        // Скрываем \ показываем кости в зависимости от числа патронов
                         // Получаем число костей, привязанных к числу патронов
                         int max_bullet_bones = object_data->m_max_bullet_bones;
                         if (max_bullet_bones <= 0)
@@ -1169,6 +1185,7 @@ void CWeapon::UpdateWpnExtraVisuals()
             {
                 vis_object_data* object_data = pVis->getObjectData();
 
+                // Скрываем \ показываем кости в зависимости от числа патронов
                 // Получаем число костей, привязанных к числу патронов
                 int max_bullet_bones = object_data->m_max_bullet_bones;
                 if (max_bullet_bones <= 0)

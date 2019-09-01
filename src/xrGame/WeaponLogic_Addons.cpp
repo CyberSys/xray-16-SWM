@@ -520,6 +520,7 @@ void CWeapon::InitAddons()
         // Коллиматорная метка, должна быть скрыта без зума
         m_sHolographBone           = READ_ADDON_DATA(r_string, "holograph_bone", GetScopeSetSect(), GetScopeName(), NULL);
         m_fHolographRotationFactor = READ_ADDON_DATA(r_float, "holograph_rotation_factor", GetScopeSetSect(), GetScopeName(), 1.0f);
+        m_vHolographOffset         = READ_ADDON_DATA(r_fvector3, "holograph_offset", GetScopeSetSect(), GetScopeName(), Fvector3().set(0.0f, 0.0f, 0.0f));
     }
     else
     {

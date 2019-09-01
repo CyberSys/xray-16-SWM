@@ -169,6 +169,7 @@ CWeapon::CWeapon() : CShellLauncher(this)
 
     m_sHolographBone           = NULL;
     m_fHolographRotationFactor = 1.f;
+    m_vHolographOffset.set(0.0f, 0.0f, 0.0f);
 
     sReloadSndSectOverride = nullptr;
 

@@ -1323,6 +1323,7 @@ protected:
 
     shared_str m_sHolographBone; //--> Название кости голографа на худовой модели, которая будет раскрыта при прицеливании
     float m_fHolographRotationFactor; //--> Фактор поворота ствола от бедра к прицеливанию [0, 1], выше которого отобразим голограф
+    Fvector m_vHolographOffset; //--> Смещение точки голографа
 
     // Объект партиклов для стрельбы из подствола
     shared_str m_sFlameParticles2;
