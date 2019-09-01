@@ -1245,6 +1245,17 @@ void CWeapon::UpdateSecondVP()
     Device.m_SecondViewport.SetSVPActive(bCond_1 && bCond_2 && bCond_3);
 }
 
+// Получить степень видимости содержимого второго вьюпорта (линзы) +SecondVP+
+float CWeapon::GetSVPVisibilityFactor()
+{ 
+    if (Device.m_SecondViewport.IsSVPActive() == false)
+    {
+        return 0.0f;
+    }
+
+    return GetZRotatingFactor();
+}
+
 // Статическая функция. Считывает из модели число костей с привязкой к числу патронов
 // Если в любой модели (худовой или мировой) есть кости вида bullet_1, bullet_2, ... bullet_x, то они будут скрываться
 // если число патронов в основном магазине меньше, чем числовой индекс кости

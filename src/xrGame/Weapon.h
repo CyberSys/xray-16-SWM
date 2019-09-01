@@ -1372,6 +1372,8 @@ public:
     void CheckFlameParticles(LPCSTR section, LPCSTR prefix);   
 
     void UpdateSecondVP();
+    float GetSVPVisibilityFactor();
+
     void StopAllEffects();
 
     virtual void renderable_Render();
