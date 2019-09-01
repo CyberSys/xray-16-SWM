@@ -44,6 +44,10 @@ void SZoomParams::Initialize(LPCSTR section, LPCSTR prefix, bool bOverrideMode)
     strconcat(sizeof(val_name), val_name, "scope_zoom_fov", _prefix);
     m_fZoomFov = READ_IF_EXISTS(pSettings, r_float, section, val_name, (bOverrideMode ? m_fZoomFov : 0.000f));
 
+    // Целевой FOV при зуме в сошках с одетым прицелом
+    strconcat(sizeof(val_name), val_name, "scope_bipods_fov", _prefix);
+    m_fScopeBipodsZoomFov = READ_IF_EXISTS(pSettings, r_float, section, val_name, (bOverrideMode ? m_fScopeBipodsZoomFov : -1.0f));
+
     //--> Зум отсутствует
     strconcat(sizeof(val_name), val_name, "scope_no_zoom", _prefix);
     m_bNoZoom = READ_IF_EXISTS(pSettings, r_bool, section, val_name, (bOverrideMode ? m_bNoZoom : false));
@@ -78,6 +82,10 @@ void SZoomParams::Initialize(LPCSTR section, LPCSTR prefix, bool bOverrideMode)
     // Режим бинокля
     strconcat(sizeof(val_name), val_name, "scope_alive_detector", _prefix);
     m_sUseBinocularVision = READ_IF_EXISTS(pSettings, r_string, section, val_name, (bOverrideMode ? m_sUseBinocularVision : NULL));
+
+    // Параметры чувствительности мышки в прицеливании
+    strconcat(sizeof(val_name), val_name, "scope_inertion_factor", _prefix);
+    m_fScopeInertionFactor = READ_IF_EXISTS(pSettings, r_float, section, val_name, (bOverrideMode ? m_fScopeInertionFactor : -1.0f));
 
     // Прочее
     xr_delete(m_UIScope);

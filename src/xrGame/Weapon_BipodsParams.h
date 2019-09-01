@@ -26,13 +26,12 @@ struct bipods_data
     Fvector m_vBipodInitNormal; //--> Актуальная нормаль установки сошек
 
     bool m_bZoomMode; //--> Включён-ли режим прицеливания
-    float m_fCurScopeZoomFov; //--> FOV в режиме прицеливания
 
     float m_fTranslationFactor; //--> Степень стадии установки сошек (0.f сложены - 1.f установлены)
 
     bipods_data()
         : m_bInstalled(false), m_bZoomMode(false), m_iBipodState(eBS_SwitchedOFF), m_fTranslationFactor(0.0f),
-          m_fCurScopeZoomFov(0.0f), bDbgDraw(false)
+          bDbgDraw(false)
     {
         m_vPrevYP.set(0.f, 0.f);
         sInstCamAnm = nullptr;

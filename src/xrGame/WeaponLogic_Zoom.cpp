@@ -270,8 +270,27 @@ bool CWeapon::CanUseScopeTexture() const
 float CWeapon::GetControlInertionFactor() const
 {
     float fInertionFactor = inherited::GetControlInertionFactor();
-    if (IsScopeAttached() && IsZoomed())
-        return m_fScopeInertionFactor;
+
+    do
+    {
+        // В разложенных сошках без зума - используем чувствительность от бедра
+        if (IsBipodsDeployed() && IsBipodsZoomed() == false)
+        {
+            break;
+        }
+
+        // При активном прицеле - используем чувствительность от прицела
+        if (IsScopeAttached() && IsZoomed())
+        {
+            float fScopeInertion = GetZoomParams().m_fScopeInertionFactor;
+            if (fScopeInertion <= 0.0f)
+            {
+                break;
+            }
+
+            return fScopeInertion;
+        }
+    } while (false);
 
     return fInertionFactor;
 }

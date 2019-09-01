@@ -457,7 +457,7 @@ public:
 private:
 
 protected:
-    EAddons m_ForegripSlot; //--> Слот аддона, который заменяет рукоятка
+    EAddons m_ForegripSlot; //--> Слот аддона, который занимает рукоятка
 
 public:
     IC bool IsForegripAttached() const { return m_ForegripSlot != eNotExist; }
@@ -466,7 +466,7 @@ public:
 private:
 
 protected:
-    EAddons m_ForendSlot; //--> Слот аддона, который заменяет рукоятка
+    EAddons m_ForendSlot; //--> Слот аддона, который занимает цевье
 
 public:
     IC bool IsForendAttached() const { return m_ForendSlot != eNotExist; }
@@ -883,8 +883,6 @@ protected:
     float m_fCurrentCartirdgeDisp; //--> Коэфицент разброса от последнего выпущенного патрона
 
 public:
-    float m_fScopeInertionFactor; //--> Чувствительность мыши во время прицеливания
-
     CameraRecoil cam_recoil; //--> Отдача камеры от бедра (simple mode (walk, run))
     CameraRecoil zoom_cam_recoil; //--> Отдача камеры от бедра (using zoom (ironsight or scope))
 

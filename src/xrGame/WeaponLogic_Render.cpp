@@ -510,7 +510,9 @@ float CWeapon::GetFov() const
     { // FOV при сошках
         if (m_bipods.m_bZoomMode)
         {
-            return (IsScopeAttached() && m_bipods.m_fCurScopeZoomFov > 0.0f ? m_bipods.m_fCurScopeZoomFov : m_bipods.fZoomFOV);
+            return (IsScopeAttached() && GetZoomParams().m_fScopeBipodsZoomFov > 0.0f ?
+                    GetZoomParams().m_fScopeBipodsZoomFov :
+                    m_bipods.fZoomFOV);
         }
         else
             return g_fov;

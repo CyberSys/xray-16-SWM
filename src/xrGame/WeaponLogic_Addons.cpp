@@ -490,9 +490,6 @@ void CWeapon::InitAddons()
     {
         //**** Прицел одет ****//
 
-        // Параметры чувствительности мышки в прицеливании
-        m_fScopeInertionFactor = READ_ADDON_DATA(r_float, "scope_inertion_factor", GetScopeSetSect(), GetScopeName(), m_fControlInertionFactor);
-
         // Параметры НПС
         m_addon_holder_range_modifier = READ_ADDON_DATA(r_float, "holder_range_modifier", GetScopeSetSect(), GetScopeName(), m_holder_range_modifier);
         m_addon_holder_fov_modifier   = READ_ADDON_DATA(r_float, "holder_fov_modifier", GetScopeSetSect(), GetScopeName(), m_holder_fov_modifier);
@@ -519,9 +516,6 @@ void CWeapon::InitAddons()
         GetZoomParams(eZoomMain).Initialize(GetScopeSetSect().c_str(), NULL, true);
         if (IsAltZoomEnabled())
             GetZoomParams(eZoomAlt).Initialize(GetScopeSetSect().c_str(), "_alt", true);
-
-        // Параметры сошек
-        m_bipods.m_fCurScopeZoomFov = READ_ADDON_DATA(r_float, "scope_bipods_fov", GetScopeSetSect(), GetScopeName(), -1.f);
 
         // Коллиматорная метка, должна быть скрыта без зума
         m_sHolographBone           = READ_ADDON_DATA(r_string, "holograph_bone", GetScopeSetSect(), GetScopeName(), NULL);
