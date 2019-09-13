@@ -462,6 +462,16 @@ protected:
 public:
     IC bool IsForegripAttached() const { return m_ForegripSlot != eNotExist; }
 
+
+//================= Аддоны - Пламегаситель =================//
+private:
+
+protected:
+    EAddons m_FlashHiderSlot; //--> Слот аддона, который занимает рукоятка
+
+public:
+    IC bool IsFlashHiderAttached() const { return m_FlashHiderSlot != eNotExist; }
+
 //================= Аддоны - Цевье =================//
 private:
 

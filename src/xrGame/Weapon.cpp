@@ -129,7 +129,7 @@ CWeapon::CWeapon() : CShellLauncher(this)
     m_sAB_vis          = NULL;
 
     m_ForegripSlot = eNotExist;
-
+    m_FlashHiderSlot = eNotExist;
     m_ForendSlot = eNotExist;
 
     m_sBulletHUDVisSect          = NULL;

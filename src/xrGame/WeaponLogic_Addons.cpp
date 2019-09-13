@@ -232,6 +232,17 @@ void CWeapon::OnAddonInstall(EAddons iSlot, const shared_str& sAddonSetSect)
         m_ForegripSlot = iSlot;
     }
 
+    // Установка пламегасителя
+    bool bIsFlashHider = READ_IF_EXISTS(pSettings, r_bool, sAddonSetSect, "is_flashider", false);
+    if (bIsFlashHider)
+    {
+        R_ASSERT4(IsFlashHiderAttached() == false,
+            "FlashHider already installed <!>",
+            sAddonSetSect.c_str(),
+            GetAddonBySlot(m_FlashHiderSlot)->GetName().c_str());
+        m_FlashHiderSlot = iSlot;
+    }
+
     // Установка цевья
     bool bIsForend = READ_IF_EXISTS(pSettings, r_bool, sAddonSetSect, "is_forend", false);
     if (bIsForend)
@@ -315,6 +326,11 @@ void CWeapon::OnAddonUnistall(EAddons iSlot, const shared_str& sAddonSetSect)
     bool bIsForegrip = (IsForegripAttached() && iSlot == m_ForegripSlot);
     if (bIsForegrip)
         m_ForegripSlot = eNotExist;
+
+    // Снятие пламегасителя
+    bool bIsFlashHider = (IsFlashHiderAttached() && iSlot == m_FlashHiderSlot);
+    if (bIsFlashHider)
+        m_FlashHiderSlot = eNotExist;
 
     // Снятие цевья
     bool bIsForend = (IsForendAttached() && iSlot == m_ForendSlot);
@@ -1141,6 +1157,13 @@ bool CWeapon::CanAttach(PIItem pIItem)
         if (bIsForegrip)
         {
             return IsGrenadeLauncherAttached() == false && IsForegripAttached() == false;
+        }
+
+        // Пламегаситель
+        bool bIsFlashHider = READ_IF_EXISTS(pSettings, r_bool, sAddonName, "is_flashider", false);
+        if (bIsFlashHider)
+        {
+            return IsSilencerAttached() == false;
         }
 
         // Сошки
