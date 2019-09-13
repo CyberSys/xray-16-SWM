@@ -1072,18 +1072,24 @@ void CWeapon::UpdateBulletHUDVisual()
     attachable_hud_item* hud_item = HudItemData();
     if (hud_item != NULL)
     {
-        bool bVisible = true;
-
-        // Отображаем\скрываем патрон
-        hud_item->UpdateChildrenList(m_sBulletHUDVisSect, bVisible);
-
-        // Обновляем его визуал
-        attachable_hud_item* bullet_item = hud_item->FindChildren(m_sBulletHUDVisSect);
-        if (bullet_item != NULL)
+        for (int i = 0, iCnt = _GetItemCount(m_sBulletHUDVisSect.c_str()); i < iCnt; ++i)
         {
-            u8 iType = (m_set_next_ammoType_on_reload == undefined_ammo_type ? m_ammoType : m_set_next_ammoType_on_reload);
-            if (iType < m_AmmoCartidges.size())
-                bullet_item->UpdateVisual(m_AmmoCartidges[iType].m_sBulletHudVisual);
+            // Получаем очередную HUD-секцию из списка
+            string128 sBulletHudSect;
+            _GetItem(m_sBulletHUDVisSect.c_str(), i, sBulletHudSect);
+
+            // Отображаем\скрываем патрон
+            bool bVisible = true;
+            hud_item->UpdateChildrenList(sBulletHudSect, bVisible);
+
+            // Обновляем его визуал
+            attachable_hud_item* bullet_item = hud_item->FindChildren(sBulletHudSect);
+            if (bullet_item != NULL)
+            {
+                u8 iType = (m_set_next_ammoType_on_reload == undefined_ammo_type ? m_ammoType : m_set_next_ammoType_on_reload);
+                if (iType < m_AmmoCartidges.size())
+                    bullet_item->UpdateVisual(m_AmmoCartidges[iType].m_sBulletHudVisual);
+            }
         }
     }
 }
