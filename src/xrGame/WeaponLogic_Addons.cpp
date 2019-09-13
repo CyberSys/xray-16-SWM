@@ -1139,10 +1139,16 @@ bool CWeapon::CanAttach(PIItem pIItem)
             return false;
         }
 
+        // Глушитель
+        if (iSlot == eSilencer)
+        {
+            return IsFlashHiderAttached() == false && IsBayonetAttached() == false;
+        }
+
         // Подствольник
         if (iSlot == eLauncher)
         {
-            return m_bUseAmmoBeltMode == false && IsForegripAttached() == false;
+            return m_bUseAmmoBeltMode == false && IsForegripAttached() == false && IsBipodsAttached() == false;
         }
 
         // Патронташ
@@ -1156,7 +1162,7 @@ bool CWeapon::CanAttach(PIItem pIItem)
         bool bIsForegrip = READ_IF_EXISTS(pSettings, r_bool, sAddonName, "is_foregrip", false);
         if (bIsForegrip)
         {
-            return IsGrenadeLauncherAttached() == false && IsForegripAttached() == false;
+            return IsGrenadeLauncherAttached() == false;
         }
 
         // Пламегаситель
@@ -1170,7 +1176,14 @@ bool CWeapon::CanAttach(PIItem pIItem)
         bool bIsBipods = READ_IF_EXISTS(pSettings, r_bool, sAddonName, "is_bipods", false);
         if (bIsBipods)
         {
-            return IsBipodsDeployed() == false && IsBipodsAttached() == false;
+            return IsBipodsDeployed() == false && IsBipodsAttached() == false && IsGrenadeLauncherAttached() == false;
+        }
+
+        // Штык-нож
+        bool bIsBayonet = READ_IF_EXISTS(pSettings, r_bool, sAddonName, "is_bayonet", false);
+        if (bIsBayonet)
+        {
+            return IsSilencerAttached() == false;
         }
 
         // Всё остальное
