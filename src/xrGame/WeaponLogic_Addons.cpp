@@ -207,11 +207,13 @@ SAddonData* CWeapon::UnistallAddon(EAddons iSlot, bool bNoUpdate)
 // Колбэк на установку аддона
 void CWeapon::OnAddonInstall(EAddons iSlot, const shared_str& sAddonSetSect)
 {
+    const shared_str& sAddonName = GetAddonBySlot(iSlot)->GetAddonName();
+
     // Изменяем характеристики оружия коэфицентами аддона
     GetAddonBySlot(iSlot)->ApplyWeaponKoefs();
 
     // Установка патронташа
-    bool bIsAmmoBelt = READ_IF_EXISTS(pSettings, r_bool, sAddonSetSect, "is_ammo_belt", false);
+    bool bIsAmmoBelt = READ_IF_EXISTS(pSettings, r_bool, sAddonName, "is_ammo_belt", false);
     if (bIsAmmoBelt)
     {
         R_ASSERT4(IsAmmoBeltAttached() == false,
@@ -222,7 +224,7 @@ void CWeapon::OnAddonInstall(EAddons iSlot, const shared_str& sAddonSetSect)
     }
 
     // Установка рукоятки
-    bool bIsForegrip = READ_IF_EXISTS(pSettings, r_bool, sAddonSetSect, "is_foregrip", false);
+    bool bIsForegrip = READ_IF_EXISTS(pSettings, r_bool, sAddonName, "is_foregrip", false);
     if (bIsForegrip)
     {
         R_ASSERT4(IsForegripAttached() == false,
@@ -233,7 +235,7 @@ void CWeapon::OnAddonInstall(EAddons iSlot, const shared_str& sAddonSetSect)
     }
 
     // Установка пламегасителя
-    bool bIsFlashHider = READ_IF_EXISTS(pSettings, r_bool, sAddonSetSect, "is_flashider", false);
+    bool bIsFlashHider = READ_IF_EXISTS(pSettings, r_bool, sAddonName, "is_flashider", false);
     if (bIsFlashHider)
     {
         R_ASSERT4(IsFlashHiderAttached() == false,
@@ -244,7 +246,7 @@ void CWeapon::OnAddonInstall(EAddons iSlot, const shared_str& sAddonSetSect)
     }
 
     // Установка цевья
-    bool bIsForend = READ_IF_EXISTS(pSettings, r_bool, sAddonSetSect, "is_forend", false);
+    bool bIsForend = READ_IF_EXISTS(pSettings, r_bool, sAddonName, "is_forend", false);
     if (bIsForend)
     {
         R_ASSERT4(
@@ -253,7 +255,7 @@ void CWeapon::OnAddonInstall(EAddons iSlot, const shared_str& sAddonSetSect)
     }
 
     // Установка сошек
-    bool bIsBipods = READ_IF_EXISTS(pSettings, r_bool, sAddonSetSect, "is_bipods", false);
+    bool bIsBipods = READ_IF_EXISTS(pSettings, r_bool, sAddonName, "is_bipods", false);
     if (bIsBipods)
     {
         R_ASSERT4(IsBipodsAttached() == false,
@@ -264,7 +266,7 @@ void CWeapon::OnAddonInstall(EAddons iSlot, const shared_str& sAddonSetSect)
     }
 
     // Установка штык-ножа
-    bool bIsBayonet = READ_IF_EXISTS(pSettings, r_bool, sAddonSetSect, "is_bayonet", false);
+    bool bIsBayonet = READ_IF_EXISTS(pSettings, r_bool, sAddonName, "is_bayonet", false);
     if (bIsBayonet)
     {
         R_ASSERT4(
@@ -1063,10 +1065,11 @@ bool CWeapon::CanAttach(PIItem pIItem)
     EAddons iSlot    = GetAddonSlot(pIItem->cast_game_object(), &addonIdx);
     if (iSlot != eNotExist)
     {
-        SAddonData* pAddon      = GetAddonBySlot(iSlot);
-        shared_str  sAddonName  = pAddon->GetNameByIdx(addonIdx);
-        bool        bIsSlotFree = pAddon->bActive == false;
-        bool        bAttachable = pAddon->m_attach_status == ALife::EWeaponAddonStatus::eAddonAttachable;
+        SAddonData*         pAddon          = GetAddonBySlot(iSlot);
+        const shared_str&   sAddonSetSect   = pAddon->GetNameByIdx(addonIdx);
+        const shared_str&   sAddonName      = pIItem->m_section_id;
+        bool                bIsSlotFree     = pAddon->bActive == false;
+        bool                bAttachable     = pAddon->m_attach_status == ALife::EWeaponAddonStatus::eAddonAttachable;
 
         // Проверяем на возможность замены аддона
         if (bAttachable == false)
@@ -1074,12 +1077,12 @@ bool CWeapon::CanAttach(PIItem pIItem)
 
         // Проверяем на совместимость с другими аддонами
         //--> Быстрая проверка - сработает если у нас уже установлен аддон, который блокирует этот
-        if (m_IncompatibleAddons.count(sAddonName.c_str()) > 0)
+        if (m_IncompatibleAddons.count(sAddonSetSect.c_str()) > 0)
             return false;
 
         //--> Медленная проверка - на случаи если это мы блокируем аддон, который уже был установлен (нет в m_IncompatibleAddons)
         {
-            LPCSTR sDisallowStr = READ_IF_EXISTS(pSettings, r_string, sAddonName, WEAPON_ADDON_DIS_L, nullptr);
+            LPCSTR sDisallowStr = READ_IF_EXISTS(pSettings, r_string, sAddonSetSect, WEAPON_ADDON_DIS_L, nullptr);
             if (sDisallowStr != nullptr)
             {
                 string128 _sect_name;
@@ -1103,7 +1106,7 @@ bool CWeapon::CanAttach(PIItem pIItem)
         }
 
         // Проверяем на наличие соседних аддонов, требуемых для установки этого
-        shared_str sRequiredAddonSetSect = READ_IF_EXISTS(pSettings, r_string, sAddonName, WEAPON_ADDON_REQ_L, nullptr);
+        shared_str sRequiredAddonSetSect = READ_IF_EXISTS(pSettings, r_string, sAddonSetSect, WEAPON_ADDON_REQ_L, nullptr);
         if (sRequiredAddonSetSect != nullptr)
         {
             bool bRequiredAddonExist = false;
