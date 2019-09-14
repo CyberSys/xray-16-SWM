@@ -552,34 +552,50 @@ void CWeapon::InitAddons()
     //******** Инициализируем параметры глушителя ********//
     LoadSilencerKoeffs(); //--> Загружаем баллистические параметры глушителя
 
+    // Дефолтные эффекты от выстрела
+    m_sFlameParticles = nullptr;
+    m_sSmokeParticles = nullptr;
+    LoadFlameParticles(*cNameSect(), ""); //--> Из конфига оружия
+
+    // Дефолтный свет от выстрела
+    CShootingObject::LoadLights(*cNameSect(), ""); //--> Из конфига оружия
+
     if (IsSilencerAttached())
-    {
+    { //--> Глушитель установлен
         // Меняем звук выстрела
         m_sSndShotCurrent = "sndSilencerShot";
 
-        // Меняем эффекты от выстрела
+        // Пробуем менять эффекты от выстрела
+        m_sFlameParticles = nullptr;
+        m_sSmokeParticles = nullptr;
         LoadFlameParticles(*cNameSect(), "silencer_");          //--> Из конфига оружия
         LoadFlameParticles(*GetSilencerSetSect(), "silencer_"); //--> Из сэт-секции глушителя
-        CheckFlameParticles(*cNameSect(), "silencer_");
 
-        // Меняем свет от выстрела у шутера
-        LoadLights(*cNameSect(), "silencer_");
+        // Пробуем менять свет от выстрела
+        LoadLights(*cNameSect(), "silencer_");                  //--> Из конфига оружия
+        LoadLights(*GetSilencerSetSect(), "silencer_");         //--> Из сэт-секции глушителя
 
         // Применяем коэфиценты глушителя
         ApplySilencerKoeffs();
     }
     else
-    {
+    { //--> Глушитель не установлен
         // Меняем звук выстрела
         m_sSndShotCurrent = "sndShot";
 
-        // Меняем эффекты от выстрела
-        LoadFlameParticles(*cNameSect(), ""); //--> Из конфига оружия
-        CheckFlameParticles(*cNameSect(), "");
+        if (IsFlashHiderAttached())
+        { //--> Пламегаситель установлен
+            // Пробуем менять эффекты от выстрела
+            m_sFlameParticles = nullptr;
+            m_sSmokeParticles = nullptr;
+            LoadFlameParticles(*cNameSect(), "flashhider_");            //--> Из конфига оружия
+            LoadFlameParticles(*GetFlashHiderSetSect(), "flashhider_"); //--> Из сэт-секции пламегасителя
 
-        // Меняем свет от выстрела у шутера
-        LoadLights(*cNameSect(), "");
-
+            // Пробуем менять свет от выстрела
+            LoadLights(*cNameSect(), "flashhider_");                    //--> Из конфига оружия
+            LoadLights(*GetFlashHiderSetSect(), "flashhider_");         //--> Из сэт-секции глушителя
+        }
+        
         // Сбрасываем коэфиценты глушителя
         ResetSilencerKoeffs();
     }

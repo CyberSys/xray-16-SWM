@@ -850,65 +850,36 @@ void CWeapon::StopAllEffects()
 // Загрузить параметры света во время стрельбы
 void CWeapon::LoadLights(LPCSTR section, LPCSTR prefix)
 {
-    // Загружаем из секции оружия
-    CShootingObject::LoadLights(section, prefix);
+    // Загружаем дефолты из секции оружия (перенесено в CWeapon::InitAddons())
+    // CShootingObject::LoadLights(section, prefix);
 
-    // Если одет глушитель, то пробуем загрузить параметры из секции глушителя в конфиге оружия
-    if (IsSilencerAttached())
+    // Переопределяем произвольные дефолтные параметры
+    if (m_bLightShotEnabled)
     {
-        string256  full_name;
-        shared_str m_sil_set_sect = GetSilencerSetSect();
+        string256 full_name;
 
         strconcat(sizeof(full_name), full_name, prefix, "light_color");
-        if (pSettings->line_exist(m_sil_set_sect, full_name))
+        if (pSettings->line_exist(section, full_name))
         {
-            Fvector clr = pSettings->r_fvector3(m_sil_set_sect, full_name);
+            Fvector clr = pSettings->r_fvector3(section, full_name);
             light_base_color.set(clr.x, clr.y, clr.z, 1);
         }
 
         strconcat(sizeof(full_name), full_name, prefix, "light_range");
-        if (pSettings->line_exist(m_sil_set_sect, full_name))
-            light_base_range = pSettings->r_float(m_sil_set_sect, full_name);
+        if (pSettings->line_exist(section, full_name))
+            light_base_range = pSettings->r_float(section, full_name);
 
         strconcat(sizeof(full_name), full_name, prefix, "light_var_color");
-        if (pSettings->line_exist(m_sil_set_sect, full_name))
-            light_var_color = pSettings->r_float(m_sil_set_sect, full_name);
+        if (pSettings->line_exist(section, full_name))
+            light_var_color = pSettings->r_float(section, full_name);
 
         strconcat(sizeof(full_name), full_name, prefix, "light_var_range");
-        if (pSettings->line_exist(m_sil_set_sect, full_name))
-            light_var_range = pSettings->r_float(m_sil_set_sect, full_name);
+        if (pSettings->line_exist(section, full_name))
+            light_var_range = pSettings->r_float(section, full_name);
 
         strconcat(sizeof(full_name), full_name, prefix, "light_time");
-        if (pSettings->line_exist(m_sil_set_sect, full_name))
-            light_lifetime = pSettings->r_float(m_sil_set_sect, full_name);
-    }
-}
-
-// Проверить партиклы пламя\дыма на их присутствие в конфигах, иначе отключить их
-void CWeapon::CheckFlameParticles(LPCSTR section, LPCSTR prefix)
-{
-    // Если одет глушитель, то возможно нам нужно отключить партиклы стрельбы
-    if (IsSilencerAttached())
-    {
-        shared_str m_sil_set_sect = GetSilencerSetSect();
-
-        //**** Проверяем партикл огня ****//
-        string256 full_name;
-        strconcat(sizeof(full_name), full_name, prefix, "flame_particles");
-
-        // Если этой строки нет ни в конфиге оружия, ни в сэт-секции глушителя -> отключаем партикл
-        if (!pSettings->line_exist(section, full_name) && !pSettings->line_exist(m_sil_set_sect, full_name))
-        {
-            m_sFlameParticlesCurrent = NULL;
-        }
-
-        //**** Проверяем партикл дыма ****//
-        strconcat(sizeof(full_name), full_name, prefix, "smoke_particles");
-        // Если этой строки нет ни в конфиге оружия, ни в сэт-секции глушителя -> отключаем партикл
-        if (!pSettings->line_exist(section, full_name) && !pSettings->line_exist(m_sil_set_sect, full_name))
-        {
-            m_sSmokeParticlesCurrent = NULL;
-        }
+        if (pSettings->line_exist(section, full_name))
+            light_lifetime = pSettings->r_float(section, full_name);
     }
 }
 

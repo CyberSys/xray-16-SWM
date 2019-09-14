@@ -462,7 +462,6 @@ protected:
 public:
     IC bool IsForegripAttached() const { return m_ForegripSlot != eNotExist; }
 
-
 //================= Аддоны - Пламегаситель =================//
 private:
 
@@ -471,6 +470,12 @@ protected:
 
 public:
     IC bool IsFlashHiderAttached() const { return m_FlashHiderSlot != eNotExist; }
+
+    // Получить set-секцию текущего активного аддона в данном слоте
+    const shared_str GetFlashHiderSetSect() const
+    {
+        return IsFlashHiderAttached() ? GetAddonBySlot(m_FlashHiderSlot)->GetName() : nullptr;
+    }
 
 //================= Аддоны - Цевье =================//
 private:
@@ -1378,7 +1383,6 @@ public:
 
     virtual void LoadLights(LPCSTR section, LPCSTR prefix);
     virtual void ForceUpdateFireParticles();
-    void CheckFlameParticles(LPCSTR section, LPCSTR prefix);   
 
     void UpdateSecondVP();
     float GetSVPVisibilityFactor();
