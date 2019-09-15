@@ -41,7 +41,8 @@ class CUIWeaponCellItem : public CUIInventoryCellItem
 public:
     enum eAddonType
     {
-        eSilencer = 0,
+        eDefaultStock = 0,
+        eSilencer,
         eScope,
         eLauncher,
         eMagazine,

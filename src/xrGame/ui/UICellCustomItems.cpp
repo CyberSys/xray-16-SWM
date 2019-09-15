@@ -159,6 +159,7 @@ void CUIAmmoCellItem::UpdateItemText()
 
 CUIWeaponCellItem::CUIWeaponCellItem(CWeapon* itm) : inherited(itm) //--#SM+#--
 {
+    m_addons[eDefaultStock] = NULL; 
     m_addons[eSilencer] = NULL;
     m_addons[eScope] = NULL;
     m_addons[eLauncher] = NULL;
@@ -169,6 +170,9 @@ CUIWeaponCellItem::CUIWeaponCellItem(CWeapon* itm) : inherited(itm) //--#SM+#--
     m_addons[eSpecial_4] = NULL; 
     m_addons[eSpecial_5] = NULL;
     m_addons[eSpecial_6] = NULL; 
+
+    if (itm->IsDefaultStockPresent() && itm->IsStockAttached() == false)
+        m_addon_offset[eDefaultStock].set(object()->GetDefaultStockX(), object()->GetDefaultStockY());
 
 	if (itm->IsSilencerAttached())
         m_addon_offset[eSilencer].set(object()->GetSilencerX(), object()->GetSilencerY());
@@ -274,6 +278,9 @@ void CUIWeaponCellItem::DestroyIcon(eAddonType t)
 CUIStatic* CUIWeaponCellItem::GetIcon(eAddonType t) { return m_addons[t]; }
 void CUIWeaponCellItem::RefreshOffset() //--#SM+#--
 {
+    if (object()->IsDefaultStockPresent() && object()->IsStockAttached() == false)
+        m_addon_offset[eDefaultStock].set(object()->GetDefaultStockX(), object()->GetDefaultStockY());
+
     if (object()->IsSilencerAttached()) 
         m_addon_offset[eSilencer].set(object()->GetSilencerX(), object()->GetSilencerY());
 
@@ -354,6 +361,21 @@ void CUIWeaponCellItem::Update()
     inherited::Update();
 
     bool bForceReInitAddons = (b != Heading()) || object()->Need2UpdateIcon(); //--#SM+#--
+
+    if (object()->IsDefaultStockPresent() && object()->IsStockAttached() == false)
+    { //--#SM+#--
+        if (!GetIcon(eDefaultStock) || bForceReInitAddons)
+        {
+            CreateIcon(eDefaultStock, object()->GetDefaultStockSect()); //--#SM+#--
+            RefreshOffset();
+            InitAddon(GetIcon(eDefaultStock), *object()->GetDefaultStockSect(), m_addon_offset[eDefaultStock], Heading());
+        }
+    }
+    else
+    {
+        if (m_addons[eDefaultStock])
+            DestroyIcon(eDefaultStock);
+    }
 
     if (object()->SilencerAttachable())
     {
@@ -542,6 +564,10 @@ void CUIWeaponCellItem::Update()
 void CUIWeaponCellItem::SetTextureColor(u32 color)
 {
     inherited::SetTextureColor(color);
+    if (m_addons[eDefaultStock]) //--#SM+#--
+    {
+        m_addons[eDefaultStock]->SetTextureColor(color);
+    }
     if (m_addons[eSilencer])
     {
         m_addons[eSilencer]->SetTextureColor(color);
@@ -586,6 +612,10 @@ void CUIWeaponCellItem::SetTextureColor(u32 color)
 
 void CUIWeaponCellItem::OnAfterChild(CUIDragDropListEx* parent_list)
 {
+    if (object()->IsDefaultStockPresent() && object()->IsStockAttached() == false && GetIcon(eDefaultStock)) //--#SM+#--
+        InitAddon(GetIcon(eDefaultStock), *object()->GetDefaultStockSect(), m_addon_offset[eDefaultStock],
+            parent_list->GetVerticalPlacement());
+
     if (is_silencer() && GetIcon(eSilencer))
         InitAddon(GetIcon(eSilencer), *object()->GetSilencerName(), m_addon_offset[eSilencer],
             parent_list->GetVerticalPlacement());
@@ -705,6 +735,16 @@ CUIDragItem* CUIWeaponCellItem::CreateDragItem(bool bRotate) //--#SM+#--
         i->wnd()->EnableHeading(true);
         i->wnd()->SetHeading(90.0f * (PI / 180.0f));
         i->wnd()->SetHeadingPivot(Fvector2().set(0.0f, 0.0f), Fvector2().set(0.0f, i->wnd()->GetWndSize().y), true);
+    }
+
+    if (GetIcon(eDefaultStock)) //--#SM+#--
+    {
+        s = new CUIStatic();
+        s->SetAutoDelete(true);
+        s->SetShader(InventoryUtilities::GetEquipmentIconsShader(object()->GetInvTexture())); //--#SM+#--
+        InitAddon(s, *object()->GetDefaultStockSect(), m_addon_offset[eDefaultStock], bRotate);
+        s->SetTextureColor(i->wnd()->GetTextureColor());
+        i->wnd()->AttachChild(s);
     }
 
     if (GetIcon(eSilencer))

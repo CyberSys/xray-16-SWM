@@ -132,6 +132,9 @@ CWeapon::CWeapon() : CShellLauncher(this)
     m_FlashHiderSlot = eNotExist;
     m_ForendSlot = eNotExist;
 
+    m_StockSlot        = eNotExist;
+    m_DefaultStockSect = NULL;
+
     m_sBulletHUDVisSect          = NULL;
 
     m_sAnimatedShellHUDVisSect   = NULL;

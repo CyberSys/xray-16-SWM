@@ -254,6 +254,17 @@ void CWeapon::OnAddonInstall(EAddons iSlot, const shared_str& sAddonSetSect)
         m_ForendSlot = iSlot;
     }
 
+    // Установка приклада
+    bool bIsStock = READ_IF_EXISTS(pSettings, r_bool, sAddonName, "is_stock", false);
+    if (bIsStock)
+    {
+        R_ASSERT4(IsStockAttached() == false,
+            "Stock already installed <!>",
+            sAddonSetSect.c_str(),
+            GetAddonBySlot(m_StockSlot)->GetName().c_str());
+        m_StockSlot = iSlot;
+    }
+
     // Установка сошек
     bool bIsBipods = READ_IF_EXISTS(pSettings, r_bool, sAddonName, "is_bipods", false);
     if (bIsBipods)
@@ -338,6 +349,11 @@ void CWeapon::OnAddonUnistall(EAddons iSlot, const shared_str& sAddonSetSect)
     bool bIsForend = (IsForendAttached() && iSlot == m_ForendSlot);
     if (bIsForend)
         m_ForendSlot = eNotExist;
+
+    // Снятие приклада
+    bool bIsStock = (IsStockAttached() && iSlot == m_StockSlot);
+    if (bIsStock)
+        m_StockSlot = eNotExist;
 
     if (iSlot == eLauncher || bIsAmmoBelt)
     {
@@ -494,6 +510,8 @@ bool CWeapon::LoadAddons(LPCSTR section, EFuncUpgrMode upgrMode)
     DEF_InitAddonSlot(eSpec_5,   "specials_5_sect", "special_name",  "special_5_status",        "wpn_a_special_5");
     DEF_InitAddonSlot(eSpec_6,   "specials_6_sect", "special_name",  "special_6_status",        "wpn_a_special_6");
     // clang-format on
+
+    m_DefaultStockSect = READ_IF_EXISTS(pSettings, r_string, section, "default_stock", nullptr);
 
     return bAddonsInitialized;
 }

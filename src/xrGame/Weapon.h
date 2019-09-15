@@ -388,7 +388,7 @@ public:
     // Получить set-секцию текущего активного аддона в данном слоте
     const shared_str GetScopeSetSect() const { return IsScopeAttached() ? GetAddonBySlot(eScope)->GetName() : nullptr; }
 
-    // Для отоброажения иконок апгрейдов в интерфейсе
+    // Координаты иконки аддона на оружии
     int GetScopeX() const { return pSettings->r_s32(GetAddonBySlot(eScope)->GetName(), "scope_x"); }
     int GetScopeY() const { return pSettings->r_s32(GetAddonBySlot(eScope)->GetName(), "scope_y"); }
     
@@ -415,7 +415,7 @@ public:
         return IsSilencerAttached() ? GetAddonBySlot(eSilencer)->GetName() : nullptr;
     }
 
-    // Для отоброажения иконок апгрейдов в интерфейсе
+    // Координаты иконки аддона на оружии
     int GetSilencerX() const { return pSettings->r_s32(GetAddonBySlot(eSilencer)->GetName(), "silencer_x"); }
     int GetSilencerY() const { return pSettings->r_s32(GetAddonBySlot(eSilencer)->GetName(), "silencer_y"); }
 
@@ -442,7 +442,7 @@ public:
         return IsGrenadeLauncherAttached() ? GetAddonBySlot(eLauncher)->GetName() : nullptr;
     }
 
-    // Для отоброажения иконок апгрейдов в интерфейсе
+    // Координаты иконки аддона на оружии
     int GetGrenadeLauncherX() const { return pSettings->r_s32(GetAddonBySlot(eLauncher)->GetName(), "launcher_x"); }
     int GetGrenadeLauncherY() const { return pSettings->r_s32(GetAddonBySlot(eLauncher)->GetName(), "launcher_y"); }
 
@@ -605,7 +605,7 @@ public:
         return IsMagazineAttached() ? GetAddonBySlot(eMagaz)->GetName() : nullptr;
     }
 
-    // Для отоброажения иконок апгрейдов в интерфейсе
+    // Координаты иконки аддона на оружии
     int GetMagazineX() const { return pSettings->r_s32(GetAddonBySlot(eMagaz)->GetName(), "magazine_x"); }
     int GetMagazineY() const { return pSettings->r_s32(GetAddonBySlot(eMagaz)->GetName(), "magazine_y"); }
 
@@ -620,6 +620,32 @@ public:
     CWeapon* GetBestMagazine(LPCSTR section = nullptr);
 
     bool SwitchMagazineType();
+
+//================= Аддоны - Приклад =================//
+private:
+
+protected:
+    EAddons m_StockSlot; //--> Слот аддона, который занимает рукоятка
+    shared_str m_DefaultStockSect;
+
+public:
+    IC bool IsStockAttached() const { return m_StockSlot != eNotExist; }
+
+    // Получить set-секцию текущего активного аддона в данном слоте
+    const shared_str GetStockSetSect() const
+    {
+        return IsStockAttached() ? GetAddonBySlot(m_StockSlot)->GetName() : nullptr;
+    }
+
+    // Проверить наличие приклада по умолчанию
+    IC bool IsDefaultStockPresent() const { return m_DefaultStockSect != nullptr; }
+
+    // Получить секцию приклада по умолчанию
+    IC const shared_str GetDefaultStockSect() const { return m_DefaultStockSect; }
+
+    // Координаты иконки "приклада по умолчанию" на оружии
+    int GetDefaultStockX() const { return pSettings->r_s32(m_DefaultStockSect, "default_stock_x"); }
+    int GetDefaultStockY() const { return pSettings->r_s32(m_DefaultStockSect, "default_stock_y"); }
 
 //================= Аддоны - Прочее =================//
 private:
@@ -682,7 +708,7 @@ public:
         return IsSpecial_6_Attached() ? GetAddonBySlot(eSpec_6)->GetName() : nullptr;
     }
 
-    // Для отоброажения иконок апгрейдов в интерфейсе
+    // Координаты иконки аддона на оружии
     int GetSpecial_1_X() const { return pSettings->r_s32(GetAddonBySlot(eSpec_1)->GetName(), "special_x"); }
     int GetSpecial_1_Y() const { return pSettings->r_s32(GetAddonBySlot(eSpec_1)->GetName(), "special_y"); }
     int GetSpecial_2_X() const { return pSettings->r_s32(GetAddonBySlot(eSpec_2)->GetName(), "special_x"); }
