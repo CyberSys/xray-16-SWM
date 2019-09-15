@@ -100,7 +100,14 @@ void CWeapon::OnAnimationEnd(u32 state)
             Need2Idle();
         break; // Keep showing idle
     case eKick:
-        Need2Stop_Kick();
+        if (m_bKickAtRunActivated)
+        { // Атака на бегу должна быть зациклена
+            PlayAnimKickAlt();
+        }
+        else
+        { // Обычная атака нет
+            Need2Stop_Kick();
+        }
         break; // Stop kicking
     case eFire:
         Try2Pump();
