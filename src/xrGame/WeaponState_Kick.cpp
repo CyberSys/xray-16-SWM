@@ -91,10 +91,6 @@ void CWeapon::state_Kick(float dt)
     // Атака на бегу
     if (m_bKickAtRunActivated == true)
     {
-        if (Device.dwTimeGlobal - m_dw_last_kick_at_run_upd_time <= WEAPON_ADDONS_VIS_UPD_INTERVAL)
-            return;
-        m_dw_last_kick_at_run_upd_time = Device.dwTimeGlobal;
-
         // Проверяем, поддерживает-ли наше оружие такую атаку
         if (m_kicker_alt == NULL)
         {
@@ -114,6 +110,10 @@ void CWeapon::state_Kick(float dt)
                 return;
             }
         }
+
+        if (Device.dwTimeGlobal - m_dw_last_kick_at_run_upd_time <= WEAPON_ADDONS_KAR_UPD_INTERVAL)
+            return;
+        m_dw_last_kick_at_run_upd_time = Device.dwTimeGlobal;
 
         // "Стреляем" до тех пор, пока стэйт не изменится
         KickHit(true);
