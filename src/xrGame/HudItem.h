@@ -196,6 +196,8 @@ protected:
     float m_fLastAnimStartTime; //--#SM+#--
     float m_fLastAnimSpeed; //--#SM+#--
 
+    u32 m_iAnimTimeoutSpeedhack; //--#SM+#--
+
     HUD_SOUND_COLLECTION m_sounds;
 
 private:

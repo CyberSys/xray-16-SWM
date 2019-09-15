@@ -63,6 +63,9 @@ void CHudItem::Load(LPCSTR section)
     m_fIdleSpeedNoAccelFactor =
         READ_IF_EXISTS(pSettings, r_float, hud_sect, "idle_speed_noaccel_factor", 1.f); //--#SM+#--
 
+    m_iAnimTimeoutSpeedhack =
+        READ_IF_EXISTS(pSettings, r_u32, hud_sect, "anim_timeout_speedhack", 0); //--#SM+#--
+
     m_sounds.LoadSound(section, "snd_bore", "sndBore", true);
 }
 
@@ -220,7 +223,7 @@ void CHudItem::UpdateCL()
             }
 
             m_dwMotionCurrTm = Device.dwTimeGlobal;
-            if (m_dwMotionCurrTm > m_dwMotionEndTm)
+            if (m_dwMotionCurrTm >= m_dwMotionEndTm) //--#SM+#-- Снижаем задержку между переключением анимаций
             {
                 m_current_motion_def = NULL;
                 m_dwMotionStartTm = 0;
@@ -333,6 +336,10 @@ CHudItem::motion_params CHudItem::OnBeforeMotionPlayed(const shared_str& sAnmAli
 u32 CHudItem::PlayHUDMotion(const shared_str& sAnmAlias, bool bMixIn, CHudItem* W, u32 state, motion_params* pParams) //--#SM+#--
 {
     u32 anim_time = PlayHUDMotion_noCB(sAnmAlias, bMixIn, pParams);
+
+    //--#SM+#-- Снижаем задержку между переключением анимаций
+    anim_time -= (anim_time > m_iAnimTimeoutSpeedhack ? m_iAnimTimeoutSpeedhack : 0); 
+
     if (anim_time > 0)
     {
         m_bStopAtEndAnimIsRunning = true;
