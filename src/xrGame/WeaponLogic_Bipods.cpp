@@ -132,8 +132,10 @@ void CWeapon::LoadBipodsParams()
     m_bipods.vBoneMDeployPosOffs = READ_ADDON_DATA(r_fvector3, "bipods_deploy_pos", pAddonBipods->GetName(), pAddonBipods->GetAddonName(), vZero);
     m_bipods.vBoneMDeployRotOffs = READ_ADDON_DATA(r_fvector3, "bipods_deploy_rot", pAddonBipods->GetName(), pAddonBipods->GetAddonName(), vZero);
     m_bipods.vBoneLDeployRotOffs = READ_ADDON_DATA(r_fvector3, "bipods_legs_rot", pAddonBipods->GetName(), pAddonBipods->GetAddonName(), vZero);
-    m_bipods.bInvertYaw = READ_ADDON_DATA(r_bool, "bipods_invert_yaw", pAddonBipods->GetName(), pAddonBipods->GetAddonName(), false);
-    m_bipods.bInvertPitch = READ_ADDON_DATA(r_bool, "bipods_invert_pitch", pAddonBipods->GetName(), pAddonBipods->GetAddonName(), false);
+    m_bipods.bInvertBodyYaw = READ_ADDON_DATA(r_bool, "bipods_invert_yaw_body", pAddonBipods->GetName(), pAddonBipods->GetAddonName(), false);
+    m_bipods.bInvertBodyPitch = READ_ADDON_DATA(r_bool, "bipods_invert_pitch_body", pAddonBipods->GetName(), pAddonBipods->GetAddonName(), false);
+    m_bipods.bInvertLegsPitch = READ_ADDON_DATA(r_bool, "bipods_invert_pitch_legs", pAddonBipods->GetName(), pAddonBipods->GetAddonName(), false);
+    m_bipods.bDeployWhenBayonetInst = READ_ADDON_DATA(r_bool, "bipods_bayonet_deploy", pAddonBipods->GetName(), pAddonBipods->GetAddonName(), false);
     // clang-format on
 
     // Создаём физическую оболочку
@@ -608,6 +610,12 @@ void CWeapon::UpdateBipods()
         return;
     }
 
+    // Разложить сошки при установленном штык-ноже
+    if (m_bipods.bDeployWhenBayonetInst && IsBipodsDeployed() == false)
+    {
+        UpdateBipodsHUD((IsBayonetAttached() ? 1.0f : 0.0f), 0.0f, 0.0f, 0.0f, false);
+    }
+
     // Если грузим сохранение с разложеными сошками, то восстанавливаем их
     if (bBipodsUseSavedData)
     {
@@ -664,6 +672,67 @@ void CWeapon::UpdateBipods()
         iWishState &= ~mcAccel;
     }
     pActor->set_state_wishful(iWishState);
+}
+
+// Обновить худовую модель сошек
+void CWeapon::UpdateBipodsHUD(float fDeployFactor, float fHBody, float fPBody, float fPLegs, bool bUseInertion)
+{
+    attachable_hud_item* hud_item = HudItemData();
+    if (hud_item != nullptr)
+    {
+        attachable_hud_item* bipods_item = hud_item->FindChildren(m_bipods.sBipodsHudSect);
+        if (bipods_item != nullptr)
+        {
+            // Основание сошек
+            KinematicsABT::additional_bone_transform offsets;
+            float fToRad = PI / 180.f;
+
+            float fX_joint = (0.f + (m_bipods.vBoneMDeployRotOffs.x * fToRad)) * fDeployFactor;
+            float fY_joint = (-fHBody + (m_bipods.vBoneMDeployRotOffs.y * fToRad)) * fDeployFactor *
+                (m_bipods.vBoneMDeployRotOffs.z < 0.f ? -1.f : 1.f);
+            float fZ_joint = (-fPBody + (m_bipods.vBoneMDeployRotOffs.z * fToRad)) * fDeployFactor;
+
+            shared_str str_bone = BONE_MAIN;
+            offsets.m_bone_id = bipods_item->m_model->LL_BoneID(str_bone);
+            offsets.setRotLocal(fX_joint, fY_joint, fZ_joint);
+            offsets.setPosOffset(Fvector().mul(m_bipods.vBoneMDeployPosOffs, fDeployFactor));
+
+            bipods_item->m_model->LL_ClearAdditionalTransform(offsets.m_bone_id);
+            bipods_item->m_model->LL_AddTransformToBone(offsets);
+
+            // Ножки сошек
+            float fX_legs = (-(fPLegs / m_bipods.fPitch2LegsTiltFactor) + (m_bipods.vBoneLDeployRotOffs.x * fToRad)) *
+                fDeployFactor;
+            float fY_legs = (0.f + (m_bipods.vBoneLDeployRotOffs.y * fToRad)) * fDeployFactor;
+            float fZ_legs = (0.f + (m_bipods.vBoneLDeployRotOffs.z * fToRad)) * fDeployFactor;
+
+            //--> Добавляем инерцию чтобы смягчить их движения
+            if (bUseInertion && m_bipods.m_iBipodState == bipods_data::eBS_SwitchedON)
+            {
+                m_bipods.m_vPrevLegsXYZ.inertion(
+                    {fX_legs, fY_legs, fZ_legs}, clampr(1.0f - Device.fTimeDelta * BIPODS_LEGS_INERTION, 0.0f, 0.99f));
+                fX_legs = m_bipods.m_vPrevLegsXYZ.x;
+                fY_legs = m_bipods.m_vPrevLegsXYZ.y;
+                fZ_legs = m_bipods.m_vPrevLegsXYZ.z;
+            }
+
+            //--> Левая ножка
+            shared_str noga_1 = BONE_LEG_L;
+            offsets.m_bone_id = bipods_item->m_model->LL_BoneID(noga_1);
+            offsets.setRotLocal(-fX_legs, -fY_legs, fZ_legs);
+
+            bipods_item->m_model->LL_ClearAdditionalTransform(offsets.m_bone_id);
+            bipods_item->m_model->LL_AddTransformToBone(offsets);
+
+            //--> Правая ножка
+            shared_str noga_2 = BONE_LEG_R;
+            offsets.m_bone_id = bipods_item->m_model->LL_BoneID(noga_2);
+            offsets.setRotLocal(fX_legs, fY_legs, fZ_legs);
+
+            bipods_item->m_model->LL_ClearAdditionalTransform(offsets.m_bone_id);
+            bipods_item->m_model->LL_AddTransformToBone(offsets);
+        }
+    }
 }
 
 //============== Эффекты сошек ==============//
@@ -862,84 +931,37 @@ bool CWeapon::UpdateCameraFromBipods(IGameObject* pCameraOwner, Fvector noise_da
 
         // Двигаем кости сошек
         Fquaternion Q;
-        float fToRad = PI / 180.f;
 
         float yaw = (-m_bipods.m_vBipodInitDir.getH()); // Y
         float& cam_yaw = C->yaw;
-        float fH = angle_difference_signed(yaw, cam_yaw); // Разница текущего Yaw от Yaw при установке
-        if (m_bipods.bInvertYaw)
+        float fHBody = angle_difference_signed(yaw, cam_yaw); // Разница текущего Yaw от Yaw при установке
+        if (m_bipods.bInvertBodyYaw)
         {
-            fH *= -1.f;
+            fHBody *= -1.f;
         }
 
         float pitch = (-m_bipods.m_vBipodInitDir.getP()); // X
         float& cam_pitch = C->pitch;
-        float fP = angle_difference_signed(pitch, cam_pitch); // Разница текущего Pitch от Pitch при установке
-        if (m_bipods.bInvertPitch)
+        float fPBody = angle_difference_signed(pitch, cam_pitch); // Разница текущего Pitch от Pitch при установке
+        float fPLegs = fPBody;
+        if (m_bipods.bInvertBodyPitch)
         {
-            fP *= -1.f;
+            fPBody *= -1.f;
+        }
+        if (m_bipods.bInvertLegsPitch)
+        {
+            fPLegs *= -1.f;
         }
 
         //--> В мировой модели
         // TODO: При необходимости
 
         //--> В худе
-        attachable_hud_item* hud_item = HudItemData();
-        if (hud_item != nullptr)
-        {
-            attachable_hud_item* bipods_item = hud_item->FindChildren(m_bipods.sBipodsHudSect);
-            if (bipods_item != nullptr)
-            {
-                // Основание сошек
-                KinematicsABT::additional_bone_transform offsets;
+        UpdateBipodsHUD((m_bipods.bDeployWhenBayonetInst && IsBayonetAttached() ? 1.0f : m_bipods.m_fTranslationFactor),
+            fHBody * m_bipods.m_fTranslationFactor, fPBody * m_bipods.m_fTranslationFactor,
+            fPLegs * m_bipods.m_fTranslationFactor, true);
 
-                float fX_joint = (0.f + (m_bipods.vBoneMDeployRotOffs.x * fToRad)) * m_bipods.m_fTranslationFactor;
-                float fY_joint = (-fH + (m_bipods.vBoneMDeployRotOffs.y * fToRad)) * m_bipods.m_fTranslationFactor *
-                    (m_bipods.vBoneMDeployRotOffs.z < 0.f ? -1.f : 1.f);
-                float fZ_joint = (-fP + (m_bipods.vBoneMDeployRotOffs.z * fToRad)) * m_bipods.m_fTranslationFactor;
-
-                shared_str str_bone = BONE_MAIN;
-                offsets.m_bone_id = bipods_item->m_model->LL_BoneID(str_bone);
-                offsets.setRotLocal(fX_joint, fY_joint, fZ_joint);
-                offsets.setPosOffset(Fvector().mul(m_bipods.vBoneMDeployPosOffs, m_bipods.m_fTranslationFactor));
-
-                bipods_item->m_model->LL_ClearAdditionalTransform(offsets.m_bone_id);
-                bipods_item->m_model->LL_AddTransformToBone(offsets);
-
-                // Ножки сошек
-                float fX_legs = (-(fP / m_bipods.fPitch2LegsTiltFactor) + (m_bipods.vBoneLDeployRotOffs.x * fToRad)) *
-                    m_bipods.m_fTranslationFactor;
-                float fY_legs = (0.f + (m_bipods.vBoneLDeployRotOffs.y * fToRad)) * m_bipods.m_fTranslationFactor;
-                float fZ_legs = (0.f + (m_bipods.vBoneLDeployRotOffs.z * fToRad)) * m_bipods.m_fTranslationFactor;
-
-                //--> Добавляем инерцию чтобы смягчить их движения
-                if (m_bipods.m_iBipodState == bipods_data::eBS_SwitchedON)
-                {
-                    m_bipods.m_vPrevLegsXYZ.inertion({fX_legs, fY_legs, fZ_legs},
-                        clampr(1.0f - Device.fTimeDelta * BIPODS_LEGS_INERTION, 0.0f, 0.99f));
-                    fX_legs = m_bipods.m_vPrevLegsXYZ.x;
-                    fY_legs = m_bipods.m_vPrevLegsXYZ.y;
-                    fZ_legs = m_bipods.m_vPrevLegsXYZ.z;
-                }
-
-                //--> Левая ножка
-                shared_str noga_1 = BONE_LEG_L;
-                offsets.m_bone_id = bipods_item->m_model->LL_BoneID(noga_1);
-                offsets.setRotLocal(-fX_legs, -fY_legs, fZ_legs);
-
-                bipods_item->m_model->LL_ClearAdditionalTransform(offsets.m_bone_id);
-                bipods_item->m_model->LL_AddTransformToBone(offsets);
-
-                //--> Правая ножка
-                shared_str noga_2 = BONE_LEG_R;
-                offsets.m_bone_id = bipods_item->m_model->LL_BoneID(noga_2);
-                offsets.setRotLocal(fX_legs, fY_legs, fZ_legs);
-
-                bipods_item->m_model->LL_ClearAdditionalTransform(offsets.m_bone_id);
-                bipods_item->m_model->LL_AddTransformToBone(offsets);
-            }
-        }
-        ///////////////////////////
+        //*******************************************//
     }
 #endif // ! DEBUG_DISABLE_MODEL_ANIMATED
 

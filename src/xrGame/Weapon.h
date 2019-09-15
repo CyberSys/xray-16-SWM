@@ -522,6 +522,7 @@ protected:
     EAddons m_BipodsSlot; //--> Слот аддона, который занимают сошки
 
     void UpdateBipods();
+    void UpdateBipodsHUD(float fDeployFactor, float fHBody, float fPBody, float fPLegs, bool bUseInertion);
     void BipodsOnRender(bool bHudMode);
     void BipodsOnDestroy();
     void BipodsOnSave(NET_Packet& output_packet);
