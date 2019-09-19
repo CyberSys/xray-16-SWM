@@ -7,6 +7,9 @@
 /***** Аддоны оружия *****/ //--#SM+#--
 /*************************/
 
+#define WEAPON_AIM_MOV_EFF_FACTOR_L "movement_eff_aim_factor"
+#define WEAPON_AIM_MOV_EFF_FACTOR_DEF 1.0f
+
 extern float g_defScopeZoomFactor;
 
 // Проверяет одинаковы-ли аддоны двух CWeapon
@@ -557,11 +560,16 @@ void CWeapon::InitAddons()
         m_sHolographBone           = READ_ADDON_DATA(r_string, "holograph_bone", GetScopeSetSect(), GetScopeName(), NULL);
         m_fHolographRotationFactor = READ_ADDON_DATA(r_float, "holograph_rotation_factor", GetScopeSetSect(), GetScopeName(), 1.0f);
         m_vHolographOffset         = READ_ADDON_DATA(r_fvector3, "holograph_offset", GetScopeSetSect(), GetScopeName(), Fvector3().set(0.0f, 0.0f, 0.0f));
+
+        //  Фактор силы эффектов камеры во время движения игрока при прицеливании
+        m_fAimMovementEffFactor    = READ_ADDON_DATA(r_float, WEAPON_AIM_MOV_EFF_FACTOR_L, GetScopeSetSect(), GetScopeName(), WEAPON_AIM_MOV_EFF_FACTOR_DEF);	
     }
     else
     {
         //**** Прицел не одет - грузим дефолт ****//
         LoadZoomParams(cNameSect_str());
+
+        m_fAimMovementEffFactor = READ_IF_EXISTS(pSettings, r_float, cNameSect_str(), WEAPON_AIM_MOV_EFF_FACTOR_L, WEAPON_AIM_MOV_EFF_FACTOR_DEF);
     }
 
     // Обновляем тип прицеливания при смене любых аддонов

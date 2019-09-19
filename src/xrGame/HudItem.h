@@ -174,6 +174,7 @@ public:
 
 	virtual void OnOwnedCameraMove(CCameraBase* pCam, float fOldYaw, float fOldPitch) { ; } //--#SM+#--
     virtual bool IsMovementEffectorAllowed() const { return true; } //--#SM+#--
+    virtual float GetMovementEffectorFactor() const { return 1.0f; } //--#SM+#--
 
     virtual void OnFirstAnimationPlayed(const shared_str& sAnmAlias){}; //--#SM+#--
 

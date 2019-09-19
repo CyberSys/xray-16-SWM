@@ -930,6 +930,17 @@ bool CWeapon::IsMovementEffectorAllowed() const
     return inherited::IsMovementEffectorAllowed();
 }
 
+// Получить фактор силы эффектов камеры во время движения игрока при прицеливании
+float CWeapon::GetMovementEffectorFactor() const
+{
+    if (IsZoomed())
+    {
+        return m_fAimMovementEffFactor;
+    }
+
+    return 1.0f;
+}
+
 //*****  Визуализация патронов *****//
 
 // Патронташ

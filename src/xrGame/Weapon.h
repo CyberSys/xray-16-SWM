@@ -1044,6 +1044,8 @@ protected:
     float m_fZoomRotateTime; //--> Скорость прицеливания
     float m_fZoomFovFactorUpgr; //--> Добавляется к текущему FOV зума (для апгрейдов)
 
+    float m_fAimMovementEffFactor; //--> Фактор силы эффектов камеры во время движения игрока при прицеливании
+
     shared_str m_sUseZoomPostprocessUpgr; //--> Пост-эффект прицела (переопределённый апгрейдами)
     shared_str m_sUseBinocularVisionUpgr; //--> Эффект выделения в прицеле живых существ (переопределённый апгрейдами)
 
@@ -1191,6 +1193,7 @@ public:
     virtual void UpdateActorTorchLightPosFromHUD(Fvector* pTorchPos);
 
     virtual bool IsMovementEffectorAllowed() const;
+    virtual float GetMovementEffectorFactor() const;
 
     virtual float GetInertionAimFactor() { return 1.f - GetZRotatingFactor(); }; //--> [От 1.0 - Инерция от бедра, до 0.0 - Инерция при зумме] Какую инерцию использовать
     virtual float GetInertionPowerFactor();
