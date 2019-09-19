@@ -90,6 +90,8 @@ XRUICORE_API extern BOOL g_show_wnd_rect2;
 //-----------------------------------------------------------
 extern float g_fTimeFactor;
 extern BOOL b_toggle_weapon_aim;
+extern BOOL b_dbg_override_weapon_fov; //--#SM+#--
+extern BOOL b_dbg_override_weapon_hud_fov; //--#SM+#--
 
 extern u32 UIStyleID;
 extern xr_vector<xr_token> UIStyleToken;
@@ -1805,6 +1807,7 @@ public:
     }
 };
 
+#ifdef DEBUG
 // Отыграть худовую анимацию текущего оружия по её anm_ названию из конфига.
 #include "HudItem.h"
 class CCC_HudPlay : public IConsole_Command //--#SM+#--
@@ -1846,6 +1849,7 @@ public:
 
     virtual void Info(TInfo& I) { xr_strcpy(I, "anm_xxx, [MixIn 0/1] "); }
 };
+#endif // DEBUG
 
 void CCC_RegisterCommands()
 {
@@ -2290,8 +2294,12 @@ void CCC_RegisterCommands()
 
     CMD4(CCC_Integer, "keypress_on_start", &g_keypress_on_start, 0, 1);
 
+#ifdef DEBUG
     CMD1(CCC_HudPlay, "swm_dbg_play_hud_anim"); //--#SM+#--
     CMD4(CCC_Integer, "swm_dbg_log_hud_anims", &g_LogHUDAnims, 0, 1); //--#SM+#--
+    CMD4(CCC_Integer, "swm_dbg_override_wpn_fov", &b_dbg_override_weapon_fov, 0, 1); //--#SM+#--
+    CMD4(CCC_Integer, "swm_dbg_override_wpn_hud_fov", &b_dbg_override_weapon_hud_fov, 0, 1); //--#SM+#--
+#endif
 
     register_mp_console_commands();
 }

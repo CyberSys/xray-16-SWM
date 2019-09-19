@@ -7,6 +7,8 @@
 /**********************************/
 
 BOOL b_toggle_weapon_aim = FALSE;
+BOOL b_dbg_override_weapon_fov = FALSE;
+BOOL b_dbg_override_weapon_hud_fov = FALSE;
 
 // Конструктор
 CWeapon::CWeapon() : CShellLauncher(this)

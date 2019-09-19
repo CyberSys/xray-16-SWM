@@ -51,6 +51,8 @@ class CWeaponMagazinedWGrenade;
 #define C_THIS_WPN const_cast<CWeapon*>(this)
 
 extern BOOL b_toggle_weapon_aim;
+extern BOOL b_dbg_override_weapon_fov;
+extern BOOL b_dbg_override_weapon_hud_fov;
 extern CUIXml* pWpnScopeXml;
 extern u32 hud_adj_mode;
 

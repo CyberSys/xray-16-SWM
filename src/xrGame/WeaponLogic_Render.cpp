@@ -506,6 +506,13 @@ void CWeapon::AddHUDShootingEffect()
 // Получить мировой FOV от текущего оружия игрока
 float CWeapon::GetFov() const
 {
+#ifdef DEBUG
+    if (!!b_dbg_override_weapon_fov)
+    {
+        return g_fov;
+    }
+#endif // DEBUG
+  
     if (IsBipodsDeployed() && !ZoomTexture())
     { // FOV при сошках
         if (m_bipods.m_bZoomMode)
@@ -545,6 +552,13 @@ float CWeapon::GetFovSVP() const
 // Получить HUD FOV от текущего оружия игрока
 float CWeapon::GetHudFov()
 {
+#ifdef DEBUG
+    if (!!b_dbg_override_weapon_hud_fov)
+    {
+        return psHUD_FOV_def;
+    }
+#endif // DEBUG
+
     // Рассчитываем HUD FOV от бедра (с учётом упирания в стены)
     if (ParentIsActor() && Level().CurrentViewEntity() == H_Parent())
     {
