@@ -446,8 +446,11 @@ void CWeapon::LoadZoomParams(LPCSTR section)
     // Разрешён-ли альтернативный зум
     m_bAltZoomEnabled = READ_IF_EXISTS(pSettings, r_bool, section, "zoom_alt_enabled", false);
 
-    // Скорость зуминга
+    // Время в секундах для полного входа в прицеливание
     m_fZoomRotateTime = pSettings->r_float(section, "zoom_rotate_time");
+
+    // Примерное время в секундах для изменения HUD FOV когда уже полностью прицелились
+    m_fZoomedHudFovSwitchTime = READ_IF_EXISTS(pSettings, r_float, section, "zoom_switch_hud_fov_time", 0.0f);
 
     // Скрыть прицел (от бедра)
     m_bHideCrosshair = READ_IF_EXISTS(pSettings, r_bool, hud_sect, "hide_crosshair", false);

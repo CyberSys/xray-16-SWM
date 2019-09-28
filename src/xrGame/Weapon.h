@@ -1041,8 +1041,9 @@ protected:
     bool m_bHideCrosshairInZoom; //--> Скрывать перекрестие во время зума
 
     float m_fZoomRotationFactor; //--> Степень разворота ствола от бедра к прицеливанию [0.f - 1.f]
-    float m_fZoomRotateTime; //--> Скорость прицеливания
+    float m_fZoomRotateTime; //--> Время в секундах для полного входа в прицеливание
     float m_fZoomFovFactorUpgr; //--> Добавляется к текущему FOV зума (для апгрейдов)
+    float m_fZoomedHudFovSwitchTime; //--> Примерное время в секундах для изменения HUD FOV когда уже полностью прицелились
 
     float m_fAimMovementEffFactor; //--> Фактор силы эффектов камеры во время движения игрока при прицеливании
 
@@ -1408,7 +1409,7 @@ public:
 
     float GetFov() const;
     float GetFovSVP() const;
-    float GetHudFov();
+    float GetHudFov(float fPrevHudFov);
 
     virtual u8 GetCurrentHudOffsetIdx();
     virtual float GetCrosshairInertion() const { return m_crosshair_inertion; };

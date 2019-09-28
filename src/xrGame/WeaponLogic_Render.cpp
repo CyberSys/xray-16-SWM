@@ -550,7 +550,7 @@ float CWeapon::GetFovSVP() const
 }
 
 // Получить HUD FOV от текущего оружия игрока
-float CWeapon::GetHudFov()
+float CWeapon::GetHudFov(float fPrevHudFov)
 {
 #ifdef DEBUG
     if (!!b_dbg_override_weapon_hud_fov)
@@ -580,27 +580,31 @@ float CWeapon::GetHudFov()
         clamp(src, 0.f, 1.f);
 
         float fTrgFov           = m_nearwall_target_hud_fov + fDistanceMod * (fBaseFov - m_nearwall_target_hud_fov);
-        m_nearwall_last_hud_fov = m_nearwall_last_hud_fov * (1 - src) + fTrgFov * src;
+        m_nearwall_last_hud_fov = m_nearwall_last_hud_fov * (1.0f - src) + fTrgFov * src;
+    } 
+    else
+    {
+        m_nearwall_last_hud_fov = psHUD_FOV_def;
+    }
+
+    // Рассчитываем HUD FOV от прицела
+    float fHudFovAim;
+    if (IsRotatingToZoom() == false)
+    {
+        //--> Если уже прицелились, то HUD FOV прицеливания меняем плавно (для альтернативного прицеливания)
+        fHudFovAim = _inertionTr(fPrevHudFov, GetZoomParams().m_fZoomHudFov, Device.fTimeDelta, m_fZoomedHudFovSwitchTime);
+    }
+    else
+    { //--> Во всех остальных случаях делаем это резко
+        fHudFovAim = GetZoomParams().m_fZoomHudFov;
     }
 
     // Возвращаем итоговый HUD FOV
-    float fRes = 1.0f;
+    float fRes = _lerp(m_nearwall_last_hud_fov, fHudFovAim, m_fZoomRotationFactor);
 
-    if (m_fZoomRotationFactor > 0.0f)
-    {
-        //--> В процессе зума
-        float fDiff = m_nearwall_last_hud_fov - GetZoomParams().m_fZoomHudFov;
-        fRes = GetZoomParams().m_fZoomHudFov + (fDiff * (1 - m_fZoomRotationFactor));
-    }
-    else
-    {
-        //--> От бедра
-        fRes = m_nearwall_last_hud_fov;
-    }
-    
     if (IsBipodsDeployed())
     { 
-        // При разложенных сошках
+        // Корректируем при разложенных сошках
         fRes = _lerpc(fRes, m_bipods.fHudFOVFactor, GetBipodsTranslationFactor());
     }
     
