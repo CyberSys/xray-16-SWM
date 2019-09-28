@@ -71,6 +71,8 @@ public:
     virtual BOOL Valid();
     float GetAnimatorLength() { return fLifeTime; };
     virtual bool AbsolutePositioning() { return m_bAbsolutePositioning; }
+    float GetSpeed(); //--#SM+#--
+    float SetSpeed(float fSpeed); //--#SM+#--
 };
 
 class CAnimatorCamEffectorScriptCB : public CAnimatorCamEffector

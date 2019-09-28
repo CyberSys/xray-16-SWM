@@ -395,7 +395,7 @@ void attachable_hud_item::anim_play_item(
 }
 
 // Запустить худовой эффект камеры --#SM+#--
-void attachable_hud_item::anim_play_cam_eff(LPCSTR sAnmPath)
+void attachable_hud_item::anim_play_cam_eff(LPCSTR sAnmPath, float fSpeed)
 {
     CActor* current_actor = static_cast_checked<CActor*>(Level().CurrentControlEntity());
     VERIFY(current_actor);
@@ -409,6 +409,7 @@ void attachable_hud_item::anim_play_cam_eff(LPCSTR sAnmPath)
             e->SetType(eCEWeaponAction);
             e->SetHudAffect(false);
             e->SetCyclic(false);
+            e->SetSpeed(fSpeed);
             e->Start(sAnmPath);
             current_actor->Cameras().AddCamEffector(e);
         }

@@ -73,6 +73,7 @@ public:
     Fvector vBoneMDeployRotOffs; // Поворот главной кости при установке сошек
     Fvector vBoneLDeployRotOffs; // Базовый поворот ножек при установке сошек
     shared_str sInstCamAnm; // Путь до анимации камеры (.anm) во время установки
+    float fCamAnmSpeed; // Фактор скорости анимации камеры
 
 private:
     bool m_bFirstCamUpdate; //--> True когда делаем первый апдейт камеры после установки сошек

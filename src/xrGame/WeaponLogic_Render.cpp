@@ -1139,8 +1139,11 @@ void CWeapon::UpdateWpnExtraVisuals()
                             if (hud_vis.find(item->m_sect_name.c_str()) != xr_string::npos)
                             {
                                 // Скрываем \ показываем метку
-                                bool bShow =
-                                    (m_bGrenadeMode == false && GetZRotatingFactor() >= m_fHolographRotationFactor);
+                                bool bShow = (
+                                    m_bGrenadeMode == false &&
+                                    m_bipods.m_iBipodState != bipods_data::eBS_TranslateInto &&
+                                    GetZRotatingFactor() >= m_fHolographRotationFactor
+                                );
                                 item->set_bone_visible(m_sHolographBone, bShow, TRUE);
 
                                 // Сдвигаем её на произвольное расстояние

@@ -164,7 +164,7 @@ void CAnimatorCamEffector::Start(LPCSTR fn)
 {
     m_objectAnimator->Load(fn);
     m_objectAnimator->Play(Cyclic());
-    fLifeTime = m_objectAnimator->GetLength();
+    fLifeTime = m_objectAnimator->GetLength() / m_objectAnimator->Speed(); //--#SM+#--
 }
 
 BOOL CAnimatorCamEffector::Valid()
@@ -172,6 +172,29 @@ BOOL CAnimatorCamEffector::Valid()
     if (Cyclic())
         return TRUE;
     return inherited::Valid();
+}
+
+// Получить скорость анимации --#SM+#--
+float CAnimatorCamEffector::GetSpeed()
+{
+    return m_objectAnimator->Speed();
+}
+
+// Установить скорость анимации - вернёт оставшееся время анимации в секундах --#SM+#--
+float CAnimatorCamEffector::SetSpeed(float fSpeed)
+{
+    float fCurSpeed = m_objectAnimator->Speed();
+
+    // Восстанавливаем оставшееся время анимации под скорость 1.0
+    fLifeTime *= fCurSpeed;
+
+    // Корректируем скорость
+    m_objectAnimator->Speed() = fSpeed;
+
+    // Пересчитываем и возвращаем время
+    fLifeTime /= fSpeed;
+
+    return fLifeTime;
 }
 
 BOOL CAnimatorCamEffector::ProcessCam(SCamEffectorInfo& info)

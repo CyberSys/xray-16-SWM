@@ -111,6 +111,7 @@ void CWeapon::LoadBipodsParams()
     m_bipods.bDbgDraw = READ_ADDON_DATA(r_bool, "bipods_draw_dbg", pAddonBipods->GetName(), pAddonBipods->GetAddonName(), false);
     m_bipods.bAnimatedLegs = READ_ADDON_DATA(r_bool, "bipods_animated", pAddonBipods->GetName(), pAddonBipods->GetAddonName(), false);
     m_bipods.sInstCamAnm = READ_ADDON_DATA(r_string, "bipods_inst_cam_anm", pAddonBipods->GetName(), pAddonBipods->GetAddonName(), nullptr);
+    m_bipods.fCamAnmSpeed = READ_ADDON_DATA(r_float, "bipods_inst_cam_anm_speed", pAddonBipods->GetName(), pAddonBipods->GetAddonName(), 1.0f);
     m_bipods.fInstRangeMax = READ_ADDON_DATA(r_float, "bipods_inst_range", pAddonBipods->GetName(), pAddonBipods->GetAddonName(), 0.8f);
     m_bipods.fInstAngleMax = READ_ADDON_DATA(r_float, "bipods_inst_angle_f", pAddonBipods->GetName(), pAddonBipods->GetAddonName(), 25.f);
     m_bipods.bEnableWpnTilt = READ_ADDON_DATA(r_bool, "bipods_enable_tilt", pAddonBipods->GetName(), pAddonBipods->GetAddonName(), false);
@@ -752,7 +753,7 @@ void CWeapon::BipodsPlayEffects(bool bIsIntro)
         {
             if (m_bipods.sInstCamAnm != nullptr)
             {
-                pHudItem->anim_play_cam_eff(m_bipods.sInstCamAnm.c_str());
+                pHudItem->anim_play_cam_eff(m_bipods.sInstCamAnm.c_str(), m_bipods.fCamAnmSpeed);
             }
         }
     }
