@@ -9,6 +9,8 @@
 
 #define WEAPON_AIM_MOV_EFF_FACTOR_L "movement_eff_aim_factor"
 #define WEAPON_AIM_MOV_EFF_FACTOR_DEF 1.0f
+#define WEAPON_AIM_MOV_EFF_SPEED_L "movement_eff_aim_speed"
+#define WEAPON_AIM_MOV_EFF_SPEED_DEF 1.0f
 
 extern float g_defScopeZoomFactor;
 
@@ -563,6 +565,9 @@ void CWeapon::InitAddons()
 
         //  Фактор силы эффектов камеры во время движения игрока при прицеливании
         m_fAimMovementEffFactor    = READ_ADDON_DATA(r_float, WEAPON_AIM_MOV_EFF_FACTOR_L, GetScopeSetSect(), GetScopeName(), WEAPON_AIM_MOV_EFF_FACTOR_DEF);	
+
+        //  Скорость эффектов камеры во время движения игрока при входе в прицеливание
+        m_fAimMovementEffSpeed     = READ_ADDON_DATA(r_float, WEAPON_AIM_MOV_EFF_SPEED_L, GetScopeSetSect(), GetScopeName(), WEAPON_AIM_MOV_EFF_SPEED_DEF);	
     }
     else
     {
@@ -570,6 +575,7 @@ void CWeapon::InitAddons()
         LoadZoomParams(cNameSect_str());
 
         m_fAimMovementEffFactor = READ_IF_EXISTS(pSettings, r_float, cNameSect_str(), WEAPON_AIM_MOV_EFF_FACTOR_L, WEAPON_AIM_MOV_EFF_FACTOR_DEF);
+        m_fAimMovementEffSpeed  = READ_IF_EXISTS(pSettings, r_float, cNameSect_str(), WEAPON_AIM_MOV_EFF_SPEED_L, WEAPON_AIM_MOV_EFF_SPEED_DEF);
     }
 
     // Обновляем тип прицеливания при смене любых аддонов

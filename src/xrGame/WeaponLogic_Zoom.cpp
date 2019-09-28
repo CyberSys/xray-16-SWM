@@ -154,19 +154,29 @@ void CWeapon::OnZoomIn(bool bSilent)
         }
     }
 
-    // Эффект камеры при зуме
+    // Эффект камеры
     CActor* pActor = smart_cast<CActor*>(H_Parent());
     if (pActor)
     {
-        CEffectorZoomInertion* S = smart_cast<CEffectorZoomInertion*>(pActor->Cameras().GetCamEffector(eCEZoom));
-        if (!S)
+        // Эффект входа в зум
+        CEffectorZoomInertion* pZoomEff = smart_cast<CEffectorZoomInertion*>(pActor->Cameras().GetCamEffector(eCEZoom));
+        if (!pZoomEff)
         {
-            S = (CEffectorZoomInertion*)pActor->Cameras().AddCamEffector(new CEffectorZoomInertion());
-            S->Init(this);
+            pZoomEff = (CEffectorZoomInertion*)pActor->Cameras().AddCamEffector(new CEffectorZoomInertion());
+            pZoomEff->Init(this);
         };
-        S->SetRndSeed(pActor->GetZoomRndSeed());
-        R_ASSERT(S);
+        pZoomEff->SetRndSeed(pActor->GetZoomRndSeed());
+        R_ASSERT(pZoomEff);
+
+        // Корректируем активный эффект ходьбы во время входа в зум
+        CAnimatorCamLerpEffectorConst* pMovEff = smart_cast<CAnimatorCamLerpEffectorConst*>(pActor->Cameras().GetCamEffector(eCEActorMoving));
+        if (pMovEff != nullptr)
+        { 
+            pMovEff->SetSpeed(m_fAimMovementEffSpeed * _lerpc(0.0f, 2.0f, pMovEff->GetFactor()));
+        }
     }
+
+    
 }
 
 // Выход из зума

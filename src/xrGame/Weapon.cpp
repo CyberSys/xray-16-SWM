@@ -61,6 +61,7 @@ CWeapon::CWeapon() : CShellLauncher(this)
     m_iPrevZoomType       = m_iCurZoomType;
 
     m_fAimMovementEffFactor = 1.0f;
+    m_fAimMovementEffSpeed = 1.0f;
 
     m_sUseZoomPostprocessUpgr = NULL;
     m_sUseBinocularVisionUpgr = NULL;

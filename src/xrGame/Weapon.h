@@ -1046,6 +1046,7 @@ protected:
     float m_fZoomedHudFovSwitchTime; //--> Примерное время в секундах для изменения HUD FOV когда уже полностью прицелились
 
     float m_fAimMovementEffFactor; //--> Фактор силы эффектов камеры во время движения игрока при прицеливании
+    float m_fAimMovementEffSpeed; //--> Скорость эффектов камеры во время движения игрока при входе в прицеливание
 
     shared_str m_sUseZoomPostprocessUpgr; //--> Пост-эффект прицела (переопределённый апгрейдами)
     shared_str m_sUseBinocularVisionUpgr; //--> Эффект выделения в прицеле живых существ (переопределённый апгрейдами)
