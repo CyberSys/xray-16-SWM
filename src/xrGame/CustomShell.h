@@ -11,6 +11,8 @@ class CShellLauncher;
 struct CShellLauncher::launch_points;
 
 #define SHELL3D_PARENT_SPEED_FACTOR 1.35f // Модификатор скорости владельца, прибавляемой к гильзе
+#define SHELL3D_SND_MIN_RANGE 0.1f // Минимальная дистанция звука удара гильзы, после которого он начинает затухать
+#define SHELL3D_SND_MAX_RANGE 5.0f // Максимальная дистанция звука удара гильзы, после которого его не слышно
 
 class CCustomShell : public CPhysicItem, public CPHUpdateObject
 {
@@ -62,6 +64,9 @@ protected:
     virtual void PhDataUpdate(float step) {};
     virtual void PhTune(float step) {};
 
+    static void ObjectContactCallback(
+        bool& do_colide, bool bo1, dContact& c, SGameMtl* /*material_1*/, SGameMtl* /*material_2*/);
+
 public:
     virtual bool IsCollideWithBullets() { return false; } // Level_bullet_manager_firetrace.cpp
     virtual bool IsCollideWithActorCamera() { return false; } // xrPhysics\ActorCameraCollision.cpp
@@ -72,15 +77,28 @@ private:
 protected:
     u32 m_dwRegisterTime;
     u32 m_dwDestroyTime;
+    u32 m_dwDestroyOnCollideSafetime;
+    u32 m_dwDropOnFrameAfter;
     u32 m_dwFOVStableTime;
     u32 m_dwFOVTranslateTime;
     u32 m_launch_point_idx;
     bool m_bHUD_mode;
 
+    bool m_bSndWasPlayed;
+    ref_sound m_pShellHitSnd;
+    shared_str m_sShellHitSndList;
+    float m_fSndVolume;
+    float m_fSndFreq;
+    Fvector2 m_vSndRange;
+
     void UpdateShellAnimated();
     void UpdateShellHUDMode();
 
 public:
+    bool m_bItWasHudShell;
+    bool m_bIgnoreGeometry_3p;
+    bool m_bIgnoreGeometry_hud;
+
     CShellLauncher* GetLauncher();
 
     void ShellDrop();

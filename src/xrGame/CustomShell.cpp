@@ -23,13 +23,26 @@ CCustomShell::CCustomShell()
     m_bHUD_mode = false;
 
     m_dwDestroyTime = 0;
+    m_dwDestroyOnCollideSafetime = u32(-1);
+    m_dwDropOnFrameAfter = 0;
     m_dwFOVTranslateTime = 0;
     m_dwFOVStableTime = 0;
 
     m_launch_point_idx = 0;
+
+    m_bItWasHudShell = false;
+    m_bIgnoreGeometry_3p = false;
+    m_bIgnoreGeometry_hud = false;
+
+    m_bSndWasPlayed = false;
+    m_sShellHitSndList = nullptr;
 }
 
-CCustomShell::~CCustomShell() { m_pShellLight.destroy(); }
+CCustomShell::~CCustomShell()
+{
+    m_pShellLight.destroy();
+    m_pShellHitSnd.destroy();
+}
 
 void CCustomShell::Load(LPCSTR section)
 {
@@ -57,6 +70,17 @@ void CCustomShell::reload(LPCSTR section)
 
     if (pSettings->line_exist(section, "shell_particles"))
         m_sShellParticles = pSettings->r_string(section, "shell_particles");
+
+    m_bIgnoreGeometry_3p = READ_IF_EXISTS(pSettings, r_bool, this->cNameSect(), "shell_ignore_geometry_3p", false);
+    m_bIgnoreGeometry_hud = READ_IF_EXISTS(pSettings, r_bool, this->cNameSect(), "shell_ignore_geometry_hud", false);
+
+    m_sShellHitSndList = READ_IF_EXISTS(pSettings, r_string, this->cNameSect(), "shell_hit_snd_list", nullptr);
+    m_fSndVolume = READ_IF_EXISTS(pSettings, r_float, this->cNameSect(), "shell_hit_snd_volume", 1.0f);
+    m_fSndFreq = Random.randF(
+        clampr(READ_IF_EXISTS(pSettings, r_float, this->cNameSect(), "shell_hit_snd_rnd_freq", 1.0f), 0.0f, 1.0f),
+        1.0f);
+    m_vSndRange = READ_IF_EXISTS(pSettings, r_fvector2, this->cNameSect(), "shell_hit_snd_range",
+        Fvector2().set(SHELL3D_SND_MIN_RANGE, SHELL3D_SND_MAX_RANGE));
 }
 
 BOOL CCustomShell::net_Spawn(CSE_Abstract* DC)
@@ -129,10 +153,13 @@ void CCustomShell::OnH_A_Chield()
 
         // Если гильза не анимированная - сразу её "выкидываем"
         if (pointCurr.bAnimatedLaunch == false)
-            ShellDrop();
+        {
+            //--> Делаем задержку в один кадр для пересчёта координат худа \ оружия
+            m_dwDropOnFrameAfter = Device.dwFrame;
+        }
     }
     else
-    { //--> Владелец присутствует но это не CShellLauncher
+    { //--> Владелец отсутствует или не CShellLauncher
         ShellDrop(); //--> Пробуем сразу выкинуть её
     }
 }
@@ -157,6 +184,13 @@ void CCustomShell::PostUpdateCL(bool bUpdateCL_disabled)
 
     UpdateShellHUDMode();
     UpdateShellAnimated();
+
+    if (m_dwDropOnFrameAfter != 0 && m_dwDropOnFrameAfter != Device.dwFrame)
+    {
+        ShellDrop();
+        m_dwDropOnFrameAfter = 0;
+    }
+
     UpdateShellLights();
     UpdateShellParticles();
 
@@ -341,7 +375,7 @@ void CCustomShell::activate_physic_shell()
     Position().set(m_pPhysicsShell->mXFORM.c);
 
     m_pPhysicsShell->set_PhysicsRefObject(this);
-    m_pPhysicsShell->set_ObjectContactCallback(nullptr);
+    m_pPhysicsShell->set_ObjectContactCallback(ObjectContactCallback);
     m_pPhysicsShell->set_ContactCallback(nullptr);
 
     m_pPhysicsShell->SetAirResistance(0.f, 0.f);
@@ -350,11 +384,97 @@ void CCustomShell::activate_physic_shell()
     m_pPhysicsShell->SetAllGeomTraced();
     m_pPhysicsShell->DisableCharacterCollision();
 
-    if (READ_IF_EXISTS(pSettings, r_bool, this->cNameSect(), "shell_ignore_dynamic", false))
-        m_pPhysicsShell->SetIgnoreDynamic();
+    // m_pPhysicsShell->SetIgnoreDynamic();
+    // m_pPhysicsShell->SetIgnoreStatic();
+}
 
-    if (READ_IF_EXISTS(pSettings, r_bool, this->cNameSect(), "shell_ignore_static", false))
-        m_pPhysicsShell->SetIgnoreStatic();
+// Контакт гильзы с геометрией
+void CCustomShell::ObjectContactCallback(
+    bool& do_colide, bool bo1, dContact& c, SGameMtl* material_1, SGameMtl* material_2)
+{
+    if (do_colide == false)
+        return;
+
+    dxGeomUserData* pUD1 = nullptr;
+    dxGeomUserData* pUD2 = nullptr;
+    pUD1 = PHRetrieveGeomUserData(c.geom.g1);
+    pUD2 = PHRetrieveGeomUserData(c.geom.g2);
+
+    // Получаем контактный материал и объект гильзы
+    SGameMtl* pMaterial = 0;
+    CCustomShell* pThisShell = pUD1 ? smart_cast<CCustomShell*>(pUD1->ph_ref_object) : nullptr;
+    if (!pThisShell)
+    {
+        pThisShell = pUD2 ? smart_cast<CCustomShell*>(pUD2->ph_ref_object) : nullptr;
+        pMaterial = material_1;
+    }
+    else
+    {
+        pMaterial = material_2;
+    }
+    VERIFY(pMaterial);
+
+    if (!pThisShell)
+        return;
+
+    // Игнорируем неконтактные материалы
+    if (pMaterial->Flags.is(SGameMtl::flPassable))
+        return;
+
+    // Проверяем необходимость коллизии с объектом
+    do_colide = (pThisShell->m_bItWasHudShell ? !pThisShell->m_bIgnoreGeometry_hud : !pThisShell->m_bIgnoreGeometry_3p);
+
+    CGameObject* pObjCollidedWith = pUD1 ? smart_cast<CGameObject*>(pUD1->ph_ref_object) : nullptr;
+    if (!pObjCollidedWith || pObjCollidedWith == (CGameObject*)pThisShell)
+    {
+        pObjCollidedWith = pUD2 ? smart_cast<CGameObject*>(pUD2->ph_ref_object) : nullptr;
+        if (pObjCollidedWith == (CGameObject*)pThisShell)
+        {
+            pObjCollidedWith = nullptr;
+        }
+    }
+
+    // Проверяем динамический объект, с которым столкнулись
+    if (pObjCollidedWith != nullptr)
+    {
+        // Log("pObjCollidedWith =", pObjCollidedWith->cNameSect_str());
+        if (pObjCollidedWith->cast_stalker() != nullptr || pObjCollidedWith->cast_actor() != nullptr)
+        {
+            // Не обрабатываем коллизию со сталкерами \ игроком
+            return;
+        }
+    }
+
+    // Msg("Contact with [%s] at [%d]", pMaterial->m_Name.c_str(), Device.dwTimeGlobal);
+
+    // Проигрываем звук удара гильзы об землю
+    if (pThisShell->m_bSndWasPlayed == false)
+    {
+        //--> Находим случайный звук
+        int iSndCnt = _GetItemCount(pThisShell->m_sShellHitSndList.c_str());
+        if (iSndCnt > 0)
+        {
+            string256 sSndPath;
+            _GetItem(pThisShell->m_sShellHitSndList.c_str(), Random.randI(0, iSndCnt), sSndPath);
+
+            //--> Запускаем его
+            pThisShell->m_pShellHitSnd.create(sSndPath, st_Effect, ESoundTypes(SOUND_TYPE_WEAPON_SHOOTING));
+            GEnv.Sound->play_no_feedback(pThisShell->m_pShellHitSnd, pThisShell->H_Parent(), 0, 0.0f,
+                &pThisShell->Position(), &pThisShell->m_fSndVolume, &pThisShell->m_fSndFreq, &pThisShell->m_vSndRange);
+        }
+
+        //--> Играем только один раз
+        pThisShell->m_bSndWasPlayed = true;
+    }
+
+    // Удаляем гильзы при коллизии
+    if (pThisShell->m_dwDestroyOnCollideSafetime != u32(-1) &&
+        pThisShell->m_dwDestroyOnCollideSafetime < Device.dwTimeGlobal)
+    {
+        pThisShell->m_dwDestroyTime = 1; //--> Отложенное удаление
+        pThisShell->m_pPhysicsShell->set_ObjectContactCallback(nullptr);
+        return;
+    }
 }
 
 //============== Специфичный код для гильз ==============//
@@ -439,9 +559,24 @@ void CCustomShell::ShellDrop()
     if (ShellIsDropped())
         return;
 
+    UpdateShellHUDMode();
+
     const CShellLauncher::launch_points& pointsAll = ShellGetAllLaunchPoints();
 
-    m_dwDestroyTime = (pointsAll.dwLifetimeTime == 0 ? 0 : Device.dwTimeGlobal + pointsAll.dwLifetimeTime);
+    // Рассчитываем время уничтожения гильзы
+    u32 dwLifeTime = (m_bHUD_mode ? pointsAll.dwLifeTimeHud : pointsAll.dwLifeTime3p);
+    m_dwDestroyTime = (dwLifeTime == 0 ? 0 : Device.dwTimeGlobal + dwLifeTime);
+
+    // Рассчитываем время разблокировки уничтожения при столкновении
+    bool bDestroyOnCollide = (m_bHUD_mode ? pointsAll.m_bDestroyOnCollideHud : pointsAll.m_bDestroyOnCollide3p);
+    if (bDestroyOnCollide)
+    {
+        u32 dwDestroyOnCollideST = (m_bHUD_mode ? pointsAll.dwMinCollideLifeTimeHud : pointsAll.dwMinCollideLifeTime3p);
+        m_dwDestroyOnCollideSafetime = Device.dwTimeGlobal + dwDestroyOnCollideST;
+    }
+
+    // Прочее
+    m_bItWasHudShell = m_bHUD_mode;
 
     H_SetParent(nullptr);
 }

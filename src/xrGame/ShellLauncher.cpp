@@ -93,8 +93,22 @@ CShellLauncher::launch_points::launch_points(const shared_str& sWorldSect, const
     xr_sprintf(sLine, "shells_3d_fov_stable_time_%d", _idx);
     dwFOVStableTime = READ_IF_EXISTS(pSettings, r_u32, sWorldSect, sLine, 0);
 
-    xr_sprintf(sLine, "shells_3d_lifetime_%d", _idx);
-    dwLifetimeTime = READ_IF_EXISTS(pSettings, r_u32, sWorldSect, sLine, SHELL3D_DEF_LIFETIME);
+    // Время жизни гильз
+    xr_sprintf(sLine, "shells_3d_lifetime_3p_%d", _idx);
+    dwLifeTime3p = READ_IF_EXISTS(pSettings, r_u32, sWorldSect, sLine, SHELL3D_DEF_LIFETIME);
+    xr_sprintf(sLine, "shells_3d_lifetime_hud_%d", _idx);
+    dwLifeTimeHud = READ_IF_EXISTS(pSettings, r_u32, sWorldSect, sLine, SHELL3D_DEF_LIFETIME);
+
+    // Обработка столкновений гильз
+    xr_sprintf(sLine, "shells_3d_destroy_on_collide_3p_%d", _idx);
+    m_bDestroyOnCollide3p = READ_IF_EXISTS(pSettings, r_bool, sWorldSect, sLine, false);
+    xr_sprintf(sLine, "shells_3d_collide_safetime_3p_%d", _idx);
+    dwMinCollideLifeTime3p = READ_IF_EXISTS(pSettings, r_u32, sWorldSect, sLine, SHELL3D_DEF_COL_LIFETIME);
+
+    xr_sprintf(sLine, "shells_3d_destroy_on_collide_hud_%d", _idx);
+    m_bDestroyOnCollideHud = READ_IF_EXISTS(pSettings, r_bool, sWorldSect, sLine, false);
+    xr_sprintf(sLine, "shells_3d_collide_safetime_hud_%d", _idx);
+    dwMinCollideLifeTimeHud = READ_IF_EXISTS(pSettings, r_u32, sWorldSect, sLine, SHELL3D_DEF_COL_LIFETIME);
 
     // Грузим точки запуска для мировой и худовой модели
     point_world = _lpoint(sWorldSect, _idx);
