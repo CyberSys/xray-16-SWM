@@ -69,6 +69,7 @@ inline constexpr T _lerpc(const T& _val_a, const T& _val_b, const float& _factor
 }
 
 // inertion
+//--> Inertion by friction [0.0f - Immediately, 0.99f - Very slow]
 template <class T>
 inline constexpr void _inertion(T& _val_cur, const T& _val_trgt, const float& _friction)
 {
@@ -81,4 +82,24 @@ inline constexpr T _inertionr(const T& _val_cur, const T& _val_trgt, const float
 {
     float friction_i = 1.f - _friction;
     return _val_cur * _friction + _val_trgt * friction_i;
+}
+//--> Inertion by the approximate time [0.0f - Immediately, 2.0f - In ~ 1.8-2.3 seconds]
+template <class T>
+inline constexpr T _inertionT(T& _val_cur, const T& _val_trgt, const float& _dt /* = Device.fTimeDelta */, const float& _time_in_sec)
+{
+    _val_cur = _inertionr(
+        _val_cur,
+        _val_trgt,
+        1.0f - clampr(_dt * 3.0f / (_time_in_sec + 0.0001f), 0.0f, 1.0f)
+    );
+}
+
+template <class T>
+inline constexpr T _inertionTr(const T& _val_cur, const T& _val_trgt, const float& _dt /* = Device.fTimeDelta */, const float& _time_in_sec)
+{
+    return _inertionr(
+        _val_cur,
+        _val_trgt,
+        1.0f - clampr(_dt * 3.0f / (_time_in_sec + 0.0001f), 0.0f, 1.0f)
+    );
 }
