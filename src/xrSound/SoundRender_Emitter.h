@@ -100,7 +100,7 @@ public:
     }
 
     void set_priority(float p) override { priority_scale = p; }
-    void set_time(float t); //--#SM+#--
+    void set_time(float t) override; //--#SM+#--
     const CSound_params* get_params() override { return &p_source; }
     void fill_block(void* ptr, u32 size);
     void fill_data(u8* ptr, u32 offset, u32 size);
