@@ -179,16 +179,15 @@ void CWeapon::OnMotionMark(u32 state, const motion_marks& M)
 
 // Вызывается перед проигрыванием любой анимации.
 // Возвращает необходимость проиграть анимацию не с начала, а с первой метки внутри неё.
-CWeapon::motion_params CWeapon::OnBeforeMotionPlayed(const shared_str& sAnmAlias)
+void CWeapon::OnBeforeMotionPlayed(const shared_str& sAnmAlias, motion_params& params)
 {
-    motion_params params; //--> Параметры по умолчанию
     xr_string sAnmAliasStr = sAnmAlias.c_str();
   
     // Ускоряем анимацию атаки ножом
     if (m_bKnifeMode && sAnmAliasStr.find("anm_attack") != xr_string::npos)
     {
         params.fSpeed = m_fKnifeSpeedMod;
-        return params;
+        return; //--> Не модифицируем дальше (оптимизация)
     }
 
     // Для анимации зума управляем её стартовой секундой и направлением движения
@@ -201,7 +200,14 @@ CWeapon::motion_params CWeapon::OnBeforeMotionPlayed(const shared_str& sAnmAlias
         if (m_ZoomAnimState == eZAOut)
             params.fSpeed = -1.0f;
 
-        return params;
+        return; //--> Не модифицируем дальше (оптимизация)
+    }
+
+    // Ускоряем анимации перезарядки и их звук
+    if (GetState() == eReload || GetState() == eReloadFrAB || GetState() == eSwitchMag)
+    {
+        params.fSpeed = (bIsGrenadeMode() ? m_fReloadSpeedModGL : m_fReloadSpeedModMain);
+        params.fSndFreq = (bIsGrenadeMode() ? m_fReloadSndFreqModGL : m_fReloadSndFreqModMain);
     }
 
     // Управляем стартовой секундой анимации смены магазина (для оружия с магазинным питанием)
@@ -209,7 +215,7 @@ CWeapon::motion_params CWeapon::OnBeforeMotionPlayed(const shared_str& sAnmAlias
     {
         //--> При осечке отыгрываем анимацию до конца
         if (IsMisfire())
-            return params;
+            return; //--> Не модифицируем дальше (оптимизация)
 
         //--> Иначе высчитываем время старта анимации из конфига или метки
         if (g_player_hud != NULL)
@@ -224,10 +230,10 @@ CWeapon::motion_params CWeapon::OnBeforeMotionPlayed(const shared_str& sAnmAlias
                 params.bTakeTimeFromMotionMark = true; //--> Магазина нет, значит мы его только что сняли => проигрываем анимацию с метки
         }
 
-        return params;
+        return; //--> Не модифицируем дальше (оптимизация)
     }
 
-    return inherited::OnBeforeMotionPlayed(sAnmAlias);
+    inherited::OnBeforeMotionPlayed(sAnmAlias, params);
 }
 
 // Вызывается при проигрывании первой анимации после каждого появления худа
@@ -312,25 +318,26 @@ bool CWeapon::PlaySoundMotion(const shared_str& sAnmAlias, BOOL bMixIn, LPCSTR s
         PlayHUDMotion(sAnm, bMixIn, NULL, GetState());
 
         // Отыгрыаем звук
-        string256 sSnd;
+        LPCSTR sSnd = nullptr;
+        string256 sSndAnm;
 
-        //--> Пробуем подыскать к ней особый звук
-        xr_sprintf(sSnd, "%s%s", "snd_", sAnm);
-        if (m_sounds.FindSoundItem(sSnd, false))
-        {
-            PlaySound(sSnd, get_LastFP());
-            if (m_fLastAnimStartTime > 0.0f)
-                m_sounds.SetCurentTime(sSnd, m_fLastAnimStartTime);
+        xr_sprintf(sSndAnm, "%s%s", "snd_", sAnm);
+        if (m_sounds.FindSoundItem(sSndAnm, false))
+        { //--> Пробуем подыскать к ней отдельный именной звук
+            sSnd = sSndAnm;
         }
         else
-        //--> Иначе пробуем играть стандартный
+        { //--> Иначе пробуем играть стандартный
+            sSnd = sSndAlias;
+        }
+
+        if (sSnd != NULL)
         {
-            if (sSndAlias != NULL)
-            {
-                PlaySound(sSndAlias, get_LastFP());
-                if (m_fLastAnimStartTime > 0.0f)
-                    m_sounds.SetCurentTime(sSndAlias, m_fLastAnimStartTime);
-            }
+            PlaySound(sSnd, get_LastFP());
+            if (m_fLastAnimStartTime > 0.0f) //--> Корректируем стартовое время звука
+                m_sounds.SetCurentTime(sSnd, m_fLastAnimStartTime);
+            if (m_fLastAnimSndFreq != 1.0f) //--> Корректируем стартовую частоту звука
+                m_sounds.SetFrequency(sSnd, m_fLastAnimSndFreq);
         }
     }
 

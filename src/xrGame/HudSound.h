@@ -49,6 +49,17 @@ struct HUD_SOUND_ITEM
         }
     }
 
+	ICF void set_cur_frequency(float fFreq) //--#SM+#--
+    {
+        if (m_activeSnd)
+        {
+            if (m_activeSnd->snd._feedback())
+                m_activeSnd->snd.set_frequency(fFreq);
+            else
+                m_activeSnd = NULL;
+        }
+    }
+
     struct SSnd
     {
         ref_sound snd;
@@ -91,6 +102,7 @@ public:
 
     void SetPosition(LPCSTR alias, const Fvector& pos);
     void SetCurentTime(LPCSTR alias, float fTime); //--#SM+#--
+    void SetFrequency(LPCSTR alias, float fFreq); //--#SM+#-- close to SetCurrentSpeed
 
     void StopAllSounds();
     void UpdateAllSounds(const Fvector& vPos); //--#SM+#--

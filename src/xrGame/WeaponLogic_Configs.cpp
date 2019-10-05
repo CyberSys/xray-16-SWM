@@ -24,6 +24,10 @@ void CWeapon::Load(LPCSTR section)
     // Параметры перезарядки
     m_bTriStateReload_main      = READ_IF_EXISTS(pSettings, r_bool, section, "tri_state_reload", false);
     m_bTriStateReload_anim_hack = READ_IF_EXISTS(pSettings, r_bool, section, "tri_state_rld_anim_hack", false);
+    m_fReloadSpeedModMain       = READ_IF_EXISTS(pSettings, r_float, section, "reload_speed_mod_main", 1.0f);
+    m_fReloadSndFreqModMain     = READ_IF_EXISTS(pSettings, r_float, section, "reload_snd_freq_mod_main", 1.0f);
+    m_fReloadSpeedModGL         = READ_IF_EXISTS(pSettings, r_float, section, "reload_speed_mod_gl", 1.0f);
+    m_fReloadSndFreqModGL       = READ_IF_EXISTS(pSettings, r_float, section, "reload_snd_freq_mod_gl", 1.0f);
 
     // Параметры износа
     misfireStartCondition   = pSettings->r_float(section, "misfire_start_condition");

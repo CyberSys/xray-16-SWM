@@ -833,6 +833,11 @@ public:
     u8 m_ammoType; //--> Текущий индекс типа патронов (Основной \ Подствол)
     u8 m_ammoType2; //--> Текущий индекс типа патронов (Подствол \ Основной)
 
+    float m_fReloadSpeedModMain; //--> Модификатор скорости перезарядки (основной ствол)
+    float m_fReloadSndFreqModMain; //--> Модификатор частоты звука перезарядки (основной ствол)
+    float m_fReloadSpeedModGL; //--> Модификатор скорости перезарядки (подствол)
+    float m_fReloadSndFreqModGL; //--> Модификатор частоты звука перезарядки (подствол)
+
 public:
     enum
     {
@@ -1189,7 +1194,7 @@ public:
 
     virtual void OnOwnedCameraMove(CCameraBase* pCam, float fOldYaw, float fOldPitch);
     virtual void OnFirstAnimationPlayed(const shared_str& sAnmAlias);
-    virtual motion_params OnBeforeMotionPlayed(const shared_str& sAnmAlias);
+    virtual void OnBeforeMotionPlayed(const shared_str& sAnmAlias, motion_params& params);
 
     virtual bool UpdateCameraFromHUD(IGameObject* pCameraOwner, Fvector noise_dangle);
     virtual void UpdateActorTorchLightPosFromHUD(Fvector* pTorchPos);

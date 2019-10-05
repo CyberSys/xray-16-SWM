@@ -91,10 +91,11 @@ protected:
 public:
     struct motion_params //--#SM+#--
     {
-        motion_params() : bTakeTimeFromMotionMark(false), fSpeed(1.0f), fStartFromTime(0.0f){};
+        motion_params() : bTakeTimeFromMotionMark(false), fSpeed(1.0f), fSndFreq(1.0f), fStartFromTime(0.0f){};
 
         bool  bTakeTimeFromMotionMark; // Время старта анимации необходимо взять из времени её первой метки (верхняя строка)
-        float fSpeed;                  // Скорость анимации (может быть отрицательной)
+        float fSpeed;                  // Скорость анимации (может быть отрицательной, анимация пойдёт в обратную сторону если была отмотана вперёд)
+        float fSndFreq;                // Частота звука анимации
         float fStartFromTime;          // Стартовая секунда анимации (значение от -0.0f до -1.0f указывает время старта в % от всей длины)
     };
 
@@ -150,7 +151,7 @@ public:
 	virtual bool UpdateCameraFromHUD(IGameObject* pCameraOwner, Fvector noise_dangle) { return false; } //--#SM+#--
     virtual void UpdateActorTorchLightPosFromHUD(Fvector* pTorchPos) { ; } //--#SM+#--
 
-    virtual motion_params OnBeforeMotionPlayed(const shared_str& sAnmAlias); //--#SM+#--
+    virtual void OnBeforeMotionPlayed(const shared_str& sAnmAlias, motion_params& params); //--#SM+#--
 
     u32 PlayHUDMotion(const shared_str& sAnmAlias, bool bMixIn, CHudItem* W, u32 state, motion_params* pParams = NULL); //--#SM+#--
     u32 PlayHUDMotion_noCB(const shared_str& sAnmAlias, bool bMixIn, motion_params* pParams = NULL);                    //--#SM+#--
@@ -196,6 +197,7 @@ protected:
     float m_fIdleSpeedNoAccelFactor; //--#SM+#--
     float m_fLastAnimStartTime; //--#SM+#--
     float m_fLastAnimSpeed; //--#SM+#--
+    float m_fLastAnimSndFreq; //--#SM+#--
 
     u32 m_iAnimTimeoutSpeedhack; //--#SM+#--
 

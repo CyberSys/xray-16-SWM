@@ -27,6 +27,7 @@ CHudItem::CHudItem()
     m_started_rnd_anim_idx = u8(-1);
     m_fLastAnimStartTime = 0.0f; //--#SM+#--
     m_fLastAnimSpeed = 1.0f; //--#SM+#--
+    m_fLastAnimSndFreq = 1.0f; //--#SM+#--
     m_bEnableMovAnimAtCrouch = false; //--#SM+#--
     m_bEnableIdleAnimRandomST = false; //--#SM+#--
     m_fIdleSpeedCrouchFactor = 1.f; //--#SM+#--
@@ -286,15 +287,13 @@ void CHudItem::on_a_hud_attach()
 // Вызывается перед проигрыванием любой анимации.
 // Возвращает параметры для текущей анимации (motion_params)
 // [Called before every hud motion, return params (speed, start time, etc...) for it]
-CHudItem::motion_params CHudItem::OnBeforeMotionPlayed(const shared_str& sAnmAlias) //--#SM+#--
+void CHudItem::OnBeforeMotionPlayed(const shared_str& sAnmAlias, motion_params& params) //--#SM+#--
 {
-    motion_params params; //--> Параметры по умолчанию
-
     // Для MP анимация прятанья и доставания предмета в два раза быстрее
     if (!IsGameTypeSingle() && (GetState() == eHiding || GetState() == eShowing))
     {
         params.fSpeed = 2.f;
-        return params;
+        return; //--> Не модифицируем дальше (оптимизация)
     }
 
     // Регулируем скорость idle-анимации в зависимости от положения тела игрока
@@ -326,11 +325,9 @@ CHudItem::motion_params CHudItem::OnBeforeMotionPlayed(const shared_str& sAnmAli
                 params.fStartFromTime = Random.randF(0.0f, 1.0f) * -1;
 
             params.fSpeed = fIdleAnimSpeedFactor;
-            return params;
+            return;  //--> Не модифицируем дальше (оптимизация)
         }
     }
-
-    return params;
 }
 
 u32 CHudItem::PlayHUDMotion(const shared_str& sAnmAlias, bool bMixIn, CHudItem* W, u32 state, motion_params* pParams) //--#SM+#--
@@ -356,7 +353,7 @@ u32 CHudItem::PlayHUDMotion(const shared_str& sAnmAlias, bool bMixIn, CHudItem* 
 
 u32 CHudItem::PlayHUDMotion_noCB(const shared_str& sAnmAlias, bool bMixIn, motion_params* pParams) //--#SM+#--
 {
-    float                fSpeed, fStartFromTime;
+    float                fSpeed, fSndFreq, fStartFromTime;
     bool                 bIsHUDPresent = (HudItemData() != NULL);
     attachable_hud_item* pHudItem      = bIsHUDPresent ? HudItemData() : g_player_hud->create_hud_item(HudSection());
 
@@ -385,11 +382,14 @@ u32 CHudItem::PlayHUDMotion_noCB(const shared_str& sAnmAlias, bool bMixIn, motio
     m_current_motion_def = g_player_hud->motion_def(motion_data.handsMotionDescr->mid);
 
     // Получаем и выставляем стартовые параметры анимации
-    motion_params pMotionParams = OnBeforeMotionPlayed(sAnmAlias);
+    motion_params pMotionParams;
+    OnBeforeMotionPlayed(sAnmAlias, pMotionParams);
+
     if (pParams != NULL)
         pMotionParams = *pParams;
 
     fSpeed         = pMotionParams.fSpeed;
+    fSndFreq       = pMotionParams.fSndFreq;
     fStartFromTime = pMotionParams.fStartFromTime;
 
     // При необходимости выставляем стартовую секунду анимации из метки в ней
@@ -405,8 +405,9 @@ u32 CHudItem::PlayHUDMotion_noCB(const shared_str& sAnmAlias, bool bMixIn, motio
     // Запоминаем стартовую секунду текущей анимации
     m_fLastAnimStartTime = fStartFromTime;
 
-    // Запоминаем стартовую скорость текущей анимации
+    // Запоминаем стартовую скорость текущей анимации и её звука
     m_fLastAnimSpeed = fSpeed;
+    m_fLastAnimSndFreq = fSndFreq;
 
     // Отыгрываем анимацию или получаем её длину
     if (g_LogHUDAnims && bIsHUDPresent)

@@ -214,6 +214,15 @@ void HUD_SOUND_COLLECTION::SetCurentTime(LPCSTR alias, float fTime) //--#SM+#--
     }
 }
 
+void HUD_SOUND_COLLECTION::SetFrequency(LPCSTR alias, float fFreq) //--#SM+#--
+{
+    HUD_SOUND_ITEM* snd_item = FindSoundItem(alias, true);
+    if (snd_item->playing())
+    {
+        snd_item->set_cur_frequency(fFreq);
+    }
+}
+
 void HUD_SOUND_COLLECTION::StopAllSounds()
 {
     for (auto& sound_item : m_sound_items)
