@@ -1459,6 +1459,7 @@ void CWeapon::PlayAnimShoot()
 {
     int  iAmmo       = GetMainAmmoElapsed() + 1; //--> Т.к анимация стрельбы играется ПОСЛЕ выстрела
     bool bLastBullet = (iAmmo == 1);
+    bool bIsDuplet   = (GetCurrentFireMode() == 2);
 
     // Мировая анимация
     if (!def_IsGL_Mode)
@@ -1486,6 +1487,8 @@ void CWeapon::PlayAnimShoot()
 
         if (IsWGLAnimRequired())
         {
+            if (bIsDuplet && PlaySoundMotion("anm_shot_duplet_aim_w_gl", FALSE, NULL, false, iAmmo))
+                return;
             if (bLastBullet)
             {
                 if (PlaySoundMotion("anm_shot_l_aim_w_gl", FALSE, NULL, false, iAmmo))
@@ -1497,6 +1500,8 @@ void CWeapon::PlayAnimShoot()
 
         if (true)
         {
+            if (bIsDuplet && PlaySoundMotion("anm_shot_duplet_aim", FALSE, NULL, false, iAmmo))
+                return;
             if (bLastBullet)
             {
                 if (PlaySoundMotion("anm_shot_l_aim", FALSE, NULL, false, iAmmo))
@@ -1520,6 +1525,8 @@ void CWeapon::PlayAnimShoot()
 
     if (IsWGLAnimRequired())
     {
+        if (bIsDuplet && PlaySoundMotion("anm_shot_duplet_w_gl", FALSE, NULL, false, iAmmo))
+            return;
         if (bLastBullet)
         {
             if (PlaySoundMotion("anm_shot_l_w_gl", FALSE, NULL, false, iAmmo))
@@ -1528,6 +1535,9 @@ void CWeapon::PlayAnimShoot()
         if (PlaySoundMotion("anm_shots_w_gl", FALSE, NULL, false, iAmmo))
             return;
     }
+
+    if (bIsDuplet && PlaySoundMotion("anm_shot_duplet", FALSE, NULL, false, iAmmo))
+        return;
 
     if (bLastBullet)
     {
