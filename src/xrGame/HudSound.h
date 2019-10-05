@@ -60,6 +60,13 @@ struct HUD_SOUND_ITEM
         }
     }
 
+    static float g_fHudSndFrequency; //--#SM+#--
+    ICF static void SetHudSndGlobalFrequency(const float& fFreq)
+    {
+        // SM_TODO: Bad for parallelization
+        g_fHudSndFrequency = fFreq;
+    }
+
     struct SSnd
     {
         ref_sound snd;

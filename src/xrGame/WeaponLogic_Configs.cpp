@@ -167,6 +167,9 @@ void CWeapon::Load(LPCSTR section)
     // Текущий звук выстрела
     m_sSndShotCurrent = "sndShot";
 
+    // Частота звука выстрела
+    m_vShotSndFreq = READ_IF_EXISTS(pSettings, r_fvector2, section, "snd_shot_frequency", Fvector2().set(1.0f, 1.0f));
+
     // Параметры подствольника
     LoadGLParams();
 

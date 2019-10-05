@@ -5,6 +5,8 @@
 float psHUDSoundVolume = 1.0f;
 float psHUDStepSoundVolume = 1.0f;
 
+float HUD_SOUND_ITEM::g_fHudSndFrequency = 1.0f; //--#SM+#--
+
 void InitHudSoundSettings()
 {
     psHUDSoundVolume = pSettings->r_float("hud_sound", "hud_sound_vol_k");
@@ -97,6 +99,7 @@ void HUD_SOUND_ITEM::PlaySound(
         flags & sm_2D ? Fvector().set(0, 0, 0) : position, flags, hud_snd.m_activeSnd->delay);
 
     hud_snd.m_activeSnd->snd.set_volume(hud_snd.m_activeSnd->volume * (b_hud_mode ? psHUDSoundVolume : 1.0f));
+    hud_snd.m_activeSnd->snd.set_frequency(g_fHudSndFrequency); //--#SM+#--
 }
 
 // Проиграть новый звук, без остановки старого (накладывающийся поверх старого) --#SM+#--
@@ -119,10 +122,10 @@ void HUD_SOUND_ITEM::PlaySoundAdd(
     hud_snd.m_activeSnd = &hud_snd.sounds[index];
 
     Fvector pos = flags & sm_2D ? Fvector().set(0, 0, 0) : position;
-    float vol = hud_snd.m_activeSnd->volume * b_hud_mode ? psHUDSoundVolume : 1.0f;
+    float vol = hud_snd.m_activeSnd->volume * (b_hud_mode ? psHUDSoundVolume : 1.0f);
 
     hud_snd.m_activeSnd->snd.play_no_feedback(
-        const_cast<IGameObject*>(parent), flags, hud_snd.m_activeSnd->delay, &pos, &vol);
+        const_cast<IGameObject*>(parent), flags, hud_snd.m_activeSnd->delay, &pos, &vol, &g_fHudSndFrequency);
 }
 
 void HUD_SOUND_ITEM::StopSound(HUD_SOUND_ITEM& hud_snd)

@@ -368,7 +368,20 @@ void CWeapon::OnShot(bool bIsRocket, bool bIsBaseDispersionedBullet)
         if (m_bGrenadeMode)
             PlaySound("sndShotG", get_LastFP2());
         else
-            PlaySound(m_sSndShotCurrent.c_str(), get_LastFP());
+        {
+            //--> Получаем алиас текущего звука выстрела
+            LPCSTR sShotSnd = m_sSndShotCurrent.c_str();
+
+            //--> Считаем случайную частоту звука и выставляем её глобально для всей игры
+            float fRndFreq = Random.randF(m_vShotSndFreq.x, m_vShotSndFreq.y);
+            HUD_SOUND_ITEM::SetHudSndGlobalFrequency(fRndFreq);
+
+            //--> Запускаем звук
+            PlaySound(sShotSnd, get_LastFP());
+
+            //--> Восстанавливаем оригинальную частоту
+            HUD_SOUND_ITEM::SetHudSndGlobalFrequency(1.0f);
+        }
 
         // Партиклы
         if (m_bGrenadeMode)

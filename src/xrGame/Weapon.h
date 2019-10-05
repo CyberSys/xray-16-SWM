@@ -1360,6 +1360,9 @@ public:
         eExOver, //--> Звук всегда в одном экземпляре, но не останавливает другие эксклюзивные
 
     };
+
+    Fvector2 m_vShotSndFreq; //--> Минимально и максимально возможная частота звука выстрела (рандом)
+
     virtual void ReloadSound(
         shared_str const& strName, shared_str const& strAlias, ESndExcl exMode = eExNot, int type = sg_SourceType);
 
