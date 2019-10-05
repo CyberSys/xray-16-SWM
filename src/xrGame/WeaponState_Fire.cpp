@@ -530,7 +530,7 @@ void CWeapon::LaunchGrenade()
     }
 }
 
-// Произвести выстрел пулей текущем патроном в текущую дирекцию
+// Произвести выстрел пулей текущим патроном в текущую дирекцию
 void CWeapon::FireTrace(const Fvector& P, const Fvector& D)
 {
     VERIFY(m_magazine.size());
@@ -609,8 +609,12 @@ void CWeapon::FireTrace(const Fvector& P, const Fvector& D)
         Light_Start();
 
     // Убираем патрон
-    m_magazine.pop_back();
-    --iAmmoElapsed;
+    bool bDecrAmmo = (IsGameTypeSingle() ? unlimited_ammo() == false : true);
+    if (bDecrAmmo)
+    {
+        m_magazine.pop_back();
+        --iAmmoElapsed;
+    }
 
     VERIFY((u32)iAmmoElapsed == m_magazine.size());
 }

@@ -277,28 +277,36 @@ bool CWeapon::GetBriefInfo(II_BriefInfo& info)
     }
     else
     {
-        // При магазинном питании подсчитываем число патронов во всех магазинах
-        int iTotalAmmoInMagazines = 0;
-        int iTotalMagazines       = 0;
-
-        TIItemContainer::iterator itb = m_pInventory->m_ruck.begin();
-        TIItemContainer::iterator ite = m_pInventory->m_ruck.end();
-        for (; itb != ite; ++itb)
+        // При магазинном питании подсчитываем число патронов во всех магазинах в инвентаре
+        if (unlimited_ammo())
         {
-            CWeapon* pWpn = smart_cast<CWeapon*>(*itb);
-            if (pWpn && GetAddonSlot(pWpn) == eMagaz)
-            {
-                int iAmmo = pWpn->GetMainAmmoElapsed();
-                iTotalAmmoInMagazines += iAmmo;
-                if (iAmmo > 0)
-                    iTotalMagazines++;
-            }
+            info.fmj_ammo._set("--");
+            info.ap_ammo._set("--");
         }
+        else
+        {
+            int iTotalAmmoInMagazines = 0;
+            int iTotalMagazines = 0;
 
-        xr_sprintf(int_str, "%d", iTotalAmmoInMagazines);
-        info.fmj_ammo._set(int_str);
-        xr_sprintf(int_str, "%d", iTotalMagazines);
-        info.ap_ammo._set(int_str);
+            TIItemContainer::iterator itb = m_pInventory->m_ruck.begin();
+            TIItemContainer::iterator ite = m_pInventory->m_ruck.end();
+            for (; itb != ite; ++itb)
+            {
+                CWeapon* pWpn = smart_cast<CWeapon*>(*itb);
+                if (pWpn && GetAddonSlot(pWpn) == eMagaz)
+                {
+                    int iAmmo = pWpn->GetMainAmmoElapsed();
+                    iTotalAmmoInMagazines += iAmmo;
+                    if (iAmmo > 0)
+                        iTotalMagazines++;
+                }
+            }
+
+            xr_sprintf(int_str, "%d", iTotalAmmoInMagazines);
+            info.fmj_ammo._set(int_str);
+            xr_sprintf(int_str, "%d", iTotalMagazines);
+            info.ap_ammo._set(int_str);
+        }
     }
 
     // Подсчитываем число доступных патронов в подствольнике (все типы)
