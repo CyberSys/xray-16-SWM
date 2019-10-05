@@ -88,7 +88,7 @@ protected:
     ref_sound m_pShellHitSnd;
     shared_str m_sShellHitSndList;
     float m_fSndVolume;
-    float m_fSndFreq;
+    Fvector2 m_fSndRndFreq;
     Fvector2 m_vSndRange;
 
     void UpdateShellAnimated();

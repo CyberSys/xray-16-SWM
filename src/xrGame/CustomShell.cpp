@@ -76,11 +76,10 @@ void CCustomShell::reload(LPCSTR section)
 
     m_sShellHitSndList = READ_IF_EXISTS(pSettings, r_string, this->cNameSect(), "shell_hit_snd_list", nullptr);
     m_fSndVolume = READ_IF_EXISTS(pSettings, r_float, this->cNameSect(), "shell_hit_snd_volume", 1.0f);
-    m_fSndFreq = Random.randF(
-        clampr(READ_IF_EXISTS(pSettings, r_float, this->cNameSect(), "shell_hit_snd_rnd_freq", 1.0f), 0.0f, 1.0f),
-        1.0f);
     m_vSndRange = READ_IF_EXISTS(pSettings, r_fvector2, this->cNameSect(), "shell_hit_snd_range",
         Fvector2().set(SHELL3D_SND_MIN_RANGE, SHELL3D_SND_MAX_RANGE));
+    m_fSndRndFreq =
+        READ_IF_EXISTS(pSettings, r_fvector2, this->cNameSect(), "shell_hit_snd_rnd_freq", Fvector2().set(1.0f, 1.0f));
 }
 
 BOOL CCustomShell::net_Spawn(CSE_Abstract* DC)
@@ -458,9 +457,10 @@ void CCustomShell::ObjectContactCallback(
             _GetItem(pThisShell->m_sShellHitSndList.c_str(), Random.randI(0, iSndCnt), sSndPath);
 
             //--> Запускаем его
+            float fRndFreq = Random.randF(pThisShell->m_fSndRndFreq.x, pThisShell->m_fSndRndFreq.y);
             pThisShell->m_pShellHitSnd.create(sSndPath, st_Effect, ESoundTypes(SOUND_TYPE_WEAPON_SHOOTING));
             GEnv.Sound->play_no_feedback(pThisShell->m_pShellHitSnd, pThisShell->H_Parent(), 0, 0.0f,
-                &pThisShell->Position(), &pThisShell->m_fSndVolume, &pThisShell->m_fSndFreq, &pThisShell->m_vSndRange);
+                &pThisShell->Position(), &pThisShell->m_fSndVolume, &fRndFreq, &pThisShell->m_vSndRange);
         }
 
         //--> Играем только один раз
