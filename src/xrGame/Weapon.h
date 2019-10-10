@@ -47,6 +47,8 @@ class CWeaponMagazinedWGrenade;
 #define WEAPON_MRAIM_DEF_VAL 0                  // Значение по умолчанию для m_iMinRequiredAmmoInMag
 #define WEAPON_ADDON_DIS_L "disallowed_addons"  // Название строки из set-секции аддона, в которой прописаны set-секции аддонов, запрещаемых для установки с этим
 #define WEAPON_ADDON_REQ_L "required_addon"     // Название строки из set-секции аддона, в которой прописана set-секция аддона, требуемого для установки этого  
+#define WEAPON_INDOOR_HEMI_FACTOR 0.01f         // Сила освещённости персонжаей солнечным светом, ниже которой считается что персонаж в помещении 
+#define WEAPON_SND_REFLECTION_HUD_FACTOR 0.7f   // Коэфицент на который домножается громкость звука эха от выстрела, если он был сделат от 1-го лица
 
 #define C_THIS_WPN const_cast<CWeapon*>(this)
 

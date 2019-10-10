@@ -6,6 +6,7 @@ float psHUDSoundVolume = 1.0f;
 float psHUDStepSoundVolume = 1.0f;
 
 float HUD_SOUND_ITEM::g_fHudSndFrequency = 1.0f; //--#SM+#--
+float HUD_SOUND_ITEM::g_fHudSndVolumeFactor = 1.0f; //--#SM+#--
 
 void InitHudSoundSettings()
 {
@@ -98,8 +99,13 @@ void HUD_SOUND_ITEM::PlaySound(
     hud_snd.m_activeSnd->snd.play_at_pos(const_cast<IGameObject*>(parent),
         flags & sm_2D ? Fvector().set(0, 0, 0) : position, flags, hud_snd.m_activeSnd->delay);
 
-    hud_snd.m_activeSnd->snd.set_volume(hud_snd.m_activeSnd->volume * (b_hud_mode ? psHUDSoundVolume : 1.0f));
-    hud_snd.m_activeSnd->snd.set_frequency(g_fHudSndFrequency); //--#SM+#--
+    //--#SM+ Begin#--
+    // <!> psHUDSoundVolume также влияет на слышимость для AI
+    float fVolume = hud_snd.m_activeSnd->volume * (b_hud_mode ? psHUDSoundVolume : 1.0f);
+    fVolume *= g_fHudSndVolumeFactor;
+    hud_snd.m_activeSnd->snd.set_volume(fVolume);
+    hud_snd.m_activeSnd->snd.set_frequency(g_fHudSndFrequency);
+    //--#SM+ Begin#--
 }
 
 // Проиграть новый звук, без остановки старого (накладывающийся поверх старого) --#SM+#--
@@ -123,7 +129,8 @@ void HUD_SOUND_ITEM::PlaySoundAdd(
 
     Fvector pos = flags & sm_2D ? Fvector().set(0, 0, 0) : position;
     float vol = hud_snd.m_activeSnd->volume * (b_hud_mode ? psHUDSoundVolume : 1.0f);
-
+    vol *= g_fHudSndVolumeFactor;
+    // <!> psHUDSoundVolume также влияет на слышимость для AI
     hud_snd.m_activeSnd->snd.play_no_feedback(
         const_cast<IGameObject*>(parent), flags, hud_snd.m_activeSnd->delay, &pos, &vol, &g_fHudSndFrequency);
 }

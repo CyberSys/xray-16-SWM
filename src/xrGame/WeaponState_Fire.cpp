@@ -369,6 +369,7 @@ void CWeapon::OnShot(bool bIsRocket, bool bIsBaseDispersionedBullet)
             PlaySound("sndShotG", get_LastFP2());
         else
         {
+            // Основной звук выстрела
             //--> Получаем алиас текущего звука выстрела
             LPCSTR sShotSnd = m_sSndShotCurrent.c_str();
 
@@ -381,6 +382,26 @@ void CWeapon::OnShot(bool bIsRocket, bool bIsBaseDispersionedBullet)
 
             //--> Восстанавливаем оригинальную частоту
             HUD_SOUND_ITEM::SetHudSndGlobalFrequency(1.0f);
+
+            // Эхо выстрела
+            if (IsSilencerAttached() == false)
+            {
+                bool bIndoor = false;
+                if (H_Parent() != nullptr)
+                {
+                    bIndoor = H_Parent()->renderable_ROS()->get_luminocity_hemi() < WEAPON_INDOOR_HEMI_FACTOR;
+                }
+
+                if (bIndoor == false && m_sounds.FindSoundItem("sndReflect", false))
+                {
+                    if (IsHudModeNow())
+                    {
+                        HUD_SOUND_ITEM::SetHudSndGlobalVolumeFactor(WEAPON_SND_REFLECTION_HUD_FACTOR);
+                    }
+                    PlaySound("sndReflect", get_LastFP());
+                    HUD_SOUND_ITEM::SetHudSndGlobalVolumeFactor(1.0f);
+                }
+            }
         }
 
         // Партиклы

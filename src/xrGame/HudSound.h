@@ -67,6 +67,13 @@ struct HUD_SOUND_ITEM
         g_fHudSndFrequency = fFreq;
     }
 
+    static float g_fHudSndVolumeFactor; //--#SM+#--
+    ICF static void SetHudSndGlobalVolumeFactor(const float& fVolume)
+    {
+        // SM_TODO: Bad for parallelization
+        g_fHudSndVolumeFactor = fVolume;
+    }
+
     struct SSnd
     {
         ref_sound snd;
