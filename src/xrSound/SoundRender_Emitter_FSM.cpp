@@ -292,6 +292,8 @@ IC void volume_lerp(float& c, float t, float s, float dt)
 
 bool CSoundRender_Emitter::update_culling(float dt)
 {
+    float fAttFactor = 1.0f; //--#SM+#--
+
     if (b2D)
     {
         occluder_volume = 1.f;
@@ -324,6 +326,15 @@ bool CSoundRender_Emitter::update_culling(float dt)
             SoundRender->get_occlusion(p_source.position, .2f, occluder);
         volume_lerp(occluder_volume, occ, 1.f, dt);
         clamp(occluder_volume, 0.f, 1.f);
+
+        // Calc linear fade --#SM+#--
+        // https://www.desmos.com/calculator/lojovfugle
+        float fMinDisDiff = dist - p_source.min_distance;
+        if (fMinDisDiff > 0.0f)
+        {
+            float fMaxDisDiff = p_source.max_distance - p_source.min_distance;
+            fAttFactor = pow(1.0f - (fMinDisDiff / fMaxDisDiff), psSoundLinearFadeFactor);
+        }
     }
     clamp(fade_volume, 0.f, 1.f);
     // Update smoothing
@@ -331,6 +342,10 @@ bool CSoundRender_Emitter::update_culling(float dt)
         .1f * (p_source.base_volume * p_source.volume *
                   (owner_data->s_type == st_Effect ? psSoundVEffects * psSoundVFactor : psSoundVMusic) *
                   occluder_volume * fade_volume);
+
+    // Add linear fade --#SM+#--
+    smooth_volume *= fAttFactor;
+
     if (smooth_volume < psSoundCull)
         return FALSE; // allow volume to go up
     // Here we has enought "PRIORITY" to be soundable
