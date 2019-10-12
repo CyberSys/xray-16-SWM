@@ -172,7 +172,7 @@ void CWeapon::OnZoomIn(bool bSilent)
         CAnimatorCamLerpEffectorConst* pMovEff = smart_cast<CAnimatorCamLerpEffectorConst*>(pActor->Cameras().GetCamEffector(eCEActorMoving));
         if (pMovEff != nullptr)
         { 
-            pMovEff->SetSpeed(m_fAimMovementEffSpeed * _lerpc(0.0f, 2.0f, pMovEff->GetFactor()));
+            pMovEff->SetSpeed(m_fAimMovementEffSpeed * _lerpc(0.5f, 2.0f, pMovEff->GetFactor()));
         }
     }
 
