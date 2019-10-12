@@ -276,11 +276,18 @@ bool CWeapon::SwitchMagazineType()
         l_newType     = u8((u32(l_newType + 1)) % totalMagazTypes);
         sMagazSection = pAddon->GetAddonNameByIdx(l_newType).c_str();
 
+        //--> Ищем магазин в инвентаре
         if (m_pInventory->GetAny(sMagazSection) != NULL)
         {
             CWeapon* pMagaz = GetBestMagazine(sMagazSection);
             if (pMagaz != NULL && pMagaz->iAmmoElapsed > 0)
-                break; // Нашли подходящий тип в инвентаре
+            {
+                //--> Проверяем совместимость магазина с текущими аддонами
+                if (CanAttach(pMagaz))
+                {
+                    break; //--> Нашли подходящий тип в инвентаре
+                }
+            }
         }
     }
 
