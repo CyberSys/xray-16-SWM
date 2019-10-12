@@ -303,7 +303,7 @@ void CGamePersistent::WeathersUpdate()
         CActor* actor = smart_cast<CActor*>(Level().CurrentViewEntity());
         BOOL bIndoor = TRUE;
         if (actor)
-            bIndoor = actor->renderable_ROS()->get_luminocity_hemi() < 0.05f;
+            bIndoor = actor->renderable_ROS()->get_luminocity_hemi() < 0.04f; //--#SM+#-- [0.05f слишком завышен был]
 
         int data_set = (Random.randF() < (1.f - Environment().CurrentEnv->weight)) ? 0 : 1;
 
