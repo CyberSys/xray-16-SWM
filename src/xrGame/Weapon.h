@@ -769,7 +769,11 @@ public:
     bool DetectorCheckCompability(bool bAllowAim) const;
     bool DetectorHideCondition(bool bAllowAim) const;
 
-    IC bool Need2Pump() { return m_bNeed2Pump; } // См. m_bNeed2Pump
+    IC bool Need2Pump() const { return m_bNeed2Pump; } // См. m_bNeed2Pump
+    IC bool CanUsePumpMode() const //--> Оружие может использовать помповый режим
+    {
+        return m_bUsePumpMode && GetCurrentFireMode() == 1;
+    }
 
     // Оружие "на поясе" (для 3-го лица)
     IC LPCSTR strap_bone0() const { return m_strap_bone0; }

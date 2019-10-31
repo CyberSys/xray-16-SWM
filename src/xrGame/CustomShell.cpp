@@ -513,7 +513,12 @@ void CCustomShell::UpdateShellAnimated()
         setVisible(true);
 
         //--> По окончанию таймера запускаем гильзу в свободный полёт
-        if (Device.dwTimeGlobal >= m_dwRegisterTime + pointCurr.dwAnimReleaseTime)
+        CGameObject* pGameObj = pLauncher->GetParentObject();
+        CWeapon* pWpnItem = pGameObj->cast_weapon();
+        u32 iAnimReleaseTime =
+            (pWpnItem == nullptr || pWpnItem->CanUsePumpMode() == false ? pointCurr.dwAnimReleaseTime :
+                                                                          pointCurr.dwAnimReleaseTimePump);
+        if (Device.dwTimeGlobal >= m_dwRegisterTime + iAnimReleaseTime)
         {
             ShellDrop();
         }

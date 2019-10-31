@@ -266,7 +266,7 @@ void CWeapon::state_Fire(float dt)
                     bool bIsMisfife = CheckForMisfire();
 
                     // Передёргиваем помпу
-                    if (m_bUsePumpMode)
+                    if (CanUsePumpMode())
                     {
                         m_bNeed2Pump = true;
 
@@ -425,7 +425,7 @@ void CWeapon::OnShot(bool bIsRocket, bool bIsBaseDispersionedBullet)
     if (m_bGrenadeMode == false)
     {
         // 2D-Гильзы
-        if (!m_bUsePumpMode)
+        if (!CanUsePumpMode())
             LaunchShell2D(&vel);
 
         // 3D-Гильзы
