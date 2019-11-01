@@ -459,9 +459,9 @@ void player_hud::calc_transform(u16 attach_slot_idx, const Fmatrix& offset, Fmat
 void player_hud::RecalculateBonesOffsets() //
 {
     // Очищаем все текущие смещения
-    m_model->LL_ClearAdditionalTransform(BI_NONE);
+    m_model->LL_ClearAdditionalTransform(BI_NONE, KinematicsABT::SourceID::HUD_HANDS_OFFSETS);
     if (m_model_twin != NULL)
-        m_model_twin->LL_ClearAdditionalTransform(BI_NONE);
+        m_model_twin->LL_ClearAdditionalTransform(BI_NONE, KinematicsABT::SourceID::HUD_HANDS_OFFSETS);
 
     // Считываем новые
     if (m_attached_items[0])

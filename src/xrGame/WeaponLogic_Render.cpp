@@ -1151,12 +1151,17 @@ void CWeapon::UpdateWpnExtraVisuals()
                                 item->set_bone_visible(m_sHolographBone, bShow, TRUE);
 
                                 // Сдвигаем её на произвольное расстояние
-                                item->m_model->LL_ClearAdditionalTransform(BI_NONE); //--> Очищаем старые смещения
+                                //--> Очищаем старые смещения
+                                item->m_model->LL_ClearAdditionalTransform(
+                                    BI_NONE, KinematicsABT::SourceID::WPN_HOLOMARK);
 
-                                KinematicsABT::additional_bone_transform holoOffsets;
+                                //--> Считаем новые
+                                KinematicsABT::additional_bone_transform holoOffsets(
+                                    KinematicsABT::SourceID::WPN_HOLOMARK);
                                 holoOffsets.m_bone_id = item->m_model->LL_BoneID(m_sHolographBone);
                                 holoOffsets.setPosOffset(m_vHolographOffset);
 
+                                //--> Применяем
                                 item->m_model->LL_AddTransformToBone(holoOffsets);
                             }
                         }

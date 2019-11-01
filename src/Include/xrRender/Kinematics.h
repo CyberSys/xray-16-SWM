@@ -79,7 +79,7 @@ public:
     virtual void LL_SetBonesVisible(u64 mask) = 0;
 
     virtual void LL_AddTransformToBone(KinematicsABT::additional_bone_transform& offset) = 0; //--#SM+#--
-    virtual void LL_ClearAdditionalTransform(u16 bone_id) = 0; //--#SM+#--
+    virtual void LL_ClearAdditionalTransform(u16 bone_id, KinematicsABT::SourceID source_id) = 0; //--#SM+#--
 
     // Main functionality
     virtual void CalculateBones(BOOL bForceExact = FALSE) = 0; // Recalculate skeleton

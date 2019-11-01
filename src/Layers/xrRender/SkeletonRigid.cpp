@@ -149,19 +149,18 @@ void CKinematics::LL_AddTransformToBone(KinematicsABT::additional_bone_transform
     m_bones_offsets.push_back(offset);
 }
 
-// Обнулить скриптовое смещение для конкретной кости или всех сразу (bone_id = BI_NONE) --#SM+#--
-void CKinematics::LL_ClearAdditionalTransform(u16 bone_id)
+/* Обнулить скриптовое смещение для конкретной кости или всех сразу --#SM+#--
+   bone_id - ID кости, с которой нужно снять смещения (BI_NONE если для всех)
+   source_id - Источник смещения, по которому нужно их фильтровать (_ANY если снять со всех источников)
+*/
+void CKinematics::LL_ClearAdditionalTransform(u16 bone_id, KinematicsABT::SourceID source_id)
 {
-    if (bone_id == BI_NONE)
-    {
-        m_bones_offsets.clear();
-        return;
-    }
-
     BONE_TRANSFORM_VECTOR_IT it = m_bones_offsets.begin();
     while (it != m_bones_offsets.end())
     {
-        if (it->m_bone_id == bone_id)
+        bool bCond_1 = (bone_id == BI_NONE) || (it->m_bone_id == bone_id);
+        bool bCond_2 = (source_id == KinematicsABT::SourceID::_ANY) || (it->m_source_id == source_id);
+        if (bCond_1 && bCond_2)
         {
             it = m_bones_offsets.erase(it);
         }

@@ -127,7 +127,7 @@ public:
     virtual void CalculateBonesAdditionalTransforms(
         const CBoneData* bd, CBoneInstance& bi, const Fmatrix* parent, u8 mask_channel = (1 << 0)); //--#SM+#--
     virtual void LL_AddTransformToBone(KinematicsABT::additional_bone_transform& offset); //--#SM+#--
-    virtual void LL_ClearAdditionalTransform(u16 bone_id = BI_NONE); //--#SM+#--
+    virtual void LL_ClearAdditionalTransform(u16 bone_id, KinematicsABT::SourceID source_id); //--#SM+#--
 public:
     dxRender_Visual* m_lod;
 

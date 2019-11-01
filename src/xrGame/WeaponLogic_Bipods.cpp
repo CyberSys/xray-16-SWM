@@ -552,7 +552,7 @@ void CWeapon::UndeployBipods(bool bInstantly)
     {
         attachable_hud_item* bipods_item = hud_item->FindChildren(m_bipods.sBipodsHudSect);
         if (bipods_item != nullptr)
-            bipods_item->m_model->LL_ClearAdditionalTransform(BI_NONE);
+            bipods_item->m_model->LL_ClearAdditionalTransform(BI_NONE, KinematicsABT::SourceID::WPN_BIPODS_DEPLOY);
     }
 
     // Убираем зум
@@ -685,7 +685,7 @@ void CWeapon::UpdateBipodsHUD(float fDeployFactor, float fHBody, float fPBody, f
         if (bipods_item != nullptr)
         {
             // Основание сошек
-            KinematicsABT::additional_bone_transform offsets;
+            KinematicsABT::additional_bone_transform offsets(KinematicsABT::SourceID::WPN_BIPODS_DEPLOY);
             float fToRad = PI / 180.f;
 
             float fX_joint = (0.f + (m_bipods.vBoneMDeployRotOffs.x * fToRad)) * fDeployFactor;
@@ -698,7 +698,8 @@ void CWeapon::UpdateBipodsHUD(float fDeployFactor, float fHBody, float fPBody, f
             offsets.setRotLocal(fX_joint, fY_joint, fZ_joint);
             offsets.setPosOffset(Fvector().mul(m_bipods.vBoneMDeployPosOffs, fDeployFactor));
 
-            bipods_item->m_model->LL_ClearAdditionalTransform(offsets.m_bone_id);
+            bipods_item->m_model->LL_ClearAdditionalTransform(
+                offsets.m_bone_id, KinematicsABT::SourceID::WPN_BIPODS_DEPLOY);
             bipods_item->m_model->LL_AddTransformToBone(offsets);
 
             // Ножки сошек
@@ -722,7 +723,8 @@ void CWeapon::UpdateBipodsHUD(float fDeployFactor, float fHBody, float fPBody, f
             offsets.m_bone_id = bipods_item->m_model->LL_BoneID(noga_1);
             offsets.setRotLocal(-fX_legs, -fY_legs, fZ_legs);
 
-            bipods_item->m_model->LL_ClearAdditionalTransform(offsets.m_bone_id);
+            bipods_item->m_model->LL_ClearAdditionalTransform(
+                offsets.m_bone_id, KinematicsABT::SourceID::WPN_BIPODS_DEPLOY);
             bipods_item->m_model->LL_AddTransformToBone(offsets);
 
             //--> Правая ножка
@@ -730,7 +732,8 @@ void CWeapon::UpdateBipodsHUD(float fDeployFactor, float fHBody, float fPBody, f
             offsets.m_bone_id = bipods_item->m_model->LL_BoneID(noga_2);
             offsets.setRotLocal(fX_legs, fY_legs, fZ_legs);
 
-            bipods_item->m_model->LL_ClearAdditionalTransform(offsets.m_bone_id);
+            bipods_item->m_model->LL_ClearAdditionalTransform(
+                offsets.m_bone_id, KinematicsABT::SourceID::WPN_BIPODS_DEPLOY);
             bipods_item->m_model->LL_AddTransformToBone(offsets);
         }
     }

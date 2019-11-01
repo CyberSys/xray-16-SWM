@@ -982,8 +982,14 @@ void CKinematicsAnimated::LL_AddTransformToBone(KinematicsABT::additional_bone_t
     inherited::LL_AddTransformToBone(offset);
 }
 
-// Обнулить скриптовое смещение для конкретной кости или всех сразу (bone_id = BI_NONE) --#SM+#--
-void CKinematicsAnimated::LL_ClearAdditionalTransform(u16 bone_id) { inherited::LL_ClearAdditionalTransform(bone_id); }
+/* Обнулить скриптовое смещение для конкретной кости или всех сразу --#SM+#--
+   bone_id - ID кости, с которой нужно снять смещения (BI_NONE если для всех)
+   source_id - Источник смещения, по которому нужно их фильтровать (_ANY если снять со всех источников)
+*/
+void CKinematicsAnimated::LL_ClearAdditionalTransform(u16 bone_id, KinematicsABT::SourceID source_id)
+{
+    inherited::LL_ClearAdditionalTransform(bone_id, source_id);
+}
 
 void CKinematicsAnimated::BuildBoneMatrix(
     const CBoneData* bd, CBoneInstance& bi, const Fmatrix* parent, u8 channel_mask /*= (1<<0)*/)

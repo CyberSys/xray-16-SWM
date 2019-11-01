@@ -580,8 +580,8 @@ void attachable_hud_item::ReadBonesOffsetsToHands()
                     _GetItem(line_value, 1, str_rot, '|'); //--> Считываем поворот
 
                     // Передаём данные в модель
-                    KinematicsABT::additional_bone_transform offsets;
-                    Fvector                                  vPos, vRot;
+                    KinematicsABT::additional_bone_transform offsets(KinematicsABT::SourceID::HUD_HANDS_OFFSETS);
+                    Fvector vPos, vRot;
 
                     offsets.m_bone_id = m_parent->get_model()->dcast_PKinematics()->LL_BoneID(str_bone);
                     sscanf(str_pos, "%f,%f,%f", &vPos.x, &vPos.y, &vPos.z);

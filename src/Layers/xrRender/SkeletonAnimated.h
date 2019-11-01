@@ -65,7 +65,7 @@ private:
 
 public:
     virtual void LL_AddTransformToBone(KinematicsABT::additional_bone_transform& offset); //--#SM+#--
-    virtual void LL_ClearAdditionalTransform(u16 bone_id = BI_NONE); //--#SM+#--
+    virtual void LL_ClearAdditionalTransform(u16 bone_id, KinematicsABT::SourceID source_id); //--#SM+#--
 
     virtual void OnCalculateBones();
 
