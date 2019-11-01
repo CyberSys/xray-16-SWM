@@ -1437,7 +1437,7 @@ void CWeapon::UpdateMagazine3p(bool bForceUpdate)
             LPCSTR world_vis = pMagaz->GetVisuals("visuals_world", true).c_str();
 
             if (bForceUpdate)
-                H_Parent()->cast_game_object()->DetachAdditionalVisual("attachable_magazin_3p");
+                H_Parent()->cast_game_object()->DetachAdditionalVisual(WEAPON_MAG3PVIS);
 
             if (world_vis != NULL)
             {
@@ -1447,7 +1447,7 @@ void CWeapon::UpdateMagazine3p(bool bForceUpdate)
                 if (pSettings->section_exist(str_buffer))
                 {
                     attachable_visual* pOut          = NULL;
-                    bool               bAttachResult = H_Parent()->cast_game_object()->AttachAdditionalVisual("attachable_magazin_3p", &pOut);
+                    bool               bAttachResult = H_Parent()->cast_game_object()->AttachAdditionalVisual(WEAPON_MAG3PVIS, &pOut);
 
                     // Загружаем параметры аттача магазина в руках НПС
                     if (pOut != NULL && (bAttachResult == true))
@@ -1470,7 +1470,7 @@ void CWeapon::UpdateMagazine3p(bool bForceUpdate)
 
             // Скрываем его у НПС
             if (bValidParent)
-                H_Parent()->cast_game_object()->DetachAdditionalVisual("attachable_magazin_3p");
+                H_Parent()->cast_game_object()->DetachAdditionalVisual(WEAPON_MAG3PVIS);
 
             // Снимаем флаг
             m_bMagaz3pIsHidden = false;

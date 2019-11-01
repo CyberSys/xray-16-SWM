@@ -1010,6 +1010,13 @@ bool CWeapon::PlayAnimOpenWeaponFrAB()
     if (m_bIsReloadFromAB == false)
         return false;
 
+    // Худовая анимация (Для NPC \ Третьего лица)
+    if (HudItemData() == NULL)
+    {
+        PlaySoundMotionForNPC("anm_npc_open_fr_ab", "sndOpenFrAB", "anm_open", "sndOpen");
+        return true;
+    }
+
     int iAmmo     = GetGLAmmoElapsed();
     int iAmmoMain = GetMainAmmoElapsed();
 
@@ -1128,8 +1135,15 @@ bool CWeapon::PlayAnimSwitchAddOneCartridge()
 }
 
 // Анимация перезарядки оружия в три стадии (вставка из патронташа)
-bool CWeapon::PlayAnimAddOneCartridgeWeaponFrAB()
+void CWeapon::PlayAnimAddOneCartridgeWeaponFrAB()
 {
+    // Худовая анимация (Для NPC \ Третьего лица)
+    if (HudItemData() == NULL)
+    {
+        PlaySoundMotionForNPC("anm_npc_add_cartridge_fr_ab", "sndAddCartridgeFrAB", "anm_add_cartridge", "sndAddCartridge");
+        return;
+    }
+
     int iAmmo     = GetGLAmmoElapsed();
     int iAmmoMain = GetMainAmmoElapsed();
 
@@ -1138,10 +1152,10 @@ bool CWeapon::PlayAnimAddOneCartridgeWeaponFrAB()
         if (iAmmoMain == 0)
         {
             if (PlaySoundMotion("anm_add_cartridge_fr_ab_empty_w_gl", FALSE, "sndAddCartridgeFrABEmptyWGL", false, iAmmo))
-                return true;
+                return;
         }
         if (PlaySoundMotion("anm_add_cartridge_fr_ab_w_gl", FALSE, "sndAddCartridgeFrABWGL", false, iAmmo))
-            return true;
+            return;
     }
 
     if (true)
@@ -1149,11 +1163,11 @@ bool CWeapon::PlayAnimAddOneCartridgeWeaponFrAB()
         if (iAmmoMain == 0)
         {
             if (PlaySoundMotion("anm_add_cartridge_fr_ab_empty", FALSE, "sndAddCartridgeFrABEmpty", false, iAmmo))
-                return true;
+                return;
         }
     }
 
-    return PlaySoundMotion("anm_add_cartridge_fr_ab", FALSE, "sndAddCartridgeFrAB", false, iAmmo);
+    PlaySoundMotion("anm_add_cartridge_fr_ab", FALSE, "sndAddCartridgeFrAB", true, iAmmo);
 }
 
 // Анимация перезарядки оружия в три стадии (закрытие)
@@ -1209,6 +1223,13 @@ bool CWeapon::PlayAnimCloseWeaponFrAB()
 {
     if (m_bIsReloadFromAB == false)
         return false;
+
+    // Худовая анимация (Для NPC \ Третьего лица)
+    if (HudItemData() == NULL)
+    {
+        PlaySoundMotionForNPC("anm_npc_close_fr_ab", "sndCloseFrAB", "anm_close", "sndClose");
+        return true;
+    }
 
     if (PlayAnimCloseWeaponFrABFromEmpty())
         return true;
@@ -1314,6 +1335,13 @@ bool CWeapon::PlayAnimCloseWeaponFrABFromEmpty()
 // Анимация перезарядки патронташа в три стадии (открытие)
 bool CWeapon::PlayAnimOpenWeaponAB()
 {
+    // Худовая анимация (Для NPC \ Третьего лица)
+    if (HudItemData() == NULL)
+    {
+        PlaySoundMotionForNPC("anm_npc_open_ab", "sndOpenAB", "anm_open", "sndOpen");
+        return true;
+    }
+
     if (IsWGLAnimRequired())
     {
         if (PlaySoundMotion("anm_open_ab_w_gl", TRUE, "sndOpenABWGL", false))
@@ -1323,21 +1351,35 @@ bool CWeapon::PlayAnimOpenWeaponAB()
 }
 
 // Анимация перезарядки патронташа в три стадии (вставка)
-bool CWeapon::PlayAnimAddOneCartridgeWeaponAB()
+void CWeapon::PlayAnimAddOneCartridgeWeaponAB()
 {
+    // Худовая анимация (Для NPC \ Третьего лица)
+    if (HudItemData() == NULL)
+    {
+        PlaySoundMotionForNPC("anm_npc_add_cartridge_ab", "sndAddCartridgeAB", "anm_add_cartridge", "sndAddCartridge");
+        return;
+    }
+
     int iAmmo = GetGLAmmoElapsed();
 
     if (IsWGLAnimRequired())
     {
         if (PlaySoundMotion("anm_add_cartridge_ab_w_gl", FALSE, "sndAddCartridgeABWGL", false, iAmmo))
-            return true;
+            return;
     }
-    return PlaySoundMotion("anm_add_cartridge_ab", FALSE, "sndAddCartridgeAB", false, iAmmo);
+    PlaySoundMotion("anm_add_cartridge_ab", FALSE, "sndAddCartridgeAB", true, iAmmo);
 }
 
 // Анимация перезарядки патронташа в три стадии (закрытие)
 bool CWeapon::PlayAnimCloseWeaponAB()
 {
+    // Худовая анимация (Для NPC \ Третьего лица)
+    if (HudItemData() == NULL)
+    {
+        PlaySoundMotionForNPC("anm_npc_close_ab", "sndCloseAB", "anm_close", "sndClose");
+        return true;
+    }
+
     if (IsWGLAnimRequired())
     {
         if (PlaySoundMotion("anm_close_ab_w_gl", FALSE, "sndCloseABWGL", false))

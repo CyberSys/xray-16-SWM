@@ -49,6 +49,7 @@ class CWeaponMagazinedWGrenade;
 #define WEAPON_ADDON_REQ_L "required_addon"     // Название строки из set-секции аддона, в которой прописана set-секция аддона, требуемого для установки этого  
 #define WEAPON_INDOOR_HEMI_FACTOR 0.01f         // Сила освещённости персонжаей солнечным светом, ниже которой считается что персонаж в помещении 
 #define WEAPON_SND_REFLECTION_HUD_FACTOR 0.7f   // Коэфицент на который домножается громкость звука эха от выстрела, если он был сделат от 1-го лица
+#define WEAPON_MAG3PVIS "attachable_magazin_3p" // Визуал-секция магазина от 3-его лица (для анимации перезарядки НПС)
 
 #define C_THIS_WPN const_cast<CWeapon*>(this)
 
@@ -1187,8 +1188,8 @@ protected:
     virtual bool PlayAnimOpenWeaponFrAB();
 
     virtual void PlayAnimAddOneCartridgeWeapon();
-    virtual bool PlayAnimAddOneCartridgeWeaponAB();
-    virtual bool PlayAnimAddOneCartridgeWeaponFrAB();
+    virtual void PlayAnimAddOneCartridgeWeaponAB();
+    virtual void PlayAnimAddOneCartridgeWeaponFrAB();
 
     virtual bool PlayAnimCloseWeapon();
     virtual bool PlayAnimCloseWeaponFromEmpty();
