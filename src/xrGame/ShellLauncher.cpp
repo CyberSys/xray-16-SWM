@@ -57,6 +57,9 @@ CShellLauncher::_lpoint::_lpoint(const shared_str& sect_data, u32 _idx) : _lpoin
     xr_sprintf(sLine, "shells_3d_anim_drop_time_pump_%d", _idx);
     dwAnimReleaseTimePump = READ_IF_EXISTS(pSettings, r_u32, sect_data, sLine, dwAnimReleaseTime);
 
+    xr_sprintf(sLine, "shells_3d_pvel_factor_%d", _idx);
+    fParentVelFactor = READ_IF_EXISTS(pSettings, r_float, sect_data, sLine, SHELL3D_PARENT_DEF_SPEED_FACTOR);
+
     xr_sprintf(sLine, "shells_3d_pos_%d", _idx);
     vOfsPos = READ_IF_EXISTS(pSettings, r_fvector3, sect_data, sLine, vOfsPos);
 

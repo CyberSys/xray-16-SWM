@@ -341,7 +341,7 @@ void CCustomShell::activate_physic_shell()
         }
         VERIFY(iLockGuard > 0);
 
-        constexpr float fParentSpeedMod = SHELL3D_PARENT_SPEED_FACTOR;
+        float fParentSpeedMod = point.fParentVelFactor;
         CEntityAlive* entity_alive = smart_cast<CEntityAlive*>(pParentRoot);
         if (entity_alive && entity_alive->character_physics_support())
         {

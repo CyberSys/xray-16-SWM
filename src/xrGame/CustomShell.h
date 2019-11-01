@@ -10,7 +10,6 @@
 class CShellLauncher;
 struct CShellLauncher::launch_points;
 
-#define SHELL3D_PARENT_SPEED_FACTOR 1.35f // Модификатор скорости владельца, прибавляемой к гильзе
 #define SHELL3D_SND_MIN_RANGE 0.1f // Минимальная дистанция звука удара гильзы, после которого он начинает затухать
 #define SHELL3D_SND_MAX_RANGE 5.0f // Максимальная дистанция звука удара гильзы, после которого его не слышно
 
