@@ -1435,6 +1435,9 @@ public:
     void UpdateSecondVP();
     float GetSVPVisibilityFactor();
 
+    float GetScopeTubeFactor();
+    float GetScopeDistortFactor();
+
     void StopAllEffects();
 
     virtual void renderable_Render();

@@ -1044,6 +1044,8 @@ void CActor::UpdateCL()
             // Обновляем информацию об оружии в шейдерах
             g_pGamePersistent->m_pGShaderConstants->hud_params.x = pWeapon->GetSVPVisibilityFactor();   //--#SM+#--
             g_pGamePersistent->m_pGShaderConstants->hud_params.y = pWeapon->GetFovSVP();                //--#SM+#--
+            g_pGamePersistent->m_pGShaderConstants->hud_params.z = pWeapon->GetScopeTubeFactor();       //--#SM+#--
+            g_pGamePersistent->m_pGShaderConstants->hud_params.w = pWeapon->GetScopeDistortFactor();    //--#SM+#--
         }
     }
     else

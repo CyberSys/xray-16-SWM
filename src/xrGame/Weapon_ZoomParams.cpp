@@ -61,6 +61,14 @@ void SZoomParams::Initialize(LPCSTR section, LPCSTR prefix, bool bOverrideMode)
     strconcat(sizeof(val_name), val_name, "scope_svp_no_zoom", _prefix);
     m_bNoZoomSVP = READ_IF_EXISTS(pSettings, r_bool, section, val_name, (bOverrideMode ? m_bNoZoomSVP : false));
 
+    //--> Коэфицент размера текстуры трубы прицела
+    strconcat(sizeof(val_name), val_name, "scope_svp_tube_factor", _prefix);
+    m_fLenseTubeKoef = READ_IF_EXISTS(pSettings, r_float, section, val_name, (bOverrideMode ? m_fLenseTubeKoef : 0.5f));
+
+    //--> Коэфицент искажения картинки в линзе
+    strconcat(sizeof(val_name), val_name, "scope_svp_distort_factor", _prefix);
+    m_fLenseDistortKoef = READ_IF_EXISTS(pSettings, r_float, section, val_name, (bOverrideMode ? m_fLenseDistortKoef : 0.0f));
+
     // Целевой HUD FOV при зуме
     strconcat(sizeof(val_name), val_name, "scope_zoom_hud_fov", _prefix);
     m_fZoomHudFov = READ_IF_EXISTS(pSettings, r_float, section, val_name, (bOverrideMode ? m_fZoomHudFov : psHUD_FOV_def));

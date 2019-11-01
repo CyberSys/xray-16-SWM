@@ -28,6 +28,8 @@ public:
     float m_fZoomFovSVP;        // Целевой FOV при зуме (заменяет m_fZoomFovFactor)
     bool  m_bNoZoomSVP;         // Прицел с регулируемой кратностью
     float m_fZoomHudFovSVP;     // Целевой HUD FOV при зуме
+    float m_fLenseTubeKoef;     // Коэфицент размера текстуры трубы прицела
+    float m_fLenseDistortKoef;  // Коэфицент искажения картинки в линзе
 
     bool m_bUseDynamicZoom;     // Прицел с регулируемой кратностью
     float m_fRTZoomFactor;      // Последний сохранённый FOV для зума с регулируемой кратностью

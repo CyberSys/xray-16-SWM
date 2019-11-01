@@ -1289,6 +1289,19 @@ float CWeapon::GetSVPVisibilityFactor()
     return GetZRotatingFactor();
 }
 
+// Получить фактор диаметра трубы внутри прицела +SecondVP+
+float CWeapon::GetScopeTubeFactor()
+{
+    float fTubeFactor = GetZoomParams().m_fLenseTubeKoef;
+    return _lerp(fTubeFactor * 4.0f, fTubeFactor, GetZRotatingFactor());
+}
+
+// Получить фактор искажения картинки внутри прицела +SecondVP+
+float CWeapon::GetScopeDistortFactor()
+{
+    return GetZoomParams().m_fLenseDistortKoef;
+}
+
 // Статическая функция. Считывает из модели число костей с привязкой к числу патронов
 // Если в любой модели (худовой или мировой) есть кости вида bullet_1, bullet_2, ... bullet_x, то они будут скрываться
 // если число патронов в основном магазине меньше, чем числовой индекс кости
