@@ -124,6 +124,33 @@ void CWeapon::UpdateHudAdditonal(Fmatrix& trans)
         clamp(m_fZoomRotationFactor, 0.f, 1.f);
     }
 
+    //============= Сдвиг ствола от бедра при одетом прицеле =============//
+    if (IsScopeAttached())
+    {
+        Fvector curr_offs, curr_rot;
+        curr_offs = hi->m_measures.m_hands_offset[0][4]; //pos,scope
+        curr_rot  = hi->m_measures.m_hands_offset[1][4]; //rot,scope
+
+        curr_offs.mul(1.0f - m_fZoomRotationFactor);
+        curr_rot.mul(1.0f - m_fZoomRotationFactor);
+
+        Fmatrix hud_rotation;
+        hud_rotation.identity();
+        hud_rotation.rotateX(curr_rot.x);
+
+        Fmatrix hud_rotation_y;
+        hud_rotation_y.identity();
+        hud_rotation_y.rotateY(curr_rot.y);
+        hud_rotation.mulA_43(hud_rotation_y);
+
+        hud_rotation_y.identity();
+        hud_rotation_y.rotateZ(curr_rot.z);
+        hud_rotation.mulA_43(hud_rotation_y);
+
+        hud_rotation.translate_over(curr_offs);
+        trans.mulB_43(hud_rotation);
+    }
+
     //============= Подготавливаем общие переменные =============//
     clamp(idx, u8(0), u8(1));
     bool bForAim = (idx == 1);

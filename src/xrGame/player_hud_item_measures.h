@@ -16,7 +16,7 @@ struct hud_item_measures
     Flags8 m_prop_flags;
 
     Fvector m_item_attach[2];      // pos,rot
-    Fvector m_hands_offset[2][4];  // pos,rot/ normal,aim,GL,aim_alt --#SM+#--
+    Fvector m_hands_offset[2][5];  // pos,rot/ normal,aim,GL,aim_alt,scope --#SM+#--
     Fvector m_strafe_offset[4][2]; // pos,rot,data1,data2/ normal,aim-GL --#SM+#--
 
     u16     m_fire_bone;
@@ -34,6 +34,7 @@ struct hud_item_measures
     bool bReloadPitchOfs; //--#SM+#--
     bool bReloadStrafe;   //--#SM+#--
     bool bReloadShooting; //--#SM+#--
+    bool bReloadScope;    //--#SM+#--
 
     void load(const shared_str& sect_name, IKinematics* K);
     void merge_measures_params(hud_item_measures& new_measures); //--#SM+#--

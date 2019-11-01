@@ -84,6 +84,12 @@ void hud_item_measures::load(const shared_str& sect_name, IKinematics* K)
     strconcat(sizeof(val_name), val_name, "aim_hud_offset_alt_rot", _prefix);
     m_hands_offset[1][3] = READ_IF_EXISTS(pSettings, r_fvector3, sect_name, val_name, vZero);
 
+    // Сдвиг от бедра при одетом прицеле
+    strconcat(sizeof(val_name), val_name, "scope_hud_offset_pos", _prefix);
+    m_hands_offset[0][4] = READ_IF_EXISTS(pSettings, r_fvector3, sect_name, val_name, vZero);
+    strconcat(sizeof(val_name), val_name, "scope_hud_offset_rot", _prefix);
+    m_hands_offset[1][4] = READ_IF_EXISTS(pSettings, r_fvector3, sect_name, val_name, vZero);
+
     // Настройки стрейфа (боковая ходьба)
     Fvector vDefStrafeValue;
     vDefStrafeValue.set(vZero);
@@ -125,6 +131,7 @@ void hud_item_measures::load(const shared_str& sect_name, IKinematics* K)
     bReloadPitchOfs = READ_IF_EXISTS(pSettings, r_bool, sect_name, "use_new_pitch_offsets", false);
     bReloadStrafe   = READ_IF_EXISTS(pSettings, r_bool, sect_name, "use_new_strafe_params", false);
     bReloadShooting = READ_IF_EXISTS(pSettings, r_bool, sect_name, "use_new_shooting_params", false);
+    bReloadScope    = READ_IF_EXISTS(pSettings, r_bool, sect_name, "use_new_scope_offset", false);
 
     // Загрузка параметров смещения / инерции
     m_inertion_params.m_pitch_offset_r  = READ_IF_EXISTS(pSettings, r_float, sect_name, "pitch_offset_right", PITCH_OFFSET_R);
@@ -154,7 +161,7 @@ void hud_item_measures::load(const shared_str& sect_name, IKinematics* K)
     m_shooting_params.m_ret_speed_aim             = READ_IF_EXISTS(pSettings, r_float, sect_name, "shooting_ret_aim_speed", 1.0f);
     m_shooting_params.m_min_LRUD_power            = READ_IF_EXISTS(pSettings, r_float, sect_name, "shooting_min_LRUD_power", 0.0f);
 
-    // Msg("Measures loaded from %s [%d][%d][%d][%d][%d][%d]", sect_name.c_str(), bReloadAim, bReloadAimGL, bReloadInertion, bReloadPitchOfs, bReloadStrafe, bReloadShooting);
+    // Msg("Measures loaded from %s [%d][%d][%d][%d][%d][%d][%d]", sect_name.c_str(), bReloadAim, bReloadAimGL, bReloadInertion, bReloadPitchOfs, bReloadStrafe, bReloadShooting, bReloadScope);
     //--#SM+# End--
 }
 
@@ -232,7 +239,16 @@ void hud_item_measures::merge_measures_params(hud_item_measures& new_measures)
         m_shooting_params.m_min_LRUD_power           = new_measures.m_shooting_params.m_min_LRUD_power;
     }
 
-    // Msg("Measures reloaded [%d][%d]", new_measures.bReloadAim, new_measures.bReloadAimGL);
+    // Смещение от бедра при одетом прицеле
+    if (new_measures.bReloadScope)
+    {
+        // scope_hud_offset_pos
+        m_hands_offset[0][4].set(new_measures.m_hands_offset[0][4]);
+        // scope_hud_offset_rot
+        m_hands_offset[1][4].set(new_measures.m_hands_offset[1][4]);
+    }
+
+    // Msg("Measures reloaded [%d][%d][%d][%d][%d][%d][%d]", new_measures.bReloadAim, new_measures.bReloadAimGL, new_measures.bReloadInertion, new_measures.bReloadPitchOfs, new_measures.bReloadStrafe, new_measures.bReloadShooting, new_measures.bReloadScope);
 }
 
 Fvector& attachable_hud_item::hands_attach_pos() { return m_measures.m_hands_attach[0]; }
