@@ -87,6 +87,7 @@ struct attachable_hud_item
     void                 AddChildren(const shared_str& sect_name, bool bRecalcBonesOffsets = true);
     void                 RemoveChildren(const shared_str& sect_name, bool bRecalcBonesOffsets = true);
     void                 UpdateChildrenList(const shared_str& addons_list, bool bShow, bool bUseParser = false);
+    void                 OnChildrenChange(attachable_hud_item* pChild, bool bOnRemove);
 
     void UpdateHudFromChildren(bool bLoadDefaults = true);
 

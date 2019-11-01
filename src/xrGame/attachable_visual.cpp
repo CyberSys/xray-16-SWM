@@ -74,19 +74,75 @@ void attachable_visual::SetVisual(shared_str vis_name)
     if (m_cur_vis_name.equal(vis_name))
         return;
 
-    m_cur_vis_name = (vis_name != NULL ? vis_name : m_cfg_vis_name);
+    m_cur_vis_name = (vis_name != nullptr ? vis_name : m_cfg_vis_name);
 
     // Удаляем старую модель
-    if (m_model != NULL)
+    if (m_model != nullptr)
     {
         IRenderVisual* v = m_model->dcast_RenderVisual();
         GEnv.Render->model_Delete(v);
-        m_model = NULL;
+        m_model = nullptr;
     }
 
     // Устанавливаем новую
-    if (m_cur_vis_name != NULL)
+    if (m_cur_vis_name != nullptr)
         m_model = smart_cast<IKinematics*>(GEnv.Render->model_Create(m_cur_vis_name.c_str()));
+
+    if (m_model)
+    {
+        // Ищем в конфиге визуала параметры смещения \ скрытия костей и применяем их
+        m_model->LL_ClearAdditionalTransform(BI_NONE, KinematicsABT::SourceID::AVIS_ITEM_OFFSETS); //--> Удаляем старые
+
+        u32 lines_count = pSettings->line_count(m_sect_name);
+        for (u32 i = 0; i < lines_count; ++i)
+        {
+            LPCSTR line_name = nullptr;
+            LPCSTR line_value = nullptr;
+            pSettings->r_line(m_sect_name, i, &line_name, &line_value);
+
+            if (line_name && xr_strlen(line_name))
+            {
+                // Сдвиги костей
+                if (nullptr != strstr(line_name, "visual_bone_offset"))
+                {
+                    string128 str_bone;
+                    _GetItem(line_name, 1, str_bone, '|'); //--> Считываем имя кости
+                    string128 str_pos;
+                    _GetItem(line_value, 0, str_pos, '|'); //--> Считываем позицию
+                    string128 str_rot;
+                    _GetItem(line_value, 1, str_rot, '|'); //--> Считываем поворот
+
+                    //--> Передаём данные в модель
+                    KinematicsABT::additional_bone_transform offsets(KinematicsABT::SourceID::AVIS_ITEM_OFFSETS);
+                    Fvector vPos, vRot;
+
+                    offsets.m_bone_id = m_model->LL_BoneID(str_bone);
+                    sscanf(str_pos, "%f,%f,%f", &vPos.x, &vPos.y, &vPos.z);
+                    sscanf(str_rot, "%f,%f,%f", &vRot.x, &vRot.y, &vRot.z);
+                    vRot.mul(PI / 180.f); //--> Преобразуем углы в радианы
+
+                    offsets.setRotLocal(vRot);
+                    offsets.setPosOffset(vPos);
+
+                    m_model->LL_AddTransformToBone(offsets);
+                }
+
+                // Скрытие костей
+                if (nullptr != strstr(line_name, "visual_bone_hide"))
+                {
+                    string128 str_bone;
+                    _GetItem(line_name, 1, str_bone, '|'); //--> Считываем имя кости
+
+                    //--> Скрываем кость
+                    u16 iBoneID = m_model->LL_BoneID(str_bone);
+                    if (iBoneID != BI_NONE)
+                    {
+                        m_model->LL_SetBoneVisible(iBoneID, false, true);
+                    }
+                }
+            }
+        }
+    }
 
     // Сообщеаем о смене модели
     m_parent->OnAdditionalVisualModelChange(this);

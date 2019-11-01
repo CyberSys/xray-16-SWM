@@ -96,6 +96,7 @@ void attachable_hud_item::UpdateVisual(shared_str new_visual)
 
     if (m_cur_vis_name.equal(new_visual) == false)
     {
+        //=======================================================//
         // Удаляем старую
         if (m_model != NULL)
         {
@@ -110,6 +111,58 @@ void attachable_hud_item::UpdateVisual(shared_str new_visual)
 
         // Считываем число костей с привязкой к числу патронов
         CWeapon::ReadMaxBulletBones(m_model);
+
+        // Ищем в конфиге худа предмета параметры смещения \ скрытия костей и применяем их
+        u32 lines_count = pSettings->line_count(m_sect_name);
+        for (u32 i = 0; i < lines_count; ++i)
+        {
+            LPCSTR line_name = nullptr;
+            LPCSTR line_value = nullptr;
+            pSettings->r_line(m_sect_name, i, &line_name, &line_value);
+
+            if (line_name && xr_strlen(line_name))
+            {
+                // Сдвиги костей
+                if (nullptr != strstr(line_name, "item_bone_offset"))
+                {
+                    string128 str_bone;
+                    _GetItem(line_name, 1, str_bone, '|'); //--> Считываем имя кости
+                    string128 str_pos;
+                    _GetItem(line_value, 0, str_pos, '|'); //--> Считываем позицию
+                    string128 str_rot;
+                    _GetItem(line_value, 1, str_rot, '|'); //--> Считываем поворот
+
+                    //--> Передаём данные в модель
+                    KinematicsABT::additional_bone_transform offsets(KinematicsABT::SourceID::HUD_ITEM_OFFSETS);
+                    Fvector vPos, vRot;
+
+                    offsets.m_bone_id = m_model->LL_BoneID(str_bone);
+                    sscanf(str_pos, "%f,%f,%f", &vPos.x, &vPos.y, &vPos.z);
+                    sscanf(str_rot, "%f,%f,%f", &vRot.x, &vRot.y, &vRot.z);
+                    vRot.mul(PI / 180.f); //--> Преобразуем углы в радианы
+
+                    offsets.setRotLocal(vRot);
+                    offsets.setPosOffset(vPos);
+
+                    m_model->LL_AddTransformToBone(offsets);
+                }
+
+                // Скрытие костей
+                if (nullptr != strstr(line_name, "item_bone_hide"))
+                {
+                    string128 str_bone;
+                    _GetItem(line_name, 1, str_bone, '|'); //--> Считываем имя кости
+
+                    //--> Скрываем кость
+                    u16 iBoneID = m_model->LL_BoneID(str_bone);
+                    if (iBoneID != BI_NONE)
+                    {
+                        m_model->LL_SetBoneVisible(iBoneID, false, true);
+                    }
+                }
+            }
+        }
+        //=======================================================//
     }
 }
 
@@ -484,6 +537,9 @@ void attachable_hud_item::AddChildren(const shared_str& sect_name, bool bRecalcB
     // Добавляем в список аттачей
     m_child_items.push_back(res);
 
+    // Вызываем событие изменения потомков
+    OnChildrenChange(res, false);
+
     // Пересчитываем смещения костей
     if (bRecalcBonesOffsets)
         m_parent->RecalculateBonesOffsets();
@@ -500,6 +556,10 @@ void attachable_hud_item::RemoveChildren(const shared_str& sect_name, bool bReca
 
     if (item != NULL)
     {
+        // Вызываем событие изменения потомков
+        OnChildrenChange(item, true);
+
+        // Удаляем потомка
         xr_delete(item);
         m_child_items.erase(m_child_items.begin() + idx);
         UpdateHudFromChildren();
@@ -541,6 +601,12 @@ void attachable_hud_item::UpdateChildrenList(const shared_str& addons_list, bool
 
     // Пересчитываем смещения костей
     m_parent->RecalculateBonesOffsets();
+}
+
+// Коллбэк на добавление \ удаление потомка
+void attachable_hud_item::OnChildrenChange(attachable_hud_item* pChild, bool bOnRemove)
+{
+
 }
 
 // Расчитываем позицию потомка относительно его ролителя --#SM+#--
