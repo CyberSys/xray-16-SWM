@@ -516,7 +516,18 @@ bool CWeapon::LoadAddons(LPCSTR section, EFuncUpgrMode upgrMode)
     DEF_InitAddonSlot(eSpec_6,   "specials_6_sect", "special_name",  "special_6_status",        "wpn_a_special_6");
     // clang-format on
 
+    // Загружаем параметры приклада по умолчанию
     m_DefaultStockSect = READ_IF_EXISTS(pSettings, r_string, section, "default_stock", nullptr);
+    if (m_DefaultStockSect != nullptr)
+    {
+        m_DefaultStockVisSect = READ_IF_EXISTS(pSettings, r_string, m_DefaultStockSect, "visuals_world", nullptr);
+        m_DefaultStockHudSect = READ_IF_EXISTS(pSettings, r_string, m_DefaultStockSect, "visuals_hud",   nullptr);
+    } 
+    else
+    {
+        m_DefaultStockVisSect = nullptr;
+        m_DefaultStockHudSect = nullptr;
+    }
 
     return bAddonsInitialized;
 }

@@ -631,9 +631,24 @@ private:
 
 protected:
     EAddons m_StockSlot; //--> Слот аддона, который занимает рукоятка
-    shared_str m_DefaultStockSect;
+    shared_str m_DefaultStockSect;    //--> Секция параметров приклада по умолчанию
+    shared_str m_DefaultStockVisSect; //--> Строка с мировой визуал-секцией приклада по умолчанию
+    shared_str m_DefaultStockHudSect; //--> Строка с худовой визуал-секцией приклада по умолчанию
 
 public:
+    struct stock_deploy
+    {
+        bool       bInitialized;    //--> Флаг инициализации
+        shared_str bone_name;       //--> Имя кости, которую будем двигать
+        Fvector3   deploy_pos;      //--> Изменение позиции
+        Fvector3   deploy_rot;      //--> Изменение поворота
+
+        stock_deploy() : bInitialized(false) {};
+        stock_deploy(LPCSTR section, LPCSTR prefix);
+    };
+    stock_deploy m_stock_deploy_world; //--> Сдвиг кости приклада при установленных прицелах (world)
+    stock_deploy m_stock_deploy_hud;   //--> Сдвиг кости приклада при установленных прицелах (hud)
+
     IC bool IsStockAttached() const { return m_StockSlot != eNotExist; }
 
     // Получить set-секцию текущего активного аддона в данном слоте

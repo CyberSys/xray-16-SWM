@@ -189,6 +189,10 @@ void CWeapon::Load(LPCSTR section)
     m_nearwall_target_hud_fov = READ_IF_EXISTS(pSettings, r_float, section, "nearwall_target_hud_fov", 0.27f);
     m_nearwall_speed_mod      = READ_IF_EXISTS(pSettings, r_float, section, "nearwall_speed_mod", 10.f);
 
+    // Загрузка параметров сдвига кости приклада при одетых прицелах
+    m_stock_deploy_world      = stock_deploy(section, "_world");
+    m_stock_deploy_hud        = stock_deploy(section, "_hud");
+
     // Прочее
     m_bUIShowAmmo              = READ_IF_EXISTS(pSettings, r_bool, section, "show_ammo", true);
     m_bAllowAutoReload         = READ_IF_EXISTS(pSettings, r_bool, section, "auto_reload", true);
@@ -527,4 +531,37 @@ void CWeapon::reload(LPCSTR section)
     // Эффективный тип оружия (для АИ)
     m_ef_main_weapon_type = READ_IF_EXISTS(pSettings, r_u32, section, "ef_main_weapon_type", u32(-1));
     m_ef_weapon_type      = READ_IF_EXISTS(pSettings, r_u32, section, "ef_weapon_type", u32(-1));
+}
+
+// Загрузка параметров сдвига кости приклада при одетых прицелах
+CWeapon::stock_deploy::stock_deploy(LPCSTR section, LPCSTR prefix) : bInitialized(false)
+{
+    string64 _prefix;
+    xr_sprintf(_prefix, "%s", prefix != nullptr ? prefix : "");
+    string128 val_name;
+
+    strconcat(sizeof(val_name), val_name, "stock_deploy", _prefix);
+    shared_str sData = READ_IF_EXISTS(pSettings, r_string, section, val_name, nullptr);
+
+    if (sData != nullptr)
+    {
+        //--> Считываем имя кости
+        string128 str_bone;
+        _GetItem(sData.c_str(), 0, str_bone, '|');
+        bone_name = str_bone;
+      
+        //--> Считываем позицию
+        string128 str_pos;
+        _GetItem(sData.c_str(), 1, str_pos, '|');
+        sscanf(str_pos, "%f,%f,%f", &deploy_pos.x, &deploy_pos.y, &deploy_pos.z);
+
+        //--> Считываем поворот
+        string128 str_rot;
+        _GetItem(sData.c_str(), 2, str_rot, '|');
+        sscanf(str_rot, "%f,%f,%f", &deploy_rot.x, &deploy_rot.y, &deploy_rot.z);
+        deploy_rot.mul(PI / 180.f); //--> Преобразуем углы в радианы
+
+        //--> Выставляем флаг инициализации
+        bInitialized = true;
+    }
 }

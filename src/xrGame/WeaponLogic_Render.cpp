@@ -1117,7 +1117,7 @@ void CWeapon::UpdateAnimatedShellVisual()
     }
 }
 
-// Обновляем все связанные с текущим оружием доп. визуалы (не связаны напрямую с аддонами)
+// Обновляем основную модель и все связанные с текущим оружием доп. визуалы (которые не связаны напрямую с аддонами)
 void CWeapon::UpdateWpnExtraVisuals()
 {
     if ((bool)GetHUDmode() == true)
@@ -1125,6 +1125,33 @@ void CWeapon::UpdateWpnExtraVisuals()
         attachable_hud_item* hud_item = HudItemData();
         if (hud_item != NULL)
         {
+            // Управляем костью приклада оружия при одетом прицеле
+            if (m_stock_deploy_hud.bInitialized)
+            {
+                //--> Очищаем старые смещения
+                hud_item->m_model->LL_ClearAdditionalTransform(BI_NONE, KinematicsABT::SourceID::WPN_PRIKLAD_DEPLOY);
+
+                if (IsScopeAttached())
+                {
+                    //--> Считаем новые
+                    KinematicsABT::additional_bone_transform prikladOffsets(
+                        KinematicsABT::SourceID::WPN_PRIKLAD_DEPLOY);
+                    prikladOffsets.m_bone_id = hud_item->m_model->LL_BoneID(m_stock_deploy_hud.bone_name);
+                    prikladOffsets.setPosOffset(m_stock_deploy_hud.deploy_pos);
+                    prikladOffsets.setRotLocal(m_stock_deploy_hud.deploy_rot);
+
+                    //--> Применяем
+                    hud_item->m_model->LL_AddTransformToBone(prikladOffsets);
+                }
+            }
+
+            // Показываем визуал приклада по умолчанию или скрываем его если одет другой приклад
+            if (m_DefaultStockSect != nullptr && m_DefaultStockHudSect != nullptr)
+            {
+                bool bShowDefaultStock = (IsStockAttached() == false); 
+                hud_item->UpdateChildrenList(m_DefaultStockHudSect, bShowDefaultStock);
+            }
+
             // Перебираем все активные атачи худа
             for (u32 i = 0; i < hud_item->m_child_items.size(); i++)
             {
@@ -1187,6 +1214,35 @@ void CWeapon::UpdateWpnExtraVisuals()
     }
     else
     { // Обновляем визуалы мировых моделей
+        // Управляем костью приклада оружия при одетом прицеле
+        if (m_stock_deploy_world.bInitialized)
+        {
+            //--> Очищаем старые смещения
+            renderable.visual->dcast_PKinematics()->LL_ClearAdditionalTransform(
+                BI_NONE, KinematicsABT::SourceID::WPN_PRIKLAD_DEPLOY);
+
+            if (IsScopeAttached())
+            {
+                //--> Считаем новые
+                KinematicsABT::additional_bone_transform prikladOffsets(KinematicsABT::SourceID::WPN_PRIKLAD_DEPLOY);
+                prikladOffsets.m_bone_id =
+                    renderable.visual->dcast_PKinematics()->LL_BoneID(m_stock_deploy_world.bone_name);
+                prikladOffsets.setPosOffset(m_stock_deploy_world.deploy_pos);
+                prikladOffsets.setRotLocal(m_stock_deploy_world.deploy_rot);
+
+                //--> Применяем
+                renderable.visual->dcast_PKinematics()->LL_AddTransformToBone(prikladOffsets);
+            }
+        }
+
+        // Показываем визуал приклада по умолчанию или скрываем его если одет другой приклад
+        if (m_DefaultStockSect != nullptr && m_DefaultStockVisSect != nullptr)
+        {
+            bool bShowDefaultStock = (IsStockAttached() == false);
+            (bShowDefaultStock ? this->AttachAdditionalVisual(m_DefaultStockVisSect) :
+                                 this->DetachAdditionalVisual(m_DefaultStockVisSect));
+        }
+
         // Строим список всех наших визуалов
         xr_vector<IRenderVisual*> tVisList;
         GetAllInheritedVisuals(tVisList);
