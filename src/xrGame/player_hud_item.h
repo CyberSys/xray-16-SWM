@@ -10,6 +10,8 @@
 #include "player_hud_item_measures.h" //--#SM+#--
 #include "firedeps.h"
 
+#define HUD_ITEM_DEF_MOTION "idle"    //--#SM+#-- Анимация по умолчанию для всех предметов
+
 class player_hud; //--#SM+#--
 
 struct attachable_hud_item
@@ -19,6 +21,7 @@ struct attachable_hud_item
     shared_str        m_sect_name;
     shared_str        m_def_vis_name; //--#SM+#--
     shared_str        m_cur_vis_name; //--#SM+#--
+    shared_str        m_def_motion;   //--#SM+#--
     IKinematics*      m_model;
     u16               m_attach_place_idx;
     hud_item_measures m_measures;

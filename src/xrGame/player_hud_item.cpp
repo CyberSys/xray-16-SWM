@@ -29,12 +29,15 @@ void attachable_hud_item::load(const shared_str& sect_name) //--#SM+#--
     m_cur_vis_name = NULL;
     UpdateVisual(m_def_vis_name);
 
+    // Motions
+    m_def_motion   = READ_IF_EXISTS(pSettings, r_string, m_sect_name, "default_motion", HUD_ITEM_DEF_MOTION);
+
     // Measures
-    m_attach_place_idx = pSettings->r_u16(sect_name, "attach_place_idx");
-    m_measures.load(sect_name, m_model);
+    m_attach_place_idx = pSettings->r_u16(m_sect_name, "attach_place_idx");
+    m_measures.load(m_sect_name, m_model);
 
     // Socket data
-    m_socket_bone_name = READ_IF_EXISTS(pSettings, r_string, sect_name, "socket_bone_name", NULL);
+    m_socket_bone_name = READ_IF_EXISTS(pSettings, r_string, m_sect_name, "socket_bone_name", NULL);
     m_socket_bone_id   = NULL;
     m_parent_aitem     = NULL;
 }
@@ -393,9 +396,9 @@ void attachable_hud_item::anim_play_item(
 void attachable_hud_item::anim_play_item(
     anim_find_result anim_to_play, bool bMixIn, bool bNoChilds, float fSpeed, float fStartFromTime, float _fRootStartTime)
 {
-    // Если анимация предмета не указана, то отыгрываем "idle"
+    // Если анимация предмета не указана, то отыгрываем дефолтную ("idle")
     if (anim_to_play.item_motion_name == NULL)
-        anim_to_play.item_motion_name = "idle";
+        anim_to_play.item_motion_name = m_def_motion;
 
     // Если наша анимация была запущена из другого attachable_hud_item, то _fRootStartTime будет содержать
     // стартовую секунду анимации нашего самого первого корневого родителя, запустившего всю цепочку вызовов anim_play_item
@@ -408,8 +411,8 @@ void attachable_hud_item::anim_play_item(
         IKinematicsAnimated* ka = m_model->dcast_PKinematicsAnimated();
 
         MotionID M2 = ka->ID_Cycle_Safe(anim_to_play.item_motion_name);
-        if (!M2.valid()) //--> Если у модели предмета нет такой анимации, то пытаемся проиграть "idle"
-            M2 = ka->ID_Cycle_Safe("idle");
+        if (!M2.valid()) //--> Если у модели предмета нет такой анимации, то пытаемся проиграть дефолтную ("idle")
+            M2 = ka->ID_Cycle_Safe(m_def_motion);
         else if (bDebug)
             Msg("playing item animation [%s]", anim_to_play.item_motion_name.c_str());
         R_ASSERT3(M2.valid(), "model has no motion [idle] ", pSettings->r_string(m_sect_name, "item_visual"));
@@ -437,8 +440,10 @@ void attachable_hud_item::anim_play_item(
         {
             attachable_hud_item*   pChildItem = (*it);
             ChildMotions::iterator pRes       = anim_to_play.child_motions_map.find(pChildItem);
-            shared_str             sChildAnm  = (pRes != anim_to_play.child_motions_map.end() ? pRes->second : "idle");
-
+            shared_str sChildAnm              = (pRes != anim_to_play.child_motions_map.end() ?
+                                                    pRes->second :
+                                                    pChildItem->m_def_motion
+                                                );
             pChildItem->anim_play_item(sChildAnm, bMixIn, false, fSpeed, fStartFromTime, _fRootStartTime);
 
             // Следующий потомок
@@ -516,8 +521,12 @@ void attachable_hud_item::AddChildren(const shared_str& sect_name, bool bRecalcB
     {
         IKinematicsAnimated* ka = res->m_model->dcast_PKinematicsAnimated();
 
-        MotionID M2 = ka->ID_Cycle_Safe("idle");
-        R_ASSERT3(M2.valid(), "model has no motion [idle] ", pSettings->r_string(res->m_sect_name, "item_visual"));
+        MotionID M2 = ka->ID_Cycle_Safe(res->m_def_motion);
+        R_ASSERT4(M2.valid(),
+            "model has no default motion",
+            pSettings->r_string(res->m_sect_name, "item_visual"),
+            res->m_def_motion.c_str()
+        );
 
         u16            root_id    = res->m_model->LL_GetBoneRoot();
         CBoneInstance& root_binst = res->m_model->LL_GetBoneInstance(root_id);
