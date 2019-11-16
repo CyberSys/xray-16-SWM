@@ -180,6 +180,9 @@ void CWeapon::Load(LPCSTR section)
     // Параметры гильз
     CShellLauncher::ReLoadLaunchPoints(section, hud_sect);
 
+    m_bDontSpawnShell3DForFirstBullet = READ_IF_EXISTS(pSettings, r_bool, section, "dont_spawn_shell3d_for_fb", false);
+    m_bDontSpawnShell3DForLastBullet = READ_IF_EXISTS(pSettings, r_bool, section, "dont_spawn_shell3d_for_lb", false);
+
     // Модификатор для HUD FOV от бедра
     m_HudFovAddition = READ_IF_EXISTS(pSettings, r_float, section, "hud_fov_addition_modifier", 0.f);
 

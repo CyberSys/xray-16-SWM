@@ -1127,6 +1127,8 @@ protected:
     shared_str m_sAnimatedShellHUDVisSect; //--> Визуал-секция анимированной худовой гильзы
     shared_str m_sCurAnimatedShellHudVisual; //--> Путь к текущему визуалу анимированной худовой гильзы
 
+    bool m_bDontSpawnShell3DForFirstBullet; //--> Флаг, блокирующий спавн 3D-гильзы если был выстрелен первый патрон из полного магазина
+    bool m_bDontSpawnShell3DForLastBullet; //--> Флаг, блокирующий спавн 3D-гильзы если был выстрелен последний патрон в стволе
     shared_str m_sCurShell3DSect; //--> Текущая секция объекта 3D-гильзы от последнего выстрела 
 
     virtual void Update3DShellTransform();

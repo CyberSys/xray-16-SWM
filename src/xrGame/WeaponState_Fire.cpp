@@ -429,11 +429,24 @@ void CWeapon::OnShot(bool bIsRocket, bool bIsBaseDispersionedBullet)
             LaunchShell2D(&vel);
 
         // 3D-Гильзы
-        if (ParentIsActor())
+        do
         {
+            if (m_bGrenadeMode == false)
+            {
+                if (m_bDontSpawnShell3DForFirstBullet == true && GetMainAmmoElapsed() == (GetMainMagSize() - 1))
+                { //--> Не спавним гильзу при первом выстреле из полного магазина
+                    break;
+                }
+
+                if (m_bDontSpawnShell3DForLastBullet == true && GetMainAmmoElapsed() == 0)
+                { //--> Не спавним гильзу при последнем выстреле
+                    break;
+                }
+            }
+
             for (int _idx = 1; _idx <= GetLPCount(); _idx++)
                 LaunchShell3D(_idx, (_idx == 1 ? m_sCurShell3DSect.c_str() : nullptr));
-        }
+        } while (false);
     }
 
     // Эффект сдвига (отдача)
