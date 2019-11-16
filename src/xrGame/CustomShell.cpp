@@ -358,23 +358,6 @@ void CCustomShell::activate_physic_shell()
                 l_vel.add(vParentLVel.mul(fParentSpeedMod));
             }
         }
-
-        /*
-        // SM_TODO: Не дало ожидаемого эффекта, возможно стоит посмотреть в сторону механизма инерции от GSC
-        #define SHELL3D_CAM_MAGNITUDE_F 0.8f // Фактор влияния поворота камеры на скорость полёта гильзы вбок
-
-        //--> Скорость от кручения камеры (от 1-го лица)
-        if (m_bHUD_mode)
-        {
-            CActor* pParentActor = pParentRoot->cast_actor();
-            if (pParentActor != nullptr)
-            {
-                float fYMag = pParentActor->fFPCamYawMagnitude; //--> Y
-                float fMagF = SHELL3D_CAM_MAGNITUDE_F * Device.time_factor();
-                l_vel.x += (-fYMag * fParentSpeedMod * fMagF);
-            }
-        }
-        */
     }
 
     R_ASSERT(!m_pPhysicsShell);

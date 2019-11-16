@@ -269,6 +269,28 @@ void CShellLauncher::RebuildLaunchParams(const Fmatrix& mTransform, IKinematics*
         point.vLaunchVel.y += Random.randFs(point.vVelocityRnd.y);
         point.vLaunchVel.z += Random.randFs(point.vVelocityRnd.z);
 
+        // Модифицируем его с помощью поворота камеры
+        if (bIsHud && m_parent_shell_launcher->H_Parent() != nullptr)
+        {
+            //--> Скорость от кручения камеры (от 1-го лица)
+            CActor* pParentActor = m_parent_shell_launcher->H_Parent()->cast_actor();
+            if (pParentActor != nullptr)
+            {
+                float fYMag = pParentActor->fFPCamYawMagnitude; //--> Y
+                float fMagF = SHELL3D_CAM_MAGNITUDE_F;
+
+                //--> Корректируем полёт гильзы от горизонтального движения камеры
+                if (point.vVelocity.x > 0.0f && fYMag < 0.0f)
+                { //--> Гильзы должны лететь вправо, и камера крутится вправо
+                    point.vLaunchVel.x += (-fYMag * fMagF);
+                }
+                else if (point.vVelocity.x < 0.0f && fYMag > 0.0f)
+                { //--> Гильзы должны лететь влево, и камера крутится влево
+                    point.vLaunchVel.x += (-fYMag * fMagF);
+                }
+            }
+        }
+
         // Модифицируем его с помощью кости и предмета
         if (point.bUseBoneDir)
         {

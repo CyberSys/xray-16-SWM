@@ -10,6 +10,7 @@ class CGameObject;
 #define SHELL3D_DEF_LIFETIME 5000 // Время существования гильзы по умолчанию
 #define SHELL3D_DEF_COL_LIFETIME 0 // Минимальное время, раньше которого не можем удалять гильзу при столкновениях
 #define SHELL3D_PARENT_DEF_SPEED_FACTOR 1.35f // Дефолтный модификатор вектора скорости владельца, прибавляемой к гильзе
+#define SHELL3D_CAM_MAGNITUDE_F 0.8f // Фактор влияния поворота камеры на скорость полёта гильзы вбок
 
 class CShellLauncher
 {
