@@ -135,6 +135,7 @@ void CWeapon::Load(LPCSTR section)
     // Визуализация патрона во время перезарядки и гильзы после выстрела
     m_sBulletHUDVisSect = READ_IF_EXISTS(pSettings, r_string, section, "hud_bullet_visual", NULL);
     m_sAnimatedShellHUDVisSect = READ_IF_EXISTS(pSettings, r_string, section, "hud_shell_visual", NULL);
+    m_sAnimatedShellLastBulletHUDVisSect = READ_IF_EXISTS(pSettings, r_string, section, "hud_shell_lb_visual", NULL);
 
     // Аддоны
     LoadAddons(section);

@@ -1080,12 +1080,23 @@ void CWeapon::PlayAnimAddOneCartridgeWeapon()
 
     if (IsWGLAnimRequired())
     {
+        if (m_bCanShowLastBulletShell)
+        {
+            if (PlaySoundMotion("anm_add_cartridge_lbs_w_gl", FALSE, "sndAddCartridgeLBSWGL", false, iAmmo))
+                return;
+        }
         if (iAmmo == 0)
         {
             if (PlaySoundMotion("anm_add_cartridge_empty_w_gl", FALSE, "sndAddCartridgeEmptyWGL", false))
                 return;
         }
         if (PlaySoundMotion("anm_add_cartridge_w_gl", FALSE, "sndAddCartridgeWGL", false))
+            return;
+    }
+
+    if (m_bCanShowLastBulletShell)
+    {
+        if (PlaySoundMotion("anm_add_cartridge_lbs", FALSE, "sndAddCartridgeLBS", false, iAmmo))
             return;
     }
 
@@ -1149,12 +1160,23 @@ void CWeapon::PlayAnimAddOneCartridgeWeaponFrAB()
 
     if (IsWGLAnimRequired())
     {
+        if (m_bCanShowLastBulletShell)
+        {
+            if (PlaySoundMotion("anm_add_cartridge_lbs_fr_ab_w_gl", FALSE, "sndAddCartridgeLBSFrABWGL", false, iAmmo))
+                return;
+        }
         if (iAmmoMain == 0)
         {
             if (PlaySoundMotion("anm_add_cartridge_fr_ab_empty_w_gl", FALSE, "sndAddCartridgeFrABEmptyWGL", false, iAmmo))
                 return;
         }
         if (PlaySoundMotion("anm_add_cartridge_fr_ab_w_gl", FALSE, "sndAddCartridgeFrABWGL", false, iAmmo))
+            return;
+    }
+
+    if (m_bCanShowLastBulletShell)
+    {
+        if (PlaySoundMotion("anm_add_cartridge_lbs_fr_ab", FALSE, "sndAddCartridgeLBSFrAB", false, iAmmo))
             return;
     }
 

@@ -1125,7 +1125,10 @@ private:
 
 protected:
     shared_str m_sAnimatedShellHUDVisSect; //--> Визуал-секция анимированной худовой гильзы
-    shared_str m_sCurAnimatedShellHudVisual; //--> Путь к текущему визуалу анимированной худовой гильзы
+    shared_str m_sCurAnimatedShellHudVisual; //--> Путь к текущему визуалу анимированной худовой гильзы от последнего выстрела
+
+    shared_str m_sAnimatedShellLastBulletHUDVisSect; //--> Визуал-секция анимированной худовой гильзы от выстрела последнего патрона (Protecta)
+    bool m_bCanShowLastBulletShell; //--> Можем-ли мы показывать гильзу после выстрела последнего патрона в стволе (Protecta)
 
     bool m_bDontSpawnShell3DForFirstBullet; //--> Флаг, блокирующий спавн 3D-гильзы если был выстрелен первый патрон из полного магазина
     bool m_bDontSpawnShell3DForLastBullet; //--> Флаг, блокирующий спавн 3D-гильзы если был выстрелен последний патрон в стволе

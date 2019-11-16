@@ -1126,21 +1126,42 @@ void CWeapon::UpdateAnimatedShellVisual()
 {
     if (!GetHUDmode())
         return;
-    if (m_sAnimatedShellHUDVisSect == NULL)
-        return;
 
     attachable_hud_item* hud_item = HudItemData();
     if (hud_item != NULL)
     {
-        bool bVisible = (m_dwShowAnimatedShellVisual >= Device.dwTimeGlobal && GetState() != eReload);
+        // Гильза после каждого выстрела (быстро исчезает)
+        if (m_sAnimatedShellHUDVisSect != NULL)
+        {
+            bool bVisible = (m_dwShowAnimatedShellVisual >= Device.dwTimeGlobal && GetState() != eReload);
 
-        // Отображаем\скрываем гильзу
-        hud_item->UpdateChildrenList(m_sAnimatedShellHUDVisSect, bVisible);
+            //--> Отображаем\скрываем гильзу
+            hud_item->UpdateChildrenList(m_sAnimatedShellHUDVisSect, bVisible);
 
-        // Обновляем её визуал
-        attachable_hud_item* shell_item = hud_item->FindChildren(m_sAnimatedShellHUDVisSect);
-        if (shell_item != NULL)
-            shell_item->UpdateVisual(m_sCurAnimatedShellHudVisual);
+            //--> Обновляем её визуал
+            attachable_hud_item* shell_item = hud_item->FindChildren(m_sAnimatedShellHUDVisSect);
+            if (shell_item != NULL)
+                shell_item->UpdateVisual(m_sCurAnimatedShellHudVisual);
+        }
+
+        // Гильза от последнего выстрела (Protecta, висит до первого патрона в стволе)
+        if (GetMainAmmoElapsed() > 0)
+        {
+            m_bCanShowLastBulletShell = false;
+        }
+
+        if (m_sAnimatedShellLastBulletHUDVisSect != NULL)
+        {
+            bool bVisible = m_bCanShowLastBulletShell;
+
+            //--> Отображаем\скрываем гильзу
+            hud_item->UpdateChildrenList(m_sAnimatedShellLastBulletHUDVisSect, bVisible);
+
+            //--> Обновляем её визуал
+            attachable_hud_item* shell_item = hud_item->FindChildren(m_sAnimatedShellLastBulletHUDVisSect);
+            if (shell_item != NULL)
+                shell_item->UpdateVisual(m_sCurAnimatedShellHudVisual);
+        }
     }
 }
 

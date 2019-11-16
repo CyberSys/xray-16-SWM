@@ -732,4 +732,9 @@ void CWeapon::UpdateLastBulletInfo(CCartridge* pBullet)
 {
     m_sCurAnimatedShellHudVisual = pBullet->m_sShellHudVisual;
     m_sCurShell3DSect = pBullet->m_sShell3DSect;
+
+    if (GetMainAmmoElapsed() <= 1)
+    { //--> Стреляем последний патрон из основного ствола
+        m_bCanShowLastBulletShell = true;
+    }
 }

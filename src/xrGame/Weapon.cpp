@@ -145,6 +145,9 @@ CWeapon::CWeapon() : CShellLauncher(this)
     m_sAnimatedShellHUDVisSect   = NULL;
     m_sCurAnimatedShellHudVisual = NULL;
 
+    m_sAnimatedShellLastBulletHUDVisSect = NULL;
+    m_bCanShowLastBulletShell    = false;
+
     m_bDontSpawnShell3DForFirstBullet = false;
     m_bDontSpawnShell3DForLastBullet = false;
     m_sCurShell3DSect            = NULL;

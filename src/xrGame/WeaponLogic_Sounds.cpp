@@ -64,33 +64,35 @@ void CWeapon::ReloadAllSounds()
 	if(m_bTriStateReload_main)
 	{
 		ReloadSound( "snd_open_weapon",						"sndOpen"							, ESndExcl::eExYes,		SOUND_TYPE_WEAPON_RECHARGING	);
-		ReloadSound( "snd_open_empty_weapon",				"sndOpenEmpty"						, ESndExcl::eExYes,		SOUND_TYPE_WEAPON_RECHARGING	);
-		ReloadSound( "snd_add_cartridge",					"sndAddCartridge"					, ESndExcl::eExNot,	    SOUND_TYPE_WEAPON_RECHARGING	);
-		ReloadSound( "snd_add_cartridge_empty",				"sndAddCartridgeEmpty"				, ESndExcl::eExNot,	    SOUND_TYPE_WEAPON_RECHARGING	);
-		ReloadSound( "snd_close_weapon",					"sndClose"							, ESndExcl::eExYes,		SOUND_TYPE_WEAPON_RECHARGING	);
-		ReloadSound( "snd_close_empty_weapon",				"sndCloseEmpty"						, ESndExcl::eExYes,		SOUND_TYPE_WEAPON_RECHARGING	);
-		ReloadSound( "snd_close_fempt_weapon",				"sndCloseFE"						, ESndExcl::eExYes,		SOUND_TYPE_WEAPON_RECHARGING	);
-		ReloadSound( "snd_close_fempt_empty_weapon",		"sndCloseEmptyFE"					, ESndExcl::eExYes,		SOUND_TYPE_WEAPON_RECHARGING	);
-	}
+		ReloadSound( "snd_open_weapon_w_gl",				"sndOpenWGL"						, ESndExcl::eExYes,		SOUND_TYPE_WEAPON_RECHARGING	);
+        ReloadSound( "snd_open_empty_weapon",				"sndOpenEmpty"						, ESndExcl::eExYes,		SOUND_TYPE_WEAPON_RECHARGING	);
+		ReloadSound( "snd_open_empty_weapon_w_gl",			"sndOpenEmptyWGL"					, ESndExcl::eExYes,		SOUND_TYPE_WEAPON_RECHARGING	);
+        ReloadSound( "snd_add_cartridge",					"sndAddCartridge"					, ESndExcl::eExNot,	    SOUND_TYPE_WEAPON_RECHARGING	);
+		ReloadSound( "snd_add_cartridge_w_gl",				"sndAddCartridgeWGL"				, ESndExcl::eExNot,	    SOUND_TYPE_WEAPON_RECHARGING	);
+        ReloadSound( "snd_add_cartridge_empty",				"sndAddCartridgeEmpty"				, ESndExcl::eExNot,	    SOUND_TYPE_WEAPON_RECHARGING	);
+		ReloadSound( "snd_add_cartridge_empty_w_gl",		"sndAddCartridgeEmptyWGL"			, ESndExcl::eExNot,	    SOUND_TYPE_WEAPON_RECHARGING	);
+		ReloadSound( "snd_add_cartridge_lbs",			    "sndAddCartridgeLBS"				, ESndExcl::eExNot,	    SOUND_TYPE_WEAPON_RECHARGING	);
+        ReloadSound( "snd_add_cartridge_lbs_w_gl",			"sndAddCartridgeLBSWGL"				, ESndExcl::eExNot,	    SOUND_TYPE_WEAPON_RECHARGING	);
+        ReloadSound( "snd_close_weapon",					"sndClose"							, ESndExcl::eExYes,		SOUND_TYPE_WEAPON_RECHARGING	);
+		ReloadSound( "snd_close_weapon_w_gl",				"sndCloseWGL"						, ESndExcl::eExYes,		SOUND_TYPE_WEAPON_RECHARGING	);
+        ReloadSound( "snd_close_empty_weapon",				"sndCloseEmpty"						, ESndExcl::eExYes,		SOUND_TYPE_WEAPON_RECHARGING	);
+     	ReloadSound( "snd_close_empty_weapon_w_gl",			"sndCloseEmptyWGL"					, ESndExcl::eExYes,		SOUND_TYPE_WEAPON_RECHARGING	);
+        ReloadSound( "snd_close_fempt_weapon",				"sndCloseFE"						, ESndExcl::eExYes,		SOUND_TYPE_WEAPON_RECHARGING	);
+		ReloadSound( "snd_close_fempt_weapon_w_gl",			"sndCloseFEWGL"						, ESndExcl::eExYes,		SOUND_TYPE_WEAPON_RECHARGING	);
+        ReloadSound( "snd_close_fempt_empty_weapon",		"sndCloseEmptyFE"					, ESndExcl::eExYes,		SOUND_TYPE_WEAPON_RECHARGING	);
+		ReloadSound( "snd_close_fempt_empty_weapon_w_gl",	"sndCloseEmptyFEWGL"				, ESndExcl::eExYes,		SOUND_TYPE_WEAPON_RECHARGING	);
+    }
 
 	if(m_bTriStateReload_gl)
 	{
 		ReloadSound( "snd_open_weapon_g",					"sndOpenG"							, ESndExcl::eExYes,		SOUND_TYPE_WEAPON_RECHARGING	);
-		ReloadSound( "snd_open_weapon_w_gl",				"sndOpenWGL"						, ESndExcl::eExYes,		SOUND_TYPE_WEAPON_RECHARGING	);
 		ReloadSound( "snd_open_empty_weapon_g",				"sndOpenEmptyG"						, ESndExcl::eExYes,		SOUND_TYPE_WEAPON_RECHARGING	);
-		ReloadSound( "snd_open_empty_weapon_w_gl",			"sndOpenEmptyWGL"					, ESndExcl::eExYes,		SOUND_TYPE_WEAPON_RECHARGING	);
 		ReloadSound( "snd_add_cartridge_g",					"sndAddCartridgeG"					, ESndExcl::eExNot,	    SOUND_TYPE_WEAPON_RECHARGING	);
-		ReloadSound( "snd_add_cartridge_w_gl",				"sndAddCartridgeWGL"				, ESndExcl::eExNot,	    SOUND_TYPE_WEAPON_RECHARGING	);
 		ReloadSound( "snd_add_cartridge_empty_g",			"sndAddCartridgeEmptyG"				, ESndExcl::eExNot,	    SOUND_TYPE_WEAPON_RECHARGING	);
-		ReloadSound( "snd_add_cartridge_empty_w_gl",		"sndAddCartridgeEmptyWGL"			, ESndExcl::eExNot,	    SOUND_TYPE_WEAPON_RECHARGING	);
-		ReloadSound( "snd_close_weapon_g",					"sndCloseG"							, ESndExcl::eExYes,		SOUND_TYPE_WEAPON_RECHARGING	);
-		ReloadSound( "snd_close_weapon_w_gl",				"sndCloseWGL"						, ESndExcl::eExYes,		SOUND_TYPE_WEAPON_RECHARGING	);
+        ReloadSound( "snd_close_weapon_g",					"sndCloseG"							, ESndExcl::eExYes,		SOUND_TYPE_WEAPON_RECHARGING	);
 		ReloadSound( "snd_close_empty_weapon_g",			"sndCloseEmptyG"					, ESndExcl::eExYes,		SOUND_TYPE_WEAPON_RECHARGING	);
-		ReloadSound( "snd_close_empty_weapon_w_gl",			"sndCloseEmptyWGL"					, ESndExcl::eExYes,		SOUND_TYPE_WEAPON_RECHARGING	);
 		ReloadSound( "snd_close_fempt_weapon_g",			"sndCloseFEG"						, ESndExcl::eExYes,		SOUND_TYPE_WEAPON_RECHARGING	);
-		ReloadSound( "snd_close_fempt_weapon_w_gl",			"sndCloseFEWGL"						, ESndExcl::eExYes,		SOUND_TYPE_WEAPON_RECHARGING	);
 		ReloadSound( "snd_close_fempt_empty_weapon_g",		"sndCloseEmptyFEG"					, ESndExcl::eExYes,		SOUND_TYPE_WEAPON_RECHARGING	);
-		ReloadSound( "snd_close_fempt_empty_weapon_w_gl",	"sndCloseEmptyFEWGL"				, ESndExcl::eExYes,		SOUND_TYPE_WEAPON_RECHARGING	);
 	}
 
 	if(m_bTriStateReload_ab)
@@ -112,8 +114,10 @@ void CWeapon::ReloadAllSounds()
 		ReloadSound( "snd_add_cartridge_fr_ab",					"sndAddCartridgeFrAB"			, ESndExcl::eExNot,	    SOUND_TYPE_WEAPON_RECHARGING	);
 		ReloadSound( "snd_add_cartridge_fr_ab_empty",			"sndAddCartridgeFrABEmpty"		, ESndExcl::eExNot,	    SOUND_TYPE_WEAPON_RECHARGING	);
 		ReloadSound( "snd_add_cartridge_fr_ab_w_gl",			"sndAddCartridgeFrABWGL"		, ESndExcl::eExNot,	    SOUND_TYPE_WEAPON_RECHARGING	);
-		ReloadSound( "snd_add_cartridge_fr_ab_empty_w_gl",		"sndAddCartridgeFrABEmptyWGL"	, ESndExcl::eExNot,	    SOUND_TYPE_WEAPON_RECHARGING	);
-		ReloadSound( "snd_close_weapon_fr_ab",					"sndCloseFrAB"					, ESndExcl::eExYes,		SOUND_TYPE_WEAPON_RECHARGING	);
+        ReloadSound( "snd_add_cartridge_fr_ab_empty_w_gl",		"sndAddCartridgeFrABEmptyWGL"	, ESndExcl::eExNot,	    SOUND_TYPE_WEAPON_RECHARGING	);
+        ReloadSound( "anm_add_cartridge_lbs_fr_ab",				"sndAddCartridgeLBSFrAB"		, ESndExcl::eExNot,	    SOUND_TYPE_WEAPON_RECHARGING	);
+        ReloadSound( "snd_add_cartridge_lbs_fr_ab_w_gl",		"sndAddCartridgeLBSFrABWGL"		, ESndExcl::eExNot,	    SOUND_TYPE_WEAPON_RECHARGING	);
+        ReloadSound( "snd_close_weapon_fr_ab",					"sndCloseFrAB"					, ESndExcl::eExYes,		SOUND_TYPE_WEAPON_RECHARGING	);
 		ReloadSound( "snd_close_empty_weapon_fr_ab",			"sndCloseFrABEmpty"				, ESndExcl::eExYes,		SOUND_TYPE_WEAPON_RECHARGING	);
 		ReloadSound( "snd_close_weapon_fr_ab_w_gl",				"sndCloseFrABWGL"				, ESndExcl::eExYes,		SOUND_TYPE_WEAPON_RECHARGING	);
 		ReloadSound( "snd_close_empty_weapon_fr_ab_w_gl",		"sndCloseFrABEmptyWGL"			, ESndExcl::eExYes,		SOUND_TYPE_WEAPON_RECHARGING	);
