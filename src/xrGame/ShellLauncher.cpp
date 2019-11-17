@@ -244,24 +244,31 @@ void CShellLauncher::RebuildLaunchParams(const Fmatrix& mTransform, IKinematics*
         // Вектор поворота
         Fvector vRotate = Fvector(point.vOfsDir);
         if (point.bAnimatedLaunch == false)
-        { //--> Случайный поворот не делаем для анимированных гильз
+        { //--> Случайный поворот не делаем для анимированных гильз - они будут трястись:
+            // поворот пересчитывается на апдейте прямо во время анимации
             vRotate.x += Random.randFs(point.vOfsDirRnd.x); // +\-
             vRotate.y += Random.randFs(point.vOfsDirRnd.y);
             vRotate.z += Random.randFs(point.vOfsDirRnd.z);
         }
         vRotate.mul(PI / 180.f); // Переводим углы в радианы
 
-        // Строим матрицу поворота и позиции
+        // Строим для гильзы матрицу поворота и позиции
+        //--> Поворот
         point.vLaunchMatrix.setXYZ(VPUSH(vRotate));
-        point.vLaunchMatrix.c.set(point.vOfsPos);
 
-        // Добавляем к ней поворот от кости и предмета
+        //--> Позиция
+        point.vLaunchMatrix.c.set(point.vOfsPos); //--> Смещение из конфига
+        point.vLaunchMatrix.c.add(mBoneTransform.c); //--> Смещение от кости
+
+        //--> Добавляем к ней поворот от кости
         if (point.bUseBoneDir)
         {
-            point.vLaunchMatrix.mulA_43(mBoneTransform); //--> + XFORM кости предмета
+            point.vLaunchMatrix.c.sub(mBoneTransform.c); //--> Убираем смещение от кости
+            point.vLaunchMatrix.mulA_43(mBoneTransform); //--> Рассчитываем новое смещение и поворот от кости
         }
 
-        point.vLaunchMatrix.mulA_43(mTransform); //--> + XFORM самого предмета
+        //--> Добавляем к ней поворот самого предмета
+        point.vLaunchMatrix.mulA_43(mTransform);
 
         // Случайный вектор скорости полёта
         point.vLaunchVel.set(point.vVelocity);
@@ -269,7 +276,7 @@ void CShellLauncher::RebuildLaunchParams(const Fmatrix& mTransform, IKinematics*
         point.vLaunchVel.y += Random.randFs(point.vVelocityRnd.y);
         point.vLaunchVel.z += Random.randFs(point.vVelocityRnd.z);
 
-        // Модифицируем его с помощью поворота камеры
+        //--> Модифицируем его с помощью поворота камеры
         if (bIsHud && m_parent_shell_launcher->H_Parent() != nullptr)
         {
             //--> Скорость от кручения камеры (от 1-го лица)
@@ -291,11 +298,7 @@ void CShellLauncher::RebuildLaunchParams(const Fmatrix& mTransform, IKinematics*
             }
         }
 
-        // Модифицируем его с помощью кости и предмета
-        if (point.bUseBoneDir)
-        {
-            mBoneTransform.transform_dir(point.vLaunchVel);
-        }
+        //--> Модифицируем его с помощью предмета
         mTransform.transform_dir(point.vLaunchVel);
     }
 }
