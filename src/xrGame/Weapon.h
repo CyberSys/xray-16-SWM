@@ -1418,6 +1418,7 @@ protected:
     void UpdateBulletHUDVisual();
     void UpdateWpnExtraVisuals();
     void UpdateGrenadeVisibility();
+    void UpdateVisualOnNetSpawn();
 
     // Обработка визуализации выстрела
     void AddShotEffector();

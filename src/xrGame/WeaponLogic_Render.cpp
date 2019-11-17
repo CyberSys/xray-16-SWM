@@ -1331,6 +1331,44 @@ void CWeapon::UpdateWpnExtraVisuals()
     }
 }
 
+
+// Обновить визуал при появлении оружия в онлайне (может быть в инвентаре), не вызывается после OnChangeVisual <!>
+void CWeapon::UpdateVisualOnNetSpawn()
+{
+    // Запускаем Idle-анимацию (иначе модель будет "поломана")
+    PlayWorldAnimIdle();
+
+    // Скрываем кости мировой модели
+    IKinematics* pVisual = Visual()->dcast_PKinematics();
+    if (pVisual)
+    {
+        u32 lines_count = pSettings->line_count(cNameSect());
+        for (u32 i = 0; i < lines_count; ++i)
+        {
+            LPCSTR line_name = nullptr;
+            LPCSTR line_value = nullptr;
+            pSettings->r_line(cNameSect(), i, &line_name, &line_value);
+
+            if (line_name && xr_strlen(line_name))
+            {
+                // Скрытие костей
+                if (nullptr != strstr(line_name, "world_bone_hide"))
+                {
+                    string128 str_bone;
+                    _GetItem(line_name, 1, str_bone, '|'); //--> Считываем имя кости
+
+                    //--> Скрываем кость
+                    u16 iBoneID = pVisual->LL_BoneID(str_bone);
+                    if (iBoneID != BI_NONE)
+                    {
+                        pVisual->LL_SetBoneVisible(iBoneID, false, true);
+                    }
+                }
+            }
+        }
+    }
+}
+
 // Каллбэк на смену визуала мировой модели
 void CWeapon::OnChangeVisual()
 {

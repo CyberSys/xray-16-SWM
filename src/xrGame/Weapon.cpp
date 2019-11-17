@@ -251,8 +251,8 @@ BOOL CWeapon::net_Spawn(CSE_Abstract* DC)
     CAmmoCompressUtil::DecompressMagazine(E->m_pAmmoGL, this, true);
     VERIFY((u32)iAmmoElapsed2 == m_magazine2.size());
 
-    // Запускаем Idle-анимацию (иначе модель будет "поломана")
-    PlayWorldAnimIdle();
+    // Обновляем визуал
+    UpdateVisualOnNetSpawn();
 
     return inherited::net_Spawn(DC);
 }
