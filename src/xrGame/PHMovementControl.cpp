@@ -146,12 +146,21 @@ void CPHMovementControl::in_shedule_Update(u32 DT)
         phcapture_destroy(m_capture);
 }
 
-void CPHMovementControl::Calculate(
-    Fvector& vAccel, const Fvector& camDir, float /**ang_speed/**/, float jump, float /**dt/**/, bool /**bLight/**/)
+void CPHMovementControl::Calculate(Fvector& vAccel, const Fvector& camDir, float /**ang_speed/**/, float jump,
+    float /**dt/**/, bool /**bLight/**/, bool bNoInterpolate) //--#SM+#--
 {
     Fvector previous_position;
     previous_position.set(vPosition);
-    m_character->IPosition(vPosition);
+
+    if (bNoInterpolate) //--#SM+#--
+    {
+        m_character->GetPosition(vPosition);
+    }
+    else
+    {
+        m_character->IPosition(vPosition);
+    }
+
     if (bExernalImpulse)
     {
         vAccel.add(vExternalImpulse);
@@ -1403,7 +1412,7 @@ void CPHMovementControl::UpdateObjectBox(CPHCharacter* ach)
     plane_k.set(pObject->XFORM().k.x, pObject->XFORM().k.z);
     float R = _abs(poses_dir.dotproduct(plane_i) * cbox.x) + _abs(poses_dir.dotproduct(plane_k) * cbox.z);
     R *= poses_dir.dotproduct(plane_cam); //(poses_dir.x*plane_cam.x+poses_dir.y*plane_cam.z);
-    Calculate(Fvector().set(0, 0, 0), Fvector().set(1, 0, 0), 0, 0, 0, 0);
+    Calculate(Fvector().set(0, 0, 0), Fvector().set(1, 0, 0), 0, 0, 0, 0, false); //--#SM+#--
     m_character->SetObjectRadius(R);
     ach->ChooseRestrictionType(rtStalker, 1.f, m_character);
     m_character->UpdateRestrictionType(ach);
@@ -1755,7 +1764,7 @@ IPhysicsShellHolder* CPHMovementControl::PhysicsRefObject()
 void CPHMovementControl::actor_calculate(
     Fvector& vAccel, const Fvector& camDir, float ang_speed, float jump, float dt, bool bLight)
 {
-    Calculate(vAccel, camDir, ang_speed, jump, dt, bLight);
+    Calculate(vAccel, camDir, ang_speed, jump, dt, bLight, false); //--#SM+#--
 }
 
 void CPHMovementControl::BlockDamageSet(u64 steps_num)
