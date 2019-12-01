@@ -101,8 +101,22 @@ bool CWeapon::Action(u16 cmd, u32 flags)
 
     // Если оружие не должно стрелять
     if (m_bDisableFire)
+    {
         if (cmd == kWPN_FIRE)
-            cmd = kWPN_ZOOM;
+        {
+            if (IsMagazine())
+            { //--> Если оружие магазин - останавливаем его зарядку
+                if (Try2StopTriStateReload() == false) //--> Если зарядка в три стадии - даём возможность закончить текущую
+                    Need2Stop_Reload(); //--> Иначе резко обрываем
+
+                return true;
+            }
+            else
+            { //--> Иначе вызываем действие при прицеливании
+                cmd = kWPN_ZOOM;
+            }
+        }
+    }
 
     switch (cmd)
     {

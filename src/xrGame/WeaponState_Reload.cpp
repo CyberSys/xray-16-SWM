@@ -181,6 +181,7 @@ void CWeapon::Need2Stop_Reload()
 
     if (GetState() != eReload)
         return;
+
     Need2Idle();
 }
 
