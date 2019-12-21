@@ -61,6 +61,12 @@ BOOL CWeapon::CheckForMisfire()
     float mp  = GetConditionMisfireProbability();
     if (rnd < mp)
     {
+        CActor* pParentActor = smart_cast<CActor*>(this->H_Parent());
+        if (pParentActor != nullptr && pParentActor->unlimited_ammo() == true)
+        { //--> Отключаем осечки если у нас бесконечные патроны через консоль
+            return FALSE;
+        }
+
         Need2Misfire();
         return TRUE;
     }
