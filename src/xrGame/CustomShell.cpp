@@ -567,17 +567,15 @@ void CCustomShell::ShellDrop()
     UpdateShellHUDMode();
 
     const CShellLauncher::launch_points& pointsAll = ShellGetAllLaunchPoints();
-
+    const CShellLauncher::_lpoint& pointCurr = ShellGetCurrentLaunchPoint();
+  
     // Рассчитываем время уничтожения гильзы
-    u32 dwLifeTime = (m_bHUD_mode ? pointsAll.dwLifeTimeHud : pointsAll.dwLifeTime3p);
-    m_dwDestroyTime = (dwLifeTime == 0 ? 0 : Device.dwTimeGlobal + dwLifeTime);
+    m_dwDestroyTime = (pointCurr.dwLifeTime == 0 ? 0 : Device.dwTimeGlobal + pointCurr.dwLifeTime);
 
     // Рассчитываем время разблокировки уничтожения при столкновении
-    bool bDestroyOnCollide = (m_bHUD_mode ? pointsAll.m_bDestroyOnCollideHud : pointsAll.m_bDestroyOnCollide3p);
-    if (bDestroyOnCollide)
+    if (pointCurr.bDestroyOnCollide)
     {
-        u32 dwDestroyOnCollideST = (m_bHUD_mode ? pointsAll.dwMinCollideLifeTimeHud : pointsAll.dwMinCollideLifeTime3p);
-        m_dwDestroyOnCollideSafetime = Device.dwTimeGlobal + dwDestroyOnCollideST;
+        m_dwDestroyOnCollideSafetime = Device.dwTimeGlobal + pointCurr.dwMinCollideLifeTime;
     }
 
     // Прочее
