@@ -30,6 +30,7 @@ CHudItem::CHudItem()
     m_fLastAnimSndFreq = 1.0f; //--#SM+#--
     m_bEnableMovAnimAtCrouch = false; //--#SM+#--
     m_bEnableIdleAnimRandomST = false; //--#SM+#--
+    m_bPlayNextIdleAnimFromRandomST = false; //--#SM+#--
     m_fIdleSpeedCrouchFactor = 1.f; //--#SM+#--
     m_fIdleSpeedNoAccelFactor = 1.f; //--#SM+#--
     bIsHUDPresent_prev = false; //--#SM+#--
@@ -321,11 +322,16 @@ void CHudItem::OnBeforeMotionPlayed(const shared_str& sAnmAlias, motion_params& 
 
             // Idle-анимацию играем со случайной позиции (иначе при изменении позиции тела игрок увидит повторения)
             // m_dw_last_movement_changed_time нужен, чтобы idle-анимации без stop_at_end "не колошматило" при перезапуске
-            if (m_bEnableIdleAnimRandomST && (Device.dwTimeGlobal - m_dw_last_movement_changed_time <= 100))
+            if (m_bEnableIdleAnimRandomST &&
+                ((Device.dwTimeGlobal - m_dw_last_movement_changed_time <= 100) ||
+                    m_bPlayNextIdleAnimFromRandomST == true))
+            {
                 params.fStartFromTime = Random.randF(0.0f, 1.0f) * -1;
-
+            }
             params.fSpeed = fIdleAnimSpeedFactor;
-            return;  //--> Не модифицируем дальше (оптимизация)
+            m_bPlayNextIdleAnimFromRandomST = false;
+
+            return; //--> Не модифицируем дальше (оптимизация)
         }
     }
 }

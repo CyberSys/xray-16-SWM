@@ -1518,6 +1518,8 @@ void CWeapon::PlayAnimEmptyClick()
 {
     int iAmmo = GetMainAmmoElapsed();
 
+    m_bPlayNextIdleAnimFromRandomST = true; //--> Следующая Idle-анимация будет запущена со случайной позиции
+
     if (IsZoomed())
     {
         if (def_IsGL_Mode)
@@ -1586,6 +1588,8 @@ void CWeapon::PlayAnimShoot()
     }
 
     // Худовая анимация
+    m_bPlayNextIdleAnimFromRandomST = true; //--> Следующая Idle-анимация будет запущена со случайной позиции
+
     if (IsZoomed())
     {
         if (def_IsGL_Mode)

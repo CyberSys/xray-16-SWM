@@ -193,6 +193,7 @@ protected:
 
     bool m_bEnableMovAnimAtCrouch; //--#SM+#--
     bool m_bEnableIdleAnimRandomST; //--#SM+#--
+    bool m_bPlayNextIdleAnimFromRandomST; //--#SM+#--
     float m_fIdleSpeedCrouchFactor; //--#SM+#--
     float m_fIdleSpeedNoAccelFactor; //--#SM+#--
     float m_fLastAnimStartTime; //--#SM+#--
