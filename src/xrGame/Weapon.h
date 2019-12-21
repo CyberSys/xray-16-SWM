@@ -51,6 +51,16 @@ class CWeaponMagazinedWGrenade;
 #define WEAPON_SND_REFLECTION_HUD_FACTOR 0.7f   // Коэфицент на который домножается громкость звука эха от выстрела, если он был сделат от 1-го лица
 #define WEAPON_MAG3PVIS "attachable_magazin_3p" // Визуал-секция магазина от 3-его лица (для анимации перезарядки НПС)
 
+// Строчки из конфигов предметов \ set-секций аддонов, которые определяют тип аддона
+#define WEAPON_AT_ALIAS_AMMO_BELT  "is_ammo_belt"
+#define WEAPON_AT_ALIAS_FOREGRIP   "is_foregrip"
+#define WEAPON_AT_ALIAS_FLASHHIDER "is_flashhider"
+#define WEAPON_AT_ALIAS_FOREND     "is_forend"
+#define WEAPON_AT_ALIAS_STOCK      "is_stock"
+#define WEAPON_AT_ALIAS_BIPODS     "is_bipods"
+#define WEAPON_AT_ALIAS_BAYONET    "is_bayonet"
+#define WEAPON_AT_ALIAS_MAGAZINE   "is_magazine"
+
 #define C_THIS_WPN const_cast<CWeapon*>(this)
 
 extern BOOL b_toggle_weapon_aim;

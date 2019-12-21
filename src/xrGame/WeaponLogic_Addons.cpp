@@ -218,7 +218,10 @@ void CWeapon::OnAddonInstall(EAddons iSlot, const shared_str& sAddonSetSect)
     GetAddonBySlot(iSlot)->ApplyWeaponKoefs();
 
     // Установка патронташа
-    bool bIsAmmoBelt = READ_IF_EXISTS(pSettings, r_bool, sAddonName, "is_ammo_belt", false);
+    bool bIsAmmoBelt = READ_IF_EXISTS(pSettings, r_bool, sAddonSetSect, WEAPON_AT_ALIAS_AMMO_BELT,
+                       READ_IF_EXISTS(pSettings, r_bool, sAddonName, WEAPON_AT_ALIAS_AMMO_BELT,
+                       false)
+    );
     if (bIsAmmoBelt)
     {
         R_ASSERT4(IsAmmoBeltAttached() == false,
@@ -229,7 +232,10 @@ void CWeapon::OnAddonInstall(EAddons iSlot, const shared_str& sAddonSetSect)
     }
 
     // Установка рукоятки
-    bool bIsForegrip = READ_IF_EXISTS(pSettings, r_bool, sAddonName, "is_foregrip", false);
+    bool bIsForegrip = READ_IF_EXISTS(pSettings, r_bool, sAddonSetSect, WEAPON_AT_ALIAS_FOREGRIP,
+                       READ_IF_EXISTS(pSettings, r_bool, sAddonName, WEAPON_AT_ALIAS_FOREGRIP,
+                       false)
+    );
     if (bIsForegrip)
     {
         R_ASSERT4(IsForegripAttached() == false,
@@ -240,7 +246,10 @@ void CWeapon::OnAddonInstall(EAddons iSlot, const shared_str& sAddonSetSect)
     }
 
     // Установка пламегасителя
-    bool bIsFlashHider = READ_IF_EXISTS(pSettings, r_bool, sAddonName, "is_flashider", false);
+    bool bIsFlashHider = READ_IF_EXISTS(pSettings, r_bool, sAddonSetSect, WEAPON_AT_ALIAS_FLASHHIDER,
+                         READ_IF_EXISTS(pSettings, r_bool, sAddonName, WEAPON_AT_ALIAS_FLASHHIDER,
+                         false)
+    );
     if (bIsFlashHider)
     {
         R_ASSERT4(IsFlashHiderAttached() == false,
@@ -251,7 +260,10 @@ void CWeapon::OnAddonInstall(EAddons iSlot, const shared_str& sAddonSetSect)
     }
 
     // Установка цевья
-    bool bIsForend = READ_IF_EXISTS(pSettings, r_bool, sAddonName, "is_forend", false);
+    bool bIsForend = READ_IF_EXISTS(pSettings, r_bool, sAddonSetSect, WEAPON_AT_ALIAS_FOREND,
+                     READ_IF_EXISTS(pSettings, r_bool, sAddonName, WEAPON_AT_ALIAS_FOREND,
+                     false)
+    );
     if (bIsForend)
     {
         R_ASSERT4(
@@ -260,7 +272,10 @@ void CWeapon::OnAddonInstall(EAddons iSlot, const shared_str& sAddonSetSect)
     }
 
     // Установка приклада
-    bool bIsStock = READ_IF_EXISTS(pSettings, r_bool, sAddonName, "is_stock", false);
+    bool bIsStock = READ_IF_EXISTS(pSettings, r_bool, sAddonSetSect, WEAPON_AT_ALIAS_STOCK,
+                    READ_IF_EXISTS(pSettings, r_bool, sAddonName, WEAPON_AT_ALIAS_STOCK,
+                    false)
+    );
     if (bIsStock)
     {
         R_ASSERT4(IsStockAttached() == false,
@@ -271,7 +286,10 @@ void CWeapon::OnAddonInstall(EAddons iSlot, const shared_str& sAddonSetSect)
     }
 
     // Установка сошек
-    bool bIsBipods = READ_IF_EXISTS(pSettings, r_bool, sAddonName, "is_bipods", false);
+    bool bIsBipods = READ_IF_EXISTS(pSettings, r_bool, sAddonSetSect, WEAPON_AT_ALIAS_BIPODS,
+                     READ_IF_EXISTS(pSettings, r_bool, sAddonName, WEAPON_AT_ALIAS_BIPODS,
+                     false)
+    );
     if (bIsBipods)
     {
         R_ASSERT4(IsBipodsAttached() == false,
@@ -282,7 +300,10 @@ void CWeapon::OnAddonInstall(EAddons iSlot, const shared_str& sAddonSetSect)
     }
 
     // Установка штык-ножа
-    bool bIsBayonet = READ_IF_EXISTS(pSettings, r_bool, sAddonName, "is_bayonet", false);
+    bool bIsBayonet = READ_IF_EXISTS(pSettings, r_bool, sAddonSetSect, WEAPON_AT_ALIAS_BAYONET,
+                      READ_IF_EXISTS(pSettings, r_bool, sAddonName, WEAPON_AT_ALIAS_BAYONET,
+                      false)
+    );
     if (bIsBayonet)
     {
         R_ASSERT4(
@@ -1214,35 +1235,50 @@ bool CWeapon::CanAttach(PIItem pIItem)
         }
 
         // Патронташ
-        bool bIsAmmoBelt = READ_IF_EXISTS(pSettings, r_bool, sAddonName, "is_ammo_belt", false);
+        bool bIsAmmoBelt = READ_IF_EXISTS(pSettings, r_bool, sAddonSetSect, WEAPON_AT_ALIAS_AMMO_BELT,
+                           READ_IF_EXISTS(pSettings, r_bool, sAddonName, WEAPON_AT_ALIAS_AMMO_BELT,
+                           false)
+        );
         if (bIsAmmoBelt)
         {
             return m_bUseAmmoBeltMode == true && IsAmmoBeltAttached() == false;
         }
 
         // Подствольная рукоятка
-        bool bIsForegrip = READ_IF_EXISTS(pSettings, r_bool, sAddonName, "is_foregrip", false);
+        bool bIsForegrip = READ_IF_EXISTS(pSettings, r_bool, sAddonSetSect, WEAPON_AT_ALIAS_FOREGRIP,
+                           READ_IF_EXISTS(pSettings, r_bool, sAddonName, WEAPON_AT_ALIAS_FOREGRIP,
+                           false)
+        );
         if (bIsForegrip)
         {
             return IsGrenadeLauncherAttached() == false;
         }
 
         // Пламегаситель
-        bool bIsFlashHider = READ_IF_EXISTS(pSettings, r_bool, sAddonName, "is_flashider", false);
+        bool bIsFlashHider = READ_IF_EXISTS(pSettings, r_bool, sAddonSetSect, WEAPON_AT_ALIAS_FLASHHIDER,
+                             READ_IF_EXISTS(pSettings, r_bool, sAddonName, WEAPON_AT_ALIAS_FLASHHIDER,
+                             false)
+        );
         if (bIsFlashHider)
         {
             return IsSilencerAttached() == false;
         }
 
         // Сошки
-        bool bIsBipods = READ_IF_EXISTS(pSettings, r_bool, sAddonName, "is_bipods", false);
+        bool bIsBipods = READ_IF_EXISTS(pSettings, r_bool, sAddonSetSect, WEAPON_AT_ALIAS_BIPODS,
+                         READ_IF_EXISTS(pSettings, r_bool, sAddonName, WEAPON_AT_ALIAS_BIPODS,
+                         false)
+        );
         if (bIsBipods)
         {
             return IsBipodsDeployed() == false && IsBipodsAttached() == false && IsGrenadeLauncherAttached() == false;
         }
 
         // Штык-нож
-        bool bIsBayonet = READ_IF_EXISTS(pSettings, r_bool, sAddonName, "is_bayonet", false);
+        bool bIsBayonet = READ_IF_EXISTS(pSettings, r_bool, sAddonSetSect, WEAPON_AT_ALIAS_BAYONET,
+                          READ_IF_EXISTS(pSettings, r_bool, sAddonName, WEAPON_AT_ALIAS_BAYONET,
+                          false)
+        );
         if (bIsBayonet)
         {
             return IsSilencerAttached() == false;

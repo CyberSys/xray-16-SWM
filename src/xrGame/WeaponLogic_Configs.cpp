@@ -295,7 +295,7 @@ bool CWeapon::LoadMainAmmoParams(LPCSTR section, bool bFromLoad, bool bDontUnloa
 void CWeapon::LoadMagazinesParams(LPCSTR section)
 {
     // Данное оружие является магазином
-    m_bIsMagazine = READ_IF_EXISTS(pSettings, r_bool, section, "is_magazine", false);
+    m_bIsMagazine = READ_IF_EXISTS(pSettings, r_bool, section, WEAPON_AT_ALIAS_MAGAZINE, false);
 
     // Минимально-необходимое кол-во патронов в магазине, чтобы им можно было зарядить оружие
     m_iMinRequiredAmmoInMag = READ_IF_EXISTS(pSettings, r_u32, section, WEAPON_MRAIM_L, WEAPON_MRAIM_DEF_VAL);
