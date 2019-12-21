@@ -332,12 +332,12 @@ void CCustomShell::activate_physic_shell()
         a_vel.mul(point.GetLaunchAVel());
 
         //--> Скорость от перемещения владельца гильзы
-        u8 iLockGuard = 1000;
+        u16 iLockGuard = 250;
         IGameObject* pParentRoot = pLauncher->GetParentObject();
         while (iLockGuard > 0 && pParentRoot->H_Parent() != nullptr)
-        { //--> Находим истинного владельца
+        { //--> Находим исходного владельца гильзы, путём перебора всех возможных
             pParentRoot = pParentRoot->H_Parent();
-            iLockGuard--;
+            iLockGuard--; //--> На случаи если что то пойдёт не так - мы не должны зависнуть
         }
         VERIFY(iLockGuard > 0);
 
@@ -695,11 +695,14 @@ void CCustomShell::UpdateShellParticlesHUDMode(bool bHUD, float fHUD_FOV)
         IRenderVisual* pV = m_pShellParticles->renderable.visual;
         IParticleCustom* pPC = smart_cast<IParticleCustom*>(pV);
 
-        pPC->SetHudMode(bHUD);
-
-        if (bHUD)
+        if (pPC != nullptr)
         {
-            pPC->OverrideHudFov(fHUD_FOV);
+            pPC->SetHudMode(bHUD);
+
+            if (bHUD)
+            {
+                pPC->OverrideHudFov(fHUD_FOV);
+            }
         }
     }
 }

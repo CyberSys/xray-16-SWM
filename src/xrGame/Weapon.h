@@ -320,9 +320,9 @@ public:
 
 //================= Аддоны и аттачменты (общее) =================//
 public:
-    enum EAddons //--> Индексы-слоты аддонов в массиве m_addons (eAddonsSize = 16 это макс [u16])
+    enum EAddons //--> Индексы-слоты аддонов в массиве m_addons
     {
-        eNotExist = u16(-1),
+        eNotExist = u8(-1),
         eScope = 0,
         eSilencer = 1,
         eLauncher = 2,
@@ -1108,7 +1108,7 @@ public:
     void SwitchZoomType(EZoomTypes iCurType, EZoomTypes iPrevType);
 
     float GetAimZoomFactor(bool bForSVP = false) const;
-    IC float IsSecondVPZoomPresent() const { return GetZoomParams().m_fZoomFovSVP > 0.000f; }
+    IC bool IsSecondVPZoomPresent() const { return GetZoomParams().m_fZoomFovSVP > 0.000f; }
 
     IC float GetZRotatingFactor() const { return m_fZoomRotationFactor; }
     IC bool IsRotatingToZoom() const { return (m_fZoomRotationFactor < 1.f); }

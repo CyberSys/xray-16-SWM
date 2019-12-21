@@ -252,7 +252,7 @@ void CWeapon::BipodsOnLoad(IReader& input_packet)
 {
     bBipodsUseSavedData = false;
 
-    int iBipodsState;
+    int iBipodsState = bipods_data::eBS_SwitchedOFF;
     load_data(iBipodsState, input_packet);
 
     if (iBipodsState == bipods_data::eBS_SwitchedON)
