@@ -26,6 +26,7 @@ void CWeapon::ReloadAllSounds()
 	ReloadSound( "snd_holster",					"sndHide"				, ESndExcl::eExYes,     SOUND_TYPE_ITEM_HIDING				);
 	ReloadSound( "snd_shoot",					"sndShot"				, ESndExcl::eExNot,	    SOUND_TYPE_WEAPON_SHOOTING			);
     ReloadSound( "snd_reflection",              "sndReflect"            , ESndExcl::eExNot,	    SOUND_TYPE_WORLD_AMBIENT			);
+	ReloadSound( "snd_tape",					"sndTape"				, ESndExcl::eExNot,     SOUND_TYPE_WEAPON_SHOOTING			);
     ReloadSound( "snd_knife",					"sndKnife"				, ESndExcl::eExNot,	    SOUND_TYPE_WEAPON_SHOOTING			);
 	ReloadSound( "snd_empty",					"sndEmptyClick"			, ESndExcl::eExNot,	    SOUND_TYPE_WEAPON_EMPTY_CLICKING	);
 	ReloadSound( "snd_reload",					"sndReload"				, ESndExcl::eExYes,     SOUND_TYPE_WEAPON_RECHARGING		);

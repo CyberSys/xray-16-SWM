@@ -402,6 +402,12 @@ void CWeapon::OnShot(bool bIsRocket, bool bIsBaseDispersionedBullet)
                     HUD_SOUND_ITEM::SetHudSndGlobalVolumeFactor(1.0f);
                 }
             }
+
+            // Звук ленты
+            if (m_sounds.FindSoundItem("sndTape", false))
+            {
+                PlaySound("sndTape", get_LastFP());
+            }
         }
 
         // Партиклы
