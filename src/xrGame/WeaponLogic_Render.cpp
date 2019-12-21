@@ -29,6 +29,11 @@ bool CWeapon::show_crosshair()
     if (hud_adj_mode)
         return true;
 
+#ifdef DEBUG
+    if (!!b_dbg_show_shooting_eff_info)
+        return true;
+#endif
+
     if (!IsZoomed() && m_bHideCrosshair)
         return false;
 
@@ -165,103 +170,106 @@ void CWeapon::UpdateHudAdditonal(Fmatrix& trans)
 
     //============= Сдвиг оружия при стрельбе =============//
     // Параметры сдвига
-    float fShootingReturnSpeedMod = _lerp(
-        hi->m_measures.m_shooting_params.m_ret_speed,
-        hi->m_measures.m_shooting_params.m_ret_speed_aim,
-        m_fZoomRotationFactor);
-    
+    //--> Длительность (== скорость) затухания эффекта ...
+    float fShootingStabilizeTime = (GetState() == eFire ?
+            //--> ... во время анимации стрельбы
+            _lerp(hi->m_measures.m_shooting_params.m_ret_time_fire[0], //--> от бедра
+                hi->m_measures.m_shooting_params.m_ret_time_fire[1], //--> в зуме
+                m_fZoomRotationFactor) :
+            //--> ... после анимации стрельбы
+            _lerp(hi->m_measures.m_shooting_params.m_ret_time[0], //--> от бедра
+                hi->m_measures.m_shooting_params.m_ret_time[1], //--> в зуме
+                m_fZoomRotationFactor));
+
+    //--> Сдвиг по Z
     float fShootingBackwOffset = _lerp(
-        hi->m_measures.m_shooting_params.m_shot_offset_BACKW.x,
-        hi->m_measures.m_shooting_params.m_shot_offset_BACKW.y,
+        hi->m_measures.m_shooting_params.m_shot_offset_BACKW, //--> от бедра
+        hi->m_measures.m_shooting_params.m_shot_offset_BACKW_aim, //--> в зуме
         m_fZoomRotationFactor);
   
-    Fvector4 vShOffsets; // x = L, y = R, z = U, w = D
-    vShOffsets.x = _lerp(
-        hi->m_measures.m_shooting_params.m_shot_max_offset_LRUD.x,
-        hi->m_measures.m_shooting_params.m_shot_max_offset_LRUD_aim.x,
+    //--> Сдвиг по X, Y
+    Fvector4 vShOffsets; // 0 = -X, 1 = +X, 2 = +Y, 3 = -Y
+    vShOffsets[0] = _lerp(
+        hi->m_measures.m_shooting_params.m_shot_max_offset_LRUD[0], //--> от бедра
+        hi->m_measures.m_shooting_params.m_shot_max_offset_LRUD_aim[0], //--> в зуме
         m_fZoomRotationFactor);
-    vShOffsets.y = _lerp(
-        hi->m_measures.m_shooting_params.m_shot_max_offset_LRUD.y,
-        hi->m_measures.m_shooting_params.m_shot_max_offset_LRUD_aim.y,
+    vShOffsets[1] = _lerp(
+        hi->m_measures.m_shooting_params.m_shot_max_offset_LRUD[1], //--> от бедра
+        hi->m_measures.m_shooting_params.m_shot_max_offset_LRUD_aim[1], //--> в зуме
         m_fZoomRotationFactor);
-    vShOffsets.z = _lerp(
-        hi->m_measures.m_shooting_params.m_shot_max_offset_LRUD.z,
-        hi->m_measures.m_shooting_params.m_shot_max_offset_LRUD_aim.z,
+    vShOffsets[2] = _lerp(
+        hi->m_measures.m_shooting_params.m_shot_max_offset_LRUD[2], //--> от бедра
+        hi->m_measures.m_shooting_params.m_shot_max_offset_LRUD_aim[2], //--> в зуме
         m_fZoomRotationFactor);
-    vShOffsets.w = _lerp(
-        hi->m_measures.m_shooting_params.m_shot_max_offset_LRUD.w,
-        hi->m_measures.m_shooting_params.m_shot_max_offset_LRUD_aim.w,
+    vShOffsets[3] = _lerp(
+        hi->m_measures.m_shooting_params.m_shot_max_offset_LRUD[3], //--> от бедра
+        hi->m_measures.m_shooting_params.m_shot_max_offset_LRUD_aim[3], //--> в зуме
         m_fZoomRotationFactor);
 
-    // Плавное затухание сдвига от стрельбы (основное, но без линейной никогда не опустит до полного 0.0f)
-    m_fLR_ShootingFactor    *= clampr(1.f - fAvgTimeDelta * fShootingReturnSpeedMod, 0.0f, 1.0f);
-    m_fUD_ShootingFactor    *= clampr(1.f - fAvgTimeDelta * fShootingReturnSpeedMod, 0.0f, 1.0f);
-    m_fBACKW_ShootingFactor *= clampr(1.f - fAvgTimeDelta * fShootingReturnSpeedMod, 0.0f, 1.0f);
+    //--> Поворот по оси X
+    Fvector4 vShRotX; // 0 = При смещении вверх, 1 = при смещении вниз
+    vShRotX[0] = _lerp(
+        hi->m_measures.m_shooting_params.m_shot_max_rot_UD[0], //--> от бедра
+        hi->m_measures.m_shooting_params.m_shot_max_rot_UD_aim[0], //--> в зуме
+        m_fZoomRotationFactor);
+    vShRotX[1] = _lerp(
+        hi->m_measures.m_shooting_params.m_shot_max_rot_UD[1], //--> от бедра
+        hi->m_measures.m_shooting_params.m_shot_max_rot_UD_aim[1], //--> в зуме
+        m_fZoomRotationFactor);
 
-    // Минимальное линейное затухание сдвига от стрельбы при покое (горизонталь)
+    // Применяем сдвиг от стрельбы к HUD-у
     {
-        float fRetSpeedMod = fShootingReturnSpeedMod * 0.125f;
-        if (m_fLR_ShootingFactor < 0.0f)
-        {
-            m_fLR_ShootingFactor += fAvgTimeDelta * fRetSpeedMod;
-            clamp(m_fLR_ShootingFactor, -1.0f, 0.0f);
-        }
-        else
-        {
-            m_fLR_ShootingFactor -= fAvgTimeDelta * fRetSpeedMod;
-            clamp(m_fLR_ShootingFactor, 0.0f, 1.0f);
-        }
+        Fvector curr_offs, curr_rot;
+
+        //--> Рассчитываем основу сдвига
+        curr_offs = {
+            //--> Горизонтальный сдвиг
+            _lerp(vShOffsets[0], vShOffsets[1], m_fShootingFactorLR) * m_fShootingCurPowerLRUD,
+            //--> Вертикальный сдвиг
+            _lerp(vShOffsets[2], vShOffsets[3], m_fShootingFactorUD) * m_fShootingCurPowerLRUD,
+            //--> Глубинный сдвиг
+            -1.f * fShootingBackwOffset * m_fShootingCurPowerBACKW
+        };
+        curr_rot = {
+            //--> Поворот по вертикали
+            _lerp(vShRotX[0], vShRotX[1], m_fShootingFactorUD) * m_fShootingCurPowerLRUD,
+            0.0f,
+            0.0f
+        };
+        curr_rot.mul(-PI / 180.f);
+
+        //--> Модифицируем её коэфицентом силы сдвига
+        float fShootingKoef = GetShootingEffectKoef();
+        curr_offs.mul(fShootingKoef);
+        curr_rot.mul(fShootingKoef);
+
+        //--> Применяем к HUD-у
+        Fmatrix hud_transform;
+        hud_transform.identity();
+        hud_transform.rotateX(curr_rot.x);
+        hud_transform.translate_over(curr_offs);
+        trans.mulB_43(hud_transform);
     }
 
-    // Минимальное линейное затухание сдвига от стрельбы при покое (вертикаль)
+#ifdef DEBUG
+    //--> Расспечатываем DBG-инфу о эффекте, если требуется
+    if (!!b_dbg_show_shooting_eff_info && m_fShootingCurPowerLRUD > 0.0f)
     {
-        float fRetSpeedMod = fShootingReturnSpeedMod * 0.125f;
-        if (m_fUD_ShootingFactor < 0.0f)
-        {
-            m_fUD_ShootingFactor += fAvgTimeDelta * fRetSpeedMod;
-            clamp(m_fUD_ShootingFactor, -1.0f, 0.0f);
-        }
-        else
-        {
-            m_fUD_ShootingFactor -= fAvgTimeDelta * fRetSpeedMod;
-            clamp(m_fUD_ShootingFactor, 0.0f, 1.0f);
-        }
+        Log("! m_fShootingCurPowerLRUD =", m_fShootingCurPowerLRUD);
     }
+#endif
 
-    // Минимальное линейное затухание сдвига от стрельбы при покое (вперёд\назад)
+    // Плавное затухание сдвига от стрельбы
+    //--> Глубинный сдвиг
+    float fBackwStabilizeTimeKoef = hi->m_measures.m_shooting_params.m_ret_time_backw_koef;
+    m_fShootingCurPowerBACKW -= Device.fTimeDelta / (fShootingStabilizeTime * fBackwStabilizeTimeKoef);
+    clamp(m_fShootingCurPowerBACKW, 0.0f, 1.0f);
+
+    //--> Боковой сдвиг
+    m_fShootingCurPowerLRUD -= Device.fTimeDelta / fShootingStabilizeTime;
+    if (m_fShootingCurPowerLRUD <= 0.0f)
     {
-        float fRetSpeedMod = fShootingReturnSpeedMod * 0.125f;
-        m_fBACKW_ShootingFactor -= fAvgTimeDelta * fRetSpeedMod;
-        clamp(m_fBACKW_ShootingFactor, 0.0f, 1.0f);
-    }
-
-    // Применяем сдвиг от стрельбы к худу
-    {
-        float fLR_lim = (m_fLR_ShootingFactor < 0.0f ? vShOffsets.x : vShOffsets.y);
-        float fUD_lim = (m_fUD_ShootingFactor < 0.0f ? vShOffsets.z : vShOffsets.w);
-
-        Fvector curr_offs;
-        curr_offs = {fLR_lim * m_fLR_ShootingFactor, fUD_lim * -1.f * m_fUD_ShootingFactor, -1.f * fShootingBackwOffset * m_fBACKW_ShootingFactor};
-
-        //--> Глушители могут изменять силу тряски
-        curr_offs.mul(cur_silencer_koef.shooting_shake);
-
-        //--> Прочие generic-аддоны могут изменять силу тряски
-        float fTrgtShakeKoef = 1.0f;
-        for (int iSlot = 0; iSlot < EAddons::eAddonsSize; iSlot++)
-        {
-            SAddonData* pAddon = GetAddonBySlot((CWeapon::EAddons)iSlot);
-            if (pAddon->bActive)
-            {
-                fTrgtShakeKoef *= pAddon->m_kShootingShake;
-            }
-        }
-        curr_offs.mul(fTrgtShakeKoef);
-
-        Fmatrix hud_rotation;
-        hud_rotation.identity();
-        hud_rotation.translate_over(curr_offs);
-        trans.mulB_43(hud_rotation);
+        ResetShootingEffect(true);
     }
 
     //======== Проверяем доступность инерции и стрейфа ========//
@@ -504,30 +512,96 @@ void CWeapon::UpdateHudAdditonal(Fmatrix& trans)
     trans.mulB_43(hud_rotation);
 }
 
-// Добавить эффект сдвига оружия от выстрела
+// Добавить HUD-эффект сдвига оружия от выстрела
 void CWeapon::AddHUDShootingEffect() 
 {
     if (IsHidden() || ParentIsActor() == false)
         return;
 
-    // Отдача назад
-    m_fBACKW_ShootingFactor = 1.0f;
-
-    // Отдача в бока
-    float fPowerMin = 0.0f;
     attachable_hud_item* hi = HudItemData();
-    if (hi != nullptr)
+    if (hi == nullptr)
+        return;
+
+    // Отдача назад всегда максимальная на каждом выстреле
+    m_fShootingCurPowerBACKW = 1.0f;
+
+    // Отдача в бока становится сильнее при длительной стрельбе
+    //--> Регулируем плавность перемещения оружия по экрану, ограничивая макс. сдвиг на каждый выстрел
+    float fLRUDDiffPerShot = _lerp(hi->m_measures.m_shooting_params.m_shot_diff_per_shot[0],
+        hi->m_measures.m_shooting_params.m_shot_diff_per_shot[1], GetZRotatingFactor());
+    clamp(fLRUDDiffPerShot, 0.0f, 1.0f);
+
+    m_fShootingFactorLR += ::Random.randF(-fLRUDDiffPerShot, fLRUDDiffPerShot); //--> m_fShootingFactorLR будет 0.5f на момент начала стрельбы
+    clamp(m_fShootingFactorLR, 0.0f, 1.0f);
+
+    m_fShootingFactorUD += ::Random.randF(-fLRUDDiffPerShot, fLRUDDiffPerShot); //--> m_fShootingFactorUD будет 0.5f на момент начала стрельбы
+    clamp(m_fShootingFactorUD, 0.0f, 1.0f);
+
+    //--> С каждым выстрелом разрешаем оружию всё ближе приближаться к текущим границам сдвига
+    m_fShootingCurPowerLRUD += _lerp(hi->m_measures.m_shooting_params.m_shot_power_per_shot[0],
+        hi->m_measures.m_shooting_params.m_shot_power_per_shot[1], GetZRotatingFactor());
+    clamp(m_fShootingCurPowerLRUD, 0.0f, 1.0f);
+
+#ifdef DEBUG
+    //--> Расспечатываем DBG-инфу о эффекте, если требуется
+    if (!!b_dbg_show_shooting_eff_info && m_fShootingCurPowerLRUD > 0.0f)
     {
-        fPowerMin = clampr(hi->m_measures.m_shooting_params.m_min_LRUD_power, 0.0f, 0.99f);
+        Log("! =========================");
+        Log("! m_fShootingFactorLR =", m_fShootingFactorLR);
+        Log("! m_fShootingFactorUD =", m_fShootingFactorUD);
+        Log("! fLRUDDiffPerShot =", fLRUDDiffPerShot);
+    }
+#endif
+
+    // Наклон ствола от стрельбы (стрейф)
+    float fShotStrafeMin = _lerp(hi->m_measures.m_shooting_params.m_shot_offsets_strafe[0],
+        hi->m_measures.m_shooting_params.m_shot_offsets_strafe_aim[0], GetZRotatingFactor());
+    float fShotStrafeMax = _lerp(hi->m_measures.m_shooting_params.m_shot_offsets_strafe[1],
+        hi->m_measures.m_shooting_params.m_shot_offsets_strafe_aim[1], GetZRotatingFactor());
+    
+    float fLRShotStrafeDir = (::Random.randF(-1.0f, 1.0f) >= 0.0f ? 1.0f : -1.0f);
+    float fStrafeVal = (::Random.randF(fShotStrafeMin, fShotStrafeMax) * fLRShotStrafeDir);
+    float fStrafePwr = clampr(m_fShootingCurPowerLRUD * 2.0f, 0.0f, 1.0f);
+
+    if (IsBipodsDeployed())
+    { //--> При разложенных сошках всегда делаем эффект наклона чуть слабее, плюс ниже он может быть ослаблен ещё раз
+        fStrafePwr *= 0.8f; 
     }
 
-    float fPowerRnd = 1.0f - fPowerMin;
+    m_fLR_MovingFactor += (fStrafeVal * GetShootingEffectKoef() * fStrafePwr);
+}
 
-    m_fLR_ShootingFactor = ::Random.randF(-fPowerRnd, fPowerRnd);
-    m_fLR_ShootingFactor += (m_fLR_ShootingFactor >= 0.0f ? fPowerMin : -fPowerMin);
-    
-    m_fUD_ShootingFactor = ::Random.randF(-fPowerRnd, fPowerRnd);
-    m_fUD_ShootingFactor += (m_fUD_ShootingFactor >= 0.0f ? fPowerMin : -fPowerMin);
+// Получить коэфицент силы тряски HUD-a при стрельбе
+float CWeapon::GetShootingEffectKoef()
+{
+    float fShakeKoef = 1.0f;
+
+    //--> Глушитель
+    fShakeKoef *= cur_silencer_koef.shooting_shake;
+
+    //--> Прицел без сошек
+    if (IsBipodsDeployed() == false && !ZoomTexture())
+    {
+        fShakeKoef *= _lerp(1.0f, GetZoomParams().m_fShootingEffFactor, GetZRotatingFactor());
+    }
+
+    //--> Сошки
+    if (IsBipodsDeployed())
+    {
+        fShakeKoef *= m_bipods.fShotEffMod;
+    }
+
+    //--> Прочие аддоны
+    for (int iSlot = 0; iSlot < EAddons::eAddonsSize; iSlot++)
+    {
+        SAddonData* pAddon = GetAddonBySlot((CWeapon::EAddons)iSlot);
+        if (pAddon->bActive)
+        {
+            fShakeKoef *= pAddon->m_kShootingShake;
+        }
+    }
+
+    return fShakeKoef;
 }
 
 // Получить мировой FOV от текущего оружия игрока

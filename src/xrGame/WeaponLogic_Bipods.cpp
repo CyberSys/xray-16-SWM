@@ -120,6 +120,7 @@ void CWeapon::LoadBipodsParams()
     m_bipods.fHudZOffset = READ_ADDON_DATA(r_float, "bipods_hud_z_offset", pAddonBipods->GetName(), pAddonBipods->GetAddonName(), 0.f);
     m_bipods.fPitch2LegsTiltFactor = READ_ADDON_DATA(r_float, "bipods_pitch_vis_factor", pAddonBipods->GetName(), pAddonBipods->GetAddonName(), 2.f);
     m_bipods.fInertiaMod = READ_ADDON_DATA(r_float, "bipods_inertia_factor", pAddonBipods->GetName(), pAddonBipods->GetAddonName(), 0.5f);
+    m_bipods.fShotEffMod = READ_ADDON_DATA(r_float, "bipods_shot_eff_factor", pAddonBipods->GetName(), pAddonBipods->GetAddonName(), 1.0f);
     m_bipods.fPosZOffset = READ_ADDON_DATA(r_float, "bipods_pos_displ", pAddonBipods->GetName(), pAddonBipods->GetAddonName(), 0.f);
     m_bipods.fDeployTime = READ_ADDON_DATA(r_float, "bipods_deploy_time", pAddonBipods->GetName(), pAddonBipods->GetAddonName(), 0.5f);
     m_bipods.fUndeployTime = READ_ADDON_DATA(r_float, "bipods_undeploy_time", pAddonBipods->GetName(), pAddonBipods->GetAddonName(), 0.5f);

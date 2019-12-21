@@ -63,12 +63,19 @@ struct hud_item_measures
 
     struct shooting_params
     {
-        Fvector4 m_shot_max_offset_LRUD;
-        Fvector4 m_shot_max_offset_LRUD_aim;
-        Fvector2 m_shot_offset_BACKW;
-        float m_ret_speed;
-        float m_ret_speed_aim;
-        float m_min_LRUD_power;
+        Fvector4 m_shot_max_offset_LRUD;     // Границы сдвига в бок при выстреле от бедра (-x, +x, +y, -y) 
+        Fvector4 m_shot_max_offset_LRUD_aim; // Границы сдвига в бок при выстреле в зуме (-x, +x, +y, -y) 
+        Fvector2 m_shot_max_rot_UD;          // Границы поворота по вертикали при выстреле от бедра (при смещении вверх \ вниз) 
+        Fvector2 m_shot_max_rot_UD_aim;      // Границы поворота по вертикали при выстреле в зуме (при смещении вверх \ вниз) 
+        float m_shot_offset_BACKW;           // Расстояние сдвига назад при выстреле от бедра [>= 0.0f]
+        float m_shot_offset_BACKW_aim;       // Расстояние сдвига назад при выстреле в зуме [>= 0.0f]
+        Fvector2 m_shot_offsets_strafe;      // Фактор изменения наклона (стрейфа) ствола при выстреле (мин.\макс. от бедра) vec2[0.f - 1.f]
+        Fvector2 m_shot_offsets_strafe_aim;  // Фактор изменения наклона (стрейфа) ствола при выстреле (мин.\макс. в зуме) vec2[0.f - 1.f]
+        Fvector2 m_shot_diff_per_shot;       // Фактор того, насколько большой может быть разница между текущей и новой позицией на каждый выстрел (от бедра \ в зуме) [0.f - 1.f]
+        Fvector2 m_shot_power_per_shot;      // Фактор того, насколько сильнее мы приближаемся к границам сдвига и наклона с каждым выстрелом (от бедра \ в зуме) [0.f - 1.f]
+        Fvector2 m_ret_time;                 // Максимально возможное время стабилизации ствола в исходное положение после анимации стрельбы (от бедра / в зуме) [секунд][>= 0.0f] - не влияет на стрейф
+        Fvector2 m_ret_time_fire;            // Максимально возможное время стабилизации ствола в исходное положение во время анимации стрельбы (от бедра / в зуме) [секунд][>= 0.0f] - не влияет на стрейф
+        float m_ret_time_backw_koef;         // Коэфицент времени стабилизации для сдвига назад [>= 0.0f]
     };
     shooting_params m_shooting_params; //--#SM+#--
 };

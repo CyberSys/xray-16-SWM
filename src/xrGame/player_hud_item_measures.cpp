@@ -156,10 +156,17 @@ void hud_item_measures::load(const shared_str& sect_name, IKinematics* K)
     // Загрузка параметров смещения при стрельбе
     m_shooting_params.m_shot_max_offset_LRUD      = READ_IF_EXISTS(pSettings, r_fvector4, sect_name, "shooting_max_LRUD", Fvector4().set(0,0,0,0));
     m_shooting_params.m_shot_max_offset_LRUD_aim  = READ_IF_EXISTS(pSettings, r_fvector4, sect_name, "shooting_max_LRUD_aim", Fvector4().set(0,0,0,0));
-    m_shooting_params.m_shot_offset_BACKW         = READ_IF_EXISTS(pSettings, r_fvector2, sect_name, "shooting_backward_offset", Fvector2().set(0,0));
-    m_shooting_params.m_ret_speed                 = READ_IF_EXISTS(pSettings, r_float, sect_name, "shooting_ret_speed", 1.0f);
-    m_shooting_params.m_ret_speed_aim             = READ_IF_EXISTS(pSettings, r_float, sect_name, "shooting_ret_aim_speed", 1.0f);
-    m_shooting_params.m_min_LRUD_power            = READ_IF_EXISTS(pSettings, r_float, sect_name, "shooting_min_LRUD_power", 0.0f);
+    m_shooting_params.m_shot_max_rot_UD           = READ_IF_EXISTS(pSettings, r_fvector2, sect_name, "shooting_max_UD_rot", Fvector2().set(0,0));
+    m_shooting_params.m_shot_max_rot_UD_aim       = READ_IF_EXISTS(pSettings, r_fvector2, sect_name, "shooting_max_UD_rot_aim", Fvector2().set(0,0));
+    m_shooting_params.m_shot_offset_BACKW         = READ_IF_EXISTS(pSettings, r_float,    sect_name, "shooting_backward_offset", 0.0f);
+    m_shooting_params.m_shot_offset_BACKW_aim     = READ_IF_EXISTS(pSettings, r_float,    sect_name, "shooting_backward_offset_aim", 0.0f);
+    m_shooting_params.m_shot_offsets_strafe       = READ_IF_EXISTS(pSettings, r_fvector2, sect_name, "shooting_strafe_offsets", Fvector2().set(0,0));
+    m_shooting_params.m_shot_offsets_strafe_aim   = READ_IF_EXISTS(pSettings, r_fvector2, sect_name, "shooting_strafe_offsets_aim", Fvector2().set(0,0));
+    m_shooting_params.m_shot_diff_per_shot        = READ_IF_EXISTS(pSettings, r_fvector2, sect_name, "shooting_diff_per_shot", Fvector2().set(0,0));
+    m_shooting_params.m_shot_power_per_shot       = READ_IF_EXISTS(pSettings, r_fvector2, sect_name, "shooting_power_per_shot", Fvector2().set(0,0));
+    m_shooting_params.m_ret_time                  = READ_IF_EXISTS(pSettings, r_fvector2, sect_name, "shooting_ret_time", Fvector2().set(1.0f, 1.0f));
+    m_shooting_params.m_ret_time_fire             = READ_IF_EXISTS(pSettings, r_fvector2, sect_name, "shooting_ret_time_fire", Fvector2().set(1000.0f, 1000.0f));
+    m_shooting_params.m_ret_time_backw_koef       = READ_IF_EXISTS(pSettings, r_float,    sect_name, "shooting_ret_time_backw_k", 1.0f);
 
     // Msg("Measures loaded from %s [%d][%d][%d][%d][%d][%d][%d]", sect_name.c_str(), bReloadAim, bReloadAimGL, bReloadInertion, bReloadPitchOfs, bReloadStrafe, bReloadShooting, bReloadScope);
     //--#SM+# End--
@@ -233,10 +240,17 @@ void hud_item_measures::merge_measures_params(hud_item_measures& new_measures)
     {
         m_shooting_params.m_shot_max_offset_LRUD     = new_measures.m_shooting_params.m_shot_max_offset_LRUD;
         m_shooting_params.m_shot_max_offset_LRUD_aim = new_measures.m_shooting_params.m_shot_max_offset_LRUD_aim;
+        m_shooting_params.m_shot_max_rot_UD          = new_measures.m_shooting_params.m_shot_max_rot_UD;
+        m_shooting_params.m_shot_max_rot_UD_aim      = new_measures.m_shooting_params.m_shot_max_rot_UD_aim;
         m_shooting_params.m_shot_offset_BACKW        = new_measures.m_shooting_params.m_shot_offset_BACKW;
-        m_shooting_params.m_ret_speed                = new_measures.m_shooting_params.m_ret_speed;
-        m_shooting_params.m_ret_speed_aim            = new_measures.m_shooting_params.m_ret_speed_aim;
-        m_shooting_params.m_min_LRUD_power           = new_measures.m_shooting_params.m_min_LRUD_power;
+        m_shooting_params.m_shot_offset_BACKW_aim    = new_measures.m_shooting_params.m_shot_offset_BACKW_aim;
+        m_shooting_params.m_shot_offsets_strafe      = new_measures.m_shooting_params.m_shot_offsets_strafe;
+        m_shooting_params.m_shot_offsets_strafe_aim  = new_measures.m_shooting_params.m_shot_offsets_strafe_aim;
+        m_shooting_params.m_shot_diff_per_shot       = new_measures.m_shooting_params.m_shot_diff_per_shot;
+        m_shooting_params.m_shot_power_per_shot      = new_measures.m_shooting_params.m_shot_power_per_shot;
+        m_shooting_params.m_ret_time                 = new_measures.m_shooting_params.m_ret_time;
+        m_shooting_params.m_ret_time_fire            = new_measures.m_shooting_params.m_ret_time_fire;
+        m_shooting_params.m_ret_time_backw_koef      = new_measures.m_shooting_params.m_ret_time_backw_koef;
     }
 
     // Смещение от бедра при одетом прицеле

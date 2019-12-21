@@ -95,6 +95,10 @@ void SZoomParams::Initialize(LPCSTR section, LPCSTR prefix, bool bOverrideMode)
     strconcat(sizeof(val_name), val_name, "scope_inertion_factor", _prefix);
     m_fScopeInertionFactor = READ_IF_EXISTS(pSettings, r_float, section, val_name, (bOverrideMode ? m_fScopeInertionFactor : -1.0f));
 
+    // Сила эффекта тряски при стрельбе
+    strconcat(sizeof(val_name), val_name, "scope_shot_eff_factor", _prefix);
+    m_fShootingEffFactor = READ_IF_EXISTS(pSettings, r_float, section, val_name, (bOverrideMode ? m_fShootingEffFactor : 1.0f));
+
     // Прочее
     xr_delete(m_UIScope);
     xr_delete(m_pVision);

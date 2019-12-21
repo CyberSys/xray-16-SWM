@@ -59,6 +59,7 @@ public:
     float fHudZOffset; // Смещение худа по Z-координате
     float fPitch2LegsTiltFactor; // Фактор влияния наклона по X на степень раздвига ножек (больше => меньше)
     float fInertiaMod; // Модификатор силы инерции худа
+    float fShotEffMod; // Модификатор силы эффекта стрельбы у худа
     float fPosZOffset; // Сдвиг точки установки m_vBipodInitPos в направлении m_vBipodInitDir
     float fDeployTime; // Время на установку сошек (секунды)
     float fUndeployTime; // Время на снятие сошек (секунды)

@@ -9,6 +9,7 @@
 BOOL b_toggle_weapon_aim = FALSE;
 BOOL b_dbg_override_weapon_fov = FALSE;
 BOOL b_dbg_override_weapon_hud_fov = FALSE;
+BOOL b_dbg_show_shooting_eff_info = FALSE;
 
 // Конструктор
 CWeapon::CWeapon() : CShellLauncher(this)
@@ -165,9 +166,7 @@ CWeapon::CWeapon() : CShellLauncher(this)
     m_fLR_InertiaFactor = 0.f;
     m_fUD_InertiaFactor = 0.f;
 
-    m_fLR_ShootingFactor = 0.f;
-    m_fUD_ShootingFactor = 0.f;
-    m_fBACKW_ShootingFactor = 0.f;
+    ResetShootingEffect();
 
     m_bDisableMovEffAtZoom = false;
 
@@ -515,9 +514,7 @@ void CWeapon::ResetWeapon(shared_str const& sCallerName)
     m_fLR_InertiaFactor = 0.f;
     m_fUD_InertiaFactor = 0.f;
 
-    m_fLR_ShootingFactor = 0.f;
-    m_fUD_ShootingFactor = 0.f;
-    m_fBACKW_ShootingFactor = 0.f;
+    ResetShootingEffect();
 
     m_fZoomRotationFactor = 0.0f;
 

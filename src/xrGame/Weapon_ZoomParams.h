@@ -35,6 +35,7 @@ public:
     float m_fRTZoomFactor;      // Последний сохранённый FOV для зума с регулируемой кратностью
 
     float m_fScopeInertionFactor; //--> Чувствительность мыши во время прицеливания
+    float m_fShootingEffFactor;   //--> Сила эффекта тряски при стрельбе
 
     bool                  m_bZoomDofEnabled;     // DOF-эффект во время зума
     Fvector               m_ZoomDof;             // Параметры DOF-эффекта при прицеливании

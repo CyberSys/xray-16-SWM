@@ -92,6 +92,7 @@ extern float g_fTimeFactor;
 extern BOOL b_toggle_weapon_aim;
 extern BOOL b_dbg_override_weapon_fov; //--#SM+#--
 extern BOOL b_dbg_override_weapon_hud_fov; //--#SM+#--
+extern BOOL b_dbg_show_shooting_eff_info; //--#SM+#--
 
 extern u32 UIStyleID;
 extern xr_vector<xr_token> UIStyleToken;
@@ -2299,6 +2300,7 @@ void CCC_RegisterCommands()
     CMD4(CCC_Integer, "swm_dbg_log_hud_anims", &g_LogHUDAnims, 0, 1); //--#SM+#--
     CMD4(CCC_Integer, "swm_dbg_override_wpn_fov", &b_dbg_override_weapon_fov, 0, 1); //--#SM+#--
     CMD4(CCC_Integer, "swm_dbg_override_wpn_hud_fov", &b_dbg_override_weapon_hud_fov, 0, 1); //--#SM+#--
+    CMD4(CCC_Integer, "swm_dbg_show_shooting_eff_info", &b_dbg_show_shooting_eff_info, 0, 1); //--#SM+#--
 #endif
 
     register_mp_console_commands();

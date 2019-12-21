@@ -56,6 +56,8 @@ class CWeaponMagazinedWGrenade;
 extern BOOL b_toggle_weapon_aim;
 extern BOOL b_dbg_override_weapon_fov;
 extern BOOL b_dbg_override_weapon_hud_fov;
+extern BOOL b_dbg_show_shooting_eff_info;
+
 extern CUIXml* pWpnScopeXml;
 extern u32 hud_adj_mode;
 
@@ -1215,10 +1217,6 @@ public:
     float m_fLR_InertiaFactor; // Фактор горизонтальной инерции худа при движении камеры [-1; +1]
     float m_fUD_InertiaFactor; // Фактор вертикальной инерции худа при движении камеры [-1; +1]
 
-    float m_fLR_ShootingFactor; // Фактор горизонтального сдвига худа при стрельбе [-1; +1]
-    float m_fUD_ShootingFactor; // Фактор вертикального сдвига худа при стрельбе [-1; +1]
-    float m_fBACKW_ShootingFactor; // Фактор сдвига худа в сторону лица при стрельбе [0; +1]
-
     virtual void OnOwnedCameraMove(CCameraBase* pCam, float fOldYaw, float fOldPitch);
     virtual void OnFirstAnimationPlayed(const shared_str& sAnmAlias);
     virtual void OnBeforeMotionPlayed(const shared_str& sAnmAlias, motion_params& params);
@@ -1272,6 +1270,12 @@ protected:
     bool m_bFireSingleShot; //--> Флаг того, что хотя бы один выстрел мы должны сделать (даже если очень быстро нажали на курок и вызвалось FireEnd)
     bool m_bStopedAfterQueueFired; //--> Флаг того, что мы остановились после того как выпустили ровно столько патронов, сколько было задано в m_iQueueSize
 
+    // Параметры эффекта стрельбы
+    float m_fShootingFactorLR; // Фактор текущего горизонтального сдвига худа при стрельбе, от края до края [0; +1]
+    float m_fShootingFactorUD; // Фактор текущего вертикального сдвига худа при стрельбе, от края до края [0; +1]
+    float m_fShootingCurPowerBACKW; // Фактор текущей силы сдвига худа в сторону лица при стрельбе [0; +1]
+    float m_fShootingCurPowerLRUD; // Фактор текущей силы сдвига худа в бока при стрельбе [0; +1]
+
     virtual void UpdateXForm();
     virtual void UpdateHudAdditonal(Fmatrix&);
     virtual void UpdateFireDependencies_internal();
@@ -1313,7 +1317,26 @@ public:
     virtual void FireBullet(const Fvector& pos, const Fvector& dir, float fire_disp, const CCartridge& cartridge,
         u16 parent_id, u16 weapon_id, bool send_hit);
 
+    // Добавляем эффект тряски HUD-a при стрельбе
     void AddHUDShootingEffect();
+
+    // Сбрасываем эффект тряски HUD-a при стрельбе
+    ICF void ResetShootingEffect(bool bNoBackw = false)
+    {
+        //--> Силу сдвига в нули
+        if (bNoBackw != true)
+        {
+            m_fShootingCurPowerBACKW = 0.0f;
+        }
+        m_fShootingCurPowerLRUD = 0.0f;
+
+        //--> Факторы сдвига ствола к границам в "нейтральное" положение - по середине от всех краёв
+        m_fShootingFactorLR = 0.5f;
+        m_fShootingFactorUD = 0.5f;
+    }
+
+    // Получить коэфицент силы тряски HUD-a при стрельбе
+    float GetShootingEffectKoef();
 
     IC const Fvector& get_LastFP()
     {
