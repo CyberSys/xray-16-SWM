@@ -389,10 +389,26 @@ bool CWeapon::IsWGLAnimRequired() const { return IsGrenadeLauncherAttached() || 
 // Мировая анимация покоя
 void CWeapon::PlayWorldAnimIdle()
 {
-    if (GetMainAmmoElapsed() <= 0 && PlayWorldMotion("idle_empty", true) == true)
-        return;
+    bool bIsWeaponEmpty = GetMainAmmoElapsed() <= 0;
+    bool bEmptyAnmPlayed = false;
 
-    PlayWorldMotion("idle", true);
+    // Мировая модель оружия
+    if (bIsWeaponEmpty)
+    { //--> Сперва пробуем проиграть анимацию пустого оружия
+        bEmptyAnmPlayed = PlayWorldMotion("idle_empty", true);
+    }
+
+    if (bEmptyAnmPlayed == false)
+    { //--> Иначе играем обычную анимацию
+        PlayWorldMotion("idle", true);
+    }
+
+    // Её доп. визуалы
+    Try2PlayMotionByAliasInAllAdditionalVisuals("anm_world_idle", true, true);
+    if (bIsWeaponEmpty)
+    {
+        Try2PlayMotionByAliasInAllAdditionalVisuals("anm_world_idle_empty", true, true);
+    }
 }
 
 // Анимация покоя (включая анимации ходьбы и бега)
@@ -769,17 +785,37 @@ void CWeapon::PlayAnimReload()
     if (!def_IsGL_Mode)
     {
         bool bPlayAnim = true;
-        if (GetState() == eSwitchMag &&
-            (m_sub_state != eSubstateReloadBegin && m_sub_state != eSubstateMagazDetach && m_sub_state != eSubstateMagazMisfire))
+        if (GetState() == eSwitchMag && (
+                //--> Если сейчас идёт смена магазина, то проигрываем анимацию только в этих под-состояниях
+                m_sub_state != eSubstateReloadBegin &&
+                m_sub_state != eSubstateMagazSwitch &&
+                m_sub_state != eSubstateMagazDetach_Do &&
+                m_sub_state != eSubstateMagazMisfire
+            ))
             bPlayAnim = false;
 
         if (bPlayAnim)
         {
-            bool bEmptyExist = false;
-            if (iAmmo == 0)
-                bEmptyExist = PlayWorldMotion("reload_world_empty", false);
-            if (bEmptyExist == false)
+            bool bIsWeaponEmpty = (iAmmo == 0);
+            bool bEmptyAnmPlayed = false;
+
+            // Мировая модель оружия
+            if (bIsWeaponEmpty)
+            { //--> Сперва пробуем проиграть анимацию пустого оружия
+                bEmptyAnmPlayed = PlayWorldMotion("reload_world_empty", false);
+            }
+
+            if (bEmptyAnmPlayed == false)
+            { //--> Иначе играем обычную анимацию
                 PlayWorldMotion("reload_world", false);
+            }
+
+            // Её доп. визуалы
+            Try2PlayMotionByAliasInAllAdditionalVisuals("anm_world_reload", false, true);
+            if (bIsWeaponEmpty)
+            {
+                Try2PlayMotionByAliasInAllAdditionalVisuals("anm_world_reload_empty", false, true);
+            }
         }
     }
 
@@ -1528,11 +1564,25 @@ void CWeapon::PlayAnimShoot()
     // Мировая анимация
     if (!def_IsGL_Mode)
     {
-        bool bLastExist = false;
+        bool bLastShotAnmPlayed = false;
+
+        // Мировая модель оружия
         if (bLastBullet)
-            bLastExist = PlayWorldMotion("shoot_last", false);
-        if (bLastExist == false)
+        { //--> Сперва пробуем проиграть анимацию пустого оружия
+            bLastShotAnmPlayed = PlayWorldMotion("shoot_last", false);
+        }
+
+        if (bLastShotAnmPlayed == false)
+        { //--> Иначе играем обычную анимацию
             PlayWorldMotion("shoot", false);
+        }
+
+        // Её доп. визуалы
+        Try2PlayMotionByAliasInAllAdditionalVisuals("anm_world_shoot", false, true);
+        if (bLastBullet)
+        {
+            Try2PlayMotionByAliasInAllAdditionalVisuals("anm_world_shoot_last", false, true);
+        }
     }
 
     // Худовая анимация

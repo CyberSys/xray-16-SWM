@@ -1466,15 +1466,8 @@ void CWeapon::OnAdditionalVisualModelChange(attachable_visual* pChangedVisual)
         CWeapon::ReadMaxBulletBones(pChangedVisual->m_model);
     }
 
-    // Проигрываем у аддона мировые анимации
-    if (pSettings->line_exist(pChangedVisual->m_sect_name.c_str(), "anm_world_idle"))
-    {
-        IKinematicsAnimated* pWeaponVisual = pChangedVisual->m_model->dcast_PKinematicsAnimated();
-        if (pWeaponVisual)
-        {
-            pWeaponVisual->PlayCycle(pSettings->r_string(pChangedVisual->m_sect_name.c_str(), "anm_world_idle"), TRUE);
-        }
-    }
+    // Проигрываем у аддона мировую idle-анимацию
+    pChangedVisual->Try2PlayMotionByAlias("anm_world_idle", false, true);
 }
 
 // Обновление необходимости включения второго вьюпорта +SecondVP+

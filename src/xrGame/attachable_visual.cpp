@@ -25,6 +25,8 @@ attachable_visual::attachable_visual(CGameObject* _parent, const shared_str& sec
 
     m_pExtRenderTransform = NULL;
 
+    m_anims.clear();
+
     ReLoad(m_sect_name);
 };
 // Деструктор
@@ -68,7 +70,7 @@ void attachable_visual::ReLoad(const shared_str& sect_name)
     }
 };
 
-// Установить визуал
+// Установить новый визуал и загрузить из него все доступные анимации, указанные в конфиге
 void attachable_visual::SetVisual(shared_str vis_name)
 {
     if (m_cur_vis_name.equal(vis_name))
@@ -142,10 +144,66 @@ void attachable_visual::SetVisual(shared_str vis_name)
                 }
             }
         }
+
+        // Загружаем анимации из секции визуала
+        do
+        {
+            CInifile::Sect& _sect = pSettings->r_section(m_sect_name);
+            auto _b = _sect.Data.begin();
+            auto _e = _sect.Data.end();
+
+            m_anims.clear(); //--> Очищаем текущие
+
+            //--> Ищем новые анимации в секции визуала
+            for (; _b != _e; ++_b)
+            {
+                if (strstr(_b->first.c_str(), "anm_world_") == _b->first.c_str())
+                {
+                    const shared_str& sAnmAlias = _b->first;
+                    const shared_str& sMotionName = _b->second;
+
+                    //--> Проверяем что модель вообще имеет анимации
+                    IKinematicsAnimated* pModelAnimated = m_model->dcast_PKinematicsAnimated();
+                    if (pModelAnimated == false)
+                    {
+                        break;
+                    }
+
+                    //--> Проверяем что модель имеет конкретно указанную анимацию
+                    MotionID motion_ID = pModelAnimated->ID_Cycle_Safe(sMotionName);
+                    if (motion_ID.valid())
+                    {
+                        m_anims[sAnmAlias.c_str()] = sMotionName.c_str(); //--> Заносим связку в список анимаций визуала
+                    }
+                }
+            }
+        } while (false);
     }
 
     // Сообщеаем о смене модели
     m_parent->OnAdditionalVisualModelChange(this);
+}
+
+// Попытаться отыграть анимацию по её алиасу из конфига ("anm_world_XXX")
+void attachable_visual::Try2PlayMotionByAlias(const shared_str& sAnmAlias, bool bMixIn, bool bChilds)
+{
+    // Сперва играем у себя
+    if (m_model != nullptr)
+    {
+        auto _it = m_anims.find(sAnmAlias.c_str());
+        if (_it != m_anims.end())
+        {
+            const xr_string& sMotionName = ((*_it).second);
+            m_model->dcast_PKinematicsAnimated()->PlayCycle(sMotionName.c_str(), bMixIn);
+        }
+    }
+
+    // Потом у всех детей
+    if (bChilds)
+    {
+        for (u32 i = 0; i < m_attached_visuals.size(); i++)
+            m_attached_visuals[i]->Try2PlayMotionByAlias(sAnmAlias, bMixIn, bChilds);
+    }
 }
 
 // Обновление

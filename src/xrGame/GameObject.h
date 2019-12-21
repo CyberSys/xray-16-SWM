@@ -127,6 +127,10 @@ public:
     attachable_visual* FindAdditionalVisual(
         const shared_str& sect_name, xr_vector<attachable_visual*>::iterator* it_child = nullptr);
 
+    // Попытаться запустить анимацию у всех присоединённых визуалов объекта по её алиасу ("anm_world_xxx") [Trying to
+    // play the animation for all attached visuals of the object by anm alias ("anm_world_xxx")] --#SM+#--
+    void Try2PlayMotionByAliasInAllAdditionalVisuals(const shared_str& sAnmAlias, bool bMixIn = false, bool bChilds = false);
+
     // Получить список всех визуалов, связанных с нашим объектом [get list of all attached visuals] //--#SM+#--
     void GetAllInheritedVisuals(
         xr_vector<IRenderVisual*>& tOutVisList);

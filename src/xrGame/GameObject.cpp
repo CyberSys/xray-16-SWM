@@ -1710,6 +1710,19 @@ attachable_visual* CGameObject::FindAdditionalVisual(
     return nullptr;
 }
 
+// Попытаться запустить анимацию у всех присоединённых визуалов объекта по её алиасу ("anm_world_xxx") [Trying to play
+// the animation for all attached visuals of the object by anm alias ("anm_world_xxx")] --#SM+#--
+void CGameObject::Try2PlayMotionByAliasInAllAdditionalVisuals(const shared_str& sAnmAlias, bool bMixIn, bool bChilds)
+{
+    xr_vector<attachable_visual*>::iterator it = m_attached_visuals.begin();
+    while (it != m_attached_visuals.end())
+    {
+        attachable_visual* vis = (*it);
+        vis->Try2PlayMotionByAlias(sAnmAlias, bMixIn, bChilds);
+        ++it;
+    }
+}
+
 // Получить список всех визуалов, связанных с нашим объектом [get list of all attached visuals] //--#SM+#--
 void CGameObject::GetAllInheritedVisuals(xr_vector<IRenderVisual*>& tOutVisList)
 {
