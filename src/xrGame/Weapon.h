@@ -948,6 +948,8 @@ public:
     bool InventoryFastReloadAllowed(bool bForGL = false) const;
     void InventoryFastReload(u8 ammoType, bool bForGL = false);
 
+    void StopReloadSoundsOnMagazChanged();
+
 //====================== Основные ТТХ Оружия ======================//
 private:
     float m_hit_probability[egdCount]; //--> Вероятность "промазать" при стрельбе по игроку (возможно сейчас не используется)

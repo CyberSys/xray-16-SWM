@@ -29,11 +29,18 @@ void CWeapon::ReloadAllSounds()
 	ReloadSound( "snd_tape",					"sndTape"				, ESndExcl::eExNot,     SOUND_TYPE_WEAPON_SHOOTING			);
     ReloadSound( "snd_knife",					"sndKnife"				, ESndExcl::eExNot,	    SOUND_TYPE_WEAPON_SHOOTING			);
 	ReloadSound( "snd_empty",					"sndEmptyClick"			, ESndExcl::eExNot,	    SOUND_TYPE_WEAPON_EMPTY_CLICKING	);
-	ReloadSound( "snd_reload",					"sndReload"				, ESndExcl::eExYes,     SOUND_TYPE_WEAPON_RECHARGING		);
-	ReloadSound( "snd_reload_empty",			"sndReloadEmpty"		, ESndExcl::eExYes,     SOUND_TYPE_WEAPON_RECHARGING		);
-	ReloadSound( "snd_reload_w_gl",				"sndReloadWGL"			, ESndExcl::eExYes,     SOUND_TYPE_WEAPON_RECHARGING		);
-	ReloadSound( "snd_reload_empty_w_gl",		"sndReloadEmptyWGL"		, ESndExcl::eExYes,     SOUND_TYPE_WEAPON_RECHARGING		);
-	ReloadSound( "snd_reload_ab",				"sndReloadAB"			, ESndExcl::eExYes,     SOUND_TYPE_WEAPON_RECHARGING		);
+
+    // <!> Не забывать про StopReloadSoundsOnMagazChanged(), добавляя сюда новые звуки
+    ReloadSound( "snd_reload",					"sndReload"				, ESndExcl::eExYes,     SOUND_TYPE_WEAPON_RECHARGING		);
+	ReloadSound( "snd_reload_s",				"sndReloadS"			, ESndExcl::eExYes,     SOUND_TYPE_WEAPON_RECHARGING		);
+    ReloadSound( "snd_reload_empty",			"sndReloadEmpty"		, ESndExcl::eExYes,     SOUND_TYPE_WEAPON_RECHARGING		);
+    ReloadSound( "snd_reload_empty_s",			"sndReloadEmptyS"		, ESndExcl::eExYes,     SOUND_TYPE_WEAPON_RECHARGING		);
+    ReloadSound( "snd_reload_w_gl",				"sndReloadWGL"			, ESndExcl::eExYes,     SOUND_TYPE_WEAPON_RECHARGING		);
+	ReloadSound( "snd_reload_w_gl_s",			"sndReloadWGLS"			, ESndExcl::eExYes,     SOUND_TYPE_WEAPON_RECHARGING		);
+    ReloadSound( "snd_reload_empty_w_gl",		"sndReloadEmptyWGL"		, ESndExcl::eExYes,     SOUND_TYPE_WEAPON_RECHARGING		);
+    ReloadSound( "snd_reload_empty_w_gl_s",		"sndReloadEmptyWGLS"	, ESndExcl::eExYes,     SOUND_TYPE_WEAPON_RECHARGING		);
+
+    ReloadSound( "snd_reload_ab",				"sndReloadAB"			, ESndExcl::eExYes,     SOUND_TYPE_WEAPON_RECHARGING		);
 	ReloadSound( "snd_reload_ab_empty",			"sndReloadABEmpty"		, ESndExcl::eExYes,     SOUND_TYPE_WEAPON_RECHARGING		);
 	ReloadSound( "snd_reload_ab_w_gl",			"sndReloadABWGL"		, ESndExcl::eExYes,     SOUND_TYPE_WEAPON_RECHARGING		);
 	ReloadSound( "snd_reload_ab_empty_w_gl",	"sndReloadABEmptyWGL"	, ESndExcl::eExYes,     SOUND_TYPE_WEAPON_RECHARGING		);
@@ -41,7 +48,8 @@ void CWeapon::ReloadAllSounds()
 	ReloadSound( "snd_reload_fr_ab_empty",		"sndReloadFrABEmpty"	, ESndExcl::eExYes,		SOUND_TYPE_WEAPON_RECHARGING		);
 	ReloadSound( "snd_reload_fr_ab_w_gl",		"sndReloadFrABWGL"		, ESndExcl::eExYes,		SOUND_TYPE_WEAPON_RECHARGING		);
 	ReloadSound( "snd_reload_fr_ab_empty_w_gl",	"sndReloadFrABEmptyWGL"	, ESndExcl::eExYes,		SOUND_TYPE_WEAPON_RECHARGING		);
-	ReloadSound( "snd_bore",					"sndBore"				, ESndExcl::eExYes,		SOUND_TYPE_IDLE						);
+
+    ReloadSound( "snd_bore",					"sndBore"				, ESndExcl::eExYes,		SOUND_TYPE_IDLE						);
 	ReloadSound( "snd_shoot_grenade",			"sndShotG"				, ESndExcl::eExNot,	    SOUND_TYPE_WEAPON_SHOOTING			);
 	ReloadSound( "snd_reload_grenade",			"sndReloadG"			, ESndExcl::eExYes,		SOUND_TYPE_WEAPON_RECHARGING		);
 	ReloadSound( "snd_switch",					"sndSwitch"				, ESndExcl::eExYes,		SOUND_TYPE_ITEM_USING				);
@@ -334,4 +342,21 @@ void CWeapon::PlaySoundZoomOut()
 
     m_sounds.StopSound("sndZoomIn");
     PlaySound("sndZoomOut", pParent->Position());
+}
+
+// Остановить некоторые звуки перезарядки в момент смены магазина
+void CWeapon::StopReloadSoundsOnMagazChanged()
+{
+    //--> Захардкоденные звуки перезарядки
+    m_sounds.StopSound("sndReload");
+    m_sounds.StopSound("sndReloadS");
+    m_sounds.StopSound("sndReloadEmpty");
+    m_sounds.StopSound("sndReloadEmptyS");
+    m_sounds.StopSound("sndReloadWGL");
+    m_sounds.StopSound("sndReloadWGLS");
+    m_sounds.StopSound("sndReloadEmptyWGL");
+    m_sounds.StopSound("sndReloadEmptyWGLS");
+
+    //--> Дин. звуки типа snd_anm_reload (их алиас совпадаем с именем из конфига)
+    m_sounds.StopAllSoundsWhichContain("reload");
 }

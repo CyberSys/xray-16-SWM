@@ -132,12 +132,7 @@ void CWeapon::OnMotionMark(u32 state, const motion_marks& M)
         if (m_sub_state != eSubstateMagazFinish)
         {
             // Остановим звук перезарядки
-            m_sounds.StopSound("sndReload");
-            m_sounds.StopSound("sndReloadEmpty");
-            m_sounds.StopSound("sndReloadWGL");
-            m_sounds.StopSound("sndReloadEmptyWGL");
-
-            m_sounds.StopAllSoundsWhichContain("reload");
+            StopReloadSoundsOnMagazChanged();
 
             // Передадим управление в стэйт SwitchMag
             Need2SwitchMag();
@@ -883,22 +878,46 @@ void CWeapon::PlayAnimReload()
         {
             if (bNeed2UseCombinedAnim)
             {
+                if (IsScopeAttached())
+                {
+                    xr_sprintf(combo_wombo, "anm_reload_empty_w_gl_s_%s_%s", sMagaz, sUBarrel);
+                    if (PlaySoundMotion(combo_wombo, TRUE, "sndReloadEmptyWGLS", false))
+                        return;
+                }
                 xr_sprintf(combo_wombo, "anm_reload_empty_w_gl_%s_%s", sMagaz, sUBarrel);
                 if (PlaySoundMotion(combo_wombo, TRUE, "sndReloadEmptyWGL", false))
                     return;
             }
+
             // Иначе играем обычную
+            if (IsScopeAttached())
+            {
+                if (PlaySoundMotion("anm_reload_empty_w_gl_s", TRUE, "sndReloadEmptyWGLS", false))
+                    return;
+            }
             if (PlaySoundMotion("anm_reload_empty_w_gl", TRUE, "sndReloadEmptyWGL", false))
                 return;
         }
 
         if (bNeed2UseCombinedAnim)
         {
+            if (IsScopeAttached())
+            {
+                xr_sprintf(combo_wombo, "anm_reload_w_gl_s_%s_%s", sMagaz, sUBarrel);
+                if (PlaySoundMotion(combo_wombo, TRUE, "sndReloadWGLS", false))
+                    return;
+            }
             xr_sprintf(combo_wombo, "anm_reload_w_gl_%s_%s", sMagaz, sUBarrel);
             if (PlaySoundMotion(combo_wombo, TRUE, "sndReloadWGL", false))
                 return;
         }
+
         // Иначе играем обычную
+        if (IsScopeAttached())
+        {
+            if (PlaySoundMotion("anm_reload_w_gl_s", TRUE, "sndReloadWGLS", false))
+                return;
+        }
         if (PlaySoundMotion("anm_reload_w_gl", TRUE, "sndReloadWGL", false))
             return;
 
@@ -920,8 +939,20 @@ void CWeapon::PlayAnimReload()
         {
             if (bNeed2UseCombinedAnim)
             {
+                if (IsScopeAttached())
+                {
+                    xr_sprintf(combo_wombo, "anm_reload_empty_s_%s_%s", sMagaz, sUBarrel);
+                    if (PlaySoundMotion(combo_wombo, TRUE, "sndReloadEmptyS", false))
+                        return;
+                }
                 xr_sprintf(combo_wombo, "anm_reload_empty_%s_%s", sMagaz, sUBarrel);
                 if (PlaySoundMotion(combo_wombo, TRUE, "sndReloadEmpty", false))
+                    return;
+            }
+
+            if (IsScopeAttached())
+            {
+                if (PlaySoundMotion("anm_reload_empty_s", TRUE, "sndReloadEmptyS", false))
                     return;
             }
             if (PlaySoundMotion("anm_reload_empty", TRUE, "sndReloadEmpty", false))
@@ -931,8 +962,20 @@ void CWeapon::PlayAnimReload()
 
     if (bNeed2UseCombinedAnim)
     {
+        if (IsScopeAttached())
+        {
+            xr_sprintf(combo_wombo, "anm_reload_s_%s_%s", sMagaz, sUBarrel);
+            if (PlaySoundMotion(combo_wombo, TRUE, "sndReloadS", false))
+                return;
+        }
         xr_sprintf(combo_wombo, "anm_reload_%s_%s", sMagaz, sUBarrel);
         if (PlaySoundMotion(combo_wombo, TRUE, "sndReload", false))
+            return;
+    }
+
+    if (IsScopeAttached())
+    {
+        if (PlaySoundMotion("anm_reload_s", TRUE, "sndReloadS", false))
             return;
     }
     PlaySoundMotion("anm_reload", TRUE, "sndReload", true);

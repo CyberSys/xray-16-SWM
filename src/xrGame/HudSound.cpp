@@ -82,7 +82,6 @@ void HUD_SOUND_ITEM::PlaySound(
     if (hud_snd.sounds.empty())
         return;
 
-    hud_snd.m_activeSnd = nullptr;
     StopSound(hud_snd);
 
     u32 flags = b_hud_mode ? sm_2D : 0;
@@ -192,8 +191,8 @@ void HUD_SOUND_COLLECTION::StopSound(LPCSTR alias)
     HUD_SOUND_ITEM::StopSound(*snd_item);
 }
 
-// Остановить все звуки, в названии которых содержится указанный alias --#SM+#--
-// [stop all sound which snd_-name contain this alies]
+// Остановить все звуки, в движковом названии которых содержится указанный alias --#SM+#--
+// [stop all sound which sndName contain this alies string]
 void HUD_SOUND_COLLECTION::StopAllSoundsWhichContain(LPCSTR alias)
 {
     xr_vector<HUD_SOUND_ITEM>::iterator it = m_sound_items.begin();
