@@ -1476,6 +1476,7 @@ protected:
 
 public:
     float m_HudFovAddition; //--> Число, добавляемое к дефолтному HUD FOV от бедра (0.0 - 1.0)
+    shared_str m_sVisWorldAnmsOverride; //--> Заменить все доступные мировые анимации модели на эту
 
     static void ReadMaxBulletBones(IKinematics* pModel);
 

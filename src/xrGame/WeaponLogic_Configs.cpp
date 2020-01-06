@@ -197,6 +197,9 @@ void CWeapon::Load(LPCSTR section)
     m_stock_deploy_world      = stock_deploy(section, "_world");
     m_stock_deploy_hud        = stock_deploy(section, "_hud");
 
+    // Параметры мировых анимаций оружия (от 3-его лица)
+    m_sVisWorldAnmsOverride    = READ_IF_EXISTS(pSettings, r_string, section, "visual_animation_overriden", NULL);
+
     // Прочее
     m_bUIShowAmmo              = READ_IF_EXISTS(pSettings, r_bool, section, "show_ammo", true);
     m_bAllowAutoReload         = READ_IF_EXISTS(pSettings, r_bool, section, "auto_reload", true);

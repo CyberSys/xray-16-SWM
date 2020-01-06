@@ -363,12 +363,18 @@ void CWeapon::PlaySoundMotionForNPC(LPCSTR sAnmAlias_base, LPCSTR sSndAlias, LPC
 // Проиграть мировую анимацию оружия
 bool CWeapon::PlayWorldMotion(const shared_str& M, BOOL bMixIn)
 {
+    if (m_sVisWorldAnmsOverride != nullptr && m_sVisWorldAnmsOverride != M)
+    {
+        return PlayWorldMotion(m_sVisWorldAnmsOverride, false);
+    }
+
     IKinematicsAnimated* pWeaponVisual = Visual()->dcast_PKinematicsAnimated();
-    if (pWeaponVisual != NULL && pWeaponVisual->ID_Cycle_Safe(M).valid())
+    if (pWeaponVisual != nullptr && pWeaponVisual->ID_Cycle_Safe(M).valid())
     {
         pWeaponVisual->PlayCycle(M.c_str(), bMixIn);
         return true;
     }
+
     return false;
 }
 
