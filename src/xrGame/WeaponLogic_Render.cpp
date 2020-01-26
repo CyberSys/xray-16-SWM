@@ -1244,6 +1244,20 @@ void CWeapon::UpdateWpnExtraVisuals()
 {
     if ((bool)GetHUDmode() == true)
     { // Обновляем визуалы худа
+        //--> Визуал рук. Корректируем кастомные смещения костей во время перезарядки
+        if (IsReloading() && m_bStopAtEndAnimIsRunning)
+        {
+            float fReloadAnimProgress = //--> Прогресс (в %) текущей анимации перезарядки, с учётом склеенных 
+                float(m_dwMotionCurrTm - m_dwMotionStartTm + (m_fLastAnimStartTime * 1000)) /
+                float(m_dwMotionEndTm - m_dwMotionStartTm + (m_fLastAnimStartTime * 1000));
+            g_player_hud->SetAdditionalTransformCurIntervalFactor(fReloadAnimProgress);
+        }
+        else
+        {
+            g_player_hud->SetAdditionalTransformCurIntervalFactor(0.0f);
+        }
+
+        //--> Визуал оружия в руках
         attachable_hud_item* hud_item = HudItemData();
         if (hud_item != NULL)
         {
@@ -1259,7 +1273,7 @@ void CWeapon::UpdateWpnExtraVisuals()
                     KinematicsABT::additional_bone_transform prikladOffsets(
                         KinematicsABT::SourceID::WPN_PRIKLAD_DEPLOY);
                     prikladOffsets.m_bone_id = hud_item->m_model->LL_BoneID(m_stock_deploy_hud.bone_name);
-                    prikladOffsets.setPosOffset(m_stock_deploy_hud.deploy_pos);
+                    prikladOffsets.setPosOffsetLocal(m_stock_deploy_hud.deploy_pos);
                     prikladOffsets.setRotLocal(m_stock_deploy_hud.deploy_rot);
 
                     //--> Применяем
@@ -1308,7 +1322,7 @@ void CWeapon::UpdateWpnExtraVisuals()
                                 KinematicsABT::additional_bone_transform holoOffsets(
                                     KinematicsABT::SourceID::WPN_HOLOMARK);
                                 holoOffsets.m_bone_id = item->m_model->LL_BoneID(m_sHolographBone);
-                                holoOffsets.setPosOffset(m_vHolographOffset);
+                                holoOffsets.setPosOffsetGlobal(m_vHolographOffset);
 
                                 //--> Применяем
                                 item->m_model->LL_AddTransformToBone(holoOffsets);
@@ -1349,7 +1363,7 @@ void CWeapon::UpdateWpnExtraVisuals()
                 KinematicsABT::additional_bone_transform prikladOffsets(KinematicsABT::SourceID::WPN_PRIKLAD_DEPLOY);
                 prikladOffsets.m_bone_id =
                     renderable.visual->dcast_PKinematics()->LL_BoneID(m_stock_deploy_world.bone_name);
-                prikladOffsets.setPosOffset(m_stock_deploy_world.deploy_pos);
+                prikladOffsets.setPosOffsetLocal(m_stock_deploy_world.deploy_pos);
                 prikladOffsets.setRotLocal(m_stock_deploy_world.deploy_rot);
 
                 //--> Применяем

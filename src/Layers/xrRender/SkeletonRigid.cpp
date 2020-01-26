@@ -169,6 +169,14 @@ void CKinematics::LL_ClearAdditionalTransform(u16 bone_id, KinematicsABT::Source
     }
 }
 
+/* Выставить текущее значение фактора интервала, которое используется для работы Fade In\Out эффекта в --#SM+#--
+   CKinematics::CalculateBonesAdditionalTransforms
+*/
+void CKinematics::LL_SetAdditionalTransformCurIntervalFactor(float fCurIntFactor) //--#SM+#--
+{
+    m_bones_offsets_cur_interval_f = clampr(fCurIntFactor, 0.0f, 1.0f);
+}
+
 void CKinematics::BuildBoneMatrix(
     const CBoneData* bd, CBoneInstance& bi, const Fmatrix* parent, u8 channel_mask /*= (1<<0)*/)
 {
@@ -180,14 +188,107 @@ void CKinematics::BuildBoneMatrix(
 void CKinematics::CalculateBonesAdditionalTransforms(
     const CBoneData* bd, CBoneInstance& bi, const Fmatrix* parent, u8 channel_mask /* = (1<<0)*/)
 {
-    // bi.mTransform.c - содержит смещение относительно первой кости модели\центра сцены (0, 0, 0)
+    //--> Применяем модификаторы смещения
     for (auto& it : m_bones_offsets)
     {
         if (it.m_bone_id == bd->GetSelfID())
         {
+            Fmatrix* mxTransformLocal = &it.m_transform_local;
+            Fmatrix* mxTransformGlobal = &it.m_transform_global;
+
+            // Fade In\Out effect
+            float fPower = 1.0f; //--> Сила эффекта смещения
+
+            if (it.m_fade.IsEnabled())
+            {
+                // С учётом текущего фактора интервала высчитываем текущую силу смещени кости относительно базового
+                const bool& bInverseMode = it.m_fade.IsInverted();
+                const Fvector2& vIntervalFadeIn = it.m_fade.GetIntervalFadeIn();
+                const Fvector2& vIntervalFadeOut = it.m_fade.GetIntervalFadeOut();
+
+                if (m_bones_offsets_cur_interval_f == 0.0f)
+                { //--> Коэфицент интервала (КИ) находится в 0 (значение по умолчанию), оптимизируем код
+                    if (bInverseMode)
+                    { //--> Для инвертированного режима на таких значениях мы полностью игнорируем смещение
+                        continue;
+                    }
+                    else
+                    { //--> Для обычного режима применяем смещение на полную силу
+                        goto skip_fade_effect;
+                    }
+                }
+                else
+                { //--> Коэфицент интервала (КИ) не равен значению по умолчанию, вычисляем силу смещения
+                    // Обычный режим: ослаблаяем смещение в Fade In и восстанавливаем в Fade Out
+
+                    float& fKI = m_bones_offsets_cur_interval_f; 
+
+                    //--> КИ вне Fade In\Out интервалов
+                    fPower = 1.0f;
+
+                    //--> КИ в Fade In интервале
+                    if (fKI >= vIntervalFadeIn.x && fKI < vIntervalFadeIn.y)
+                    {
+                        fPower = 1.0f - (((fKI - vIntervalFadeIn.x) / (vIntervalFadeIn.y - vIntervalFadeIn.x)));
+                    }
+                    
+                    //--> КИ между Fade In End и Fade Out Start
+                    if (fKI >= vIntervalFadeIn.y && fKI < vIntervalFadeOut.x)
+                    {
+                        fPower = 0.0f;
+                    }
+
+                    //--> КИ в Fade Out интервале
+                    if (fKI >= vIntervalFadeOut.x && fKI < vIntervalFadeOut.y)
+                    {
+                        fPower = ((fKI - vIntervalFadeOut.x) / (vIntervalFadeOut.y - vIntervalFadeOut.x));
+                    }
+
+                    // Инвертированный режим: усиливаем смещение в Fade In и ослабляем в Fade Out
+                    if (bInverseMode)
+                    {
+                        fPower = 1.0f - fPower;
+                    }
+                }
+            }
+
+            if (fPower < 1.0f)
+            { //--> Применяем эффект затухания с учётом его текущей силы
+                Fmatrix mxIdentity;
+                mxIdentity.identity();
+
+                mxTransformLocal = &Fmatrix(*mxTransformLocal);
+                mxTransformLocal->i.lerp(mxIdentity.i, mxTransformLocal->i, fPower);
+                mxTransformLocal->j.lerp(mxIdentity.j, mxTransformLocal->j, fPower);
+                mxTransformLocal->k.lerp(mxIdentity.k, mxTransformLocal->k, fPower);
+                mxTransformLocal->c.lerp(mxIdentity.c, mxTransformLocal->c, fPower);
+
+                mxTransformGlobal = &Fmatrix(*mxTransformGlobal);
+                mxTransformGlobal->i.lerp(mxIdentity.i, mxTransformGlobal->i, fPower);
+                mxTransformGlobal->j.lerp(mxIdentity.j, mxTransformGlobal->j, fPower);
+                mxTransformGlobal->k.lerp(mxIdentity.k, mxTransformGlobal->k, fPower);
+                mxTransformGlobal->c.lerp(mxIdentity.c, mxTransformGlobal->c, fPower);
+            }
+
+skip_fade_effect:
+
+            // Rotation
+            //--> Запоминаем позицию кости
             const Fvector vOldPos = bi.mTransform.c;
-            bi.mTransform.mulB_43(it.m_transform); // Rotation
-            bi.mTransform.c.add(vOldPos, it.m_transform.c); // Translation
+            //--> Поворот в локальных координатах
+            bi.mTransform.mulB_43(*mxTransformLocal);
+            //--> Поворот в мировых координатах
+            bi.mTransform.mulB_43(*mxTransformGlobal);
+            //--> Восстанавливаем позицию кости
+            bi.mTransform.translate_over(vOldPos);
+
+            // Position
+            //--> Смещение в локальных координатах
+            Fvector vTemp;
+            bi.mTransform.transform_dir(vTemp, mxTransformLocal->c);
+            bi.mTransform.c.add(vTemp);
+            //--> Смещение в мировых координатах
+            bi.mTransform.c.add(mxTransformGlobal->c);
         }
     }
 }

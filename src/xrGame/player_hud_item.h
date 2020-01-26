@@ -69,14 +69,14 @@ struct attachable_hud_item
     };
     anim_find_result anim_find(const shared_str& sAnmAliasBase, bool bNoChilds, u8& rnd_idx, bool bAssert = true);
 
-    u32 anim_play_both(anim_find_result anim_to_play, bool bMixIn, bool bNoChilds, float fSpeed = 1.0f, float fStartFromTime = 0.0f);
+    u32 anim_play_both(anim_find_result& anim_to_play, bool bMixIn, bool bNoChilds, float fSpeed = 1.0f, float fStartFromTime = 0.0f);
 
-    u32 anim_play_hands(anim_find_result anim_to_play, bool bMixIn, float fSpeed = 1.0f, float fStartFromTime = 0.0f);
+    u32 anim_play_hands(anim_find_result& anim_to_play, bool bMixIn, float fSpeed = 1.0f, float fStartFromTime = 0.0f);
 
     void anim_play_item(
         shared_str& motion_name, bool bMixIn, bool bNoChilds, float fSpeed = 1.0f, float fStartFromTime = 0.0f, float _fRootStartTime = -1.f);
     void anim_play_item(
-        anim_find_result anim_to_play, bool bMixIn, bool bNoChilds, float fSpeed = 1.0f, float fStartFromTime = 0.0f, float _fRootStartTime = -1.f);
+        anim_find_result& anim_to_play, bool bMixIn, bool bNoChilds, float fSpeed = 1.0f, float fStartFromTime = 0.0f, float _fRootStartTime = -1.f);
 
     void anim_play_cam_eff(LPCSTR sAnmPath, float fSpeed = 1.0f);
 
@@ -99,7 +99,7 @@ struct attachable_hud_item
 
     void calc_child_transform(const Fmatrix& offset, u16 bone_id, Fmatrix& result);
 
-    void ReadBonesOffsetsToHands();
+    void ReadBonesOffsetsToHands(bool bNoHands = false);
 
     inline bool IsChildHudItem() { return m_parent_aitem != NULL; }
     /*--#SM+# End--*/

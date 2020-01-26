@@ -107,8 +107,10 @@ void attachable_visual::SetVisual(shared_str vis_name)
                 // Сдвиги костей
                 if (nullptr != strstr(line_name, "visual_bone_offset"))
                 {
+                    string16 str_mode;
+                    _GetItem(line_name, 1, str_mode, '|'); //--> Считываем локальность \ глобальность изменений
                     string128 str_bone;
-                    _GetItem(line_name, 1, str_bone, '|'); //--> Считываем имя кости
+                    _GetItem(line_name, 2, str_bone, '|'); //--> Считываем имя кости
                     string128 str_pos;
                     _GetItem(line_value, 0, str_pos, '|'); //--> Считываем позицию
                     string128 str_rot;
@@ -123,8 +125,11 @@ void attachable_visual::SetVisual(shared_str vis_name)
                     sscanf(str_rot, "%f,%f,%f", &vRot.x, &vRot.y, &vRot.z);
                     vRot.mul(PI / 180.f); //--> Преобразуем углы в радианы
 
-                    offsets.setRotLocal(vRot);
-                    offsets.setPosOffset(vPos);
+                    bool bIsPosLocal = (str_mode[0] == 'L');
+                    bIsPosLocal ? offsets.setPosOffsetLocal(vPos) : offsets.setPosOffsetGlobal(vPos);
+                    
+                    bool bIsRotLocal = (str_mode[1] == 'L');
+                    bIsRotLocal ? offsets.setRotLocal(vRot) : offsets.setRotGlobal(vRot);
 
                     m_model->LL_AddTransformToBone(offsets);
                 }

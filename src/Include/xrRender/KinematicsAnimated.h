@@ -64,6 +64,7 @@ public:
 
     virtual void LL_AddTransformToBone(KinematicsABT::additional_bone_transform& offset) = 0; //--#SM+#--
     virtual void LL_ClearAdditionalTransform(u16 bone_id, KinematicsABT::SourceID source_id) = 0; //--#SM+#--
+    virtual void LL_SetAdditionalTransformCurIntervalFactor(float fCurIntFactor) = 0; //--#SM+#--
 
     virtual IBlendDestroyCallback* GetBlendDestroyCallback() = 0;
     virtual void SetBlendDestroyCallback(IBlendDestroyCallback* cb) = 0;

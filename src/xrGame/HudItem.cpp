@@ -290,6 +290,8 @@ void CHudItem::on_a_hud_attach()
 // [Called before every hud motion, return params (speed, start time, etc...) for it]
 void CHudItem::OnBeforeMotionPlayed(const shared_str& sAnmAlias, motion_params& params) //--#SM+#--
 {
+    // <!> Функция может переопределяться в классах-наследниках, её вызов не гарантируется
+
     // Для MP анимация прятанья и доставания предмета в два раза быстрее
     if (!IsGameTypeSingle() && (GetState() == eHiding || GetState() == eShowing))
     {

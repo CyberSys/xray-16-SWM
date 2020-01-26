@@ -55,17 +55,32 @@ public:
 
     void OnMovementChanged(ACTOR_DEFS::EMoveCommand cmd);
 
-    // Получаем m_model и m_model_twin --#SM+#--
-    inline IKinematicsAnimated* get_model() { return m_model; }
-    inline IKinematicsAnimated* get_model_twin() { return m_model_twin; }
+    // Получить m_model --#SM+#--
+    IC IKinematicsAnimated* get_model() { return m_model; }
+    // Получить m_model_twin --#SM+#--
+    IC IKinematicsAnimated* get_model_twin() { return m_model_twin; }
 
     // Получаем attachable_hud_item из нужного слота --#SM+#--
-    inline attachable_hud_item* get_attached_item(int IDX)
+    IC attachable_hud_item* get_attached_item(int IDX)
     {
         if (IDX < 2)
             return m_attached_items[IDX];
 
         return NULL;
+    }
+
+    // Установить коэфицент интервала для моделей рук (используется в Fade In\Out эффекте при смещениях костей рук через LL_AddTransformToBone) --#SM+#--
+    IC void SetAdditionalTransformCurIntervalFactor(float fKI)
+    {
+        if (m_model != nullptr)
+        {
+            m_model->LL_SetAdditionalTransformCurIntervalFactor(fKI);
+        }
+
+        if (m_model_twin != nullptr)
+        {
+            m_model_twin->LL_SetAdditionalTransformCurIntervalFactor(fKI);
+        }
     }
 
     bool inertion_allowed();

@@ -991,6 +991,14 @@ void CKinematicsAnimated::LL_ClearAdditionalTransform(u16 bone_id, KinematicsABT
     inherited::LL_ClearAdditionalTransform(bone_id, source_id);
 }
 
+/* Выставить текущее значение фактора интервала, которое используется для работы Fade In\Out эффекта в --#SM+#--
+   CKinematics::CalculateBonesAdditionalTransforms
+*/
+void CKinematicsAnimated::LL_SetAdditionalTransformCurIntervalFactor(float fCurIntFactor) //--#SM+#--
+{
+    inherited::LL_SetAdditionalTransformCurIntervalFactor(fCurIntFactor);
+}
+
 void CKinematicsAnimated::BuildBoneMatrix(
     const CBoneData* bd, CBoneInstance& bi, const Fmatrix* parent, u8 channel_mask /*= (1<<0)*/)
 {

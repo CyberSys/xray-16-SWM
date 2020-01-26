@@ -107,6 +107,7 @@ CKinematics::CKinematics()
 #endif
 
     m_is_original_lod = false;
+    m_bones_offsets_cur_interval_f = 0.0f; //--#SM+#--
 }
 
 CKinematics::~CKinematics()

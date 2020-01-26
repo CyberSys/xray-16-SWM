@@ -128,8 +128,11 @@ void attachable_hud_item::UpdateVisual(shared_str new_visual)
                 // Сдвиги костей
                 if (nullptr != strstr(line_name, "item_bone_offset"))
                 {
+                    string16 str_mode;
+                    _GetItem(line_name, 1, str_mode, '|'); //--> Считываем локальность \ глобальность изменений
                     string128 str_bone;
-                    _GetItem(line_name, 1, str_bone, '|'); //--> Считываем имя кости
+                    _GetItem(line_name, 2, str_bone, '|'); //--> Считываем имя кости
+
                     string128 str_pos;
                     _GetItem(line_value, 0, str_pos, '|'); //--> Считываем позицию
                     string128 str_rot;
@@ -139,14 +142,21 @@ void attachable_hud_item::UpdateVisual(shared_str new_visual)
                     KinematicsABT::additional_bone_transform offsets(KinematicsABT::SourceID::HUD_ITEM_OFFSETS);
                     Fvector vPos, vRot;
 
+                    //--> ID Кости
                     offsets.m_bone_id = m_model->LL_BoneID(str_bone);
+
+                    //--> Позиция и поворот
                     sscanf(str_pos, "%f,%f,%f", &vPos.x, &vPos.y, &vPos.z);
                     sscanf(str_rot, "%f,%f,%f", &vRot.x, &vRot.y, &vRot.z);
                     vRot.mul(PI / 180.f); //--> Преобразуем углы в радианы
 
-                    offsets.setRotLocal(vRot);
-                    offsets.setPosOffset(vPos);
+                    bool bIsPosLocal = (str_mode[0] == 'L');
+                    bIsPosLocal ? offsets.setPosOffsetLocal(vPos) : offsets.setPosOffsetGlobal(vPos);
+                    
+                    bool bIsRotLocal = (str_mode[1] == 'L');
+                    bIsRotLocal ? offsets.setRotLocal(vRot) : offsets.setRotGlobal(vRot);
 
+                    //--> Применяем смещение
                     m_model->LL_AddTransformToBone(offsets);
                 }
 
@@ -349,7 +359,7 @@ attachable_hud_item::anim_find_result attachable_hud_item::anim_find(
 }
 
 // Проиграть анимацию одновременно у худовой модели предмета и худовой модели рук --#SM+#--
-u32 attachable_hud_item::anim_play_both(anim_find_result anim_to_play, bool bMixIn, bool bNoChilds, float fSpeed, float fStartFromTime)
+u32 attachable_hud_item::anim_play_both(anim_find_result& anim_to_play, bool bMixIn, bool bNoChilds, float fSpeed, float fStartFromTime)
 {
     // Анимация рук
     u32 ret = anim_play_hands(anim_to_play, bMixIn, fSpeed, fStartFromTime);
@@ -361,7 +371,7 @@ u32 attachable_hud_item::anim_play_both(anim_find_result anim_to_play, bool bMix
 }
 
 // Проиграть анимацию у худовой модели рук --#SM+#--
-u32 attachable_hud_item::anim_play_hands(anim_find_result anim_to_play, bool bMixIn, float fSpeed, float fStartFromTime)
+u32 attachable_hud_item::anim_play_hands(anim_find_result& anim_to_play, bool bMixIn, float fSpeed, float fStartFromTime)
 {
     // Запускаем анимацию у рук
     u32 ret = g_player_hud->anim_play(m_attach_place_idx, anim_to_play.handsMotionDescr->mid, bMixIn, fSpeed, fStartFromTime);
@@ -394,7 +404,7 @@ void attachable_hud_item::anim_play_item(
 
 // Проиграть анимацию у худовой модели предмета (2) --#SM+#--
 void attachable_hud_item::anim_play_item(
-    anim_find_result anim_to_play, bool bMixIn, bool bNoChilds, float fSpeed, float fStartFromTime, float _fRootStartTime)
+    anim_find_result& anim_to_play, bool bMixIn, bool bNoChilds, float fSpeed, float fStartFromTime, float _fRootStartTime)
 {
     // Если анимация предмета не указана, то отыгрываем дефолтную ("idle")
     if (anim_to_play.item_motion_name == NULL)
@@ -627,53 +637,93 @@ void attachable_hud_item::calc_child_transform(const Fmatrix& offset, u16 bone_i
 }
 
 // Считываем смещения для костей из худовых секций потомков, и регистрируем эту информацию в текущей модели рук --#SM+#--
-void attachable_hud_item::ReadBonesOffsetsToHands()
+void attachable_hud_item::ReadBonesOffsetsToHands(bool bNoHands)
 {
-    xr_vector<attachable_hud_item*>::iterator it = m_child_items.begin();
-    while (it != m_child_items.end())
-    {
-        // На случаи если к потомку тоже что-то присоединено
-        (*it)->ReadBonesOffsetsToHands();
-
-        // Ищем смещения в худовой секции
-        u32 lines_count = pSettings->line_count((*it)->m_sect_name);
+    // Лямбда-функция для считывания смещений из переданной секции
+    auto fnReadHandsOffsets = [&](shared_str& section) {
+        u32 lines_count = pSettings->line_count(section);
         for (u32 i = 0; i < lines_count; ++i)
         {
-            LPCSTR line_name  = NULL;
+            LPCSTR line_name = NULL;
             LPCSTR line_value = NULL;
-            pSettings->r_line((*it)->m_sect_name, i, &line_name, &line_value);
+            pSettings->r_line(section, i, &line_name, &line_value);
 
             if (line_name && xr_strlen(line_name))
             {
                 if (NULL != strstr(line_name, "hand_bone_offset"))
                 {
+                    string16 str_mode;
+                    _GetItem(line_name, 1, str_mode, '|'); //--> Считываем локальность \ глобальность изменений
                     string128 str_bone;
-                    _GetItem(line_name, 1, str_bone, '|'); //--> Считываем имя кости
+                    _GetItem(line_name, 2, str_bone, '|'); //--> Считываем имя кости
+
                     string128 str_pos;
                     _GetItem(line_value, 0, str_pos, '|'); //--> Считываем позицию
                     string128 str_rot;
                     _GetItem(line_value, 1, str_rot, '|'); //--> Считываем поворот
 
+                    bool bFadeExist = false;
+                    string128 str_fade;
+                    if (_GetItemCount(line_value, '|') > 2)
+                    {
+                        bFadeExist = true;
+                        _GetItem(line_value, 2, str_fade, '|'); //--> Считываем параметры Fade In\Out эффекта
+                    }
+
                     // Передаём данные в модель
                     KinematicsABT::additional_bone_transform offsets(KinematicsABT::SourceID::HUD_HANDS_OFFSETS);
                     Fvector vPos, vRot;
 
+                    // ID Кости
                     offsets.m_bone_id = m_parent->get_model()->dcast_PKinematics()->LL_BoneID(str_bone);
+
+                    //--> Позиция и поворот
                     sscanf(str_pos, "%f,%f,%f", &vPos.x, &vPos.y, &vPos.z);
                     sscanf(str_rot, "%f,%f,%f", &vRot.x, &vRot.y, &vRot.z);
                     vRot.mul(PI / 180.f); //--> Преобразуем углы в радианы
 
-                    offsets.setRotLocal(vRot);
-                    offsets.setPosOffset(vPos);
+                    bool bIsPosLocal = (str_mode[0] == 'L');
+                    bIsPosLocal ? offsets.setPosOffsetLocal(vPos) : offsets.setPosOffsetGlobal(vPos);
 
+                    bool bIsRotLocal = (str_mode[1] == 'L');
+                    bIsRotLocal ? offsets.setRotLocal(vRot) : offsets.setRotGlobal(vRot);
+
+                    //--> Fade In\Out эффект
+                    if (bFadeExist)
+                    {
+                        string16 sFadeMode = "00";
+                        Fvector2 vFadeIn, vFadeOut;
+                        sscanf(str_fade, "%2s,%f,%f,%f,%f", sFadeMode, &vFadeIn.x, &vFadeIn.y, &vFadeOut.x, &vFadeOut.y);
+
+                        offsets.m_fade.SetupEffect(vFadeIn, vFadeOut, sFadeMode[1] == 'I');
+                    }
+
+                    //--> Применяем смещение
                     m_parent->get_model()->LL_AddTransformToBone(offsets);
                     if (m_parent->get_model_twin() != NULL)
                         m_parent->get_model_twin()->LL_AddTransformToBone(offsets);
                 }
             }
         }
+    };
+
+    // Считываем смещения из присоединённых потомков
+    xr_vector<attachable_hud_item*>::iterator it = m_child_items.begin();
+    while (it != m_child_items.end())
+    {
+        // На случаи если к потомку тоже что-то присоединено
+        (*it)->ReadBonesOffsetsToHands(true); //--> Но уже игнорируем смещение из секции рук
+
+        // Ищем смещения в худовой секции потомка
+        fnReadHandsOffsets((*it)->m_sect_name);
 
         // next
         ++it;
+    }
+
+    // Ищем смещения в худовой секции текущего предмета
+    if (bNoHands == false)
+    {
+        fnReadHandsOffsets(this->m_sect_name);
     }
 }

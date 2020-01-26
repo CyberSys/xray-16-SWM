@@ -697,7 +697,7 @@ void CWeapon::UpdateBipodsHUD(float fDeployFactor, float fHBody, float fPBody, f
             shared_str str_bone = BONE_MAIN;
             offsets.m_bone_id = bipods_item->m_model->LL_BoneID(str_bone);
             offsets.setRotLocal(fX_joint, fY_joint, fZ_joint);
-            offsets.setPosOffset(Fvector().mul(m_bipods.vBoneMDeployPosOffs, fDeployFactor));
+            offsets.setPosOffsetGlobal(Fvector().mul(m_bipods.vBoneMDeployPosOffs, fDeployFactor));
 
             bipods_item->m_model->LL_ClearAdditionalTransform(
                 offsets.m_bone_id, KinematicsABT::SourceID::WPN_BIPODS_DEPLOY);
