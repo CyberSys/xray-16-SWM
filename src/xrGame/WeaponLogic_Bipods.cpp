@@ -138,6 +138,7 @@ void CWeapon::LoadBipodsParams()
     m_bipods.bInvertBodyPitch = READ_ADDON_DATA(r_bool, "bipods_invert_pitch_body", pAddonBipods->GetName(), pAddonBipods->GetAddonName(), false);
     m_bipods.bInvertLegsPitch = READ_ADDON_DATA(r_bool, "bipods_invert_pitch_legs", pAddonBipods->GetName(), pAddonBipods->GetAddonName(), false);
     m_bipods.bDeployWhenBayonetInst = READ_ADDON_DATA(r_bool, "bipods_bayonet_deploy", pAddonBipods->GetName(), pAddonBipods->GetAddonName(), false);
+    m_bipods.bAlwaysDeployed = READ_ADDON_DATA(r_bool, "bipods_always_deployed", pAddonBipods->GetName(), pAddonBipods->GetAddonName(), false);
     // clang-format on
 
     // Создаём физическую оболочку
@@ -612,10 +613,25 @@ void CWeapon::UpdateBipods()
         return;
     }
 
-    // Разложить сошки при установленном штык-ноже
-    if (m_bipods.bDeployWhenBayonetInst && IsBipodsDeployed() == false)
+    // Разложить сошки от бедра ...
+    if (IsBipodsDeployed() == false)
     {
-        UpdateBipodsHUD((IsBayonetAttached() ? 1.0f : 0.0f), 0.0f, 0.0f, 0.0f, false);
+        do
+        {
+            // ... если так указано в конфиге
+            if (m_bipods.bAlwaysDeployed)
+            {
+                UpdateBipodsHUD(1.0f, 0.0f, 0.0f, 0.0f, false);
+                break;
+            }
+
+            // ... при установленном штык-ноже
+            if (m_bipods.bDeployWhenBayonetInst)
+            {
+                UpdateBipodsHUD((IsBayonetAttached() ? 1.0f : 0.0f), 0.0f, 0.0f, 0.0f, false);
+                break;
+            }
+        } while (0);
     }
 
     // Если грузим сохранение с разложеными сошками, то восстанавливаем их
@@ -962,7 +978,12 @@ bool CWeapon::UpdateCameraFromBipods(IGameObject* pCameraOwner, Fvector noise_da
         // TODO: При необходимости
 
         //--> В худе
-        UpdateBipodsHUD((m_bipods.bDeployWhenBayonetInst && IsBayonetAttached() ? 1.0f : m_bipods.m_fTranslationFactor),
+        float fDeployFactor = m_bipods.m_fTranslationFactor;
+        if (m_bipods.bAlwaysDeployed || (m_bipods.bDeployWhenBayonetInst && IsBayonetAttached()))
+        {
+            fDeployFactor = 1.0f;
+        }
+        UpdateBipodsHUD(fDeployFactor,
             fHBody * m_bipods.m_fTranslationFactor, fPBody * m_bipods.m_fTranslationFactor,
             fPLegs * m_bipods.m_fTranslationFactor, true);
 

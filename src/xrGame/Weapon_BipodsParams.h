@@ -52,6 +52,7 @@ public:
     bool bInvertBodyPitch; // Инвертировать X-поворот основания при повороте камеры
     bool bInvertLegsPitch; // Инвертировать X-поворот ножек при повороте камеры
     bool bDeployWhenBayonetInst; // Разложить сошки если установлен штык-нож
+    bool bAlwaysDeployed; // Сошки всегда разложены
     float fInstRangeMax; // Макс. расстояние установки сошек от центра камеры
     float fInstAngleMax; // Максимальный наклон поверхности в градусах (0 - ровная, 90 - стена, 180 - потолок)
     float fCamDistMax; // Макс. дистанция от точки установки до камеры
