@@ -723,7 +723,7 @@ float CWeapon::GetInertionPowerFactor()
     return 1.0f;
 }
 
-// Требуется-ли отрисовывать худ
+// Требуется-ли отрисовывать HUD-модели рук и оружия (не исключает отрисовку других HUD-объектов вроде гильз) +SecondVP+
 bool CWeapon::need_renderable() { return !Device.m_SecondViewport.IsSVPFrame() && !(IsZoomed() && ZoomTexture() && !IsRotatingToZoom()); }
 
 // Требуется-ли отрисовывать UI-элементы от оружия (эффекты прицела)

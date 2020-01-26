@@ -219,7 +219,7 @@ void CCustomShell::renderable_Render()
 // Рендер худовой модели
 void CCustomShell::OnRenderHUD(IGameObject* pCurViewEntity)
 {
-    if (!m_bHUD_mode)
+    if (!m_bHUD_mode || Device.m_SecondViewport.IsSVPFrame()) // +SecondVP+
         return;
 
     // Отрисовываем модель с динамическим HUD FOV
