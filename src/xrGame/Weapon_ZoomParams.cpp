@@ -79,6 +79,10 @@ void SZoomParams::Initialize(LPCSTR section, LPCSTR prefix, bool bOverrideMode)
     if (bOverrideMode == false)
         m_fRTZoomFactor = -1.f;
 
+    //--> Отключить анимацию стрельбы при прицеливании
+    strconcat(sizeof(val_name), val_name, "scope_zoom_no_shot_anim", _prefix);
+    m_bDisableShotAnimAtZoom = READ_IF_EXISTS(pSettings, r_bool, section, val_name, (bOverrideMode ? m_bDisableShotAnimAtZoom : false));
+
     // Текстура прицельной сетки
     strconcat(sizeof(val_name), val_name, "scope_texture", _prefix);
     m_sUseScopeTexture = READ_IF_EXISTS(pSettings, r_string, section, val_name, (bOverrideMode ? m_sUseScopeTexture : NULL));

@@ -37,9 +37,12 @@ public:
     float m_fScopeInertionFactor; //--> Чувствительность мыши во время прицеливания
     float m_fShootingEffFactor;   //--> Сила эффекта тряски при стрельбе
 
+    bool m_bDisableShotAnimAtZoom; //--> Отключить анимацию стрельбы при прицеливании
+
     bool                  m_bZoomDofEnabled;     // DOF-эффект во время зума
     Fvector               m_ZoomDof;             // Параметры DOF-эффекта при прицеливании
     Fvector4              m_ReloadDof;           // Параметры DOF-эффекта при перезарядке
+    
     shared_str            m_sUseScopeTexture;    // 2D-текстура прицельной сетки
     shared_str            m_sUseZoomPostprocess; // Пост-эффект прицела
     shared_str            m_sUseBinocularVision; // Эффект выделения в прицеле живых существ

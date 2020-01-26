@@ -1641,6 +1641,20 @@ void CWeapon::PlayAnimShoot()
 
     if (IsZoomed())
     {
+        if (GetZoomParams().m_bDisableShotAnimAtZoom == true)
+        { //--> Отключаем анимацию стрельбы при прицеливании (для оптики)
+            do
+            {
+                if (IsBipodsDeployed() && IsBipodsZoomed() == false)
+                { //--> В режиме сошек прицеливание работает по другому
+                    break;
+                }
+
+                PlayAnimIdle();
+                return;
+            } while (0);
+        }
+
         if (def_IsGL_Mode)
         {
             if (bLastBullet)
