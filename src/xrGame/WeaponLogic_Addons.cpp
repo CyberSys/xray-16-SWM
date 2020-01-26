@@ -346,11 +346,20 @@ void CWeapon::OnAddonUnistall(EAddons iSlot, const shared_str& sAddonSetSect)
             SAddonData* pAddonNext = GetAddonBySlot((EAddons)iSlotNext);
             if (pAddonNext->bActive)
             {
-                shared_str sRequiredAddonSetSect =
-                    READ_IF_EXISTS(pSettings, r_string, pAddonNext->GetName(), WEAPON_ADDON_REQ_L, nullptr);
-                if (sRequiredAddonSetSect != nullptr && sRequiredAddonSetSect.equal(sAddonSetSect))
+                LPCSTR sRequiredStr = READ_IF_EXISTS(pSettings, r_string, pAddonNext->GetName(), WEAPON_ADDON_REQ_L, nullptr);
+                if (sRequiredStr != nullptr)
                 {
-                    Detach(pAddonNext->GetAddonName().c_str(), true, false);
+                    string128 _sect_name;
+                    int count = _GetItemCount(sRequiredStr);
+                    for (int i = 0; i < count; ++i)
+                    {
+                        LPCSTR sReqAddonSetSect = _GetItem(sRequiredStr, i, _sect_name);
+                        if (sAddonSetSect.equal(sReqAddonSetSect))
+                        {
+                            Detach(pAddonNext->GetAddonName().c_str(), true, false);
+                            continue;
+                        }
+                    }
                 }
             }
         }
@@ -902,6 +911,7 @@ void CWeapon::_UpdateHUDAddonVisibility(SAddonData* m_pAddon, bool bForceReset)
         for (u32 j = 0; j < show_bones_vec.size(); j++)
             if (bIsAddonActive || std::find(show_bones_attached.begin(), show_bones_attached.end(), show_bones_vec[j]) == show_bones_attached.end())
                 HudItemData()->set_bone_visible(show_bones_vec[j], bIsAddonActive, TRUE);
+
         for (u32 j = 0; j < hud_vis_vec.size(); j++)
             if (bIsAddonActive || std::find(hud_vis_attached.begin(), hud_vis_attached.end(), hud_vis_vec[j]) == hud_vis_attached.end())
                 HudItemData()->UpdateChildrenList(hud_vis_vec[j], bIsAddonActive);
@@ -1186,27 +1196,39 @@ bool CWeapon::CanAttach(PIItem pIItem)
         }
 
         // Проверяем на наличие соседних аддонов, требуемых для установки этого
-        shared_str sRequiredAddonSetSect = READ_IF_EXISTS(pSettings, r_string, sAddonSetSect, WEAPON_ADDON_REQ_L, nullptr);
-        if (sRequiredAddonSetSect != nullptr)
-        {
-            bool bRequiredAddonExist = false;
-
-            for (int iSlotNext = 0; iSlotNext < EAddons::eAddonsSize; iSlotNext++)
+        {    
+            LPCSTR sRequiredStr = READ_IF_EXISTS(pSettings, r_string, sAddonSetSect, WEAPON_ADDON_REQ_L, nullptr);
+            if (sRequiredStr != nullptr)
             {
-                if (iSlotNext != iSlot)
+                bool bRequiredAddonExist = false;
+
+                string128 _sect_name;
+                int count = _GetItemCount(sRequiredStr);
+                for (int i = 0; i < count; ++i)
                 {
-                    SAddonData* pAddonNext = GetAddonBySlot((EAddons)iSlotNext);
-                    if (pAddonNext->bActive && pAddonNext->GetName().equal(sRequiredAddonSetSect))
+                    LPCSTR sReqAddonSetSect = _GetItem(sRequiredStr, i, _sect_name);
+                    for (int iSlotNext = 0; iSlotNext < EAddons::eAddonsSize; iSlotNext++)
                     {
-                        bRequiredAddonExist = true;
+                        if (iSlotNext != iSlot)
+                        {
+                            SAddonData* pAddonNext = GetAddonBySlot((EAddons)iSlotNext);
+                            if (pAddonNext->bActive && pAddonNext->GetName().equal(sReqAddonSetSect))
+                            {
+                                bRequiredAddonExist = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (bRequiredAddonExist == true)
+                    {
                         break;
                     }
                 }
-            }
 
-            if (bRequiredAddonExist == false)
-            {
-                return false;
+                if (bRequiredAddonExist == false)
+                {
+                    return false;
+                }
             }
         }
 
