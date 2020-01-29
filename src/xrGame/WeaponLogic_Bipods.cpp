@@ -256,7 +256,7 @@ void CWeapon::BipodsOnLoad(IReader& input_packet)
     int iBipodsState = bipods_data::eBS_SwitchedOFF;
     load_data(iBipodsState, input_packet);
 
-    if (iBipodsState == bipods_data::eBS_SwitchedON)
+    if (iBipodsState == bipods_data::eBS_SwitchedON) //-V547
     {
         load_data(vBipodsSavedIPos, input_packet);
         load_data(vBipodsSavedIDir, input_packet);
@@ -726,13 +726,20 @@ void CWeapon::UpdateBipodsHUD(float fDeployFactor, float fHBody, float fPBody, f
             float fZ_legs = (0.f + (m_bipods.vBoneLDeployRotOffs.z * fToRad)) * fDeployFactor;
 
             //--> Добавляем инерцию чтобы смягчить их движения
-            if (bUseInertion && m_bipods.m_iBipodState == bipods_data::eBS_SwitchedON)
+            if (bUseInertion)
             {
-                m_bipods.m_vPrevLegsXYZ.inertion(
-                    {fX_legs, fY_legs, fZ_legs}, clampr(1.0f - Device.fTimeDelta * BIPODS_LEGS_INERTION, 0.0f, 0.99f));
-                fX_legs = m_bipods.m_vPrevLegsXYZ.x;
-                fY_legs = m_bipods.m_vPrevLegsXYZ.y;
-                fZ_legs = m_bipods.m_vPrevLegsXYZ.z;
+                if (m_bipods.m_iBipodState == bipods_data::eBS_SwitchedON)
+                {
+                    m_bipods.m_vPrevLegsXYZ.inertion({fX_legs, fY_legs, fZ_legs},
+                        clampr(1.0f - Device.fTimeDelta * BIPODS_LEGS_INERTION, 0.0f, 0.99f));
+                    fX_legs = m_bipods.m_vPrevLegsXYZ.x;
+                    fY_legs = m_bipods.m_vPrevLegsXYZ.y;
+                    fZ_legs = m_bipods.m_vPrevLegsXYZ.z;
+                }
+                else
+                {
+                    m_bipods.m_vPrevLegsXYZ.set(fX_legs, fY_legs, fZ_legs);
+                }
             }
 
             //--> Левая ножка
