@@ -194,6 +194,10 @@ CWeapon::CWeapon() : CShellLauncher(this)
     m_iMinRequiredAmmoInMag = 0;
 
     bBipodsUseSavedData = false;
+
+    m_bAllowABTFadeEffForKick = false;
+    m_bAllowABTFadeEffForKickWK = false;
+    m_bAllowABTFadeEffForKickAtRun = false;
 }
 
 // Деструктор

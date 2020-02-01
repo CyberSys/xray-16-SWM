@@ -1244,13 +1244,53 @@ void CWeapon::UpdateWpnExtraVisuals()
 {
     if ((bool)GetHUDmode() == true)
     { // Обновляем визуалы худа
-        //--> Визуал рук. Корректируем кастомные смещения костей во время перезарядки
-        if (IsReloading() && m_bStopAtEndAnimIsRunning)
+        //--> Визуал рук. Корректируем кастомные смещения костей во время перезарядки (Fade In\Out эффект)
+        float fFadeFactor4NoStopAtEnd = 0.0f; //--> Значение фактора Fade-эффекта для зацикленных анимаций  
+        bool bIsFadeAllowed = IsReloading(); //--> Всегда разрешено во время перезарядки
+        if (bIsFadeAllowed == false)
+        { 
+            do
+            { // Опционально разрешено ...
+                if (GetState() == eKick)
+                { //--> ... во время удара ...
+                    if (m_bAllowABTFadeEffForKick && IsBayonetAttached() == false && IsKickAtRunActive() == false)
+                    { //--> ... прикладом стоя
+                        bIsFadeAllowed = true;
+                        break;
+                    }
+                    if (m_bAllowABTFadeEffForKickWK && IsBayonetAttached() == true && IsKickAtRunActive() == false)
+                    { //--> ... ножом стоя
+                        bIsFadeAllowed = true;
+                        break;
+                    }
+                    if (m_bAllowABTFadeEffForKickAtRun && IsKickAtRunActive() == true)
+                    { //--> ... на бегу (анимация зацикелена => нет плавности)
+                        fFadeFactor4NoStopAtEnd = 0.5f; //--> Считаем что мы всегда на середине анимации
+                        bIsFadeAllowed = true;
+                        break;
+                    }
+                }
+            } while (0);
+        }
+
+        if (bIsFadeAllowed)
         {
-            float fReloadAnimProgress = //--> Прогресс (в %) текущей анимации перезарядки, с учётом склеенных 
-                float(m_dwMotionCurrTm - m_dwMotionStartTm + (m_fLastAnimStartTime * 1000)) /
-                float(m_dwMotionEndTm - m_dwMotionStartTm + (m_fLastAnimStartTime * 1000));
-            g_player_hud->SetAdditionalTransformCurIntervalFactor(fReloadAnimProgress);
+            if (m_bStopAtEndAnimIsRunning)
+            { //--> Анимация конечна, можем сделать плавность
+                float fAnimProgress = //--> Прогресс (в %) текущей анимации, с учётом склеек (смена магазина)
+                    float(m_dwMotionCurrTm - m_dwMotionStartTm + (m_fLastAnimStartTime * 1000)) /
+                    float(m_dwMotionEndTm - m_dwMotionStartTm + (m_fLastAnimStartTime * 1000));
+                g_player_hud->SetAdditionalTransformCurIntervalFactor(fAnimProgress);
+            }
+            else
+            { //--> Анимация зациклена, подставляем произвольный фактор
+                /* TODO: 
+                    1) Костыль - в идеале нужно использовать комплексный метод для расчёта времени анимации на основе других факторов
+                    2) Баг - похоже анимация перезарядки на последнем кадре уже считается не зацикленной, при этом IsReloading() всё ещё возвращает true.
+                       По этой причине fFadeFactor4NoStopAtEnd рекомендуется указывать равным 0.0f по умолчанию, иначе будет мерцание
+                */
+                g_player_hud->SetAdditionalTransformCurIntervalFactor(fFadeFactor4NoStopAtEnd);
+            }
         }
         else
         {

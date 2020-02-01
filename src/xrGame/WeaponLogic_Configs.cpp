@@ -212,6 +212,11 @@ void CWeapon::Load(LPCSTR section)
     m_bInvShowWeaponStats      = READ_IF_EXISTS(pSettings, r_bool, section, "ui_show_wpn_stats_in_inv", true);
     m_bInvShowWeaponAmmo       = READ_IF_EXISTS(pSettings, r_bool, section, "ui_show_wpn_ammo_in_inv", true);
 
+    // Параметры, считывающиеся из HUD-секции
+    m_bAllowABTFadeEffForKick       = READ_IF_EXISTS(pSettings, r_bool, hud_sect, "hand_bone_offsets_allow_fade_for_kick", false);
+    m_bAllowABTFadeEffForKickWK     = READ_IF_EXISTS(pSettings, r_bool, hud_sect, "hand_bone_offsets_allow_fade_for_kick_w_knife", false);
+    m_bAllowABTFadeEffForKickAtRun  = READ_IF_EXISTS(pSettings, r_bool, hud_sect, "hand_bone_offsets_allow_fade_for_kick_at_run", false);
+
     // Added by Axel, to enable optional condition use on any item
     m_flags.set(FUsingCondition, READ_IF_EXISTS(pSettings, r_bool, section, "use_condition", true));
 }

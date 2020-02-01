@@ -1049,6 +1049,10 @@ protected:
     bool m_bKickAtRunActivated; //--> Активен режим штыковой атаки на бегу
 
 public:
+    bool m_bAllowABTFadeEffForKick;         //--> Для Additional Bode Tranform разрешить Fade In\Out эффект при ударе прикладом (без ножа)
+    bool m_bAllowABTFadeEffForKickWK;       //--> Для Additional Bode Tranform разрешить Fade In\Out эффект при ударе прикладом (с ножом)
+    bool m_bAllowABTFadeEffForKickAtRun;    //--> Для Additional Bode Tranform разрешить Fade In\Out эффект при ударе прикладом (в штыковой атаке)
+
     virtual void LoadBayonetParams();
 
     IC bool IsBayonetAttached() { return m_BayonetSlot != eNotExist; } //--> Присутствие штык-ножа
