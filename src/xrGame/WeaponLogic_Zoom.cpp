@@ -314,11 +314,14 @@ void CWeapon::SwitchZoomType(EZoomTypes iType)
     if (bZoomed)
         OnZoomOut(true);
 
-    // Меняем тип зума
-    m_iPrevZoomType = m_iCurZoomType;
-    m_iCurZoomType  = iType;
+    // Пробуем менять тип зума
+    if (m_iCurZoomType != iType)
+    {
+        m_iPrevZoomType = m_iCurZoomType;
+        m_iCurZoomType = iType;
+    }
 
-    // <!> Тип зума уже новый
+    // <!> Тип зума уже может быть новый
     if (iType != eZoomMain || IsScopeAttached()) //--> Только ради обратной совместимости с конфигами оригиниальной игры
         GetZoomParams().UpdateUIScope();
 

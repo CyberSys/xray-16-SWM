@@ -28,6 +28,8 @@ CWeapon::CWeapon() : CShellLauncher(this)
 
     bMisfire = false;
 
+    m_ForceGAnimsMode = eGModeDisabled;
+
     m_bTriStateReload_anim_hack = false;
 
     m_Offset.identity();
@@ -359,10 +361,10 @@ void CWeapon::net_Import(NET_Packet& P)
     CAmmoCompressUtil::DecompressMagazine(pVAmmoGL, this, true);
 
     // Стэйт и зум (1)
-    u8 wstate;
+    u8 wstate = 0;
     P.r_u8(wstate);
 
-    u8 Zoom;
+    u8 Zoom = 0;
     P.r_u8((u8)Zoom);
 
     // Текущий режим стрельбы (1)
@@ -466,10 +468,17 @@ void CWeapon::load(IReader& input_packet)
     load_data(m_bIsZoomModeNow, input_packet);
     load_data(iCurZoomType, input_packet);
     load_data(iPrevZoomType, input_packet);
+
     load_data(iZoomTypesCnt, input_packet);
-    for (int i = 0; i < EZoomTypes::eZoomTypesCnt && i < iZoomTypesCnt; i++)
+    for (int iZoomTypeIdx = 0; iZoomTypeIdx < iZoomTypesCnt; iZoomTypeIdx++) //-V654 //-V621
     {
-        load_data(GetZoomParams((EZoomTypes)i).m_fRTZoomFactor, input_packet);
+        float fSavedRTZoomFactor = 0.0f;
+        load_data(fSavedRTZoomFactor, input_packet);
+
+        if (iZoomTypeIdx < EZoomTypes::eZoomTypesCnt)
+        {
+            GetZoomParams((EZoomTypes)iZoomTypeIdx).m_fRTZoomFactor = fSavedRTZoomFactor;
+        }
     }
 
     load_data(m_bRememberActorNVisnStatus, input_packet);
