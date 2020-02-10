@@ -832,140 +832,131 @@ bool CWeapon::Special_5_Attachable() const { return (ALife::eAddonAttachable == 
 bool CWeapon::Special_6_Attachable() const { return (ALife::eAddonAttachable == get_Special_6_Status()); }
 
 // Обновляем визуальное состояние всех аддонов данного типа на худе
-void CWeapon::_UpdateHUDAddonVisibility(SAddonData* m_pAddon, bool bForceReset)
+void CWeapon::UpdateHUDAddonsVisibility(bool bForceReset)
 {
-    // Если аддон данного типа присоединён, то его кости\аттачи имеют приоритет над другими
+    if (!ParentIsActor() || HudItemData() == nullptr)
+        return;
+
+    // Список всех костей и аттачей, которые уже затронуты установленными аддонами (другие аддоны их не станут менять)
     xr_vector<shared_str> hide_bones_attached; // Кости,  которые будут скрыты
     xr_vector<shared_str> show_bones_attached; // Кости,  которые будут показаны
     xr_vector<shared_str> hud_vis_attached;    // Аттачи, которые будут одеты
 
-    bool bIsAddonActive = (bForceReset ? false: m_pAddon->bActive);
-
-    u8 start_idx = 0;
-    if (bIsAddonActive)
-        start_idx = m_pAddon->addon_idx;
-
-    HudItemData()->set_bone_visible(m_pAddon->m_addon_bone, bIsAddonActive, TRUE); //-- Для совместимости с оригиналом
-
-    // Перебираем все аддоны данного типа и производим операции над костями и аттачами модели
-    for (u32 i = start_idx; i < m_pAddon->m_addons_list.size();)
+    // Снимаем все аддоны, зависящие от нашего
+    for (int iSlotNext = 0; iSlotNext < EAddons::eAddonsSize; iSlotNext++)
     {
-        // Если условие true, значит элемент с этим индексом мы уже обработали первым
-        if (start_idx == i && start_idx > 0 && bIsAddonActive == false)
-        {
-            i++;
-            continue;
-        }
+        SAddonData* pAddon = GetAddonBySlot((EAddons)iSlotNext);
+        bool bIsAddonActive = (bForceReset ? false: pAddon->bActive);
 
-        const shared_str& addon_set_sect  = m_pAddon->m_addons_list[i];
-        const shared_str& addon_name_sect = pSettings->r_string(addon_set_sect.c_str(), m_pAddon->m_addon_alias.c_str());
-
-        xr_vector<shared_str> hide_bones_vec; // Кости для скрытия у текущего аддона цикла
-        xr_vector<shared_str> show_bones_vec; // Кости для показа у текущего аддона цикла
-        xr_vector<shared_str> hud_vis_vec;    // Аттачи у текущего аддона цикла
-
-        /////////////////////
-        // clang-format off
-		LPCSTR hide_bones = READ_IF_EXISTS(pSettings, r_string, addon_set_sect,		"hide_bones_hud",									
-							READ_IF_EXISTS(pSettings, r_string, addon_name_sect,	"hide_bones_hud", NULL)								
-		);																															
-		LPCSTR show_bones = READ_IF_EXISTS(pSettings, r_string, addon_set_sect,		"show_bones_hud",									
-							READ_IF_EXISTS(pSettings, r_string, addon_name_sect,	"show_bones_hud", NULL)								
-		);																															
-		LPCSTR hud_vis	  = m_pAddon->GetVisuals("visuals_hud", false, i).c_str();
-        // clang-format on
-
-        // Парсим строки
-        if (hide_bones)
-        {
-            string128 _itm_name;
-            int       count = _GetItemCount(hide_bones);
-            for (int it = 0; it < count; ++it)
-            {
-                LPCSTR _itm = _GetItem(hide_bones, it, _itm_name);
-                hide_bones_vec.push_back(_itm);
-
-                if (bIsAddonActive) // Для присоединённого аддона добавляем ещё и в отдельный вектор
-                    hide_bones_attached.push_back(_itm);
-            }
-        }
-        if (show_bones)
-        {
-            string128 _itm_name;
-            int       count = _GetItemCount(show_bones);
-            for (int it = 0; it < count; ++it)
-            {
-                LPCSTR _itm = _GetItem(show_bones, it, _itm_name);
-                show_bones_vec.push_back(_itm);
-
-                if (bIsAddonActive)
-                    show_bones_attached.push_back(_itm);
-            }
-        }
-        if (hud_vis)
-        {
-            string128 _itm_name;
-            int       count = _GetItemCount(hud_vis);
-            for (int it = 0; it < count; ++it)
-            {
-                LPCSTR _itm = _GetItem(hud_vis, it, _itm_name);
-                hud_vis_vec.push_back(_itm);
-
-                if (bIsAddonActive)
-                    hud_vis_attached.push_back(_itm);
-            }
-        }
-
-        // Скрываем\раскрываем нужные кости и аттачи на худе
-        for (u32 j = 0; j < hide_bones_vec.size(); j++)
-            if (bIsAddonActive || std::find(hide_bones_attached.begin(), hide_bones_attached.end(), hide_bones_vec[j]) == hide_bones_attached.end())
-                HudItemData()->set_bone_visible(hide_bones_vec[j], !bIsAddonActive, TRUE);
-
-        for (u32 j = 0; j < show_bones_vec.size(); j++)
-            if (bIsAddonActive || std::find(show_bones_attached.begin(), show_bones_attached.end(), show_bones_vec[j]) == show_bones_attached.end())
-                HudItemData()->set_bone_visible(show_bones_vec[j], bIsAddonActive, TRUE);
-
-        for (u32 j = 0; j < hud_vis_vec.size(); j++)
-            if (bIsAddonActive || std::find(hud_vis_attached.begin(), hud_vis_attached.end(), hud_vis_vec[j]) == hud_vis_attached.end())
-                HudItemData()->UpdateChildrenList(hud_vis_vec[j], bIsAddonActive);
-        /////////////////////
-
-        // Решаем какой элемент обработать дальше
+        u8 start_idx = 0;
         if (bIsAddonActive)
-        {
-            if (start_idx > 0)
-                i = 0;
-            else
-                i = 1;
+            start_idx = pAddon->addon_idx;
 
-            bIsAddonActive = false;
-        }
-        else
+        HudItemData()->set_bone_visible(pAddon->m_addon_bone, bIsAddonActive, TRUE); //-- Для совместимости с оригиналом
+
+        // Перебираем все аддоны данного типа и производим операции над костями и аттачами модели
+        for (u32 i = start_idx; i < pAddon->m_addons_list.size();)
         {
-            i++;
+            // Если условие true, значит элемент с этим индексом мы уже обработали первым
+            if (start_idx == i && start_idx > 0 && bIsAddonActive == false)
+            {
+                i++;
+                continue;
+            }
+
+            const shared_str& addon_set_sect  = pAddon->m_addons_list[i];
+            const shared_str& addon_name_sect = pSettings->r_string(addon_set_sect.c_str(), pAddon->m_addon_alias.c_str());
+
+            xr_vector<shared_str> hide_bones_vec; // Кости для скрытия у текущего аддона цикла
+            xr_vector<shared_str> show_bones_vec; // Кости для показа у текущего аддона цикла
+            xr_vector<shared_str> hud_vis_vec;    // Аттачи у текущего аддона цикла
+
+            /////////////////////
+            // clang-format off
+		    LPCSTR hide_bones = READ_IF_EXISTS(pSettings, r_string, addon_set_sect,		"hide_bones_hud",									
+							    READ_IF_EXISTS(pSettings, r_string, addon_name_sect,	"hide_bones_hud", NULL)								
+		    );																															
+		    LPCSTR show_bones = READ_IF_EXISTS(pSettings, r_string, addon_set_sect,		"show_bones_hud",									
+							    READ_IF_EXISTS(pSettings, r_string, addon_name_sect,	"show_bones_hud", NULL)								
+		    );																															
+		    LPCSTR hud_vis	  = pAddon->GetVisuals("visuals_hud", false, i).c_str();
+            // clang-format on
+
+            // Парсим строки
+            if (hide_bones)
+            {
+                string128 _itm_name;
+                int       count = _GetItemCount(hide_bones);
+                for (int it = 0; it < count; ++it)
+                {
+                    LPCSTR _itm = _GetItem(hide_bones, it, _itm_name);
+                    hide_bones_vec.push_back(_itm);
+
+                    if (bIsAddonActive) // Для присоединённого аддона добавляем ещё и в отдельный вектор
+                        hide_bones_attached.push_back(_itm);
+                }
+            }
+            if (show_bones)
+            {
+                string128 _itm_name;
+                int       count = _GetItemCount(show_bones);
+                for (int it = 0; it < count; ++it)
+                {
+                    LPCSTR _itm = _GetItem(show_bones, it, _itm_name);
+                    show_bones_vec.push_back(_itm);
+
+                    if (bIsAddonActive)
+                        show_bones_attached.push_back(_itm);
+                }
+            }
+            if (hud_vis)
+            {
+                string128 _itm_name;
+                int       count = _GetItemCount(hud_vis);
+                for (int it = 0; it < count; ++it)
+                {
+                    LPCSTR _itm = _GetItem(hud_vis, it, _itm_name);
+                    hud_vis_vec.push_back(_itm);
+
+                    if (bIsAddonActive)
+                        hud_vis_attached.push_back(_itm);
+                }
+            }
+
+            // Скрываем\раскрываем нужные кости и аттачи на худе
+            for (u32 j = 0; j < hide_bones_vec.size(); j++)
+                if (bIsAddonActive || std::find(hide_bones_attached.begin(), hide_bones_attached.end(), hide_bones_vec[j]) == hide_bones_attached.end())
+                    HudItemData()->set_bone_visible(hide_bones_vec[j], !bIsAddonActive, TRUE);
+
+            for (u32 j = 0; j < show_bones_vec.size(); j++)
+                if (bIsAddonActive || std::find(show_bones_attached.begin(), show_bones_attached.end(), show_bones_vec[j]) == show_bones_attached.end())
+                    HudItemData()->set_bone_visible(show_bones_vec[j], bIsAddonActive, TRUE);
+
+            for (u32 j = 0; j < hud_vis_vec.size(); j++)
+                if (bIsAddonActive || std::find(hud_vis_attached.begin(), hud_vis_attached.end(), hud_vis_vec[j]) == hud_vis_attached.end())
+                    HudItemData()->UpdateChildrenList(hud_vis_vec[j], bIsAddonActive);
+            /////////////////////
+
+            // Решаем какой элемент обработать дальше
+            if (bIsAddonActive)
+            {
+                if (start_idx > 0)
+                    i = 0;
+                else
+                    i = 1;
+
+                bIsAddonActive = false;
+            }
+            else
+            {
+                i++;
+            }
         }
     }
 
     show_bones_attached.clear();
     hide_bones_attached.clear();
     hud_vis_attached.clear();
-}
-
-void CWeapon::UpdateHUDAddonsVisibility(bool bForceReset)
-{
-    if (!ParentIsActor() || HudItemData() == nullptr)
-        return;
-
-    _UpdateHUDAddonVisibility(GetAddonBySlot(eScope), bForceReset);
-    _UpdateHUDAddonVisibility(GetAddonBySlot(eSilencer), bForceReset);
-    _UpdateHUDAddonVisibility(GetAddonBySlot(eLauncher), bForceReset);
-    _UpdateHUDAddonVisibility(GetAddonBySlot(eMagaz), bForceReset);
-    _UpdateHUDAddonVisibility(GetAddonBySlot(eSpec_1), bForceReset);
-    _UpdateHUDAddonVisibility(GetAddonBySlot(eSpec_2), bForceReset);
-    _UpdateHUDAddonVisibility(GetAddonBySlot(eSpec_3), bForceReset);
-    _UpdateHUDAddonVisibility(GetAddonBySlot(eSpec_4), bForceReset);
-    _UpdateHUDAddonVisibility(GetAddonBySlot(eSpec_5), bForceReset);
-    _UpdateHUDAddonVisibility(GetAddonBySlot(eSpec_6), bForceReset);
 }
 
 // Обновляем отображение косточки гранаты на худе
@@ -991,166 +982,155 @@ void CWeapon::UpdateGrenadeVisibility()
 }
 
 // Обновляем визуальное состояние всех аддонов данного типа на мировой модели
-void CWeapon::_UpdateAddonsVisibility(SAddonData* m_pAddon)
+void CWeapon::UpdateAddonsVisibility(bool bDontUpdateHUD)
 {
+    m_dwLastAddonsVisUpdTime = Device.dwTimeGlobal;
+
     IKinematics* pWeaponVisual = smart_cast<IKinematics*>(Visual());
     R_ASSERT(pWeaponVisual);
 
-    bool bIsAddonActive = m_pAddon->bActive;
+    // Список всех костей и аттачей, которые уже затронуты установленными аддонами (другие аддоны их не станут менять)
+    xr_vector<shared_str> hide_bones_attached; // Кости,  которые будут скрыты
+    xr_vector<shared_str> show_bones_attached; // Кости,  которые будут показаны
+    xr_vector<shared_str> ext_vis_attached;    // Аттачи, которые будут одеты
 
-    // Если аддон данного типа присоединён, то его кости\аттачи имеют приоритет над другими
-    xr_vector<shared_str> hide_bones_attached; // Кости,  которые точно будут скрыты
-    xr_vector<shared_str> show_bones_attached; // Кости,  которые точно будут показаны
-    xr_vector<shared_str> ext_vis_attached;    // Аттачи, которые точно будут одеты
-
-    u8 start_idx = 0;
-    if (bIsAddonActive)
-        start_idx = m_pAddon->addon_idx;
-
-    // Для совместимости с оригиналом
-    u16 def_bone_id = pWeaponVisual->LL_BoneID(m_pAddon->m_addon_bone);
-    if (def_bone_id != BI_NONE)
-        if ((bool)pWeaponVisual->LL_GetBoneVisible(def_bone_id) != bIsAddonActive)
-            pWeaponVisual->LL_SetBoneVisible(def_bone_id, bIsAddonActive, TRUE);
-
-    // Перебираем все аддоны данного типа и производим операции над костями и аттачами модели
-    for (u32 i = start_idx; i < m_pAddon->m_addons_list.size();)
+    // Снимаем все аддоны, зависящие от нашего
+    for (int iSlotNext = 0; iSlotNext < EAddons::eAddonsSize; iSlotNext++)
     {
-        // Если условие true, значит элемент с этим индексом мы уже обработали первым
-        if (start_idx == i && start_idx > 0 && bIsAddonActive == false)
-        {
-            i++;
-            continue;
-        }
+        SAddonData* pAddon = GetAddonBySlot((EAddons)iSlotNext);
+        bool bIsAddonActive = pAddon->bActive;
 
-        const shared_str& addon_set_sect  = m_pAddon->m_addons_list[i];
-        const shared_str& addon_name_sect = pSettings->r_string(addon_set_sect.c_str(), m_pAddon->m_addon_alias.c_str());
-
-        xr_vector<shared_str> hide_bones_vec; // Кости для скрытия у текущего аддона цикла
-        xr_vector<shared_str> show_bones_vec; // Кости для показа у текущего аддона цикла
-        xr_vector<shared_str> ext_vis_vec;    // Аттачи у текущего аддона цикла
-
-        /////////////////////
-        // clang-format off
-		LPCSTR hide_bones = READ_IF_EXISTS(pSettings, r_string, addon_set_sect,		"hide_bones",									
-							READ_IF_EXISTS(pSettings, r_string, addon_name_sect,	"hide_bones",	 NULL)								
-		);																															
-		LPCSTR show_bones = READ_IF_EXISTS(pSettings, r_string, addon_set_sect,		"show_bones",									
-							READ_IF_EXISTS(pSettings, r_string, addon_name_sect,	"show_bones",	 NULL)								
-		);																															
-        LPCSTR world_vis  = m_pAddon->GetVisuals("visuals_world", false, i).c_str();
-        // clang-format on
-
-        // Парсим строки
-        if (hide_bones)
-        {
-            string128 _itm_name;
-            int       count = _GetItemCount(hide_bones);
-            for (int it = 0; it < count; ++it)
-            {
-                LPCSTR _itm = _GetItem(hide_bones, it, _itm_name);
-                hide_bones_vec.push_back(_itm);
-
-                if (bIsAddonActive) // Для присоединённого аддона добавляем ещё и в отдельный вектор
-                    hide_bones_attached.push_back(_itm);
-            }
-        }
-        if (show_bones)
-        {
-            string128 _itm_name;
-            int       count = _GetItemCount(show_bones);
-            for (int it = 0; it < count; ++it)
-            {
-                LPCSTR _itm = _GetItem(show_bones, it, _itm_name);
-                show_bones_vec.push_back(_itm);
-
-                if (bIsAddonActive)
-                    show_bones_attached.push_back(_itm);
-            }
-        }
-        if (world_vis)
-        {
-            string128 _itm_name;
-            int       count = _GetItemCount(world_vis);
-            for (int it = 0; it < count; ++it)
-            {
-                LPCSTR _itm = _GetItem(world_vis, it, _itm_name);
-                ext_vis_vec.push_back(_itm);
-
-                if (bIsAddonActive)
-                    ext_vis_attached.push_back(_itm);
-            }
-        }
-
-        // Скрываем\раскрываем нужные кости и аттачи на худе
-        for (u32 j = 0; j < hide_bones_vec.size(); j++)
-            if (bIsAddonActive || std::find(hide_bones_attached.begin(), hide_bones_attached.end(), hide_bones_vec[j]) == hide_bones_attached.end())
-            {
-                u16 bone_id = pWeaponVisual->LL_BoneID(hide_bones_vec[j]);
-                if (bone_id != BI_NONE)
-                    if ((bool)pWeaponVisual->LL_GetBoneVisible(bone_id) == bIsAddonActive)
-                        pWeaponVisual->LL_SetBoneVisible(bone_id, !bIsAddonActive, TRUE);
-            }
-
-        for (u32 j = 0; j < show_bones_vec.size(); j++)
-            if (bIsAddonActive || std::find(show_bones_attached.begin(), show_bones_attached.end(), show_bones_vec[j]) == show_bones_attached.end())
-            {
-                u16 bone_id = pWeaponVisual->LL_BoneID(show_bones_vec[j]);
-                if (bone_id != BI_NONE)
-                    if ((bool)pWeaponVisual->LL_GetBoneVisible(bone_id) != bIsAddonActive)
-                        pWeaponVisual->LL_SetBoneVisible(bone_id, bIsAddonActive, TRUE);
-            }
-
-        for (u32 j = 0; j < ext_vis_vec.size(); j++)
-            if (bIsAddonActive || std::find(ext_vis_attached.begin(), ext_vis_attached.end(), ext_vis_vec[j]) == ext_vis_attached.end())
-            {
-                if (!m_pAddon->bHideVis3p && bIsAddonActive)
-                    this->AttachAdditionalVisual(ext_vis_vec[j]);
-                else
-                    this->DetachAdditionalVisual(ext_vis_vec[j]);
-            }
-
-        /////////////////////
-
-        // Решаем какой элемент обработать дальше
+        u8 start_idx = 0;
         if (bIsAddonActive)
-        {
-            if (start_idx > 0)
-                i = 0;
-            else
-                i = 1;
+            start_idx = pAddon->addon_idx;
 
-            bIsAddonActive = false;
-        }
-        else
+        // Для совместимости с оригиналом
+        u16 def_bone_id = pWeaponVisual->LL_BoneID(pAddon->m_addon_bone);
+        if (def_bone_id != BI_NONE)
+            if ((bool)pWeaponVisual->LL_GetBoneVisible(def_bone_id) != bIsAddonActive)
+                pWeaponVisual->LL_SetBoneVisible(def_bone_id, bIsAddonActive, TRUE);
+
+        // Перебираем все аддоны данного типа и производим операции над костями и аттачами модели
+        for (u32 i = start_idx; i < pAddon->m_addons_list.size();)
         {
-            i++;
+            // Если условие true, значит элемент с этим индексом мы уже обработали первым
+            if (start_idx == i && start_idx > 0 && bIsAddonActive == false)
+            {
+                i++;
+                continue;
+            }
+
+            const shared_str& addon_set_sect  = pAddon->m_addons_list[i];
+            const shared_str& addon_name_sect = pSettings->r_string(addon_set_sect.c_str(), pAddon->m_addon_alias.c_str());
+
+            xr_vector<shared_str> hide_bones_vec; // Кости для скрытия у текущего аддона цикла
+            xr_vector<shared_str> show_bones_vec; // Кости для показа у текущего аддона цикла
+            xr_vector<shared_str> ext_vis_vec;    // Аттачи у текущего аддона цикла
+
+            /////////////////////
+            // clang-format off
+		    LPCSTR hide_bones = READ_IF_EXISTS(pSettings, r_string, addon_set_sect,		"hide_bones",									
+							    READ_IF_EXISTS(pSettings, r_string, addon_name_sect,	"hide_bones",	 NULL)								
+		    );																															
+		    LPCSTR show_bones = READ_IF_EXISTS(pSettings, r_string, addon_set_sect,		"show_bones",									
+							    READ_IF_EXISTS(pSettings, r_string, addon_name_sect,	"show_bones",	 NULL)								
+		    );																															
+            LPCSTR world_vis  = pAddon->GetVisuals("visuals_world", false, i).c_str();
+            // clang-format on
+
+            // Парсим строки
+            if (hide_bones)
+            {
+                string128 _itm_name;
+                int       count = _GetItemCount(hide_bones);
+                for (int it = 0; it < count; ++it)
+                {
+                    LPCSTR _itm = _GetItem(hide_bones, it, _itm_name);
+                    hide_bones_vec.push_back(_itm);
+
+                    if (bIsAddonActive) // Для присоединённого аддона добавляем ещё и в отдельный вектор
+                        hide_bones_attached.push_back(_itm);
+                }
+            }
+            if (show_bones)
+            {
+                string128 _itm_name;
+                int       count = _GetItemCount(show_bones);
+                for (int it = 0; it < count; ++it)
+                {
+                    LPCSTR _itm = _GetItem(show_bones, it, _itm_name);
+                    show_bones_vec.push_back(_itm);
+
+                    if (bIsAddonActive)
+                        show_bones_attached.push_back(_itm);
+                }
+            }
+            if (world_vis)
+            {
+                string128 _itm_name;
+                int       count = _GetItemCount(world_vis);
+                for (int it = 0; it < count; ++it)
+                {
+                    LPCSTR _itm = _GetItem(world_vis, it, _itm_name);
+                    ext_vis_vec.push_back(_itm);
+
+                    if (bIsAddonActive)
+                        ext_vis_attached.push_back(_itm);
+                }
+            }
+
+            // Скрываем\раскрываем нужные кости и аттачи на худе
+            for (u32 j = 0; j < hide_bones_vec.size(); j++)
+                if (bIsAddonActive || std::find(hide_bones_attached.begin(), hide_bones_attached.end(), hide_bones_vec[j]) == hide_bones_attached.end())
+                {
+                    u16 bone_id = pWeaponVisual->LL_BoneID(hide_bones_vec[j]);
+                    if (bone_id != BI_NONE)
+                        if ((bool)pWeaponVisual->LL_GetBoneVisible(bone_id) == bIsAddonActive)
+                            pWeaponVisual->LL_SetBoneVisible(bone_id, !bIsAddonActive, TRUE);
+                }
+
+            for (u32 j = 0; j < show_bones_vec.size(); j++)
+                if (bIsAddonActive || std::find(show_bones_attached.begin(), show_bones_attached.end(), show_bones_vec[j]) == show_bones_attached.end())
+                {
+                    u16 bone_id = pWeaponVisual->LL_BoneID(show_bones_vec[j]);
+                    if (bone_id != BI_NONE)
+                        if ((bool)pWeaponVisual->LL_GetBoneVisible(bone_id) != bIsAddonActive)
+                            pWeaponVisual->LL_SetBoneVisible(bone_id, bIsAddonActive, TRUE);
+                }
+
+            for (u32 j = 0; j < ext_vis_vec.size(); j++)
+                if (bIsAddonActive || std::find(ext_vis_attached.begin(), ext_vis_attached.end(), ext_vis_vec[j]) == ext_vis_attached.end())
+                {
+                    if (!pAddon->bHideVis3p && bIsAddonActive)
+                        this->AttachAdditionalVisual(ext_vis_vec[j]);
+                    else
+                        this->DetachAdditionalVisual(ext_vis_vec[j]);
+                }
+
+            /////////////////////
+
+            // Решаем какой элемент обработать дальше
+            if (bIsAddonActive)
+            {
+                if (start_idx > 0)
+                    i = 0;
+                else
+                    i = 1;
+
+                bIsAddonActive = false;
+            }
+            else
+            {
+                i++;
+            }
         }
     }
 
     show_bones_attached.clear();
     hide_bones_attached.clear();
     ext_vis_attached.clear();
-}
-
-void CWeapon::UpdateAddonsVisibility(bool bDontUpdateHUD)
-{
-    m_dwLastAddonsVisUpdTime = Device.dwTimeGlobal;
-
-    _UpdateAddonsVisibility(GetAddonBySlot(eScope));
-    _UpdateAddonsVisibility(GetAddonBySlot(eSilencer));
-    _UpdateAddonsVisibility(GetAddonBySlot(eLauncher));
-    _UpdateAddonsVisibility(GetAddonBySlot(eMagaz));
-    _UpdateAddonsVisibility(GetAddonBySlot(eSpec_1));
-    _UpdateAddonsVisibility(GetAddonBySlot(eSpec_2));
-    _UpdateAddonsVisibility(GetAddonBySlot(eSpec_3));
-    _UpdateAddonsVisibility(GetAddonBySlot(eSpec_4));
-    _UpdateAddonsVisibility(GetAddonBySlot(eSpec_5));
-    _UpdateAddonsVisibility(GetAddonBySlot(eSpec_6));
 
     // Обновляем кости на мировой модели
-    IKinematics* pWeaponVisual = smart_cast<IKinematics*>(Visual());
-    R_ASSERT(pWeaponVisual);
     pWeaponVisual->CalculateBones_Invalidate();
     pWeaponVisual->CalculateBones(TRUE);
 

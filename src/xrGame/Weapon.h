@@ -341,9 +341,6 @@ private:
     u32 m_dwLastAddonsVisUpdTime; // Время в dwTimeGloabl (м\сек) когда последний раз вызывали плановый апдейт визуалов аддонов
 
 protected:
-    void _UpdateAddonsVisibility(SAddonData* m_pAddon);
-    void _UpdateHUDAddonVisibility(SAddonData* m_pAddon, bool bForceReset = false);
-
     void OnAddonInstall(EAddons iSlot, const shared_str& sAddonSetSect);
     void OnAddonUnistall(EAddons iSlot, const shared_str& sAddonSetSect);
 
