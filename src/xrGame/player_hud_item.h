@@ -66,6 +66,9 @@ struct attachable_hud_item
         shared_str          item_motion_name;
         const motion_descr* handsMotionDescr;
         ChildMotions        child_motions_map;
+        bool                mute_item_motion_not_found_err;
+
+        anim_find_result() : mute_item_motion_not_found_err(false), handsMotionDescr(nullptr) { ; }
     };
     anim_find_result anim_find(const shared_str& sAnmAliasBase, bool bNoChilds, u8& rnd_idx, bool bAssert = true);
 

@@ -11,6 +11,8 @@
 #include "ActorEffector.h"
 #include "Weapon.h" //--#SM+#--
 
+extern BOOL g_LogHUDAnims; //--#SM+#--
+
 attachable_hud_item::~attachable_hud_item() //--#SM+#--
 {
     IRenderVisual* v = m_model->dcast_RenderVisual();
@@ -294,6 +296,13 @@ attachable_hud_item::anim_find_result attachable_hud_item::anim_find(
     player_hud_motion* pHandsMotions = m_hand_motions.find_motion(sAnmAlias);
     player_hud_motion* pItemMotions  = pHandsMotions;
 
+    //--> Запоминаем какая анимация рук была найдена без учёта аддонов
+    player_hud_motion* pOrigHandsMotions = nullptr;
+    if (g_LogHUDAnims)
+    {
+        pOrigHandsMotions = pHandsMotions;
+    }
+
     //--> Потом у своих потомков (они приоритетней)
     if (bNoChilds == false)
     {
@@ -354,6 +363,15 @@ attachable_hud_item::anim_find_result attachable_hud_item::anim_find(
     if (pItemMotions != NULL)
         result.item_motion_name =
             (pHandsMotions->m_base_name != pItemMotions->m_additional_name) ? pItemMotions->m_additional_name : result.handsMotionDescr->name;
+
+    // Проверяем совпадает ли имя анимации предмета с именем анимации модели рук до аддонов
+    if (g_LogHUDAnims && pOrigHandsMotions != nullptr && pOrigHandsMotions->m_base_name == result.item_motion_name)
+    {
+        //--> Если совпало, значит скорее всего анимация предмета не была явно указана в конфиге,
+        //    поэтому её имя автоматически стало равно имени анимации рук (player_hud_motion_container::load)
+        //    В таком случае учитываем это при выводе ошибок в лог об отсутствующей анимации - скрываем ошибки про неё
+        result.mute_item_motion_not_found_err = true;
+    }
 
     return result;
 }
@@ -421,11 +439,27 @@ void attachable_hud_item::anim_play_item(
         IKinematicsAnimated* ka = m_model->dcast_PKinematicsAnimated();
 
         MotionID M2 = ka->ID_Cycle_Safe(anim_to_play.item_motion_name);
-        if (!M2.valid()) //--> Если у модели предмета нет такой анимации, то пытаемся проиграть дефолтную ("idle")
+        if (!M2.valid())
+        { // Не нашли указанной анимации у предмета
+            //--> Выводим ошибку
+            if (g_LogHUDAnims && (anim_to_play.item_motion_name != anim_to_play.handsMotionDescr->name) &&
+                anim_to_play.mute_item_motion_not_found_err == false)
+            {
+                Msg("! item model [%s] has no motion [%s], playing [idle] instead",
+                    pSettings->r_string(m_sect_name, "item_visual"), anim_to_play.item_motion_name.c_str());
+            }
+
+            //--> Пытаемся проиграть дефолтную ("idle")
             M2 = ka->ID_Cycle_Safe(m_def_motion);
-        else if (bDebug)
-            Msg("playing item animation [%s]", anim_to_play.item_motion_name.c_str());
-        R_ASSERT3(M2.valid(), "model has no motion [idle] ", pSettings->r_string(m_sect_name, "item_visual"));
+        }
+        else
+        { // Анимация найдена и успешно запущена
+            if (bDebug)
+            {
+                Msg("playing item animation [%s]", anim_to_play.item_motion_name.c_str());
+            }
+        }
+        R_ASSERT3(M2.valid(), "item model has no motion [idle] ", pSettings->r_string(m_sect_name, "item_visual"));
 
         u16            root_id    = m_model->LL_GetBoneRoot();
         CBoneInstance& root_binst = m_model->LL_GetBoneInstance(root_id);
