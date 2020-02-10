@@ -19,6 +19,9 @@ bool CWeapon::Try2Switch(bool bCheckOnlyMode)
     if (!IsGrenadeLauncherAttached())
         return false;
 
+    if (IsBipodsDeployed() == false & (IsZoomed() || GetZRotatingFactor() > 0.0f))
+        return false;
+
     if (!bCheckOnlyMode)
         SwitchState(eSwitch);
 
