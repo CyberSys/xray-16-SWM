@@ -433,8 +433,8 @@ void attachable_hud_item::anim_play_item(
     if (_fRootStartTime < 0.0f)
         _fRootStartTime = fStartFromTime;
 
-    // Играем свою анимацию
-    if (m_model->dcast_PKinematicsAnimated())
+    // Играем свою анимацию (X в названии анимации означает оставить текущую)
+    if (m_model->dcast_PKinematicsAnimated() && anim_to_play.item_motion_name != "X")
     {
         IKinematicsAnimated* ka = m_model->dcast_PKinematicsAnimated();
 
