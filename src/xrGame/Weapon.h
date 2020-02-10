@@ -1198,9 +1198,17 @@ protected:
     };
     EZoomAnimStae m_ZoomAnimState; //--> Указывает какую анимацию проиграть во время прицеливания (PlayAnimZoom)
 
+    enum EForceGAnimsMode
+    {
+        eGModeDisabled = 0, //--> Режим по умолчанию
+        eGModeForceOn, //--> Всегда пробовать запускать _g-анимации
+        eGModeForceOff, //--> Всегда запрещать _g-анимации
+    };
+    EForceGAnimsMode m_ForceGAnimsMode; //--> Принудительно запускать\запрещать _g анимации, независимо от текущего режима подствольника
+
     bool m_bDisableMovEffAtZoom; //--> Нужно-ли блокировать эффекты ходьбы во время зума
     bool m_bTriStateReload_anim_hack; //--> Нужно-ли использовать подмену некоторых анимаций от 3-го лица (перезарядка в 3 этапа)
-
+ 
     virtual void PlayWorldAnimIdle();
 
     virtual void PlayAnimIdle();
@@ -1268,6 +1276,7 @@ public:
     virtual float GetInertionAimFactor() { return 1.f - GetZRotatingFactor(); }; //--> [От 1.0 - Инерция от бедра, до 0.0 - Инерция при зумме] Какую инерцию использовать
     virtual float GetInertionPowerFactor();
 
+    bool IsGAnimRequired() const;
     bool IsWGLAnimRequired() const;
 
     void ResetIdleAnim();

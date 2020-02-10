@@ -491,8 +491,12 @@ void CWeapon::UnloadMagazineMain(bool spawn_ammo)
     if (bGMode)
         PerformSwitchGL();
 
+    m_ForceGAnimsMode = (bGMode ? eGModeForceOn : eGModeForceOff); //--> Фиксим неправильные Idle-анимации если разрядка была при активном подстволе
+
     R_ASSERT(m_bGrenadeMode == false);
     UnloadMagazine(spawn_ammo);
+
+    m_ForceGAnimsMode = eGModeDisabled;
 
     if (bGMode)
         PerformSwitchGL();
@@ -505,8 +509,12 @@ void CWeapon::UnloadMagazineGL(bool spawn_ammo)
     if (!bGMode)
         PerformSwitchGL();
 
+    m_ForceGAnimsMode = (bGMode ? eGModeForceOn : eGModeForceOff); //--> Фиксим неправильные Idle-анимации если разрядка была при активном подстволе
+
     R_ASSERT(m_bGrenadeMode == true);
     UnloadMagazine(spawn_ammo);
+
+    m_ForceGAnimsMode = eGModeDisabled;
 
     if (!bGMode)
         PerformSwitchGL();

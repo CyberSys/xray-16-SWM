@@ -378,14 +378,27 @@ bool CWeapon::PlayWorldMotion(const shared_str& M, BOOL bMixIn)
     return false;
 }
 
+// Возвращает необходимость проиграть анимацию с префиксом _g
+bool CWeapon::IsGAnimRequired() const {
+    if (m_bUseAmmoBeltMode == true || m_ForceGAnimsMode == eGModeForceOff)
+    {
+        return false;
+    }
+
+    if (m_ForceGAnimsMode == eGModeForceOn)
+    {
+        return true;
+    }
+
+    return m_bGrenadeMode == true;
+}
+
 // Возвращает необходимость проиграть анимацию с префиксом _wgl
 bool CWeapon::IsWGLAnimRequired() const { return IsGrenadeLauncherAttached() || IsForegripAttached(); }
 
 ////////////////////////////////////////////////////////////////////
 // ************************************************************** //
 ////////////////////////////////////////////////////////////////////
-
-#define def_IsGL_Mode (m_bGrenadeMode == true && m_bUseAmmoBeltMode == false)
 
 // Мировая анимация покоя
 void CWeapon::PlayWorldAnimIdle()
@@ -433,7 +446,7 @@ void CWeapon::PlayAnimIdleOnly()
 
     if (IsZoomed() && !m_bIdleFromZoomOut)
     {
-        if (def_IsGL_Mode)
+        if (IsGAnimRequired())
         {
             if (iAmmo == 0)
             {
@@ -467,7 +480,7 @@ void CWeapon::PlayAnimIdleOnly()
         }
     }
 
-    if (def_IsGL_Mode)
+    if (IsGAnimRequired())
     {
         if (iAmmo == 0)
         {
@@ -508,7 +521,7 @@ void CWeapon::PlayAnimIdleMoving()
 
     if (IsZoomed() && !m_bIdleFromZoomOut)
     {
-        if (def_IsGL_Mode)
+        if (IsGAnimRequired())
         {
             if (iAmmo == 0)
             {
@@ -545,7 +558,7 @@ void CWeapon::PlayAnimIdleMoving()
         return;
     }
 
-    if (def_IsGL_Mode)
+    if (IsGAnimRequired())
     {
         if (iAmmo == 0)
         {
@@ -588,7 +601,7 @@ void CWeapon::PlayAnimIdleSprint()
 
     int iAmmo = GetMainAmmoElapsed();
 
-    if (def_IsGL_Mode)
+    if (IsGAnimRequired())
     {
         if (iAmmo == 0)
         {
@@ -628,7 +641,7 @@ void CWeapon::PlayAnimBore()
 {
     int iAmmo = GetMainAmmoElapsed();
 
-    if (def_IsGL_Mode)
+    if (IsGAnimRequired())
     {
         if (iAmmo == 0)
         {
@@ -667,7 +680,7 @@ void CWeapon::PlayAnimHide()
 {
     int iAmmo = GetMainAmmoElapsed();
 
-    if (def_IsGL_Mode)
+    if (IsGAnimRequired())
     {
         if (iAmmo == 0)
         {
@@ -714,7 +727,7 @@ void CWeapon::PlayAnimShow()
 
     UpdateAddonsVisibility();
 
-    if (def_IsGL_Mode)
+    if (IsGAnimRequired())
     {
         if (iAmmo == 0)
         {
@@ -753,7 +766,7 @@ void CWeapon::PlayAnimModeSwitch()
 {
     int iAmmo = GetMainAmmoElapsed();
 
-    if (def_IsGL_Mode)
+    if (IsGAnimRequired())
     {
         if (iAmmo == 0)
         {
@@ -783,7 +796,7 @@ void CWeapon::PlayAnimReload()
         iAmmo = GetMainAmmoElapsed();
 
     // Мировая анимация
-    if (!def_IsGL_Mode)
+    if (!IsGAnimRequired())
     {
         bool bPlayAnim = true;
         if (GetState() == eSwitchMag && (
@@ -838,7 +851,7 @@ void CWeapon::PlayAnimReload()
     if (IsAmmoBeltReloadNow())
         return PlayAnimReloadAB();
 
-    if (def_IsGL_Mode)
+    if (IsGAnimRequired())
     {
         if (iAmmo == 0)
         {
@@ -1055,7 +1068,7 @@ bool CWeapon::PlayAnimOpenWeapon()
 
     int iAmmo = GetMainAmmoElapsed();
 
-    if (def_IsGL_Mode)
+    if (IsGAnimRequired())
     {
         if (iAmmo == 0)
         {
@@ -1152,7 +1165,7 @@ void CWeapon::PlayAnimAddOneCartridgeWeapon()
 
     int iAmmo = GetMainAmmoElapsed();
 
-    if (def_IsGL_Mode)
+    if (IsGAnimRequired())
     {
         if (iAmmo == 0)
         {
@@ -1291,7 +1304,7 @@ bool CWeapon::PlayAnimCloseWeapon()
 
     int iAmmo = GetMainAmmoElapsed();
 
-    if (def_IsGL_Mode)
+    if (IsGAnimRequired())
     {
         if (iAmmo == 0)
         {
@@ -1374,7 +1387,7 @@ bool CWeapon::PlayAnimCloseWeaponFromEmpty()
 
     int iAmmo = GetMainAmmoElapsed();
 
-    if (def_IsGL_Mode)
+    if (IsGAnimRequired())
     {
         if (iAmmo == 0)
         {
@@ -1524,7 +1537,7 @@ void CWeapon::PlayAnimZoom()
 {
     int iAmmo = GetMainAmmoElapsed();
 
-    if (def_IsGL_Mode)
+    if (IsGAnimRequired())
     {
         if (iAmmo == 0)
         {
@@ -1571,7 +1584,7 @@ void CWeapon::PlayAnimEmptyClick()
 
     if (IsZoomed())
     {
-        if (def_IsGL_Mode)
+        if (IsGAnimRequired())
         {
             if (PlaySoundMotion("anm_empty_click_g_aim", TRUE, "sndEmptyClick", false, iAmmo))
                 return;
@@ -1590,7 +1603,7 @@ void CWeapon::PlayAnimEmptyClick()
         }
     }
 
-    if (def_IsGL_Mode)
+    if (IsGAnimRequired())
     {
         if (PlaySoundMotion("anm_empty_click_g", TRUE, "sndEmptyClick", false, iAmmo))
             return;
@@ -1613,7 +1626,7 @@ void CWeapon::PlayAnimShoot()
     bool bIsDuplet   = (GetCurrentFireMode() == 2);
 
     // Мировая анимация
-    if (!def_IsGL_Mode)
+    if (!IsGAnimRequired())
     {
         bool bLastShotAnmPlayed = false;
 
@@ -1658,7 +1671,7 @@ void CWeapon::PlayAnimShoot()
             }
         }
 
-        if (def_IsGL_Mode)
+        if (IsGAnimRequired())
         {
             if (bLastBullet)
             {
@@ -1696,7 +1709,7 @@ void CWeapon::PlayAnimShoot()
         }
     }
 
-    if (def_IsGL_Mode)
+    if (IsGAnimRequired())
     {
         if (bLastBullet)
         {
@@ -1773,7 +1786,7 @@ void CWeapon::PlayAnimKick()
             return;
     }
 
-    if (def_IsGL_Mode)
+    if (IsGAnimRequired())
     {
         if (iAmmo == 0)
         {
@@ -1834,7 +1847,7 @@ void CWeapon::PlayAnimKickAlt()
             return;
     }
 
-    if (def_IsGL_Mode)
+    if (IsGAnimRequired())
     {
         if (iAmmo == 0)
         {
@@ -1895,7 +1908,7 @@ bool CWeapon::PlayAnimKickOut()
             return true;
     }
 
-    if (def_IsGL_Mode)
+    if (IsGAnimRequired())
     {
         if (iAmmo == 0)
         {
@@ -1960,7 +1973,7 @@ bool CWeapon::PlayAnimKickOutAlt()
             return true;
     }
 
-    if (def_IsGL_Mode)
+    if (IsGAnimRequired())
     {
         if (iAmmo == 0)
         {
@@ -1996,5 +2009,3 @@ bool CWeapon::PlayAnimKickOutAlt()
 
     return false;
 }
-
-#undef def_IsGL_Mode
