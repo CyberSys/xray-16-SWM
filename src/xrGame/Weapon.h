@@ -394,6 +394,10 @@ protected:
     float m_addon_holder_range_modifier; //--> Модификатор дальности зрения для AI
     float m_addon_holder_fov_modifier; //--> Модификатор угла обзора для AI
 
+    shared_str m_DefaultScopeSect; //--> Секция параметров прицела по умолчанию
+    shared_str m_DefaultScopeVisSect; //--> Строка с мировой визуал-секцией прицела по умолчанию
+    shared_str m_DefaultScopeHudSect; //--> Строка с худовой визуал-секцией прицела по умолчанию
+
 public:
     bool IsScopeAttached() const;
     bool ScopeAttachable() const;
@@ -405,10 +409,31 @@ public:
     // Получить set-секцию текущего активного аддона в данном слоте
     const shared_str GetScopeSetSect() const { return IsScopeAttached() ? GetAddonBySlot(eScope)->GetName() : nullptr; }
 
+    // Проверить наличие прицела по умолчанию
+    IC bool IsDefaultScopePresent() const { return m_DefaultScopeSect != nullptr; }
+
+    // Получить секцию прицела по умолчанию
+    IC const shared_str GetDefaultScopeSect() const { return m_DefaultScopeSect; }
+
+    // Можно ли отображать прицел по умолчанию (визуал + иконка)
+    IC bool CanShowDefaultScope()
+    {
+        if (IsScopeAttached())
+        {
+            return READ_IF_EXISTS(pSettings, r_bool, GetAddonBySlot(eScope)->GetName(), "keep_default_scope", false);
+        }
+
+        return true;
+    }
+
     // Координаты иконки аддона на оружии
     int GetScopeX() const { return pSettings->r_s32(GetAddonBySlot(eScope)->GetName(), "scope_x"); }
     int GetScopeY() const { return pSettings->r_s32(GetAddonBySlot(eScope)->GetName(), "scope_y"); }
-    
+
+    // Координаты иконки "приклада по умолчанию" на оружии
+    int GetDefaultScopeX() const { return pSettings->r_s32(m_DefaultScopeSect, "default_scope_x"); }
+    int GetDefaultScopeY() const { return pSettings->r_s32(m_DefaultScopeSect, "default_scope_y"); }
+
     virtual void modify_holder_params(float& range, float& fov) const;
 
 //================= Аддоны - Глушитель =================//

@@ -71,7 +71,7 @@ void CUIInventoryCellItem::SetIsHelper(bool is_helper) { object()->set_is_helper
 void CUIInventoryCellItem::Update()
 {
     inherited::Update();
-    inherited:UpdateConditionProgressBar(); //Alundaio
+    inherited::UpdateConditionProgressBar(); //Alundaio
     UpdateItemText();
 
     u32 color = GetTextureColor();
@@ -160,6 +160,7 @@ void CUIAmmoCellItem::UpdateItemText()
 CUIWeaponCellItem::CUIWeaponCellItem(CWeapon* itm) : inherited(itm) //--#SM+#--
 {
     m_addons[eDefaultStock] = NULL; 
+    m_addons[eDefaultScope] = NULL; 
     m_addons[eSilencer] = NULL;
     m_addons[eScope] = NULL;
     m_addons[eLauncher] = NULL;
@@ -173,6 +174,9 @@ CUIWeaponCellItem::CUIWeaponCellItem(CWeapon* itm) : inherited(itm) //--#SM+#--
 
     if (itm->IsDefaultStockPresent() && itm->IsStockAttached() == false)
         m_addon_offset[eDefaultStock].set(object()->GetDefaultStockX(), object()->GetDefaultStockY());
+
+    if (itm->IsDefaultScopePresent() && itm->CanShowDefaultScope())
+        m_addon_offset[eDefaultScope].set(object()->GetDefaultScopeX(), object()->GetDefaultScopeY());
 
 	if (itm->IsSilencerAttached())
         m_addon_offset[eSilencer].set(object()->GetSilencerX(), object()->GetSilencerY());
@@ -281,6 +285,9 @@ void CUIWeaponCellItem::RefreshOffset() //--#SM+#--
     if (object()->IsDefaultStockPresent() && object()->IsStockAttached() == false)
         m_addon_offset[eDefaultStock].set(object()->GetDefaultStockX(), object()->GetDefaultStockY());
 
+    if (object()->IsDefaultScopePresent() && object()->CanShowDefaultScope())
+        m_addon_offset[eDefaultScope].set(object()->GetDefaultScopeX(), object()->GetDefaultScopeY());
+
     if (object()->IsSilencerAttached()) 
         m_addon_offset[eSilencer].set(object()->GetSilencerX(), object()->GetSilencerY());
 
@@ -375,6 +382,21 @@ void CUIWeaponCellItem::Update()
     {
         if (m_addons[eDefaultStock])
             DestroyIcon(eDefaultStock);
+    }
+
+    if (object()->IsDefaultScopePresent() && object()->CanShowDefaultScope())
+    { //--#SM+#--
+        if (!GetIcon(eDefaultScope) || bForceReInitAddons)
+        {
+            CreateIcon(eDefaultScope, object()->GetDefaultScopeSect()); //--#SM+#--
+            RefreshOffset();
+            InitAddon(GetIcon(eDefaultScope), *object()->GetDefaultScopeSect(), m_addon_offset[eDefaultScope], Heading());
+        }
+    }
+    else
+    {
+        if (m_addons[eDefaultScope])
+            DestroyIcon(eDefaultScope);
     }
 
     if (object()->SilencerAttachable())
@@ -568,6 +590,10 @@ void CUIWeaponCellItem::SetTextureColor(u32 color)
     {
         m_addons[eDefaultStock]->SetTextureColor(color);
     }
+    if (m_addons[eDefaultScope]) //--#SM+#--
+    {
+        m_addons[eDefaultScope]->SetTextureColor(color);
+    }
     if (m_addons[eSilencer])
     {
         m_addons[eSilencer]->SetTextureColor(color);
@@ -614,6 +640,10 @@ void CUIWeaponCellItem::OnAfterChild(CUIDragDropListEx* parent_list)
 {
     if (object()->IsDefaultStockPresent() && object()->IsStockAttached() == false && GetIcon(eDefaultStock)) //--#SM+#--
         InitAddon(GetIcon(eDefaultStock), *object()->GetDefaultStockSect(), m_addon_offset[eDefaultStock],
+            parent_list->GetVerticalPlacement());
+
+    if (object()->IsDefaultScopePresent() && object()->CanShowDefaultScope() && GetIcon(eDefaultScope)) //--#SM+#--
+        InitAddon(GetIcon(eDefaultScope), *object()->GetDefaultScopeSect(), m_addon_offset[eDefaultScope],
             parent_list->GetVerticalPlacement());
 
     if (is_silencer() && GetIcon(eSilencer))
@@ -743,6 +773,16 @@ CUIDragItem* CUIWeaponCellItem::CreateDragItem(bool bRotate) //--#SM+#--
         s->SetAutoDelete(true);
         s->SetShader(InventoryUtilities::GetEquipmentIconsShader(object()->GetInvTexture())); //--#SM+#--
         InitAddon(s, *object()->GetDefaultStockSect(), m_addon_offset[eDefaultStock], bRotate);
+        s->SetTextureColor(i->wnd()->GetTextureColor());
+        i->wnd()->AttachChild(s);
+    }
+
+    if (GetIcon(eDefaultScope)) //--#SM+#--
+    {
+        s = new CUIStatic();
+        s->SetAutoDelete(true);
+        s->SetShader(InventoryUtilities::GetEquipmentIconsShader(object()->GetInvTexture())); //--#SM+#--
+        InitAddon(s, *object()->GetDefaultScopeSect(), m_addon_offset[eDefaultScope], bRotate);
         s->SetTextureColor(i->wnd()->GetTextureColor());
         i->wnd()->AttachChild(s);
     }

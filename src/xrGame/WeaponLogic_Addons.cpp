@@ -559,6 +559,19 @@ bool CWeapon::LoadAddons(LPCSTR section, EFuncUpgrMode upgrMode)
         m_DefaultStockHudSect = nullptr;
     }
 
+    // Загружаем параметры прицела по умолчанию
+    m_DefaultScopeSect = READ_IF_EXISTS(pSettings, r_string, section, "default_scope", nullptr);
+    if (m_DefaultScopeSect != nullptr)
+    {
+        m_DefaultScopeVisSect = READ_IF_EXISTS(pSettings, r_string, m_DefaultScopeSect, "visuals_world", nullptr);
+        m_DefaultScopeHudSect = READ_IF_EXISTS(pSettings, r_string, m_DefaultScopeSect, "visuals_hud", nullptr);
+    }
+    else
+    {
+        m_DefaultScopeVisSect = nullptr;
+        m_DefaultScopeHudSect = nullptr;
+    }
+
     return bAddonsInitialized;
 }
 

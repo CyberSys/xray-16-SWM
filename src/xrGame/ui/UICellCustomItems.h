@@ -42,6 +42,7 @@ public:
     enum eAddonType
     {
         eDefaultStock = 0,
+        eDefaultScope,
         eSilencer,
         eScope,
         eLauncher,

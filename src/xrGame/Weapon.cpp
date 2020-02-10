@@ -141,6 +141,8 @@ CWeapon::CWeapon() : CShellLauncher(this)
     m_StockSlot        = eNotExist;
     m_DefaultStockSect = NULL;
 
+    m_DefaultScopeSect = NULL;
+
     m_sBulletHUDVisSect          = NULL;
 
     m_sAnimatedShellHUDVisSect   = NULL;

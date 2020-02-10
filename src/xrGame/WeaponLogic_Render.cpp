@@ -1328,6 +1328,12 @@ void CWeapon::UpdateWpnExtraVisuals()
                 hud_item->UpdateChildrenList(m_DefaultStockHudSect, bShowDefaultStock);
             }
 
+            // Показываем визуал прицела по умолчанию или скрываем его если одет другой прицел
+            if (m_DefaultScopeSect != nullptr && m_DefaultScopeHudSect != nullptr)
+            {
+                hud_item->UpdateChildrenList(m_DefaultScopeHudSect, CanShowDefaultScope());
+            }
+
             // Перебираем все активные атачи худа
             for (u32 i = 0; i < hud_item->m_child_items.size(); i++)
             {
@@ -1417,6 +1423,13 @@ void CWeapon::UpdateWpnExtraVisuals()
             bool bShowDefaultStock = (IsStockAttached() == false);
             (bShowDefaultStock ? this->AttachAdditionalVisual(m_DefaultStockVisSect) :
                                  this->DetachAdditionalVisual(m_DefaultStockVisSect));
+        }
+
+        // Показываем визуал прицела по умолчанию или скрываем его если одет другой прицел
+        if (m_DefaultScopeSect != nullptr && m_DefaultScopeVisSect != nullptr)
+        {
+            (CanShowDefaultScope() ? this->AttachAdditionalVisual(m_DefaultScopeVisSect) :
+                                 this->DetachAdditionalVisual(m_DefaultScopeVisSect));
         }
 
         // Строим список всех наших визуалов
