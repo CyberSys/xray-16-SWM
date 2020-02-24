@@ -1788,6 +1788,17 @@ void CWeapon::PlayAnimKick()
 
     if (IsGAnimRequired())
     {
+        if (IsBayonetAttached())
+        {
+            if (iAmmo == 0)
+            {
+                if (PlaySoundMotion("anm_kick_empty_gk", FALSE, NULL, false))
+                    return;
+            }
+            if (PlaySoundMotion("anm_kick_gk", FALSE, NULL, false))
+                return;
+        }
+
         if (iAmmo == 0)
         {
             if (PlaySoundMotion("anm_kick_g_empty", FALSE, NULL, false))
@@ -1799,6 +1810,17 @@ void CWeapon::PlayAnimKick()
 
     if (IsWGLAnimRequired())
     {
+        if (IsBayonetAttached())
+        {
+            if (iAmmo == 0)
+            {
+                if (PlaySoundMotion("anm_kick_empty_w_gak", FALSE, NULL, false))
+                    return;
+            }
+            if (PlaySoundMotion("anm_kick_w_gak", FALSE, NULL, false))
+                return;
+        }
+
         if (iAmmo == 0)
         {
             if (PlaySoundMotion("anm_kick_empty_w_gl", FALSE, NULL, false))
@@ -1849,6 +1871,17 @@ void CWeapon::PlayAnimKickAlt()
 
     if (IsGAnimRequired())
     {
+        if (IsBayonetAttached())
+        {
+            if (iAmmo == 0)
+            {
+                if (PlaySoundMotion("anm_kick_alt_empty_gk", TRUE, NULL, false))
+                    return;
+            }
+            if (PlaySoundMotion("anm_kick_alt_gk", TRUE, NULL, false))
+                return;
+        }
+
         if (iAmmo == 0)
         {
             if (PlaySoundMotion("anm_kick_alt_g_empty", TRUE, NULL, false))
@@ -1860,6 +1893,17 @@ void CWeapon::PlayAnimKickAlt()
 
     if (IsWGLAnimRequired())
     {
+        if (IsBayonetAttached())
+        {
+            if (iAmmo == 0)
+            {
+                if (PlaySoundMotion("anm_kick_alt_empty_w_gak", TRUE, NULL, false))
+                    return;
+            }
+            if (PlaySoundMotion("anm_kick_alt_w_gak", TRUE, NULL, false))
+                return;
+        }
+
         if (iAmmo == 0)
         {
             if (PlaySoundMotion("anm_kick_alt_empty_w_gl", TRUE, NULL, false))
@@ -1910,6 +1954,17 @@ bool CWeapon::PlayAnimKickOut()
 
     if (IsGAnimRequired())
     {
+        if (IsBayonetAttached())
+        {
+            if (iAmmo == 0)
+            {
+                if (PlaySoundMotion("anm_kick_out_empty_gk", FALSE, NULL, false))
+                    return true;
+            }
+            if (PlaySoundMotion("anm_kick_out_gk", FALSE, NULL, false))
+                return true;
+        }
+
         if (iAmmo == 0)
         {
             if (PlaySoundMotion("anm_kick_out_g_empty", FALSE, NULL, false))
@@ -1921,6 +1976,17 @@ bool CWeapon::PlayAnimKickOut()
 
     if (IsWGLAnimRequired())
     {
+        if (IsBayonetAttached())
+        {
+            if (iAmmo == 0)
+            {
+                if (PlaySoundMotion("anm_kick_out_empty_w_gak", FALSE, NULL, false))
+                    return true;
+            }
+            if (PlaySoundMotion("anm_kick_out_w_gak", FALSE, NULL, false))
+                return true;
+        }
+
         if (iAmmo == 0)
         {
             if (PlaySoundMotion("anm_kick_out_empty_w_gl", FALSE, NULL, false))
@@ -1975,6 +2041,17 @@ bool CWeapon::PlayAnimKickOutAlt()
 
     if (IsGAnimRequired())
     {
+        if (IsBayonetAttached())
+        {
+            if (iAmmo == 0)
+            {
+                if (PlaySoundMotion("anm_kick_alt_out_empty_gk", FALSE, NULL, false))
+                    return true;
+            }
+            if (PlaySoundMotion("anm_kick_alt_out_gk", FALSE, NULL, false))
+                return true;
+        }
+
         if (iAmmo == 0)
         {
             if (PlaySoundMotion("anm_kick_alt_out_g_empty", FALSE, NULL, false))
@@ -1986,6 +2063,17 @@ bool CWeapon::PlayAnimKickOutAlt()
 
     if (IsWGLAnimRequired())
     {
+        if (IsBayonetAttached())
+        {
+            if (iAmmo == 0)
+            {
+                if (PlaySoundMotion("anm_kick_alt_out_empty_w_gak", FALSE, NULL, false))
+                    return true;
+            }
+            if (PlaySoundMotion("anm_kick_alt_out_w_gak", FALSE, NULL, false))
+                return true;
+        }
+
         if (iAmmo == 0)
         {
             if (PlaySoundMotion("anm_kick_alt_out_empty_w_gl", FALSE, NULL, false))
