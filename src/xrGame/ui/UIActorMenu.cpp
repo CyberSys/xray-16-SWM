@@ -635,7 +635,7 @@ void CUIActorMenu::highlight_ammo_for_weapon(PIItem weapon_item, CUIDragDropList
         {
             if (ammo_name._get() == (*itb)._get())
             {
-                ci->m_select_armament = true;
+                ci->m_select_armament = CUICellItem::eBlue; //--#SM+#--
                 break; // itb
             }
         }
@@ -675,7 +675,7 @@ void CUIActorMenu::highlight_weapons_for_ammo(PIItem ammo_item, CUIDragDropListE
         {
             if (ammo_name._get() == (*itb)._get())
             {
-                ci->m_select_armament = true;
+                ci->m_select_armament = CUICellItem::eBlue; //--#SM+#--
                 break; // for itb
             }
         }
@@ -691,7 +691,7 @@ void CUIActorMenu::highlight_weapons_for_ammo(PIItem ammo_item, CUIDragDropListE
         {
             if (ammo_name._get() == (*itb)._get())
             {
-                ci->m_select_armament = true;
+                ci->m_select_armament = CUICellItem::eBlue; //--#SM+#--
                 break; // for itb
             }
         }
@@ -716,10 +716,18 @@ bool CUIActorMenu::highlight_addons_for_weapon(PIItem weapon_item, CUICellItem* 
             if (pAddon->m_attach_status != ALife::eAddonAttachable)
                 return false;
 
-            if (iSlot == CWeapon::eMagaz)
-                ci->m_select_armament_2 = true;
+            bool bCanAttachNow = weapon_item->CanAttach(item);
+            if (bCanAttachNow == true)
+            {
+                if (iSlot == CWeapon::eMagaz)
+                    ci->m_select_armament = CUICellItem::eGreen;
+                else
+                    ci->m_select_armament = CUICellItem::eBlue;
+            }
             else
-                ci->m_select_armament = true;
+            {
+                ci->m_select_armament = CUICellItem::eRed;
+            }
             return true;
         }
     }
@@ -754,7 +762,15 @@ void CUIActorMenu::highlight_weapons_for_addon(PIItem addon_item, CUIDragDropLis
             if (pAddon->m_attach_status != ALife::eAddonAttachable)
                 continue;
 
-            ci->m_select_armament = true;
+            bool bCanAttachNow = weapon->CanAttach(addon_item);
+            if (bCanAttachNow)
+            {
+                ci->m_select_armament = CUICellItem::eBlue;
+            }
+            else
+            {
+                ci->m_select_armament = CUICellItem::eRed;
+            }
             continue;
         }
 

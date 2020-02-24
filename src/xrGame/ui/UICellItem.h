@@ -75,14 +75,24 @@ public:
     virtual bool GetUtilityBarValue(float& fRetVal) { return false; } //--#SM+#--
 
 public:
+    enum EUIInvSelectArmament
+    {
+        eNone = 0,
+        eGray,
+        eYellow,
+        eBlue,
+        eRed,
+        eGreen,
+        ePurple,
+        ePattern,
+    } m_select_armament; //--#SM+#--
+
     static CUICellItem* m_mouse_selected_item;
     void* m_pData;
     int m_index;
     u32 m_drawn_frame;
     bool m_b_destroy_childs;
     bool m_selected;
-    bool m_select_armament;
-    bool m_select_armament_2; //--#SM+#--
     bool m_cur_mark;
     bool m_has_upgrade;
 };

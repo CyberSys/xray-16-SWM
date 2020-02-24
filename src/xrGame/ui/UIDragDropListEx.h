@@ -181,7 +181,7 @@ protected:
 
     UI_CELLS_VEC m_cells;
 
-    void GetTexUVLT(Fvector2& uv, u32 col, u32 row, u8 select_mode);
+    void GetTexUVLT(Fvector2& uv, u32 col, u32 row, CUICellItem::EUIInvSelectArmament armament); //--#SM+#--
     void ReinitSize();
     u32 GetCellsInRange(const Irect& rect, UI_CELLS_VEC& res);
 

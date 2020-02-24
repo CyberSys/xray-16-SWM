@@ -678,14 +678,18 @@ bool CUICellContainer::IsRoomFree(const Ivector2& pos, const Ivector2& _size)
     return true;
 }
 
-void CUICellContainer::GetTexUVLT(Fvector2& uv, u32 col, u32 row, u8 select_mode)
+void CUICellContainer::GetTexUVLT(Fvector2& uv, u32 col, u32 row, CUICellItem::EUIInvSelectArmament armament) //--#SM+#--
 {
-    switch (select_mode)
+    switch (armament) // textures\ui_grid.dds
     {
-    case 0: uv.set(0.00f, 0.0f); break;
-    case 1: uv.set(0.25f, 0.0f); break;
-    case 2: uv.set(0.50f, 0.0f); break;
-    case 3: uv.set(0.75f, 0.0f); break;
+    case CUICellItem::eNone: uv.set(0.000f, 0.0f); break;
+    case CUICellItem::eGray: uv.set(0.125f, 0.0f); break;
+    case CUICellItem::eYellow: uv.set(0.250f, 0.0f); break;
+    case CUICellItem::eBlue: uv.set(0.375f, 0.0f); break;
+    case CUICellItem::eRed: uv.set(0.500f, 0.0f); break;
+    case CUICellItem::eGreen: uv.set(0.625f, 0.0f); break;
+    case CUICellItem::ePurple: uv.set(0.750f, 0.0f); break;
+    case CUICellItem::ePattern: uv.set(0.875f, 0.0f); break;
     default: uv.set(0.00f, 0.0f); break;
     }
 }
@@ -840,7 +844,7 @@ void CUICellContainer::Draw()
 
     const Fvector2 pts[6] = {{0.0f, 0.0f}, {1.0f, 0.0f}, {1.0f, 1.0f}, {0.0f, 0.0f}, {1.0f, 1.0f}, {0.0f, 1.0f}};
     constexpr auto ty = 1.0f;
-    constexpr auto tx = 0.25f;
+    constexpr auto tx = 0.125f; // Поддержка 8 вариантов подсветки --#SM+#--
     const Fvector2 uvs[6] = {{0.0f, 0.0f}, {tx, 0.0f}, {tx, ty}, {0.0f, 0.0f}, {tx, ty}, {0.0f, ty}};
 
     // calculate cell size in screen pixels
@@ -853,6 +857,8 @@ void CUICellContainer::Draw()
     // fill cell buffer
     u32 max_prim_cnt = ((tgt_cells.width() + 1) * (tgt_cells.height() + 1) * 6);
     GEnv.UIRender->StartPrimitive(max_prim_cnt, IUIRender::ptTriList, UI().m_currentPointType);
+
+    u32 iBackColor = m_pParentDragDropList->back_color; // Базовый тон ячейки, белый по дефолту --#SM+#--
 
     //	u32 cell_i = 0;
     for (int x = 0; x <= tgt_cells.width(); ++x)
@@ -867,17 +873,16 @@ void CUICellContainer::Draw()
             cpos.add(TopVisibleCell());
             CUICell& ui_cell = GetCellAt(cpos);
 
-            u8 select_mode = 0;
+            //--#SM+ Begin--//
+            CUICellItem::EUIInvSelectArmament armamentColor = CUICellItem::eNone;
             if (!ui_cell.Empty())
             {
                 if (ui_cell.m_item->m_cur_mark)
-                    select_mode = 2;
+                    armamentColor = CUICellItem::eYellow;
                 else if (ui_cell.m_item->m_selected)
-                    select_mode = 1;
-                else if (ui_cell.m_item->m_select_armament)
-                    select_mode = 3;
-                else if (ui_cell.m_item->m_select_armament_2) //--#SM+#--
-                    select_mode = 2;
+                    armamentColor = CUICellItem::eGray;
+                else if (ui_cell.m_item->m_select_armament != CUICellItem::eNone)
+                    armamentColor = ui_cell.m_item->m_select_armament;
                 else
                 {
                     //Alundaio: Highlight equipped items
@@ -886,14 +891,15 @@ void CUICellContainer::Draw()
                     {
                         PIItem iitem = static_cast<PIItem>(ui_cell.m_item->m_pData);
                         if (iitem && iitem->m_pInventory && iitem->m_pInventory->ItemFromSlot(iitem->BaseSlot()) == iitem)
-                            select_mode = 2;
+                            armamentColor = CUICellItem::eYellow;
                     }
                     //-Alundaio
                 }
             }
 
             Fvector2 tp;
-            GetTexUVLT(tp, tgt_cells.x1 + x, tgt_cells.y1 + y, select_mode);
+            GetTexUVLT(tp, tgt_cells.x1 + x, tgt_cells.y1 + y, armamentColor);
+            //--#SM+ End--//
 
             // for (u32 k=0; k<6; ++k,++pv)
             for (u32 k = 0; k < 6; ++k)
@@ -904,8 +910,7 @@ void CUICellContainer::Draw()
                 //				 iFloor(drawLT.y + p.y*(f_len.y) + f_len.y*y)-0.5f,
                 //				 0xFFFFFFFF,tp.x+uv.x,tp.y+uv.y);
                 GEnv.UIRender->PushPoint(iFloor(rect_offset.x + p.x * (f_len.x)) - 0.5f,
-                    iFloor(rect_offset.y + p.y * (f_len.y)) - 0.5f, 0, m_pParentDragDropList->back_color, tp.x + uv.x,
-                    tp.y + uv.y);
+                    iFloor(rect_offset.y + p.y * (f_len.y)) - 0.5f, 0, iBackColor, tp.x + uv.x, tp.y + uv.y); //--#SM+#--
             } // for k
         } // for y
     } // for x
@@ -940,8 +945,7 @@ void CUICellContainer::clear_select_armament()
         CUICell& cell = (*itb);
         if (cell.m_item)
         {
-            cell.m_item->m_select_armament = false;
-            cell.m_item->m_select_armament_2 = false; //--#SM+#--
+            cell.m_item->m_select_armament = CUICellItem::eNone; //--#SM+#--
         }
     }
 }

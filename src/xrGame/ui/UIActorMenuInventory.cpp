@@ -353,6 +353,8 @@ void CUIActorMenu::OnInventoryAction(PIItem pItem, u16 action_type)
 }
 void CUIActorMenu::AttachAddon(PIItem item_to_upgrade)
 {
+    clear_highlight_lists(); // Обновляем подсветку --#SM+#--
+
     PlaySnd(eAttachAddon);
     R_ASSERT(item_to_upgrade);
     if (OnClient())
@@ -370,6 +372,11 @@ void CUIActorMenu::AttachAddon(PIItem item_to_upgrade)
 
 void CUIActorMenu::DetachAddon(LPCSTR addon_name, PIItem itm)
 {
+    if (itm == NULL)
+    {
+        clear_highlight_lists(); // Обновляем подсветку --#SM+#--
+    }
+
     PlaySnd(eDetachAddon);
     if (OnClient())
     {
