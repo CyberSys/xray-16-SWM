@@ -1246,7 +1246,7 @@ void CWeapon::UpdateWpnExtraVisuals()
     { // Обновляем визуалы худа
         //--> Визуал рук. Корректируем кастомные смещения костей во время перезарядки (Fade In\Out эффект)
         float fFadeFactor4NoStopAtEnd = 0.0f; //--> Значение фактора Fade-эффекта для зацикленных анимаций  
-        bool bIsFadeAllowed = IsReloading(); //--> Всегда разрешено во время перезарядки
+        bool bIsFadeAllowed = IsReloading() && !bIsGrenadeMode(); //--> Всегда разрешено во время перезарядки основного ствола
         if (bIsFadeAllowed == false)
         { 
             do
