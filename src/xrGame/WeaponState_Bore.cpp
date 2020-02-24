@@ -56,4 +56,4 @@ void CWeapon::state_Bore(float dt) {}
 ////////////////////////////////////////////////////////////////////
 
 // Можем-ли мы перейти в состояние скуки
-bool CWeapon::AllowBore() { return true; }
+bool CWeapon::AllowBore() { return m_bDisableBoreAnimation == false; }

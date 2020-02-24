@@ -202,6 +202,8 @@ CWeapon::CWeapon() : CShellLauncher(this)
     m_bAllowABTFadeEffForKick = false;
     m_bAllowABTFadeEffForKickWK = false;
     m_bAllowABTFadeEffForKickAtRun = false;
+
+    m_bDisableBoreAnimation = false;
 }
 
 // Деструктор

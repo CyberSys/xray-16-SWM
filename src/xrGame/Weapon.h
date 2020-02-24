@@ -276,6 +276,8 @@ public:
         eSubstateMagazFinish, //--> Завершение (магазин уже установлен\снят)
     };
 
+    bool m_bDisableBoreAnimation; //--> Отключить анимацию скуки
+
     virtual bool OnBeforeStateSwitch(u32 oldS, u32 newS);
     virtual void UpdateStates(float dt);
     virtual void SwitchState(u32 S);
