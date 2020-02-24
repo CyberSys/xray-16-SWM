@@ -484,6 +484,19 @@ void CWeapon::UpdateCL()
     if (getRocketCount() > 0)
         LaunchGrenade();
 
+    // Отрабатываем отложенный запуск 3D-гильз (но не более одной за апдейт)
+    if (m_Shells3DQueue.size() > 0)
+    {
+        u32& dwShell3DSpawnTime = m_Shells3DQueue[0];
+        if (Device.dwTimeGlobal >= dwShell3DSpawnTime)
+        {
+            for (int _idx = 1; _idx <= GetLPCount(); _idx++)
+                LaunchShell3D(_idx, (_idx == 1 ? m_sCurShell3DSect.c_str() : nullptr));
+
+            m_Shells3DQueue.pop_front();
+        }
+    }
+
     // Обновляем патронташ
     UpdateAmmoBelt();
 

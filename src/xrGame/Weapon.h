@@ -1176,6 +1176,8 @@ protected:
     bool m_bDontSpawnShell3DForLastBullet; //--> Флаг, блокирующий спавн 3D-гильзы если был выстрелен последний патрон в стволе
     shared_str m_sCurShell3DSect; //--> Текущая секция объекта 3D-гильзы от последнего выстрела 
 
+    xr_deque<u32> m_Shells3DQueue; //--> Очередь отложенного спавна 3D-гильз (хранит dwTimeGlobal когда нужно заспавнить гильзу)
+
     virtual void Update3DShellTransform();
     virtual bool CanPlay3DShellAnim() const;
 

@@ -450,8 +450,15 @@ void CWeapon::OnShot(bool bIsRocket, bool bIsBaseDispersionedBullet)
                 }
             }
 
-            for (int _idx = 1; _idx <= GetLPCount(); _idx++)
-                LaunchShell3D(_idx, (_idx == 1 ? m_sCurShell3DSect.c_str() : nullptr));
+            if (bIsBaseDispersionedBullet == true && m_iShotNum > 1)
+            { //--> При выстреле нескольких пуль за раз - растягиваем спавн гильзы по времени
+                m_Shells3DQueue.push_back(Device.dwTimeGlobal + ((m_iShotNum - 1) * 80));
+            }
+            else
+            { //--> Запускаем гильзу сразу
+                for (int _idx = 1; _idx <= GetLPCount(); _idx++)
+                    LaunchShell3D(_idx, (_idx == 1 ? m_sCurShell3DSect.c_str() : nullptr));
+            }
         } while (false);
     }
 
