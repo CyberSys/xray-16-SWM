@@ -111,6 +111,7 @@ void attachable_visual::SetVisual(shared_str vis_name)
                     _GetItem(line_name, 1, str_mode, '|'); //--> Считываем локальность \ глобальность изменений
                     string128 str_bone;
                     _GetItem(line_name, 2, str_bone, '|'); //--> Считываем имя кости
+                    _GetItem(str_bone, 0, str_bone, ':');  //    Отрезаем от неё :alias (если был)
                     string128 str_pos;
                     _GetItem(line_value, 0, str_pos, '|'); //--> Считываем позицию
                     string128 str_rot;
